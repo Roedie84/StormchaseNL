@@ -1,0 +1,118 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Stormchase",
+        "description": "Locatie wordt overgenomen uit Home Assistant: {latitude}, {longitude}. De bliksemsensoren komen uit je bestaande Blitzortung-integratie.",
+        "data": {
+          "distance_sensor": "Afstandssensor",
+          "azimuth_sensor": "Azimutsensor",
+          "counter_sensor": "Tellersensor",
+          "geo_pattern": "Patroon in geo_location entity-id",
+          "warn_distance": "Waarschuwingsafstand",
+          "ring_near": "Binnenste ring",
+          "ring_mid": "Middelste ring",
+          "ring_far": "Buitenste ring",
+          "location_mode": "Locatie"
+        }
+      },
+      "location": {
+        "title": "Locatie",
+        "description": "Kies waar de weerparameters vandaan moeten komen. Bij een apparaat of persoon verhuist de integratie mee; ontbreekt de GPS-positie, dan valt hij terug op je thuislocatie.",
+        "data": {
+          "zone_entity": "Zone",
+          "tracker_entity": "Te volgen apparaat of persoon",
+          "manual_location": "Coördinaten"
+        }
+      }
+    },
+    "error": {
+      "rings_not_ascending": "De ringen moeten oplopend zijn en van elkaar verschillen."
+    },
+    "abort": {
+      "already_configured": "Stormchase is al ingesteld."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Stormchase instellingen",
+        "data": {
+          "distance_sensor": "Afstandssensor",
+          "azimuth_sensor": "Azimutsensor",
+          "counter_sensor": "Tellersensor",
+          "geo_pattern": "Patroon in geo_location entity-id",
+          "warn_distance": "Waarschuwingsafstand",
+          "ring_near": "Binnenste ring",
+          "ring_mid": "Middelste ring",
+          "ring_far": "Buitenste ring",
+          "location_mode": "Locatie"
+        }
+      },
+      "location": {
+        "title": "Locatie",
+        "description": "Kies waar de weerparameters vandaan moeten komen. Bij een apparaat of persoon verhuist de integratie mee; ontbreekt de GPS-positie, dan valt hij terug op je thuislocatie.",
+        "data": {
+          "zone_entity": "Zone",
+          "tracker_entity": "Te volgen apparaat of persoon",
+          "manual_location": "Coördinaten"
+        }
+      }
+    },
+    "error": {
+      "rings_not_ascending": "De ringen moeten oplopend zijn en van elkaar verschillen."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "approach_speed": {
+        "name": "Naderingssnelheid"
+      },
+      "eta": {
+        "name": "Aankomst"
+      },
+      "trend": {
+        "name": "Trend"
+      },
+      "markers": {
+        "name": "Actieve markers"
+      },
+      "cape": {
+        "name": "CAPE"
+      },
+      "cape_peak": {
+        "name": "CAPE piek 12 uur"
+      },
+      "lifted_index": {
+        "name": "Lifted Index"
+      },
+      "cin": {
+        "name": "Convectieve remming"
+      },
+      "chase_potential": {
+        "name": "Chase potentie"
+      },
+      "location": {
+        "name": "Actieve locatie"
+      }
+    },
+    "binary_sensor": {
+      "nearby": {
+        "name": "Onweer nabij"
+      },
+      "approaching": {
+        "name": "Onweer nadert"
+      }
+    }
+  },
+  "selector": {
+    "location_mode": {
+      "options": {
+        "home": "Thuislocatie van Home Assistant",
+        "zone": "Een zone",
+        "tracker": "Volg een apparaat of persoon",
+        "manual": "Handmatige coördinaten"
+      }
+    }
+  }
+}

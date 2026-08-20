@@ -1,0 +1,50 @@
+{
+  "entity": {
+    "sensor": {
+      "approach_speed": {
+        "default": "mdi:speedometer"
+      },
+      "eta": {
+        "default": "mdi:timer-sand"
+      },
+      "trend": {
+        "default": "mdi:swap-vertical"
+      },
+      "markers": {
+        "default": "mdi:map-marker-multiple"
+      },
+      "cape": {
+        "default": "mdi:arrow-up-bold-box"
+      },
+      "cape_peak": {
+        "default": "mdi:chart-bell-curve"
+      },
+      "lifted_index": {
+        "default": "mdi:thermometer-chevron-down"
+      },
+      "cin": {
+        "default": "mdi:lock-outline"
+      },
+      "chase_potential": {
+        "default": "mdi:radar"
+      },
+      "location": {
+        "default": "mdi:crosshairs-gps"
+      }
+    },
+    "binary_sensor": {
+      "nearby": {
+        "default": "mdi:flash-outline",
+        "state": {
+          "on": "mdi:flash-alert"
+        }
+      },
+      "approaching": {
+        "default": "mdi:minus",
+        "state": {
+          "on": "mdi:arrow-down-bold"
+        }
+      }
+    }
+  }
+}

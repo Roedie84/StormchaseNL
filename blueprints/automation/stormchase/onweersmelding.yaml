@@ -1,0 +1,166 @@
+blueprint:
+  name: Stormchase — onweersmelding
+  description: >
+    Stuurt een melding zodra onweer binnen de ingestelde afstand komt, met de
+    afstand, richting, trend en geschatte aankomsttijd erin. Reageert op de
+    events van de Stormchase-integratie, dus je krijgt één melding per
+    onweersgebied in plaats van bij elke inslag opnieuw.
+
+    Optioneel ook een bericht wanneer het onweer weer weggetrokken is.
+  domain: automation
+  source_url: https://github.com/Roedie84/StormchaseNL/blob/main/blueprints/automation/stormchase/onweersmelding.yaml
+  input:
+    melding_dienst:
+      name: Meldingsdienst
+      description: >
+        De notify-service die de melding stuurt, bijvoorbeeld
+        notify.mobile_app_telefoon of notify.persistent_notification.
+      selector:
+        text:
+    max_afstand:
+      name: Maximale afstand
+      description: Alleen melden als het onweer dichterbij is dan dit.
+      default: 30
+      selector:
+        number:
+          min: 5
+          max: 100
+          step: 5
+          unit_of_measurement: km
+          mode: slider
+    ook_bij_nadering:
+      name: Ook melden bij nadering
+      description: >
+        Naast de melding bij binnenkomst binnen de waarschuwingsafstand ook
+        een vroeger bericht zodra het onweer structureel dichterbij komt.
+      default: true
+      selector:
+        boolean:
+    melden_bij_weggetrokken:
+      name: Melden als het over is
+      default: false
+      selector:
+        boolean:
+    titel:
+      name: Titel van de melding
+      description: Achterhoeks mag ook.
+      default: ⚡ Onweer in de buurt
+      selector:
+        text:
+    wachttijd:
+      name: Wachttijd tussen meldingen
+      description: >
+        Voorkomt dat je bij een grillige cel om de haverklap een bericht
+        krijgt.
+      default: 20
+      selector:
+        number:
+          min: 0
+          max: 120
+          step: 5
+          unit_of_measurement: min
+          mode: slider
+    stilte_van:
+      name: Stiltevenster begint om
+      description: >
+        Laat op 00:00:00 staan om altijd te melden. Onweer 's nachts is
+        meestal juist wel het vermelden waard, dus dit staat standaard uit.
+      default: "00:00:00"
+      selector:
+        time:
+    stilte_tot:
+      name: Stiltevenster eindigt om
+      default: "00:00:00"
+      selector:
+        time:
+    extra_voorwaarden:
+      name: Extra voorwaarden
+      description: Optioneel, bijvoorbeeld alleen melden als je thuis bent.
+      default: []
+      selector:
+        condition:
+
+mode: single
+max_exceeded: silent
+
+variables:
+  wachttijd: !input wachttijd
+  max_afstand: !input max_afstand
+  ook_bij_nadering: !input ook_bij_nadering
+  melden_bij_weggetrokken: !input melden_bij_weggetrokken
+  stilte_van: !input stilte_van
+  stilte_tot: !input stilte_tot
+
+trigger:
+  - platform: event
+    event_type: stormchase_nearby
+    id: nabij
+  - platform: event
+    event_type: stormchase_approaching
+    id: nadert
+  - platform: event
+    event_type: stormchase_cleared
+    id: over
+
+condition:
+  - condition: template
+    value_template: >-
+      {{ trigger.event.data.afstand is not none
+         and trigger.event.data.afstand | float(999) <= max_afstand }}
+  - condition: template
+    value_template: >-
+      {{ trigger.id != 'nadert' or ook_bij_nadering }}
+  - condition: template
+    value_template: >-
+      {{ trigger.id != 'over' or melden_bij_weggetrokken }}
+  - condition: template
+    value_template: >-
+      {% set laatst = state_attr(this.entity_id, 'last_triggered') %}
+      {{ laatst is none
+         or (as_timestamp(now()) - as_timestamp(laatst)) > wachttijd * 60 }}
+  - condition: template
+    value_template: >-
+      {% set van = stilte_van[:5] %}
+      {% set tot = stilte_tot[:5] %}
+      {% set nu = now().strftime('%H:%M') %}
+      {% if van == tot %}
+        true
+      {% elif van < tot %}
+        {{ not (van <= nu < tot) }}
+      {% else %}
+        {{ not (nu >= van or nu < tot) }}
+      {% endif %}
+  - condition: and
+    conditions: !input extra_voorwaarden
+
+action:
+  - variables:
+      richting: >-
+        {% set a = trigger.event.data.azimut | float(-1) %}
+        {% if a < 0 %}onbekend{% else %}
+        {{ ['noorden','noordnoordoosten','noordoosten','oostnoordoosten',
+            'oosten','oostzuidoosten','zuidoosten','zuidzuidoosten',
+            'zuiden','zuidzuidwesten','zuidwesten','westzuidwesten',
+            'westen','westnoordwesten','noordwesten','noordnoordwesten']
+           [((a / 22.5) | round(0) | int) % 16] }}{% endif %}
+      bericht: >-
+        {% if trigger.id == 'over' %}
+          Het onweer is weggetrokken, laatste inslag op
+          {{ trigger.event.data.afstand | round(1) }} km.
+        {% else %}
+          Blikseminslag op {{ trigger.event.data.afstand | round(1) }} km in het
+          {{ richting }}, {{ trigger.event.data.trend }}
+          {%- if trigger.event.data.aankomst_minuten %}, hier over ongeveer
+          {{ trigger.event.data.aankomst_minuten | round(0) }} minuten
+          {%- endif %}.
+        {% endif %}
+
+  - service: !input melding_dienst
+    data:
+      title: !input titel
+      message: "{{ bericht }}"
+      data:
+        tag: stormchase
+        channel: Onweer
+        importance: high
+        notification_icon: mdi:flash-alert

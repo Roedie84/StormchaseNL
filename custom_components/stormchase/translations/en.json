@@ -1,0 +1,118 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Stormchase",
+        "description": "Location is taken from Home Assistant: {latitude}, {longitude}. The lightning sensors come from your existing Blitzortung integration.",
+        "data": {
+          "distance_sensor": "Distance sensor",
+          "azimuth_sensor": "Azimuth sensor",
+          "counter_sensor": "Counter sensor",
+          "geo_pattern": "Pattern in geo_location entity id",
+          "warn_distance": "Warning distance",
+          "ring_near": "Inner ring",
+          "ring_mid": "Middle ring",
+          "ring_far": "Outer ring",
+          "location_mode": "Location"
+        }
+      },
+      "location": {
+        "title": "Location",
+        "description": "Choose where the weather parameters should come from. When following a device or person the integration travels with you; if no GPS position is available it falls back to your home location.",
+        "data": {
+          "zone_entity": "Zone",
+          "tracker_entity": "Device or person to follow",
+          "manual_location": "Coordinates"
+        }
+      }
+    },
+    "error": {
+      "rings_not_ascending": "Rings must be ascending and distinct."
+    },
+    "abort": {
+      "already_configured": "Stormchase is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Stormchase settings",
+        "data": {
+          "distance_sensor": "Distance sensor",
+          "azimuth_sensor": "Azimuth sensor",
+          "counter_sensor": "Counter sensor",
+          "geo_pattern": "Pattern in geo_location entity id",
+          "warn_distance": "Warning distance",
+          "ring_near": "Inner ring",
+          "ring_mid": "Middle ring",
+          "ring_far": "Outer ring",
+          "location_mode": "Location"
+        }
+      },
+      "location": {
+        "title": "Location",
+        "description": "Choose where the weather parameters should come from. When following a device or person the integration travels with you; if no GPS position is available it falls back to your home location.",
+        "data": {
+          "zone_entity": "Zone",
+          "tracker_entity": "Device or person to follow",
+          "manual_location": "Coordinates"
+        }
+      }
+    },
+    "error": {
+      "rings_not_ascending": "Rings must be ascending and distinct."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "approach_speed": {
+        "name": "Approach speed"
+      },
+      "eta": {
+        "name": "Arrival"
+      },
+      "trend": {
+        "name": "Trend"
+      },
+      "markers": {
+        "name": "Active markers"
+      },
+      "cape": {
+        "name": "CAPE"
+      },
+      "cape_peak": {
+        "name": "CAPE peak 12 hours"
+      },
+      "lifted_index": {
+        "name": "Lifted Index"
+      },
+      "cin": {
+        "name": "Convective inhibition"
+      },
+      "chase_potential": {
+        "name": "Chase potential"
+      },
+      "location": {
+        "name": "Active location"
+      }
+    },
+    "binary_sensor": {
+      "nearby": {
+        "name": "Storm nearby"
+      },
+      "approaching": {
+        "name": "Storm approaching"
+      }
+    }
+  },
+  "selector": {
+    "location_mode": {
+      "options": {
+        "home": "Home Assistant home location",
+        "zone": "A zone",
+        "tracker": "Follow a device or person",
+        "manual": "Manual coordinates"
+      }
+    }
+  }
+}

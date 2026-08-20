@@ -1,0 +1,422 @@
+# =====================================================================
+# Stormchase dashboard
+# Vereist via HACS: card-mod, Mushroom, apexcharts-card, compass-card
+# Bronsensoren: sensor.onweer_detectie_lightning_* (Blitzortung)
+# Afgeleide sensoren: sensor.stormchase_* (deze integratie)
+# =====================================================================
+title: Stormchase
+path: stormchase
+type: sections
+max_columns: 2
+sections:
+
+  # ===================================================================
+  # SECTIE 1 (links) — STATUS, SENSOREN & PARAMETERS
+  # ===================================================================
+  - type: grid
+    column_span: 1
+    cards:
+      - type: heading
+        heading: Stormchase
+        heading_style: title
+        icon: mdi:flash
+
+      - type: markdown
+        content: >-
+          <span style="letter-spacing:1px;font-size:11px;opacity:.6">BLITZORTUNG
+          · IRADAR · OPEN-METEO</span>
+        card_mod:
+          style: |
+            ha-card {
+              background: linear-gradient(135deg, rgba(41,30,74,.85), rgba(24,18,45,.85));
+              border: 1px solid rgba(255,255,255,.07);
+              border-radius: 18px;
+            }
+
+      # ---------- WAARSCHUWINGSBANNER ----------
+      - type: conditional
+        conditions:
+          - condition: state
+            entity: binary_sensor.stormchase_onweer_nabij
+            state: 'on'
+        card:
+          type: custom:mushroom-template-card
+          icon: mdi:flash-alert
+          icon_color: red
+          primary: >-
+            Onweer op {{ states('sensor.onweer_detectie_lightning_distance') }}
+            km — voorzichtig!
+          secondary: >-
+            {{ states('sensor.stormchase_trend') }}{% if
+            has_value('sensor.stormchase_aankomst') %} · hier over ongeveer {{
+            states('sensor.stormchase_aankomst') }} min{% endif %}
+          multiline_secondary: true
+          card_mod:
+            style: |
+              ha-card {
+                background: rgba(255, 60, 90, .10);
+                border: 1px solid rgba(255, 92, 108, .55);
+                border-radius: 16px;
+              }
+              ha-card .primary { color: #ff5c6c !important; font-weight: 600; }
+
+      # ---------- BASISTEGELS ----------
+      - type: grid
+        columns: 2
+        square: false
+        cards:
+          - type: custom:mushroom-template-card
+            icon: mdi:flash
+            icon_color: red
+            primary: '{{ states(''sensor.onweer_detectie_lightning_distance'') }} km'
+            secondary: AFSTAND · laatste inslag
+            card_mod: &tegel
+              style: >
+                ha-card {
+                  background: rgba(41,30,74,.55);
+                  border: 1px solid rgba(255,255,255,.06);
+                  border-radius: 16px;
+                }
+
+                ha-card .primary { font-size: 22px; font-weight: 700; }
+
+                ha-card .secondary { font-size: 11px; letter-spacing: .5px;
+                text-transform: uppercase; }
+
+          - type: custom:mushroom-template-card
+            icon: mdi:compass-outline
+            icon_color: blue
+            primary: '{{ states(''sensor.onweer_detectie_lightning_azimuth'') }}°'
+            secondary: >-
+              AZIMUT · {% set a =
+              states('sensor.onweer_detectie_lightning_azimuth') | float(0) %}
+              {{
+              ['N','NNO','NO','ONO','O','OZO','ZO','ZZO','Z','ZZW','ZW','WZW','W','WNW','NW','NNW']
+                 [((a / 22.5) | round(0) | int) % 16] }}
+            card_mod: *tegel
+
+          - type: custom:mushroom-template-card
+            icon: mdi:counter
+            icon_color: amber
+            primary: '{{ states(''sensor.onweer_detectie_lightning_counter'') }}'
+            secondary: AANTAL · tijdvenster
+            card_mod: *tegel
+
+          - type: custom:mushroom-template-card
+            icon: mdi:map-marker-multiple
+            icon_color: purple
+            primary: '{{ states(''sensor.stormchase_actieve_markers'') }}'
+            secondary: ACTIEVE MARKERS
+            card_mod: *tegel
+
+      # ---------- ACTIEVE LOCATIE ----------
+      # Zichtbaar houden als je de zone- of trackermodus gebruikt
+      - type: custom:mushroom-template-card
+        icon: mdi:crosshairs-gps
+        icon_color: >-
+          {{ 'blue' if states('sensor.stormchase_actieve_locatie') == 'thuis'
+          else 'orange' }}
+        primary: 'Locatie: {{ states(''sensor.stormchase_actieve_locatie'') }}'
+        secondary: >-
+          {{ state_attr('sensor.stormchase_actieve_locatie','latitude') |
+          round(3) }}, {{
+          state_attr('sensor.stormchase_actieve_locatie','longitude') |
+          round(3) }}
+        card_mod: *tegel
+
+      # ---------- NADERING ----------
+      # Let op: de integratie rekent POSITIEF = komt dichterbij
+      - type: grid
+        columns: 2
+        square: false
+        cards:
+          - type: custom:mushroom-template-card
+            icon: >-
+              {% set v = states('sensor.stormchase_naderingssnelheid') | float(0) %}
+              {{ 'mdi:arrow-down-bold' if v > 1 else 'mdi:arrow-up-bold' if v <
+              -1 else 'mdi:minus' }}
+            icon_color: >-
+              {% set v = states('sensor.stormchase_naderingssnelheid') | float(0) %}
+              {{ 'red' if v > 3 else 'orange' if v > 1 else 'green' if v < -1
+              else 'grey' }}
+            primary: >-
+              {{ states('sensor.stormchase_naderingssnelheid') | float(0) | abs |
+              round(0) }} km/u
+            secondary: 'NADERING · {{ states(''sensor.stormchase_trend'') }}'
+            card_mod: *tegel
+
+          - type: custom:mushroom-template-card
+            icon: mdi:timer-sand
+            icon_color: red
+            primary: >-
+              {% if has_value('sensor.stormchase_aankomst') %}{{
+              states('sensor.stormchase_aankomst') }} min{% else %}—{% endif %}
+            secondary: AANKOMST · geschat
+            card_mod: *tegel
+
+      # ---------- AFSTANDSRINGEN ----------
+      - type: heading
+        heading: Inslagen per ring
+        heading_style: subtitle
+        icon: mdi:target
+
+      - type: grid
+        columns: 3
+        square: false
+        cards:
+          - type: custom:mushroom-template-card
+            icon: mdi:flash-alert
+            icon_color: red
+            primary: '{{ states(''sensor.stormchase_inslagen_binnen_10_km'') }}'
+            secondary: < 10 KM
+            card_mod: *tegel
+
+          - type: custom:mushroom-template-card
+            icon: mdi:flash
+            icon_color: orange
+            primary: '{{ states(''sensor.stormchase_inslagen_binnen_25_km'') }}'
+            secondary: < 25 KM
+            card_mod: *tegel
+
+          - type: custom:mushroom-template-card
+            icon: mdi:flash-outline
+            icon_color: amber
+            primary: '{{ states(''sensor.stormchase_inslagen_binnen_50_km'') }}'
+            secondary: < 50 KM
+            card_mod: *tegel
+
+      # ---------- ONWEERSPARAMETERS ----------
+      - type: heading
+        heading: Onweersparameters
+        heading_style: subtitle
+        icon: mdi:weather-lightning
+
+      - type: custom:mushroom-template-card
+        icon: mdi:radar
+        icon_color: >-
+          {% set p = states('sensor.stormchase_chase_potentie') | float(0) %}
+          {{ 'red' if p > 70 else 'orange' if p > 40 else 'amber' if p > 20 else
+          'grey' }}
+        primary: 'Chase potentie: {{ states(''sensor.stormchase_chase_potentie'') }}%'
+        secondary: >-
+          CAPE {{ state_attr('sensor.stormchase_chase_potentie','cape_bijdrage')
+          }} · LI {{
+          state_attr('sensor.stormchase_chase_potentie','lifted_index_bijdrage')
+          }} · inslagen {{
+          state_attr('sensor.stormchase_chase_potentie','inslagen_bijdrage') }}
+        multiline_secondary: true
+        card_mod: *tegel
+
+      - type: grid
+        columns: 3
+        square: false
+        cards:
+          - type: custom:mushroom-template-card
+            icon: mdi:arrow-up-bold-box
+            icon_color: >-
+              {% set c = states('sensor.stormchase_cape') | float(0) %}
+              {{ 'red' if c > 2500 else 'orange' if c > 1000 else 'amber' if c >
+              300 else 'grey' }}
+            primary: '{{ states(''sensor.stormchase_cape'') }}'
+            secondary: CAPE · J/KG
+            card_mod: *tegel
+
+          - type: custom:mushroom-template-card
+            icon: mdi:chart-bell-curve
+            icon_color: purple
+            primary: '{{ states(''sensor.stormchase_cape_piek_12_uur'') }}'
+            secondary: PIEK · 12U
+            card_mod: *tegel
+
+          - type: custom:mushroom-template-card
+            icon: mdi:thermometer-chevron-down
+            icon_color: >-
+              {% set li = states('sensor.stormchase_lifted_index') | float(0) %}
+              {{ 'red' if li < -6 else 'orange' if li < -3 else 'amber' if li < 0
+              else 'grey' }}
+            primary: '{{ states(''sensor.stormchase_lifted_index'') }}'
+            secondary: LIFTED INDEX
+            card_mod: *tegel
+
+      # ---------- GROTE AFSTANDKAART ----------
+      - type: custom:mushroom-template-card
+        icon: mdi:map-marker-distance
+        icon_color: red
+        primary: '{{ states(''sensor.onweer_detectie_lightning_distance'') }} km'
+        secondary: >-
+          Richting {{ states('sensor.onweer_detectie_lightning_azimuth') }}° · {{
+          states('sensor.stormchase_trend') }} · {{
+          states('sensor.stormchase_actieve_markers') }} actieve markers
+        multiline_secondary: true
+        card_mod:
+          style: >
+            ha-card {
+              background: rgba(41,30,74,.55);
+              border: 1px solid rgba(255,92,108,.35);
+              border-radius: 18px;
+            }
+
+            ha-card .primary { font-size: 46px; font-weight: 800; color: #ff5c6c
+            !important; }
+
+      - type: custom:compass-card
+        name: RICHTING
+        indicator_sensors:
+          - sensor: sensor.onweer_detectie_lightning_azimuth
+            indicator:
+              image: arrow_outward
+              color: '#ff5c6c'
+        value_sensors:
+          - sensor: sensor.onweer_detectie_lightning_azimuth
+        card_mod: &kaartrand
+          style: |
+            ha-card {
+              background: rgba(41,30,74,.55);
+              border: 1px solid rgba(255,255,255,.06);
+              border-radius: 18px;
+            }
+
+      # ---------- GRAFIEKEN ----------
+      - type: custom:apexcharts-card
+        graph_span: 2h
+        header:
+          show: true
+          title: AFSTAND · LAATSTE 2 UUR
+          show_states: false
+        series:
+          - entity: sensor.onweer_detectie_lightning_distance
+            name: Afstand (km)
+            color: '#f5b731'
+            type: line
+            curve: stepline
+            stroke_width: 2
+            group_by:
+              func: min
+              duration: 1min
+        apex_config:
+          chart:
+            height: 240
+            background: transparent
+          grid:
+            borderColor: rgba(255,255,255,.06)
+          yaxis:
+            min: 0
+          annotations:
+            yaxis:
+              # LET OP: "y" moet gequote blijven, anders maakt YAML er 'true' van
+              - "y": 15
+                borderColor: '#ff5c6c'
+                strokeDashArray: 6
+                label:
+                  text: 15 km gevarenlijn
+                  style:
+                    background: '#ff5c6c'
+                    color: '#fff'
+              - "y": 50
+                borderColor: '#8a7fd0'
+                strokeDashArray: 4
+                label:
+                  text: 50 km detectiegrens
+                  style:
+                    background: '#8a7fd0'
+                    color: '#fff'
+        card_mod: *kaartrand
+
+      - type: custom:apexcharts-card
+        graph_span: 24h
+        header:
+          show: true
+          title: CAPE & CHASE POTENTIE · 24 UUR
+          show_states: false
+        series:
+          - entity: sensor.stormchase_cape
+            name: CAPE (J/kg)
+            color: '#a78bfa'
+            type: area
+            opacity: 0.25
+            stroke_width: 2
+          - entity: sensor.stormchase_chase_potentie
+            name: Potentie (%)
+            color: '#f5b731'
+            type: line
+            stroke_width: 2
+            yaxis_id: pct
+        apex_config:
+          chart:
+            height: 220
+            background: transparent
+          grid:
+            borderColor: rgba(255,255,255,.06)
+        yaxis:
+          - id: cape
+            min: 0
+          - id: pct
+            opposite: true
+            min: 0
+            max: 100
+        card_mod: *kaartrand
+
+  # ===================================================================
+  # SECTIE 2 (rechts) — KAARTEN
+  # ===================================================================
+  - type: grid
+    column_span: 1
+    cards:
+      - type: heading
+        heading: Kaarten
+        heading_style: title
+        icon: mdi:map-marker-radius
+
+      # iRadar: genereer je eigen embed via Menu > Functies > Insluiten
+      # op pagina. Zet daar ook de ESTOFEX-laag aan.
+      - type: heading
+        heading: iRadar · radar & celdetectie
+        heading_style: subtitle
+        icon: mdi:radar
+
+      - type: iframe
+        url: https://iradar.app/
+        aspect_ratio: 56%
+        card_mod: &iframerand
+          style: |
+            ha-card {
+              border: 1px solid rgba(255,255,255,.06);
+              border-radius: 18px;
+              overflow: hidden;
+            }
+
+      # Blitzortung: MapStyleRangeValue lager = donkerder
+      - type: heading
+        heading: Blitzortung · live inslagen
+        heading_style: subtitle
+        icon: mdi:flash-outline
+
+      - type: iframe
+        url: >-
+          https://map.blitzortung.org/index.php?interactive=1&NavigationControl=1&FullScreenControl=0&Cookies=0&InfoDiv=0&MenuButtonDiv=0&ScaleControl=1&Advertisment=0&MapStyle=1&MapStyleRangeValue=3#8/52.10/6.63
+        aspect_ratio: 75%
+        card_mod: *iframerand
+
+      # Buienradar: zoom 10 komt ongeveer overeen met 50 km straal
+      - type: heading
+        heading: Buienradar · neerslag 2 uur
+        heading_style: subtitle
+        icon: mdi:weather-pouring
+
+      - type: iframe
+        url: >-
+          https://gadgets.buienradar.nl/gadget/zoommap/?lat=52.10&lng=6.63&overname=2&zoom=10&size=3&voor=1
+        aspect_ratio: 100%
+        card_mod: *iframerand
+
+      # Windy: overlay=cape · radar · thunder
+      - type: heading
+        heading: Windy · CAPE
+        heading_style: subtitle
+        icon: mdi:weather-lightning-rainy
+
+      - type: iframe
+        url: >-
+          https://embed.windy.com/embed2.html?lat=52.10&lon=6.63&zoom=9&overlay=cape&type=map&metricWind=km%2Fh&metricTemp=%C2%B0C&menu=&message=&marker=&calendar=&pressure=&location=coordinates&detail=&radarRange=-1
+        aspect_ratio: 75%
+        card_mod: *iframerand
