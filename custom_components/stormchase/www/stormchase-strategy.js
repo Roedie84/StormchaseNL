@@ -415,20 +415,37 @@ class StormchaseStrategy {
       });
     }
 
-    // CAPE-verloop
+    // CAPE-verloop, eventueel met de potentie op een tweede as
     if (bruikbaar(hass, "sensor.stormchase_cape")) {
-      const series = [
-        {
-          entity: "sensor.stormchase_cape",
-          name: "CAPE (J/kg)",
-          color: "#a78bfa",
-          type: "area",
-          opacity: 0.25,
-          stroke_width: 2,
+      const tweeAssen = bruikbaar(hass, "sensor.stormchase_chase_potentie");
+
+      const capeSerie = {
+        entity: "sensor.stormchase_cape",
+        name: "CAPE (J/kg)",
+        color: "#a78bfa",
+        type: "area",
+        opacity: 0.25,
+        stroke_width: 2,
+      };
+
+      // Apexcharts-card eist dat elke serie een as heeft zodra er meer dan
+      // een as gedefinieerd is. Bij een enkele serie laten we yaxis weg.
+      if (tweeAssen) capeSerie.yaxis_id = "cape";
+
+      const grafiek = {
+        type: "custom:apexcharts-card",
+        graph_span: "24h",
+        header: { show: true, title: "CAPE \u00b7 24 UUR", show_states: false },
+        series: [capeSerie],
+        apex_config: {
+          chart: { height: 220, background: "transparent" },
+          grid: { borderColor: "rgba(255,255,255,.06)" },
         },
-      ];
-      if (bruikbaar(hass, "sensor.stormchase_chase_potentie")) {
-        series.push({
+        card_mod: { style: PANEL_STYLE },
+      };
+
+      if (tweeAssen) {
+        grafiek.series.push({
           entity: "sensor.stormchase_chase_potentie",
           name: "Potentie (%)",
           color: "#f5b731",
@@ -436,22 +453,15 @@ class StormchaseStrategy {
           stroke_width: 2,
           yaxis_id: "pct",
         });
-      }
-      cards.push({
-        type: "custom:apexcharts-card",
-        graph_span: "24h",
-        header: { show: true, title: "CAPE · 24 UUR", show_states: false },
-        series,
-        yaxis: [
+        grafiek.yaxis = [
           { id: "cape", min: 0 },
           { id: "pct", opposite: true, min: 0, max: 100 },
-        ],
-        apex_config: {
-          chart: { height: 220, background: "transparent" },
-          grid: { borderColor: "rgba(255,255,255,.06)" },
-        },
-        card_mod: { style: PANEL_STYLE },
-      });
+        ];
+      } else {
+        grafiek.apex_config.yaxis = { min: 0 };
+      }
+
+      cards.push(grafiek);
     }
 
     return { type: "grid", column_span: 1, cards };
@@ -564,10 +574,22 @@ class StormchaseDashboardStrategy extends HTMLTemplateElement {
   }
 }
 
-customElements.define("ll-strategy-view-stormchase", StormchaseViewStrategy);
-customElements.define(
-  "ll-strategy-dashboard-stormchase",
-  StormchaseDashboardStrategy
-);
+/**
+ * Registreer alleen als het nog niet gebeurd is. Het script kan via twee
+ * wegen binnenkomen (Lovelace-bron en add_extra_js_url); een tweede define
+ * zou anders een fout gooien.
+ */
+const registreer = (naam, klasse) => {
+  if (!customElements.get(naam)) {
+    customElements.define(naam, klasse);
+  }
+};
 
-console.info("%c STORMCHASE %c strategie geladen ", "background:#3a2a5e;color:#f5b731;font-weight:700", "");
+registreer("ll-strategy-view-stormchase", StormchaseViewStrategy);
+registreer("ll-strategy-dashboard-stormchase", StormchaseDashboardStrategy);
+
+console.info(
+  "%c STORMCHASE %c strategie geladen ",
+  "background:#3a2a5e;color:#f5b731;font-weight:700",
+  ""
+);

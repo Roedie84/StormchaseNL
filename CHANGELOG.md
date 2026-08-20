@@ -5,6 +5,58 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.2.3] — 2026-08-20
+
+### Gerepareerd
+
+- **CAPE-grafiek gaf een configuratiefout.** De grafiek definieerde twee
+  y-assen, maar de CAPE-serie kreeg er geen toegewezen. Apexcharts-card eist
+  dat elke serie aan een as hangt zodra er meer dan een as bestaat. Beide
+  series krijgen nu expliciet een as.
+- Is de chase-potentie niet beschikbaar, dan blijft er een enkele serie over
+  en wordt de assen-definitie helemaal weggelaten in plaats van een
+  ongebruikte tweede as te laten staan.
+
+## [0.2.2] — 2026-08-20
+
+### Gerepareerd
+
+- **Dashboard gaf 'Timeout waiting for strategy element'.** Het script werd
+  wel geserveerd, maar `add_extra_js_url` alleen bleek niet te garanderen
+  dat de frontend het op tijd laadt. De integratie registreert het script nu
+  ook als Lovelace-bron; die worden geladen op het moment dat een dashboard
+  opstart, precies wanneer de strategie nodig is.
+- Het script registreert zijn custom elements alleen nog als ze nog niet
+  bestaan, zodat dubbel laden via beide routes geen fout meer geeft.
+
+### Gewijzigd
+
+- Bij een versie-update wordt de bestaande Lovelace-bron bijgewerkt met het
+  nieuwe versienummer in plaats van dat er een tweede bij komt.
+- `lovelace` toegevoegd als afhankelijkheid in het manifest.
+
+### Opmerking
+
+Draait Lovelace in YAML-modus, dan kan de integratie de bron niet zelf
+aanmaken. Er verschijnt dan een regel in het logboek met de URL die je
+handmatig moet toevoegen.
+
+## [0.2.1] — 2026-08-20
+
+### Gerepareerd
+
+- `hacs.json` teruggebracht tot de velden die actuele HACS-versies kennen.
+  `content_in_root` was al de standaardwaarde en `render_readme` is uit
+  recente versies verdwenen; onbekende sleutels lieten de validatie
+  struikelen met een onleesbare `[object Object]` melding.
+
+### Toegevoegd
+
+- Workflow die releases automatisch aanmaakt. Hoog het versienummer in
+  `manifest.json` op, werk de changelog bij en push naar `main` — de tag,
+  de release en de notities volgen vanzelf. De releasenotities worden uit
+  de bijbehorende changelog-sectie gehaald.
+
 ## [0.2.0] — 2026-08-20
 
 ### Toegevoegd
@@ -113,5 +165,8 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.2.3]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.2.3
+[0.2.2]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.2.2
+[0.2.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.2.1
 [0.2.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.2.0
 [0.1.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.1.0

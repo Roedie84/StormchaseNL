@@ -152,7 +152,15 @@ strategy:
   type: custom:stormchase
 ```
 
-Dat is alles. Wil je alleen een losse view binnen een bestaand dashboard:
+Dat is alles — de integratie registreert het benodigde script zelf als
+Lovelace-bron.
+
+Krijg je toch *Timeout waiting for strategy element*, dan draait Lovelace
+waarschijnlijk in YAML-modus en moet je de bron handmatig toevoegen onder
+Instellingen → Dashboards → Bronnen: URL `/stormchase/stormchase-strategy.js`,
+type JavaScript-module. Ververs daarna één keer hard met Ctrl+Shift+R.
+
+Wil je alleen een losse view binnen een bestaand dashboard:
 
 ```yaml
 views:
@@ -232,6 +240,24 @@ daar ook de ESTOFEX-laag aan voor de onweersverwachting over je radarbeeld.
 - Open-Meteo levert modelwaarden per uur, geen metingen.
 - De locatie-instelling geldt alleen voor de weerparameters, niet voor de
   bliksemdetectie zelf.
+
+## Nieuwe versie uitbrengen
+
+Releases worden automatisch aangemaakt. De workflow in
+`.github/workflows/release.yml` kijkt bij elke push naar `main` of de versie
+in `manifest.json` al een tag heeft. Zo niet, dan maakt hij die aan, publiceert
+een release en hangt er een zip van de integratie aan.
+
+De releasenotities komen uit `CHANGELOG.md`: de workflow pakt het blok tussen
+de kop van die versie en de volgende. Dus:
+
+1. Hoog `version` op in `custom_components/stormchase/manifest.json`
+2. Voeg een `## [x.y.z] — datum` sectie toe bovenaan `CHANGELOG.md`
+3. Push naar `main`
+
+Meer is het niet. Vergeet je de changelog-sectie, dan komt er een release met
+een verwijzing naar het bestand in plaats van notities — vervelend, maar niet
+kapot.
 
 ## Licentie
 
