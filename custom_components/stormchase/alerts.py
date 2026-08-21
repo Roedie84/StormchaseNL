@@ -347,6 +347,12 @@ class AlertCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
                 ", ".join(self._gebiedsnamen[:3]) if self._gebiedsnamen else None
             ),
             "aantal_in_land": totaal,
+            # Een steekproef van de gebieden zoals de feed ze noemt. Zonder
+            # dit valt niet na te gaan of het filter niets vindt omdat er
+            # niets is, of omdat de namen niet op elkaar aansluiten.
+            "gebieden_in_land": sorted(
+                {w.get("gebied") for w in alles if w.get("gebied")}
+            )[:25],
         }
 
         self._vuur_events(actief)

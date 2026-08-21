@@ -211,17 +211,30 @@ class Briefing:
             return deel + "."
 
         if meteo is not None and meteo.data:
-            potentie = meteo.data.get("cape_peak")
+            oordeel = meteo.data.get("verwachting")
+            toelichting = meteo.data.get("verwachting_toelichting")
+            rang = meteo.data.get("verwachting_rang") or 0
+
+            if not oordeel:
+                return None
+
+            # Bij rustig weer een korte regel, anders de toelichting erbij en
+            # de kansen op rotatie en hagel als die noemenswaardig zijn.
+            if rang == 0:
+                return f"{oordeel}."
+
+            regel = f"{oordeel}: {toelichting}" if toelichting else f"{oordeel}."
+            if not regel.endswith("."):
+                regel += "."
+
             rotatie = meteo.data.get("rotatiekans") or 0
             hagel = meteo.data.get("hagelkans") or 0
-
             if rotatie > 20 or hagel > 20:
-                return (
-                    f"Zwaar weer mogelijk: rotatiekans {rotatie} procent, "
-                    f"hagelkans {hagel} procent."
+                regel += (
+                    f" Rotatiekans {rotatie} procent, hagelkans {hagel} procent."
                 )
-            if potentie and potentie > 500:
-                return f"Onweerskans aanwezig, CAPE loopt op tot {potentie:.0f} J/kg."
+
+            return regel
 
         return None
 

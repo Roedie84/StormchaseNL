@@ -61,6 +61,17 @@ CONF_RING_WINDOW = "ring_window"
 DEFAULT_RING_WINDOW = 120  # minuten
 MAX_INSLAGEN = 5000        # bovengrens voor de bewaarde inslagen
 
+# Configuratie - vooruitzicht
+CONF_OUTLOOK_NOTIFY = "outlook_notify"
+CONF_OUTLOOK_LEVEL = "outlook_level"
+
+OUTLOOK_LEVELS = ["onweer", "zwaar", "noodweer"]
+DEFAULT_OUTLOOK_LEVEL = "zwaar"
+# Bij welke rang uit indices.py de gekozen drempel hoort
+OUTLOOK_RANGEN = {"onweer": 2, "zwaar": 3, "noodweer": 4}
+
+EVENT_OUTLOOK = f"{DOMAIN}_outlook"
+
 # Configuratie - dagelijks weerbericht
 CONF_BRIEFING = "briefing"
 CONF_BRIEFING_MORNING = "briefing_morning"

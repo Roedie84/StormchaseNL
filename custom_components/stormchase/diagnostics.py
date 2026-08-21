@@ -143,6 +143,7 @@ async def async_get_config_entry_diagnostics(
             "gebieden": [
                 w.get("gebied") for w in ((alert_data or {}).get("actief") or [])
             ][:20],
+            "gebieden_in_land": (alert_data or {}).get("gebieden_in_land"),
         },
         "statistieken": stats.als_dict() if stats else None,
         "entiteiten": entiteiten,

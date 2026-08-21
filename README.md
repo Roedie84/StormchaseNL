@@ -38,6 +38,17 @@ sensoren uit en rekent daar bovenop.
 | `sensor.stormchase_neerslagpiek_2_uur` | Zwaarste bui in de komende twee uur. |
 | `sensor.stormchase_actieve_locatie` | Welke locatie in gebruik is. Attributen: coordinaten, adres, en of Blitzortung vanaf hetzelfde punt meet. |
 
+### Onweersverwachting
+
+`sensor.stormchase_onweersverwachting` zet de losse parameters om in een
+oordeel: geen onweer verwacht, kleine kans, kans op onweer, kans op zwaar
+onweer of kans op noodweer. De attributen bevatten de duiding per onderdeel
+en een toelichting waarom het oordeel zo uitvalt.
+
+Het gaat om de combinatie. CAPE van 2500 bij stabiele lucht levert niets op,
+en veel energie zonder windschering hooguit een losse bui die zichzelf binnen
+een uur opruimt. `indices.py` bevat de gebruikte drempels met uitleg.
+
 ### Rotatie en hagel
 
 `sensor.stormchase_rotatiekans` en `sensor.stormchase_hagelkans` geven een
@@ -76,6 +87,12 @@ je bent en haalt de bijbehorende feed op. Rijd je een grens over, dan
 verschuiven de waarschuwingen mee. Handmatig kiezen kan ook. Het regioveld is een tekstfilter op de
 gebiedsnaam uit de feed: vul bijvoorbeeld `Gelderland` in om alleen die
 provincie te volgen, of laat het leeg voor het hele land.
+
+Zie je in een weerapp een waarschuwing die hier ontbreekt, kijk dan naar het
+attribuut `gefilterd_op` van `sensor.stormchase_waarschuwingsniveau`. Staat de
+naam van jouw gebied daar niet bij, vul het regioveld dan handmatig in; dat
+gaat voor op de automatische namen. Het dashboard toont een grijze tegel zodra
+er waarschuwingen in het land zijn die buiten je filter vallen.
 
 Het soort waarschuwing wordt vertaald naar het Nederlands. MeteoAlarm levert
 dat als vrije Engelse tekst die per land verschilt, dus de herkenning gaat op
@@ -201,6 +218,7 @@ automatisering aan te pas komt.
 | Wachttijd | Voorkomt herhaling bij een grillige cel. |
 | Stiltevenster | Twee gelijke tijden betekent: altijd melden. |
 | Ook bij regen | Bericht zodra er neerslag aankomt. |
+| Vooruitzicht | Bericht zodra de verwachting opschaalt naar zwaar onweer of noodweer. |
 | Weersituaties | Sneeuw, ijzel, mist, hitte en vorst, per stuk aan of uit. |
 | Hitte vanaf | Standaard 30 graden. |
 | Vorst vanaf | Standaard 0 graden. |
@@ -288,6 +306,7 @@ reageren:
 | `stormchase_cleared` | De afstand is weer boven anderhalf keer de waarschuwingsafstand. |
 | `stormchase_rain_incoming` | Er komt regen aan binnen de ingestelde tijd. |
 | `stormchase_alert` | Nieuwe officiele weerwaarschuwing. |
+| `stormchase_outlook` | Het vooruitzicht schaalt op naar zwaarder weer. |
 
 Events vuren bij een *overgang*, niet bij elke update. Je krijgt dus één
 melding per onweersgebied in plaats van bij elke inslag opnieuw.

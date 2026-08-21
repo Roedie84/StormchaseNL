@@ -288,6 +288,28 @@ class StormchaseStrategy {
       });
     }
 
+    // ---- Waarschuwingen elders in het land ----
+    // Zonder deze regel lijkt een leeg waarschuwingsblok alsof er niets aan
+    // de hand is, terwijl het regiofilter er net tien kan hebben weggelaten.
+    const niveauState = hass.states["sensor.stormchase_waarschuwingsniveau"];
+    const inLand = Number(niveauState?.attributes?.aantal_in_land || 0);
+    const inRegio = Number(niveauState?.attributes?.aantal || 0);
+
+    if (inLand > 0 && inRegio === 0) {
+      cards.push(
+        tegel({
+          icon: "mdi:map-marker-off-outline",
+          icon_color: "grey",
+          primary: `${inLand} waarschuwing${inLand === 1 ? "" : "en"} elders in het land`,
+          secondary:
+            "Niet voor jouw regio" +
+            "{% set f = state_attr('sensor.stormchase_waarschuwingsniveau','gefilterd_op') %}" +
+            "{% if f %} \u00b7 gefilterd op {{ f }}{% endif %}",
+          multiline_secondary: true,
+        })
+      );
+    }
+
     // ---- Statusregel: vat in een oogopslag samen wat er speelt ----
     // De kleur en tekst volgen de ernst, zodat je bij rustig weer niet
     // hetzelfde beeld krijgt als wanneer er iets aankomt.
@@ -616,6 +638,7 @@ class StormchaseStrategy {
         id: "sensor.stormchase_cape_piek_12_uur",
         icon: "mdi:chart-bell-curve",
         label: "Piek 12u",
+        duiding: "energie",
         kleur:
           "{% set c = states('sensor.stormchase_cape_piek_12_uur') | float(0) %}" +
           "{{ 'purple' if c > 300 else 'disabled' }}",
@@ -688,6 +711,25 @@ class StormchaseStrategy {
         kop("Zwaar weer \u00b7 kans op basis van omgeving", "mdi:alert-rhombus")
       );
 
+      // Het oordeel in gewone taal, want CAPE en Total Totals zeggen niets
+      // als je de drempels niet uit je hoofd kent.
+      if (bruikbaar(hass, "sensor.stormchase_onweersverwachting")) {
+        cards.push({
+          type: "custom:mushroom-template-card",
+          icon: "mdi:weather-lightning",
+          icon_color:
+            "{% set v = states('sensor.stormchase_onweersverwachting') %}" +
+            "{{ 'red' if 'noodweer' in v else 'orange' if 'zwaar' in v " +
+            "else 'amber' if 'Kans op onweer' in v " +
+            "else 'yellow' if 'Kleine' in v else 'disabled' }}",
+          primary: "{{ states('sensor.stormchase_onweersverwachting') }}",
+          secondary:
+            "{{ state_attr('sensor.stormchase_onweersverwachting','toelichting') }}",
+          multiline_secondary: true,
+          card_mod: { style: TILE_STYLE },
+        });
+      }
+
       cards.push({
         type: "grid",
         columns: 2,
@@ -722,8 +764,12 @@ class StormchaseStrategy {
             icon_color:
               "{% set s = states('sensor.stormchase_windschering_0_6_km') | float(0) %}" +
               "{{ 'red' if s > 72 else 'orange' if s > 50 else 'amber' if s > 30 else 'disabled' }}",
-            primary: waarde("sensor.stormchase_windschering_0_6_km", " km/u"),
-            secondary: "Schering 0-6 km",
+            primary:
+              "{{ state_attr('sensor.stormchase_onweersverwachting','windschering') " +
+              "| default('onbekend') | capitalize }}",
+            secondary:
+              "Schering 0-6 km \u00b7 " +
+              waarde("sensor.stormchase_windschering_0_6_km", " km/u"),
           }),
           tegel({
             icon: "mdi:weather-windy-variant",
@@ -738,16 +784,23 @@ class StormchaseStrategy {
             icon_color:
               "{% set v = states('sensor.stormchase_vriesniveau') | float(0) %}" +
               "{{ 'green' if 2000 <= v <= 3500 else 'disabled' }}",
-            primary: waarde("sensor.stormchase_vriesniveau", " m"),
-            secondary: "Vriesniveau",
+            primary:
+              "{{ state_attr('sensor.stormchase_onweersverwachting','vriesniveau') " +
+              "| default('onbekend') | capitalize }}",
+            secondary:
+              "Vriesniveau \u00b7 " + waarde("sensor.stormchase_vriesniveau", " m"),
           }),
           tegel({
             icon: "mdi:sigma",
             icon_color:
               "{% set t = states('sensor.stormchase_total_totals_index') | float(0) %}" +
               "{{ 'red' if t > 56 else 'orange' if t > 50 else 'amber' if t > 44 else 'disabled' }}",
-            primary: waarde("sensor.stormchase_total_totals_index"),
-            secondary: "Total Totals",
+            primary:
+              "{{ state_attr('sensor.stormchase_onweersverwachting','stabiliteit') " +
+              "| default('onbekend') | capitalize }}",
+            secondary:
+              "Stabiliteit \u00b7 Total Totals " +
+              waarde("sensor.stormchase_total_totals_index"),
           }),
         ],
       });

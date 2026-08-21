@@ -19,7 +19,18 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from homeassistant.util import dt as dt_util
 from homeassistant.util.location import distance as location_distance
 
-from .indices import hagelkans, peiling, rotatiekans, total_totals, windschering
+from .indices import (
+    duiding_cape,
+    duiding_schering,
+    duiding_stabiliteit,
+    duiding_vriesniveau,
+    hagelkans,
+    onweersverwachting,
+    peiling,
+    rotatiekans,
+    total_totals,
+    windschering,
+)
 
 from .const import (
     CLEARED_FACTOR,
@@ -67,7 +78,11 @@ from .const import (
     DEFAULT_WEATHER_TYPES,
     DEFAULT_WIND_THRESHOLD,
     EVENT_NEARBY,
+    CONF_OUTLOOK_LEVEL,
+    DEFAULT_OUTLOOK_LEVEL,
+    EVENT_OUTLOOK,
     EVENT_WEATHER,
+    OUTLOOK_RANGEN,
     EVENT_WIND,
     METEO_HOURLY,
     METEO_INTERVAL,
@@ -441,7 +456,9 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
 
         # slope in km per seconde -> km per uur, omgedraaid van teken
         slope = numerator / denominator
-        return round(-slope * 3600, 1)
+        # Plus nul, anders levert een vlakke reeks -0.0 op en staat er
+        # "-0,0 km/u" op het dashboard.
+        return round(-slope * 3600, 1) + 0.0
 
     def _beweging(
         self, latitude: float, longitude: float, bron: str
@@ -737,6 +754,7 @@ class MeteoCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
         self._fetched_at: tuple[float, float] | None = None
         self._was_winderig: bool | None = None
         self._vorige_condities: set[str] | None = None
+        self._vorige_rang: int | None = None
 
     def _controleer_wind(self, windstoten: float | None) -> None:
         """Meld het als de wind boven de drempel uitkomt.
@@ -754,11 +772,42 @@ class MeteoCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
             if self.stats is not None:
                 self.stats.noteer_event("wind")
             self.hass.bus.async_fire(
-                EVENT_WEATHER,
+                CONF_OUTLOOK_LEVEL,
+    DEFAULT_OUTLOOK_LEVEL,
+    EVENT_OUTLOOK,
+    EVENT_WEATHER,
+    OUTLOOK_RANGEN,
     EVENT_WIND, {"windstoten": windstoten, "drempel": drempel}
             )
 
         self._was_winderig = winderig
+
+    def _controleer_vooruitzicht(
+        self, oordeel: str, toelichting: str, rang: int
+    ) -> None:
+        """Meld het wanneer het vooruitzicht opschaalt.
+
+        Alleen omhoog en alleen over de drempel heen: van kans op onweer naar
+        kans op zwaar onweer is nieuws, andersom niet. Zakt het weer, dan kan
+        een volgende opschaling opnieuw gemeld worden.
+        """
+        drempel = OUTLOOK_RANGEN.get(
+            self._opt(CONF_OUTLOOK_LEVEL, DEFAULT_OUTLOOK_LEVEL), 3
+        )
+
+        if self._vorige_rang is None:
+            self._vorige_rang = rang
+            return
+
+        if rang >= drempel and rang > self._vorige_rang:
+            if self.stats is not None:
+                self.stats.noteer_event("outlook")
+            self.hass.bus.async_fire(
+                EVENT_OUTLOOK,
+                {"oordeel": oordeel, "toelichting": toelichting, "rang": rang},
+            )
+
+        self._vorige_rang = rang
 
     def _controleer_weer(self, huidig: dict) -> None:
         """Meld bijzondere weersituaties zodra ze intreden.
@@ -801,7 +850,11 @@ class MeteoCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
             if self.stats is not None:
                 self.stats.noteer_event("weather")
             self.hass.bus.async_fire(
-                EVENT_WEATHER,
+                CONF_OUTLOOK_LEVEL,
+    DEFAULT_OUTLOOK_LEVEL,
+    EVENT_OUTLOOK,
+    EVENT_WEATHER,
+    OUTLOOK_RANGEN,
                 {
                     "soort": soort,
                     "temperatuur": temperatuur,
@@ -920,26 +973,42 @@ class MeteoCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
         vriesniveau = at_index("freezing_level_height")
         cape_nu = at_index("cape")
 
+        tt = total_totals(
+            at_index("temperature_850hPa"),
+            at_index("dew_point_850hPa"),
+            at_index("temperature_500hPa"),
+        )
+        li = at_index("lifted_index")
+
         rotatie, rotatie_detail = rotatiekans(cape_nu, schering_6km)
         hagel, hagel_detail = hagelkans(
             cape_nu, schering_6km, vriesniveau, at_index("weather_code")
         )
 
+        cape_piek = max(cape_window) if cape_window else None
+        oordeel, toelichting, rang = onweersverwachting(
+            cape_piek, li, tt, schering_6km, rotatie, hagel
+        )
+        self._controleer_vooruitzicht(oordeel, toelichting, rang)
+
         return {
             "cape": at_index("cape"),
+            "verwachting": oordeel,
+            "verwachting_rang": rang,
+            "verwachting_toelichting": toelichting,
+            "duiding_cape": duiding_cape(cape_piek),
+            "duiding_stabiliteit": duiding_stabiliteit(li, tt),
+            "duiding_schering": duiding_schering(schering_6km),
+            "duiding_vriesniveau": duiding_vriesniveau(vriesniveau),
             "schering_6km": schering_6km,
             "schering_1km": schering_1km,
             "vriesniveau": vriesniveau,
-            "total_totals": total_totals(
-                at_index("temperature_850hPa"),
-                at_index("dew_point_850hPa"),
-                at_index("temperature_500hPa"),
-            ),
+            "total_totals": tt,
             "rotatiekans": rotatie,
             "rotatie_detail": rotatie_detail,
             "hagelkans": hagel,
             "hagel_detail": hagel_detail,
-            "cape_peak": max(cape_window) if cape_window else None,
+            "cape_peak": cape_piek,
             "lifted_index": at_index("lifted_index"),
             "cin": at_index("convective_inhibition"),
             "latitude": latitude,

@@ -5,6 +5,102 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.22.1] — 2026-08-21
+
+### Gerepareerd
+
+- **Samengestelde waarschuwingen werden half vertaald.** Een waarschuwing
+  noemt vaak meer dan een verschijnsel tegelijk, zoals "heavy thunderstorms
+  with heavy rain". De vertaler pakte een enkel trefwoord en liet de rest
+  weg; dat wordt nu "zwaar onweer met zware regen". Bij drie onderdelen:
+  "zwaar onweer met hagel en harde wind".
+- Overlappende treffers tellen niet dubbel, dus "heavy rain" wordt niet
+  daarna nog eens als "rain" meegenomen.
+- Extra termen toegevoegd voor zwaar en lokaal onweer.
+
+## [0.22.0] — 2026-08-21
+
+### Toegevoegd
+
+- **Melding zodra het vooruitzicht opschaalt.** Gaat de verwachting van kans
+  op onweer naar kans op zwaar onweer, of naar noodweer, dan krijg je
+  bericht met de toelichting erbij: "Kans op zwaar onweer in de komende uren.
+  Veel energie, onstabiel, schering sterk."
+- Alleen omhoog en alleen over de ingestelde drempel heen. Zakt het weer, dan
+  kan een volgende opschaling opnieuw gemeld worden. Instelbaar vanaf kans op
+  onweer, zwaar onweer of noodweer; standaard vanaf zwaar onweer.
+- Deze melding komt ook door tijdens het rijden. Hij gaat over de komende
+  uren en over de hele omgeving, en juist onderweg wil je weten dat de dag
+  omslaat.
+
+### Gewijzigd
+
+- **Het dagelijkse weerbericht toont het oordeel** in plaats van de ruwe
+  CAPE-waarde. Bij rustig weer een korte regel, anders met toelichting en de
+  kansen op rotatie en hagel als die noemenswaardig zijn.
+- `sensor.stormchase_onweersverwachting` draagt de ernst als attribuut
+  `verwachting_rang`, van 0 voor geen onweer tot 4 voor noodweer.
+
+## [0.21.0] — 2026-08-21
+
+Getallen kregen betekenis.
+
+### Toegevoegd
+
+- **`sensor.stormchase_onweersverwachting`** vat de hele situatie samen in
+  een oordeel: geen onweer verwacht, kleine kans op onweer, kans op onweer,
+  kans op zwaar onweer, of kans op noodweer. Met een toelichting erbij die
+  zegt waarom.
+- Het oordeel kijkt naar de combinatie, niet naar een enkel getal. Energie
+  zonder onstabiliteit levert niets op, en energie zonder windschering
+  hooguit een losse bui die zichzelf binnen een uur opruimt.
+- De losse waarden op het dashboard tonen nu hun betekenis groot en het getal
+  klein: "Sterk" met daaronder "Schering 0-6 km · 61 km/u", en "Stabiel" met
+  "Stabiliteit · Total Totals 41,3".
+- In de attributen staat per onderdeel de duiding: energie, stabiliteit,
+  windschering en vriesniveau.
+
+### Gebruikte drempels
+
+- Energie: nauwelijks tot 150, weinig tot 500, matig tot 1500, veel tot 2500,
+  daarboven zeer veel.
+- Stabiliteit op de Lifted Index, of op Total Totals als die ontbreekt:
+  stabiel onder 44, licht onstabiel tot 50, onstabiel tot 56, daarboven
+  sterk onstabiel.
+- Schering: zwak tot 25, matig tot 50, sterk tot 72, daarboven
+  supercelwaardig.
+
+## [0.20.3] — 2026-08-21
+
+### Gerepareerd
+
+- **Chase-potentie kwam structureel te laag uit.** Open-Meteo levert de
+  Lifted Index niet voor elke locatie of elk model; bij een lege waarde viel
+  dat onderdeel weg en misten er dertig punten. Ontbreekt hij, dan wordt nu
+  de Total Totals index gebruikt, die ongeveer hetzelfde zegt over de
+  stabiliteit. Het attribuut `stabiliteit_via` laat zien welke van de twee
+  gebruikt is.
+- Een vlakke afstandsreeks leverde `-0,0 km/u` op. Dat is nu gewoon nul.
+
+### Toegevoegd
+
+- De diagnostiek bevat een steekproef van de gebiedsnamen zoals MeteoAlarm ze
+  schrijft, in het veld `gebieden_in_land`. Daarmee valt na te gaan of het
+  regiofilter niets vindt omdat er niets is, of omdat de namen niet op elkaar
+  aansluiten.
+
+## [0.20.2] — 2026-08-21
+
+### Toegevoegd
+
+- **Zichtbaar wanneer het regiofilter waarschuwingen weglaat.** Zijn er wel
+  waarschuwingen in het land maar geen voor jouw omgeving, dan verschijnt er
+  een grijze tegel met het aantal en de namen waarop is gefilterd. Zonder dat
+  lijkt een leeg waarschuwingsblok alsof er niets speelt, terwijl er net tien
+  kunnen zijn weggelaten.
+- `sensor.stormchase_waarschuwingsniveau` draagt nu ook de attributen
+  `aantal_in_land` en `gefilterd_op`.
+
 ## [0.20.1] — 2026-08-21
 
 ### Gewijzigd
@@ -763,6 +859,11 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.22.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.22.1
+[0.22.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.22.0
+[0.21.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.21.0
+[0.20.3]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.20.3
+[0.20.2]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.20.2
 [0.20.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.20.1
 [0.20.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.20.0
 [0.19.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.19.0

@@ -204,6 +204,7 @@ async def async_setup_entry(
         for position, bound in enumerate(storm.ring_bounds)
     ]
     entities.append(ChasePotentialSensor(meteo, storm, entry))
+    entities.append(ForecastSensor(meteo, entry))
 
     waarschuwingen: AlertCoordinator = data["alerts"]
     entities.append(AlertSensor(waarschuwingen, entry))
@@ -393,10 +394,20 @@ class ChasePotentialSensor(CoordinatorEntity[MeteoCoordinator], SensorEntity):
         cape = data.get("cape_peak") or 0
         cape_score = min(cape / 2500 * 50, 50)
 
+        # Open-Meteo levert de Lifted Index niet voor elke locatie of elk
+        # model. Ontbreekt hij, dan nemen we de Total Totals index, die
+        # ongeveer hetzelfde zegt over de stabiliteit: onder 44 gebeurt er
+        # weinig, boven 56 wordt het serieus.
         li = data.get("lifted_index")
         li_score = 0.0
-        if li is not None and li < 0:
-            li_score = min(abs(li) / 8 * 30, 30)
+
+        if li is not None:
+            if li < 0:
+                li_score = min(abs(li) / 8 * 30, 30)
+        else:
+            tt = data.get("total_totals")
+            if tt is not None and tt > 44:
+                li_score = min((tt - 44) / 12 * 30, 30)
 
         strike_score = 0.0
         if self._storm.data and self._storm.data.rings:
@@ -417,12 +428,16 @@ class ChasePotentialSensor(CoordinatorEntity[MeteoCoordinator], SensorEntity):
     def extra_state_attributes(self) -> dict:
         """Laat zien hoe de score is opgebouwd."""
         cape_score, li_score, strike_score = self._scores()
+        data = self.coordinator.data or {}
+        via_tt = data.get("lifted_index") is None and data.get("total_totals")
+
         return {
             "cape_bijdrage": round(cape_score),
-            "lifted_index_bijdrage": round(li_score),
+            "stabiliteit_bijdrage": round(li_score),
+            "stabiliteit_via": "total_totals" if via_tt else "lifted_index",
             "inslagen_bijdrage": round(strike_score),
             "toelichting": (
-                "CAPE-piek max 50, Lifted Index max 30, inslagen in de "
+                "CAPE-piek max 50, stabiliteit max 30, inslagen in de "
                 "buitenste ring max 20"
             ),
         }
@@ -571,6 +586,11 @@ class AlertSensor(CoordinatorEntity[AlertCoordinator], SensorEntity):
             "soort": data.get("soort"),
             "gebied": data.get("gebied"),
             "land": data.get("land"),
+            # Hoeveel er landelijk actief zijn en waarop is teruggefilterd.
+            # Zonder dat lijkt een lege lijst alsof er niets aan de hand is,
+            # terwijl er verderop in het land van alles kan spelen.
+            "aantal_in_land": data.get("aantal_in_land"),
+            "gefilterd_op": data.get("gefilterd_op"),
             "waarschuwingen": data.get("actief"),
         }
 
@@ -617,3 +637,42 @@ class SevereSensor(CoordinatorEntity[MeteoCoordinator], SensorEntity):
         if self.coordinator.data is None:
             return {}
         return self.coordinator.data.get(self._detailveld) or {}
+
+
+class ForecastSensor(CoordinatorEntity[MeteoCoordinator], SensorEntity):
+    """De onweersverwachting in gewone taal.
+
+    Getallen als CAPE en Total Totals zeggen alleen iets als je de drempels
+    kent. Deze sensor vat ze samen tot een oordeel, met in de attributen wat
+    elk onderdeel bijdraagt.
+    """
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "forecast"
+
+    def __init__(self, coordinator: MeteoCoordinator, entry: ConfigEntry) -> None:
+        """Initialiseer de sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_forecast"
+        self._attr_device_info = _device(entry)
+
+    @property
+    def native_value(self) -> str | None:
+        """Het oordeel."""
+        if self.coordinator.data is None:
+            return None
+        return self.coordinator.data.get("verwachting")
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        """Waar het oordeel op gebaseerd is."""
+        data = self.coordinator.data
+        if not data:
+            return {}
+        return {
+            "toelichting": data.get("verwachting_toelichting"),
+            "energie": data.get("duiding_cape"),
+            "stabiliteit": data.get("duiding_stabiliteit"),
+            "windschering": data.get("duiding_schering"),
+            "vriesniveau": data.get("duiding_vriesniveau"),
+        }

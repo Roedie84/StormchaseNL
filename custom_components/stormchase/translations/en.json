@@ -50,7 +50,9 @@
           "moving_speed": "Travelling from speed",
           "weather_types": "Notify for these conditions",
           "heat_threshold": "Heat from",
-          "frost_threshold": "Frost from"
+          "frost_threshold": "Frost from",
+          "outlook_notify": "Notify when the outlook escalates",
+          "outlook_level": "Notify from"
         }
       },
       "alerts": {
@@ -130,7 +132,9 @@
           "moving_speed": "Travelling from speed",
           "weather_types": "Notify for these conditions",
           "heat_threshold": "Heat from",
-          "frost_threshold": "Frost from"
+          "frost_threshold": "Frost from",
+          "outlook_notify": "Notify when the outlook escalates",
+          "outlook_level": "Notify from"
         }
       },
       "alerts": {
@@ -227,6 +231,9 @@
       },
       "azimuth": {
         "name": "Azimuth"
+      },
+      "forecast": {
+        "name": "Storm outlook"
       }
     },
     "binary_sensor": {
@@ -298,6 +305,13 @@
         "mist": "Dense fog",
         "hitte": "Heat",
         "vorst": "Frost"
+      }
+    },
+    "outlook_level": {
+      "options": {
+        "onweer": "Chance of thunderstorms",
+        "zwaar": "Chance of severe storms",
+        "noodweer": "Chance of extreme weather"
       }
     }
   },

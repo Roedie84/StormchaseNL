@@ -25,6 +25,9 @@ TREFWOORDEN: list[tuple[str, str]] = [
     ("rain", "regen"),
     # Onweer
     ("severe thunderstorm", "zwaar onweer"),
+    ("heavy thunderstorm", "zwaar onweer"),
+    ("strong thunderstorm", "zwaar onweer"),
+    ("isolated thunderstorm", "lokaal onweer"),
     ("thunderstorm", "onweer"),
     ("lightning", "bliksem"),
     # Wind
@@ -76,17 +79,44 @@ TREFWOORDEN: list[tuple[str, str]] = [
 def vertaal_soort(soort: str | None) -> str | None:
     """Vertaal het soort waarschuwing naar het Nederlands.
 
-    Wordt er geen trefwoord herkend, dan blijft de oorspronkelijke tekst
-    staan. Liever een Engelse term die klopt dan een Nederlandse die de lading
-    niet dekt.
+    Een waarschuwing noemt vaak meer dan een verschijnsel tegelijk, zoals
+    "heavy thunderstorms with heavy rain". Een enkel trefwoord pakken zou
+    daar de helft van weglaten, dus we zoeken alle onderdelen en zetten ze
+    weer aan elkaar.
+
+    Wordt er niets herkend, dan blijft de oorspronkelijke tekst staan. Liever
+    een Engelse term die klopt dan een Nederlandse die de lading niet dekt.
     """
     if not soort:
         return soort
 
     laag = soort.lower().strip()
 
-    for engels, nederlands in TREFWOORDEN:
-        if engels in laag:
-            return nederlands
+    gevonden: list[tuple[int, str]] = []
+    bezet: list[tuple[int, int]] = []
 
-    return soort
+    # Specifieke termen eerst, zodat "heavy rain" wint van "rain" en het
+    # stuk tekst daarna niet nog eens meetelt.
+    for engels, nederlands in TREFWOORDEN:
+        start = laag.find(engels)
+        if start == -1:
+            continue
+
+        eind = start + len(engels)
+        if any(start < b and eind > a for a, b in bezet):
+            continue
+
+        bezet.append((start, eind))
+        gevonden.append((start, nederlands))
+
+    if not gevonden:
+        return soort
+
+    gevonden.sort()
+    delen = [tekst for _, tekst in gevonden]
+
+    if len(delen) == 1:
+        return delen[0]
+
+    # Het eerste onderdeel is het hoofdverschijnsel, de rest hangt eraan
+    return f"{delen[0]} met {' en '.join(delen[1:])}"

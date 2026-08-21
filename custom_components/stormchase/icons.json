@@ -69,6 +69,9 @@
       },
       "azimuth": {
         "default": "mdi:compass-outline"
+      },
+      "forecast": {
+        "default": "mdi:weather-lightning"
       }
     },
     "binary_sensor": {

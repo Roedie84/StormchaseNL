@@ -86,6 +86,7 @@ class Statistieken:
             "rain_incoming": 0,
             "wind": 0,
             "weather": 0,
+            "outlook": 0,
             "alert": 0,
         }
     )

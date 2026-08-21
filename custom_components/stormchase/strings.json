@@ -50,7 +50,9 @@
           "moving_speed": "Onderweg vanaf snelheid",
           "weather_types": "Melden bij deze weersituaties",
           "heat_threshold": "Hitte vanaf",
-          "frost_threshold": "Vorst vanaf"
+          "frost_threshold": "Vorst vanaf",
+          "outlook_notify": "Melden als het vooruitzicht opschaalt",
+          "outlook_level": "Melden vanaf"
         }
       },
       "alerts": {
@@ -130,7 +132,9 @@
           "moving_speed": "Onderweg vanaf snelheid",
           "weather_types": "Melden bij deze weersituaties",
           "heat_threshold": "Hitte vanaf",
-          "frost_threshold": "Vorst vanaf"
+          "frost_threshold": "Vorst vanaf",
+          "outlook_notify": "Melden als het vooruitzicht opschaalt",
+          "outlook_level": "Melden vanaf"
         }
       },
       "alerts": {
@@ -227,6 +231,9 @@
       },
       "azimuth": {
         "name": "Azimut"
+      },
+      "forecast": {
+        "name": "Onweersverwachting"
       }
     },
     "binary_sensor": {
@@ -298,6 +305,13 @@
         "mist": "Dichte mist",
         "hitte": "Hitte",
         "vorst": "Vorst"
+      }
+    },
+    "outlook_level": {
+      "options": {
+        "onweer": "Kans op onweer",
+        "zwaar": "Kans op zwaar onweer",
+        "noodweer": "Kans op noodweer"
       }
     }
   },

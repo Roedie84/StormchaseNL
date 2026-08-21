@@ -169,3 +169,147 @@ def hagelkans(
             "radar vast te stellen."
         ),
     }
+
+
+# ---------------------------------------------------------------------
+# Duiding: van getal naar taal
+#
+# De drempels zijn de gangbare vuistregels. Ze zijn bewust ruim genomen,
+# want een enkel getal zegt nooit alles: het gaat om de combinatie.
+# ---------------------------------------------------------------------
+
+
+def duiding_cape(cape: float | None) -> str:
+    """Hoeveel energie zit er in de atmosfeer?"""
+    if cape is None:
+        return "onbekend"
+    if cape < 150:
+        return "nauwelijks energie"
+    if cape < 500:
+        return "weinig energie"
+    if cape < 1500:
+        return "matige energie"
+    if cape < 2500:
+        return "veel energie"
+    return "zeer veel energie"
+
+
+def duiding_stabiliteit(
+    lifted_index: float | None, total_totals: float | None
+) -> str:
+    """Hoe onstabiel is de lucht?
+
+    Bij voorkeur op de Lifted Index; ontbreekt die, dan op Total Totals.
+    Beide zeggen hetzelfde, alleen op een andere schaal.
+    """
+    if lifted_index is not None:
+        if lifted_index >= 0:
+            return "stabiel"
+        if lifted_index > -3:
+            return "licht onstabiel"
+        if lifted_index > -6:
+            return "onstabiel"
+        return "sterk onstabiel"
+
+    if total_totals is not None:
+        if total_totals < 44:
+            return "stabiel"
+        if total_totals < 50:
+            return "licht onstabiel"
+        if total_totals < 56:
+            return "onstabiel"
+        return "sterk onstabiel"
+
+    return "onbekend"
+
+
+def duiding_schering(schering: float | None) -> str:
+    """Genoeg windschering voor georganiseerde buien?"""
+    if schering is None:
+        return "onbekend"
+    if schering < 25:
+        return "zwak"
+    if schering < 50:
+        return "matig"
+    if schering < SHEAR_SUPERCEL:
+        return "sterk"
+    return "supercelwaardig"
+
+
+def duiding_vriesniveau(hoogte: float | None) -> str:
+    """Kan hagel de grond halen zonder te smelten?"""
+    if hoogte is None:
+        return "onbekend"
+    if hoogte < VRIESNIVEAU_ONDER:
+        return "laag"
+    if hoogte <= VRIESNIVEAU_BOVEN:
+        return "gunstig voor hagel"
+    return "te hoog voor hagel"
+
+
+# Oplopende ernst, zodat er te vergelijken valt of het vooruitzicht opschaalt
+RANG_GEEN = 0
+RANG_KLEIN = 1
+RANG_ONWEER = 2
+RANG_ZWAAR = 3
+RANG_NOODWEER = 4
+
+
+def onweersverwachting(
+    cape_piek: float | None,
+    lifted_index: float | None,
+    total_totals: float | None,
+    schering: float | None,
+    rotatie: int | None = None,
+    hagel: int | None = None,
+) -> tuple[str, str, int]:
+    """Vat de hele situatie samen in een oordeel plus toelichting.
+
+    Het gaat om de combinatie: energie zonder onstabiliteit levert niets op,
+    en energie zonder schering levert hooguit een losse bui op die zichzelf
+    binnen een uur opruimt.
+    """
+    energie = cape_piek or 0
+    stabiliteit = duiding_stabiliteit(lifted_index, total_totals)
+    stabiel = stabiliteit in ("stabiel", "onbekend")
+    rotatie = rotatie or 0
+    hagel = hagel or 0
+    schering_waarde = schering or 0
+
+    # Zonder energie of bij stabiele lucht gebeurt er niets, hoe hard het ook
+    # waait op hoogte.
+    if energie < 150 or stabiel:
+        return (
+            "Geen onweer verwacht",
+            f"{duiding_cape(cape_piek)}, lucht is {stabiliteit}",
+            RANG_GEEN,
+        )
+
+    if rotatie > 60 or hagel > 70 or (energie > 2500 and schering_waarde > SHEAR_SUPERCEL):
+        return (
+            "Kans op noodweer",
+            f"{duiding_cape(cape_piek)}, {stabiliteit}, schering "
+            f"{duiding_schering(schering)}. Supercellen mogelijk.",
+            RANG_NOODWEER,
+        )
+
+    if energie >= 1500 and schering_waarde >= 50 or rotatie > 40 or hagel > 40:
+        return (
+            "Kans op zwaar onweer",
+            f"{duiding_cape(cape_piek)}, {stabiliteit}, schering "
+            f"{duiding_schering(schering)}. Georganiseerde buien mogelijk.",
+            RANG_ZWAAR,
+        )
+
+    if energie >= 500:
+        return (
+            "Kans op onweer",
+            f"{duiding_cape(cape_piek)}, lucht is {stabiliteit}",
+            RANG_ONWEER,
+        )
+
+    return (
+        "Kleine kans op onweer",
+        f"{duiding_cape(cape_piek)}, lucht is {stabiliteit}",
+        RANG_KLEIN,
+    )

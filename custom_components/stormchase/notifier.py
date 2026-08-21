@@ -13,6 +13,7 @@ from .const import (
     CONF_NOTIFY_COOLDOWN,
     CONF_ALERT_NOTIFY,
     CONF_ONLY_STATIONARY,
+    CONF_OUTLOOK_NOTIFY,
     CONF_RAIN_NOTIFY,
     CONF_WEATHER_TYPES,
     CONF_WIND_NOTIFY,
@@ -34,6 +35,7 @@ from .const import (
     EVENT_NEARBY,
     EVENT_ALERT,
     EVENT_RAIN_INCOMING,
+    EVENT_OUTLOOK,
     EVENT_WEATHER,
     EVENT_WIND,
     ONDERWEG_RELEVANT,
@@ -108,6 +110,7 @@ class StormNotifier:
             self.hass.bus.async_listen(EVENT_ALERT, self._handle_alert),
             self.hass.bus.async_listen(EVENT_WIND, self._handle_wind),
             self.hass.bus.async_listen(EVENT_WEATHER, self._handle_weather),
+            self.hass.bus.async_listen(EVENT_OUTLOOK, self._handle_outlook),
         ]
 
     def stop(self) -> None:
@@ -455,6 +458,29 @@ class StormNotifier:
         titel, bericht = self._weerbericht(soort, event.data)
         await self._stuur(bericht, f"weather_{soort}", titel=titel)
         self._laatste_weer[soort] = dt_util.utcnow()
+
+    @callback
+    async def _handle_outlook(self, event: Event) -> None:
+        """Het vooruitzicht is opgeschaald naar zwaar weer.
+
+        Gaat over de komende uren en over de hele omgeving, dus dit komt ook
+        door tijdens het rijden: juist dan wil je weten dat de dag omslaat.
+        """
+        if not self._opt(CONF_OUTLOOK_NOTIFY, True):
+            return
+        if not self.ingeschakeld or not self.diensten:
+            return
+        if self._in_stiltevenster():
+            return
+
+        oordeel = event.data.get("oordeel", "")
+        toelichting = event.data.get("toelichting", "")
+
+        bericht = f"{oordeel} in de komende uren."
+        if toelichting:
+            bericht += f"\n{toelichting.capitalize()}"
+
+        await self._stuur(bericht, "outlook", titel="Vooruitzicht")
 
     async def stuur_direct(self, bericht: str, soort: str, titel: str) -> None:
         """Verstuur zonder wachttijd of stilstandcontrole.
