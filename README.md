@@ -21,6 +21,8 @@ sensoren uit en rekent daar bovenop.
 
 | Entiteit | Beschrijving |
 |---|---|
+| `sensor.stormchase_afstand` | Afstand tot de dichtstbijzijnde inslag, herberekend vanaf je eigen positie. Attribuut `gemeten_via` toont of dat gelukt is. |
+| `sensor.stormchase_azimut` | Richting van die inslag. |
 | `sensor.stormchase_naderingssnelheid` | km/u, **positief = komt dichterbij**. Lineaire regressie over 15 minuten, niet eerste-tegen-laatste, omdat losse inslagen flink springen. |
 | `sensor.stormchase_aankomst` | Geschatte minuten tot aankomst. Niet beschikbaar als het onweer niet nadert. |
 | `sensor.stormchase_trend` | `nadert snel` · `nadert` · `stabiel` · `trekt weg` · `trekt snel weg` |

@@ -5,6 +5,36 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.16.0] — 2026-08-21
+
+Eerste versie die tijdens een echt onweer is nagelopen.
+
+### Gerepareerd
+
+- **Het dashboard mengde twee maatstaven.** De afstandstegel toonde de waarde
+  van de Blitzortung-sensor, gemeten vanaf het vaste punt daar, terwijl de
+  aankomsttijd rekende met de herberekende afstand vanaf jouw positie. Bij
+  een verschil van 274 kilometer tussen die twee punten leverde dat een
+  onweer op 44 km met een aankomsttijd van drie uur op.
+- Nieuwe sensoren `sensor.stormchase_afstand` en `sensor.stormchase_azimut`
+  met de herberekende waarden. Het dashboard gebruikt die nu, en valt alleen
+  terug op de bronsensor als ze er niet zijn. Het attribuut `gemeten_via`
+  laat zien welke van de twee je ziet.
+- De tegel met het aantal inslagen toont nu onze eigen telling in plaats van
+  de teller van de bron, zodat hij bij de afstanden ernaast hoort.
+- **De neerslaggrafiek toonde 24 uur terug in plaats van 2 uur vooruit.**
+  Apexcharts kijkt standaard achteruit, terwijl deze reeks in de toekomst
+  ligt. Venster en startpunt staan nu goed.
+- De aankomsttijd is een heel getal in plaats van 184.0, en boven de
+  anderhalf uur wordt hij in uren getoond.
+
+### Wat er tijdens het onweer goed ging
+
+De herberekening werkte: 110 geo_location entiteiten, afstand en richting
+bepaald vanaf de tracker in plaats van vanaf het vaste punt van Blitzortung.
+De stilstanddetectie klopte, de regenmelding is verstuurd en alle bronnen
+bleven foutloos.
+
 ## [0.15.0] — 2026-08-21
 
 ### Toegevoegd
@@ -590,6 +620,7 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.16.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.16.0
 [0.15.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.15.0
 [0.14.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.14.1
 [0.14.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.14.0

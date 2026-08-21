@@ -39,6 +39,21 @@ class MeteoSensorDescription(SensorEntityDescription):
 
 STORM_SENSORS: tuple[StormSensorDescription, ...] = (
     StormSensorDescription(
+        key="distance",
+        translation_key="distance",
+        native_unit_of_measurement="km",
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=1,
+        value=lambda data: data.distance,
+    ),
+    StormSensorDescription(
+        key="azimuth",
+        translation_key="azimuth",
+        native_unit_of_measurement="\u00b0",
+        suggested_display_precision=0,
+        value=lambda data: data.azimuth,
+    ),
+    StormSensorDescription(
         key="approach_speed",
         translation_key="approach_speed",
         native_unit_of_measurement="km/h",
@@ -242,14 +257,24 @@ class StormSensor(CoordinatorEntity[StormCoordinator], SensorEntity):
 
     @property
     def extra_state_attributes(self) -> dict:
-        """Context bij de afstand en richting."""
-        if self.entity_description.key != "approach_speed" or not self.coordinator.data:
+        """Context bij de waarde."""
+        data = self.coordinator.data
+        if not data:
             return {}
-        return {
-            "afstand": self.coordinator.data.distance,
-            "azimut": self.coordinator.data.azimuth,
-            "trend": self.coordinator.data.trend,
-        }
+
+        if self.entity_description.key == "approach_speed":
+            return {
+                "afstand": data.distance,
+                "azimut": data.azimuth,
+                "trend": data.trend,
+            }
+
+        if self.entity_description.key == "distance":
+            # herberekend = vanaf jouw positie, sensor = zoals de bron hem
+            # aanlevert, mogelijk vanaf een heel ander punt
+            return {"gemeten_via": data.afstand_bron, "inslagen": data.markers}
+
+        return {}
 
 
 class RingSensor(CoordinatorEntity[StormCoordinator], SensorEntity):

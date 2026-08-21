@@ -199,11 +199,25 @@ const kop = (heading, icon, style = "subtitle") => ({
 class StormchaseStrategy {
   /** Verzamel alles wat de strategie nodig heeft. */
   static verzamel(config, hass) {
+    // Onze eigen afstand en azimut gaan voor: die zijn herberekend vanaf
+    // jouw positie. De sensor van de bron rekent mogelijk vanaf een vast
+    // punt elders, en dan zouden afstand en aankomsttijd elkaar tegenspreken.
+    const eigenAfstand = bruikbaar(hass, "sensor.stormchase_afstand")
+      ? "sensor.stormchase_afstand"
+      : null;
+    const eigenAzimut = bruikbaar(hass, "sensor.stormchase_azimut")
+      ? "sensor.stormchase_azimut"
+      : null;
+
     const bron = {
       afstand:
-        config.distance_entity || raad(hass, "sensor", "_lightning_distance"),
+        config.distance_entity ||
+        eigenAfstand ||
+        raad(hass, "sensor", "_lightning_distance"),
       azimut:
-        config.azimuth_entity || raad(hass, "sensor", "_lightning_azimuth"),
+        config.azimuth_entity ||
+        eigenAzimut ||
+        raad(hass, "sensor", "_lightning_azimuth"),
       teller:
         config.counter_entity || raad(hass, "sensor", "_lightning_counter"),
     };
@@ -370,13 +384,18 @@ class StormchaseStrategy {
         })
       );
     }
-    if (bron.teller) {
+    // Bij herberekening telt onze eigen marker-telling; die hoort bij de
+    // afstanden die ernaast staan.
+    const tellerEntiteit = bruikbaar(hass, "sensor.stormchase_actieve_markers")
+      ? "sensor.stormchase_actieve_markers"
+      : bron.teller;
+    if (tellerEntiteit) {
       basis.push(
         tegel({
           icon: "mdi:counter",
-          icon_color: bruikbaar(hass, bron.teller) ? "amber" : "disabled",
-          primary: waarde(bron.teller),
-          secondary: "Inslagen totaal",
+          icon_color: bruikbaar(hass, tellerEntiteit) ? "amber" : "disabled",
+          primary: waarde(tellerEntiteit),
+          secondary: "Inslagen in bereik",
         })
       );
     }
@@ -514,6 +533,10 @@ class StormchaseStrategy {
       // Verwachting per 5 minuten, uit de attributen van de startsensor
       cards.push({
         type: "custom:apexcharts-card",
+        // Zonder deze twee toont apexcharts standaard de afgelopen 24 uur,
+        // terwijl deze reeks juist in de toekomst ligt.
+        graph_span: "2h",
+        span: { start: "minute" },
         header: {
           show: true,
           title: "Neerslag \u00b7 komende 2 uur",

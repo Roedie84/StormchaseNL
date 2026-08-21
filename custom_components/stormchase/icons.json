@@ -63,6 +63,12 @@
       },
       "wind_gusts": {
         "default": "mdi:weather-windy"
+      },
+      "distance": {
+        "default": "mdi:flash"
+      },
+      "azimuth": {
+        "default": "mdi:compass-outline"
       }
     },
     "binary_sensor": {

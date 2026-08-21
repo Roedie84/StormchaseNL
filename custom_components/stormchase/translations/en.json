@@ -195,6 +195,12 @@
       },
       "wind_gusts": {
         "name": "Wind gusts"
+      },
+      "distance": {
+        "name": "Distance"
+      },
+      "azimuth": {
+        "name": "Azimuth"
       }
     },
     "binary_sensor": {

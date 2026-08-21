@@ -651,7 +651,7 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
 
         eta = None
         if speed is not None and speed > SPEED_DEADZONE and distance:
-            eta = round(distance / speed * 60, 0)
+            eta = int(round(distance / speed * 60))
 
         # Meet Blitzortung vanaf hetzelfde punt als wij?
         bz = blitzortung_locatie(self.hass)

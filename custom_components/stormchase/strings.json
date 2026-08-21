@@ -195,6 +195,12 @@
       },
       "wind_gusts": {
         "name": "Windstoten"
+      },
+      "distance": {
+        "name": "Afstand"
+      },
+      "azimuth": {
+        "name": "Azimut"
       }
     },
     "binary_sensor": {
