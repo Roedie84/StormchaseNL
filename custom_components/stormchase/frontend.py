@@ -8,6 +8,7 @@ from pathlib import Path
 from homeassistant.components.frontend import add_extra_js_url
 from homeassistant.components.http import StaticPathConfig
 from homeassistant.core import HomeAssistant
+from homeassistant.util import dt as dt_util
 
 from .const import DOMAIN, STRATEGY_FILE, STRATEGY_URL
 
@@ -17,7 +18,7 @@ _REGISTERED = f"{DOMAIN}_frontend_registered"
 
 
 async def _async_register_resource(hass: HomeAssistant, versioned_url: str) -> bool:
-    """Zet het script in de Lovelace-bronnenlijst.
+    """Zet het script in de Lovelace-bronnenlijst, of werk het bij.
 
     Dit is de betrouwbaarste route: bronnen worden geladen op het moment dat
     een dashboard opstart, precies wanneer de strategie nodig is.
@@ -94,7 +95,13 @@ async def async_register_frontend(hass: HomeAssistant, version: str) -> None:
         ]
     )
 
-    versioned_url = f"{STRATEGY_URL}?v={version}"
+    # Versienummer plus starttijd. Het versienummer alleen bleek niet genoeg:
+    # bij een update via HACS bleef de oude URL soms in de bronnenlijst staan,
+    # waardoor de browser het oude script uit de cache bleef gebruiken. Met de
+    # starttijd erbij wijzigt de URL bij elke herstart en is een herlaad
+    # onvermijdelijk.
+    stempel = int(dt_util.utcnow().timestamp())
+    versioned_url = f"{STRATEGY_URL}?v={version}&t={stempel}"
 
     # Beide routes: de bron is leidend, add_extra_js_url vangt YAML-modus af.
     # Het script registreert zichzelf maar één keer, dus dubbel laden kan geen

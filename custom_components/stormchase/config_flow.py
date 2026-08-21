@@ -61,6 +61,7 @@ from .const import (
     CONF_RING_NEAR,
     CONF_RING_WINDOW,
     CONF_TRACKER_ENTITY,
+    CONF_UPDATE_INTERVAL,
     CONF_WARN_DISTANCE,
     CONF_ZONE_ENTITY,
     DEFAULT_GEO_PATTERN,
@@ -68,6 +69,7 @@ from .const import (
     DEFAULT_RING_MID,
     DEFAULT_RING_NEAR,
     DEFAULT_RING_WINDOW,
+    DEFAULT_UPDATE_INTERVAL,
     DEFAULT_WARN_DISTANCE,
     DOMAIN,
     LOCATION_MODES,
@@ -164,6 +166,15 @@ def _base_schema(hass, defaults: dict[str, Any]) -> vol.Schema:
                 )
             ),
             vol.Required(
+                CONF_UPDATE_INTERVAL,
+                default=defaults.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=5, max=120, step=5, unit_of_measurement="s",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
+            vol.Required(
                 CONF_LOCATION_MODE,
                 default=defaults.get(CONF_LOCATION_MODE, MODE_HOME),
             ): selector.SelectSelector(
@@ -194,7 +205,8 @@ def _location_schema(mode: str, defaults: dict[str, Any]) -> vol.Schema:
         return vol.Schema(
             {
                 vol.Required(
-                    CONF_TRACKER_ENTITY, default=defaults.get(CONF_TRACKER_ENTITY)
+                    CONF_TRACKER_ENTITY,
+    CONF_UPDATE_INTERVAL, default=defaults.get(CONF_TRACKER_ENTITY)
                 ): selector.EntitySelector(
                     selector.EntitySelectorConfig(
                         domain=["device_tracker", "person"]
@@ -494,6 +506,7 @@ class StormchaseOptionsFlow(OptionsFlow):
                     for key in (
                         CONF_ZONE_ENTITY,
                         CONF_TRACKER_ENTITY,
+    CONF_UPDATE_INTERVAL,
                         CONF_MANUAL_LOCATION,
                     ):
                         self._data.pop(key, None)

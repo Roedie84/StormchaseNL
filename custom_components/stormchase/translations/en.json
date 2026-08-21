@@ -15,7 +15,8 @@
           "ring_far": "Outer ring",
           "location_mode": "Location",
           "ring_window": "Time window for the rings",
-          "address_sensor": "Address sensor (optional)"
+          "address_sensor": "Address sensor (optional)",
+          "update_interval": "Update interval"
         }
       },
       "location": {
@@ -82,7 +83,8 @@
           "ring_far": "Outer ring",
           "location_mode": "Location",
           "ring_window": "Time window for the rings",
-          "address_sensor": "Address sensor (optional)"
+          "address_sensor": "Address sensor (optional)",
+          "update_interval": "Update interval"
         }
       },
       "location": {

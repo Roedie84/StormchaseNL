@@ -39,7 +39,10 @@ DEFAULT_RING_MID = 25
 DEFAULT_RING_FAR = 50
 
 # Update-intervallen
-STORM_INTERVAL = timedelta(seconds=30)
+CONF_UPDATE_INTERVAL = "update_interval"
+DEFAULT_UPDATE_INTERVAL = 10  # seconden
+
+STORM_INTERVAL = timedelta(seconds=DEFAULT_UPDATE_INTERVAL)
 METEO_INTERVAL = timedelta(minutes=30)
 
 # Venster waarover de naderingssnelheid wordt berekend
@@ -71,7 +74,7 @@ DEFAULT_STATIONARY_MINUTES = 10  # zo lang traag voor je weer 'ter plaatse' bent
 DEFAULT_MOVING_SPEED = 30        # km/u; hierboven ben je onderweg
 SNELHEID_VENSTER = 180           # seconden waarover de snelheid wordt bepaald
 MAX_SNELHEID = 400               # km/u; hierboven is het geen echte beweging
-LOCATIE_GESCHIEDENIS = 240       # aantal bewaarde locatiepunten
+LOCATIE_GESCHIEDENIS = 400       # aantal bewaarde locatiepunten
 
 EVENT_WIND = f"{DOMAIN}_wind"
 

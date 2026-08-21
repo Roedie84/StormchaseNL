@@ -15,7 +15,7 @@ from typing import Any
 from homeassistant.util import dt as dt_util
 
 # Hoeveel meetpunten we bewaren voor de afstandsreeks
-GESCHIEDENIS = 60
+GESCHIEDENIS = 180
 
 
 @dataclass

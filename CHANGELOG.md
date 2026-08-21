@@ -5,6 +5,45 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.17.1] — 2026-08-21
+
+### Gerepareerd
+
+- **Browser bleef het oude dashboardscript gebruiken.** De URL van het script
+  droeg alleen het versienummer, en bij een update via HACS bleef de oude URL
+  soms in de bronnenlijst staan. De browser haalde dan netjes het bestand uit
+  zijn cache, met als gevolg dat reparaties aan het dashboard onzichtbaar
+  bleven tot je handmatig hard ververste.
+- De URL bevat nu ook de starttijd van Home Assistant, dus na elke herstart
+  is hij anders en moet de browser het script opnieuw ophalen. De
+  bronnenlijst wordt daarbij bijgewerkt in plaats van dat er een tweede regel
+  bij komt.
+
+### Wat dit niet oplost
+
+Tussen twee herstarts door blijft de URL gelijk, want die staat vast in de
+bronnenlijst. Wijzig je het dashboard zonder te herstarten, dan is een harde
+ververs nog steeds nodig.
+
+## [0.17.0] — 2026-08-21
+
+### Gewijzigd
+
+- **De ronde loopt nu elke tien seconden in plaats van elke dertig.** Afstand,
+  richting, ringen, trend en de stilstandbepaling volgen daardoor sneller.
+  Die ronde leest alleen lokale toestanden en rekent wat door, dus er gaan
+  geen extra verzoeken naar buiten.
+- Nieuwe instelling **Verversingsinterval**, van vijf tot honderdtwintig
+  seconden.
+- De bewaarde reeksen zijn meegegroeid, zodat ze bij tien seconden nog steeds
+  ruim een uur aan locatiepunten en een halfuur aan afstandsmetingen dekken.
+
+### Ongewijzigd
+
+De externe bronnen houden hun eigen ritme: weerparameters elk half uur,
+neerslag elke vijf minuten, waarschuwingen elk kwartier. Die vaker bevragen
+levert niets op, want ze verversen zelf niet sneller.
+
 ## [0.16.0] — 2026-08-21
 
 Eerste versie die tijdens een echt onweer is nagelopen.
@@ -620,6 +659,8 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.17.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.17.1
+[0.17.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.17.0
 [0.16.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.16.0
 [0.15.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.15.0
 [0.14.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.14.1

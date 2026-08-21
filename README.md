@@ -289,6 +289,11 @@ strategy:
 Dat is alles — de integratie registreert het benodigde script zelf als
 Lovelace-bron.
 
+De URL van het script bevat het versienummer en de starttijd van Home
+Assistant, zodat je browser na elke herstart gedwongen wordt het opnieuw op te
+halen. Zie je na een update toch het oude dashboard, herstart dan Home
+Assistant of ververs hard met Ctrl+Shift+R.
+
 Krijg je toch *Timeout waiting for strategy element*, dan draait Lovelace
 waarschijnlijk in YAML-modus en moet je de bron handmatig toevoegen onder
 Instellingen → Dashboards → Bronnen: URL `/stormchase/stormchase-strategy.js`,

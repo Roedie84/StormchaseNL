@@ -15,7 +15,8 @@
           "ring_far": "Buitenste ring",
           "location_mode": "Locatie",
           "ring_window": "Tijdvenster voor de ringen",
-          "address_sensor": "Adressensor (optioneel)"
+          "address_sensor": "Adressensor (optioneel)",
+          "update_interval": "Verversingsinterval"
         }
       },
       "location": {
@@ -82,7 +83,8 @@
           "ring_far": "Buitenste ring",
           "location_mode": "Locatie",
           "ring_window": "Tijdvenster voor de ringen",
-          "address_sensor": "Adressensor (optioneel)"
+          "address_sensor": "Adressensor (optioneel)",
+          "update_interval": "Verversingsinterval"
         }
       },
       "location": {

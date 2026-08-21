@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from collections import deque
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import aiohttp
 import async_timeout
@@ -34,6 +34,7 @@ from .const import (
     CONF_RING_MID,
     CONF_RING_NEAR,
     CONF_TRACKER_ENTITY,
+    CONF_UPDATE_INTERVAL,
     CONF_RING_WINDOW,
     CONF_STATIONARY_MINUTES,
     CONF_WARN_DISTANCE,
@@ -43,6 +44,7 @@ from .const import (
     CONF_MOVING_SPEED,
     DEFAULT_MOVING_SPEED,
     DEFAULT_STATIONARY_MINUTES,
+    DEFAULT_UPDATE_INTERVAL,
     MAX_SNELHEID,
     SNELHEID_VENSTER,
     MAX_INSLAGEN,
@@ -67,7 +69,6 @@ from .const import (
     MODE_ZONE,
     MOVE_THRESHOLD_KM,
     SPEED_DEADZONE,
-    STORM_INTERVAL,
     TREND_APPROACH,
     TREND_FAST_APPROACH,
     TREND_FAST_RECEDE,
@@ -226,11 +227,17 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
         """Initialiseer de coordinator."""
+        # Het interval komt uit de instellingen. De ronde leest alleen lokale
+        # toestanden en rekent wat door, dus tien seconden kost weinig.
+        seconden = entry.options.get(
+            CONF_UPDATE_INTERVAL,
+            entry.data.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL),
+        )
         super().__init__(
             hass,
             _LOGGER,
             name=f"{entry.title} storm",
-            update_interval=STORM_INTERVAL,
+            update_interval=timedelta(seconds=int(seconden)),
         )
         self.entry = entry
         self.meteo: MeteoCoordinator | None = None
