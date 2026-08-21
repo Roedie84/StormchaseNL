@@ -24,6 +24,33 @@
           "tracker_entity": "Device or person to follow",
           "manual_location": "Coordinates"
         }
+      },
+      "notify": {
+        "title": "Notifications",
+        "description": "Leave the notification services empty to disable notifications. Set both quiet hours to the same time to always notify. Notifications can also be toggled later with a switch.",
+        "data": {
+          "notify_services": "Notification services",
+          "notify_max_distance": "Only notify within",
+          "notify_on_approach": "Also notify when the storm approaches",
+          "notify_on_cleared": "Notify when the storm has passed",
+          "notify_title": "Notification title",
+          "notify_cooldown": "Wait time between notifications",
+          "quiet_from": "Quiet hours from",
+          "quiet_to": "Quiet hours to",
+          "rain_notify": "Also notify when rain is approaching",
+          "rain_lead": "How many minutes ahead to warn",
+          "rain_threshold": "Intensity from which it counts as rain"
+        }
+      },
+      "alerts": {
+        "title": "Weather warnings",
+        "description": "Official warnings via MeteoAlarm. On automatic the integration looks up which country you are in, so you get the right warnings while travelling. Leave the region empty for the whole country.",
+        "data": {
+          "alert_country": "Country",
+          "alert_region": "Region (optional filter)",
+          "alert_min_level": "Notify from",
+          "alert_notify": "Send notifications for warnings"
+        }
       }
     },
     "error": {
@@ -56,6 +83,33 @@
           "zone_entity": "Zone",
           "tracker_entity": "Device or person to follow",
           "manual_location": "Coordinates"
+        }
+      },
+      "notify": {
+        "title": "Notifications",
+        "description": "Leave the notification services empty to disable notifications. Set both quiet hours to the same time to always notify. Notifications can also be toggled later with a switch.",
+        "data": {
+          "notify_services": "Notification services",
+          "notify_max_distance": "Only notify within",
+          "notify_on_approach": "Also notify when the storm approaches",
+          "notify_on_cleared": "Notify when the storm has passed",
+          "notify_title": "Notification title",
+          "notify_cooldown": "Wait time between notifications",
+          "quiet_from": "Quiet hours from",
+          "quiet_to": "Quiet hours to",
+          "rain_notify": "Also notify when rain is approaching",
+          "rain_lead": "How many minutes ahead to warn",
+          "rain_threshold": "Intensity from which it counts as rain"
+        }
+      },
+      "alerts": {
+        "title": "Weather warnings",
+        "description": "Official warnings via MeteoAlarm. On automatic the integration looks up which country you are in, so you get the right warnings while travelling. Leave the region empty for the whole country.",
+        "data": {
+          "alert_country": "Country",
+          "alert_region": "Region (optional filter)",
+          "alert_min_level": "Notify from",
+          "alert_notify": "Send notifications for warnings"
         }
       }
     },
@@ -94,6 +148,18 @@
       },
       "location": {
         "name": "Active location"
+      },
+      "rain_starts": {
+        "name": "Rain starts in"
+      },
+      "rain_intensity": {
+        "name": "Precipitation intensity"
+      },
+      "rain_peak": {
+        "name": "Precipitation peak 2 hours"
+      },
+      "alert_level": {
+        "name": "Warning level"
       }
     },
     "binary_sensor": {
@@ -102,6 +168,17 @@
       },
       "approaching": {
         "name": "Storm approaching"
+      },
+      "rain_expected": {
+        "name": "Rain expected"
+      },
+      "alert_active": {
+        "name": "Weather warning"
+      }
+    },
+    "switch": {
+      "notifications": {
+        "name": "Notifications"
       }
     }
   },
@@ -113,6 +190,42 @@
         "tracker": "Follow a device or person",
         "manual": "Manual coordinates"
       }
+    },
+    "alert_country": {
+      "options": {
+        "uit": "Disabled",
+        "netherlands": "Netherlands",
+        "belgium": "Belgium",
+        "germany": "Germany",
+        "luxembourg": "Luxembourg",
+        "france": "France",
+        "united-kingdom": "United Kingdom",
+        "denmark": "Denmark",
+        "austria": "Austria",
+        "switzerland": "Switzerland",
+        "italy": "Italy",
+        "spain": "Spain",
+        "portugal": "Portugal",
+        "poland": "Poland",
+        "czechia": "Czechia",
+        "norway": "Norway",
+        "sweden": "Sweden",
+        "ireland": "Ireland",
+        "auto": "Automatic, follows your location"
+      }
+    },
+    "alert_level": {
+      "options": {
+        "geel": "Yellow",
+        "oranje": "Orange",
+        "rood": "Red"
+      }
+    }
+  },
+  "services": {
+    "test_notification": {
+      "name": "Send test notification",
+      "description": "Sends a test message to all configured notification services."
     }
   }
 }

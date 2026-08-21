@@ -30,6 +30,18 @@
       },
       "location": {
         "default": "mdi:crosshairs-gps"
+      },
+      "rain_starts": {
+        "default": "mdi:weather-rainy"
+      },
+      "rain_intensity": {
+        "default": "mdi:water"
+      },
+      "rain_peak": {
+        "default": "mdi:weather-pouring"
+      },
+      "alert_level": {
+        "default": "mdi:alert-decagram"
       }
     },
     "binary_sensor": {
@@ -44,7 +56,30 @@
         "state": {
           "on": "mdi:arrow-down-bold"
         }
+      },
+      "rain_expected": {
+        "default": "mdi:weather-partly-cloudy",
+        "state": {
+          "on": "mdi:weather-pouring"
+        }
+      },
+      "alert_active": {
+        "default": "mdi:shield-check",
+        "state": {
+          "on": "mdi:alert-decagram"
+        }
+      }
+    },
+    "switch": {
+      "notifications": {
+        "default": "mdi:bell-off",
+        "state": {
+          "on": "mdi:bell-ring"
+        }
       }
     }
+  },
+  "services": {
+    "test_notification": "mdi:bell-check"
   }
 }

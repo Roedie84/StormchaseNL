@@ -24,6 +24,33 @@
           "tracker_entity": "Te volgen apparaat of persoon",
           "manual_location": "Coördinaten"
         }
+      },
+      "notify": {
+        "title": "Meldingen",
+        "description": "Laat de meldingsdiensten leeg om meldingen uit te zetten. Zet het stiltevenster op twee gelijke tijden om altijd te melden. De meldingen zijn later ook via een schakelaar aan en uit te zetten.",
+        "data": {
+          "notify_services": "Meldingsdiensten",
+          "notify_max_distance": "Alleen melden binnen",
+          "notify_on_approach": "Ook melden zodra het onweer nadert",
+          "notify_on_cleared": "Melden als het onweer weggetrokken is",
+          "notify_title": "Titel van de melding",
+          "notify_cooldown": "Wachttijd tussen meldingen",
+          "quiet_from": "Stiltevenster van",
+          "quiet_to": "Stiltevenster tot",
+          "rain_notify": "Ook melden als er regen aankomt",
+          "rain_lead": "Hoeveel minuten vooruit waarschuwen",
+          "rain_threshold": "Vanaf welke intensiteit het regen heet"
+        }
+      },
+      "alerts": {
+        "title": "Weerwaarschuwingen",
+        "description": "Officiele waarschuwingen via MeteoAlarm, waar onder meer het KNMI aan levert. Op automatisch zoekt de integratie zelf op in welk land je bent, zodat je op reis de juiste waarschuwingen krijgt. Laat de regio leeg voor het hele land, of vul een deel van de regionaam in om te filteren, bijvoorbeeld Gelderland.",
+        "data": {
+          "alert_country": "Land",
+          "alert_region": "Regio (optioneel filter)",
+          "alert_min_level": "Melden vanaf",
+          "alert_notify": "Meldingen sturen bij waarschuwingen"
+        }
       }
     },
     "error": {
@@ -56,6 +83,33 @@
           "zone_entity": "Zone",
           "tracker_entity": "Te volgen apparaat of persoon",
           "manual_location": "Coördinaten"
+        }
+      },
+      "notify": {
+        "title": "Meldingen",
+        "description": "Laat de meldingsdiensten leeg om meldingen uit te zetten. Zet het stiltevenster op twee gelijke tijden om altijd te melden. De meldingen zijn later ook via een schakelaar aan en uit te zetten.",
+        "data": {
+          "notify_services": "Meldingsdiensten",
+          "notify_max_distance": "Alleen melden binnen",
+          "notify_on_approach": "Ook melden zodra het onweer nadert",
+          "notify_on_cleared": "Melden als het onweer weggetrokken is",
+          "notify_title": "Titel van de melding",
+          "notify_cooldown": "Wachttijd tussen meldingen",
+          "quiet_from": "Stiltevenster van",
+          "quiet_to": "Stiltevenster tot",
+          "rain_notify": "Ook melden als er regen aankomt",
+          "rain_lead": "Hoeveel minuten vooruit waarschuwen",
+          "rain_threshold": "Vanaf welke intensiteit het regen heet"
+        }
+      },
+      "alerts": {
+        "title": "Weerwaarschuwingen",
+        "description": "Officiele waarschuwingen via MeteoAlarm, waar onder meer het KNMI aan levert. Op automatisch zoekt de integratie zelf op in welk land je bent, zodat je op reis de juiste waarschuwingen krijgt. Laat de regio leeg voor het hele land, of vul een deel van de regionaam in om te filteren, bijvoorbeeld Gelderland.",
+        "data": {
+          "alert_country": "Land",
+          "alert_region": "Regio (optioneel filter)",
+          "alert_min_level": "Melden vanaf",
+          "alert_notify": "Meldingen sturen bij waarschuwingen"
         }
       }
     },
@@ -94,6 +148,18 @@
       },
       "location": {
         "name": "Actieve locatie"
+      },
+      "rain_starts": {
+        "name": "Regen begint over"
+      },
+      "rain_intensity": {
+        "name": "Neerslagintensiteit"
+      },
+      "rain_peak": {
+        "name": "Neerslagpiek 2 uur"
+      },
+      "alert_level": {
+        "name": "Waarschuwingsniveau"
       }
     },
     "binary_sensor": {
@@ -102,6 +168,17 @@
       },
       "approaching": {
         "name": "Onweer nadert"
+      },
+      "rain_expected": {
+        "name": "Regen verwacht"
+      },
+      "alert_active": {
+        "name": "Weerwaarschuwing"
+      }
+    },
+    "switch": {
+      "notifications": {
+        "name": "Meldingen"
       }
     }
   },
@@ -113,6 +190,42 @@
         "tracker": "Volg een apparaat of persoon",
         "manual": "Handmatige coördinaten"
       }
+    },
+    "alert_country": {
+      "options": {
+        "uit": "Uitgeschakeld",
+        "netherlands": "Nederland",
+        "belgium": "Belgie",
+        "germany": "Duitsland",
+        "luxembourg": "Luxemburg",
+        "france": "Frankrijk",
+        "united-kingdom": "Verenigd Koninkrijk",
+        "denmark": "Denemarken",
+        "austria": "Oostenrijk",
+        "switzerland": "Zwitserland",
+        "italy": "Italie",
+        "spain": "Spanje",
+        "portugal": "Portugal",
+        "poland": "Polen",
+        "czechia": "Tsjechie",
+        "norway": "Noorwegen",
+        "sweden": "Zweden",
+        "ireland": "Ierland",
+        "auto": "Automatisch, volgt je locatie"
+      }
+    },
+    "alert_level": {
+      "options": {
+        "geel": "Code geel",
+        "oranje": "Code oranje",
+        "rood": "Code rood"
+      }
+    }
+  },
+  "services": {
+    "test_notification": {
+      "name": "Proefmelding sturen",
+      "description": "Stuurt een testbericht naar alle ingestelde meldingsdiensten."
     }
   }
 }

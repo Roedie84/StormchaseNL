@@ -16,7 +16,32 @@ from homeassistant.core import callback
 from homeassistant.helpers import selector
 
 from .const import (
+    ALERT_COUNTRIES,
+    ALERT_LEVEL_CHOICES,
+    CONF_ALERT_COUNTRY,
+    CONF_ALERT_MIN_LEVEL,
+    CONF_ALERT_NOTIFY,
+    CONF_ALERT_REGION,
     CONF_AZIMUTH_SENSOR,
+    DEFAULT_ALERT_COUNTRY,
+    DEFAULT_ALERT_MIN_LEVEL,
+    CONF_NOTIFY_COOLDOWN,
+    CONF_NOTIFY_MAX_DISTANCE,
+    CONF_NOTIFY_ON_APPROACH,
+    CONF_NOTIFY_ON_CLEARED,
+    CONF_NOTIFY_SERVICES,
+    CONF_NOTIFY_TITLE,
+    CONF_QUIET_FROM,
+    CONF_QUIET_TO,
+    CONF_RAIN_LEAD,
+    CONF_RAIN_NOTIFY,
+    CONF_RAIN_THRESHOLD,
+    DEFAULT_RAIN_LEAD,
+    DEFAULT_RAIN_THRESHOLD,
+    DEFAULT_NOTIFY_COOLDOWN,
+    DEFAULT_NOTIFY_MAX_DISTANCE,
+    DEFAULT_NOTIFY_TITLE,
+    DEFAULT_QUIET,
     CONF_COUNTER_SENSOR,
     CONF_DISTANCE_SENSOR,
     CONF_GEO_PATTERN,
@@ -160,6 +185,126 @@ def _location_schema(mode: str, defaults: dict[str, Any]) -> vol.Schema:
     )
 
 
+def _notify_schema(hass, defaults: dict[str, Any]) -> vol.Schema:
+    """Instellingen voor de meldingen."""
+    # De beschikbare notify-diensten opzoeken, zodat de gebruiker kan kiezen
+    # in plaats van een servicenaam te moeten intikken.
+    diensten = sorted(hass.services.async_services().get("notify", {}))
+    opties = [
+        selector.SelectOptionDict(value=naam, label=f"notify.{naam}")
+        for naam in diensten
+    ]
+
+    return vol.Schema(
+        {
+            vol.Optional(
+                CONF_NOTIFY_SERVICES,
+                default=defaults.get(CONF_NOTIFY_SERVICES, []),
+            ): selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    options=opties,
+                    multiple=True,
+                    custom_value=True,
+                    mode=selector.SelectSelectorMode.DROPDOWN,
+                )
+            ),
+            vol.Required(
+                CONF_NOTIFY_MAX_DISTANCE,
+                default=defaults.get(
+                    CONF_NOTIFY_MAX_DISTANCE, DEFAULT_NOTIFY_MAX_DISTANCE
+                ),
+            ): _km(200),
+            vol.Required(
+                CONF_NOTIFY_ON_APPROACH,
+                default=defaults.get(CONF_NOTIFY_ON_APPROACH, True),
+            ): selector.BooleanSelector(),
+            vol.Required(
+                CONF_NOTIFY_ON_CLEARED,
+                default=defaults.get(CONF_NOTIFY_ON_CLEARED, False),
+            ): selector.BooleanSelector(),
+            vol.Required(
+                CONF_NOTIFY_TITLE,
+                default=defaults.get(CONF_NOTIFY_TITLE, DEFAULT_NOTIFY_TITLE),
+            ): str,
+            vol.Required(
+                CONF_NOTIFY_COOLDOWN,
+                default=defaults.get(CONF_NOTIFY_COOLDOWN, DEFAULT_NOTIFY_COOLDOWN),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0, max=180, step=5, unit_of_measurement="min",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
+            vol.Required(
+                CONF_RAIN_NOTIFY,
+                default=defaults.get(CONF_RAIN_NOTIFY, True),
+            ): selector.BooleanSelector(),
+            vol.Required(
+                CONF_RAIN_LEAD,
+                default=defaults.get(CONF_RAIN_LEAD, DEFAULT_RAIN_LEAD),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=5, max=120, step=5, unit_of_measurement="min",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
+            vol.Required(
+                CONF_RAIN_THRESHOLD,
+                default=defaults.get(CONF_RAIN_THRESHOLD, DEFAULT_RAIN_THRESHOLD),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0.1, max=5, step=0.1, unit_of_measurement="mm/h",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
+            vol.Required(
+                CONF_QUIET_FROM,
+                default=defaults.get(CONF_QUIET_FROM, DEFAULT_QUIET),
+            ): selector.TimeSelector(),
+            vol.Required(
+                CONF_QUIET_TO,
+                default=defaults.get(CONF_QUIET_TO, DEFAULT_QUIET),
+            ): selector.TimeSelector(),
+        }
+    )
+
+
+def _alert_schema(defaults: dict[str, Any]) -> vol.Schema:
+    """Instellingen voor de officiele weerwaarschuwingen."""
+    return vol.Schema(
+        {
+            vol.Required(
+                CONF_ALERT_COUNTRY,
+                default=defaults.get(CONF_ALERT_COUNTRY, DEFAULT_ALERT_COUNTRY),
+            ): selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    options=ALERT_COUNTRIES,
+                    translation_key="alert_country",
+                    mode=selector.SelectSelectorMode.DROPDOWN,
+                )
+            ),
+            vol.Optional(
+                CONF_ALERT_REGION,
+                default=defaults.get(CONF_ALERT_REGION, ""),
+            ): str,
+            vol.Required(
+                CONF_ALERT_MIN_LEVEL,
+                default=defaults.get(CONF_ALERT_MIN_LEVEL, DEFAULT_ALERT_MIN_LEVEL),
+            ): selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    options=ALERT_LEVEL_CHOICES,
+                    translation_key="alert_level",
+                    mode=selector.SelectSelectorMode.DROPDOWN,
+                )
+            ),
+            vol.Required(
+                CONF_ALERT_NOTIFY,
+                default=defaults.get(CONF_ALERT_NOTIFY, True),
+            ): selector.BooleanSelector(),
+        }
+    )
+
+
 def _validate_rings(user_input: dict[str, Any]) -> str | None:
     """Controleer of de ringen oplopend en verschillend zijn."""
     rings = [
@@ -197,9 +342,7 @@ class StormchaseConfigFlow(ConfigFlow, domain=DOMAIN):
             else:
                 self._data = user_input
                 if user_input[CONF_LOCATION_MODE] == MODE_HOME:
-                    return self.async_create_entry(
-                        title="Stormchase", data=self._data
-                    )
+                    return await self.async_step_notify()
                 return await self.async_step_location()
 
         return self.async_show_form(
@@ -220,12 +363,37 @@ class StormchaseConfigFlow(ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             self._data.update(user_input)
-            return self.async_create_entry(title="Stormchase", data=self._data)
+            return await self.async_step_notify()
 
         return self.async_show_form(
             step_id="location",
             data_schema=_location_schema(mode, self._data),
             description_placeholders={"mode": mode},
+        )
+
+    async def async_step_notify(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Vraag hoe en wanneer er gemeld moet worden."""
+        if user_input is not None:
+            self._data.update(user_input)
+            return await self.async_step_alerts()
+
+        return self.async_show_form(
+            step_id="notify",
+            data_schema=_notify_schema(self.hass, self._data),
+        )
+
+    async def async_step_alerts(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Vraag de instellingen voor officiele waarschuwingen."""
+        if user_input is not None:
+            self._data.update(user_input)
+            return self.async_create_entry(title="Stormchase", data=self._data)
+
+        return self.async_show_form(
+            step_id="alerts", data_schema=_alert_schema(self._data)
         )
 
     @staticmethod
@@ -264,7 +432,7 @@ class StormchaseOptionsFlow(OptionsFlow):
                         CONF_MANUAL_LOCATION,
                     ):
                         self._data.pop(key, None)
-                    return self.async_create_entry(title="", data=self._data)
+                    return await self.async_step_notify()
                 return await self.async_step_location()
 
         return self.async_show_form(
@@ -281,10 +449,35 @@ class StormchaseOptionsFlow(OptionsFlow):
 
         if user_input is not None:
             self._data.update(user_input)
-            return self.async_create_entry(title="", data=self._data)
+            return await self.async_step_notify()
 
         return self.async_show_form(
             step_id="location",
             data_schema=_location_schema(mode, self._data),
             description_placeholders={"mode": mode},
+        )
+
+    async def async_step_notify(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Vraag hoe en wanneer er gemeld moet worden."""
+        if user_input is not None:
+            self._data.update(user_input)
+            return await self.async_step_alerts()
+
+        return self.async_show_form(
+            step_id="notify",
+            data_schema=_notify_schema(self.hass, self._data),
+        )
+
+    async def async_step_alerts(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Vraag de instellingen voor officiele waarschuwingen."""
+        if user_input is not None:
+            self._data.update(user_input)
+            return self.async_create_entry(title="", data=self._data)
+
+        return self.async_show_form(
+            step_id="alerts", data_schema=_alert_schema(self._data)
         )

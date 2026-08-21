@@ -19,6 +19,8 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN
 from .coordinator import MeteoCoordinator, StormCoordinator, StormData
+from .alerts import AlertCoordinator
+from .rain import RainCoordinator
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -100,6 +102,33 @@ METEO_SENSORS: tuple[MeteoSensorDescription, ...] = (
 )
 
 
+RAIN_SENSORS: tuple[MeteoSensorDescription, ...] = (
+    MeteoSensorDescription(
+        key="rain_starts",
+        translation_key="rain_starts",
+        native_unit_of_measurement="min",
+        suggested_display_precision=0,
+        value=lambda data: data.get("begint_over"),
+    ),
+    MeteoSensorDescription(
+        key="rain_intensity",
+        translation_key="rain_intensity",
+        native_unit_of_measurement="mm/h",
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=1,
+        value=lambda data: data.get("intensiteit"),
+    ),
+    MeteoSensorDescription(
+        key="rain_peak",
+        translation_key="rain_peak",
+        native_unit_of_measurement="mm/h",
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=1,
+        value=lambda data: data.get("piek"),
+    ),
+)
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
@@ -121,6 +150,12 @@ async def async_setup_entry(
         for position, bound in enumerate(storm.ring_bounds)
     ]
     entities.append(ChasePotentialSensor(meteo, storm, entry))
+
+    waarschuwingen: AlertCoordinator = data["alerts"]
+    entities.append(AlertSensor(waarschuwingen, entry))
+
+    regen: RainCoordinator = data["rain"]
+    entities += [RainSensor(regen, entry, beschrijving) for beschrijving in RAIN_SENSORS]
     entities.append(LocationSensor(storm, entry))
 
     async_add_entities(entities)
@@ -347,4 +382,82 @@ class LocationSensor(CoordinatorEntity[StormCoordinator], SensorEntity):
         return {
             "latitude": data.latitude,
             "longitude": data.longitude,
+        }
+
+
+class RainSensor(CoordinatorEntity[RainCoordinator], SensorEntity):
+    """Sensor op basis van de neerslagverwachting."""
+
+    _attr_has_entity_name = True
+    entity_description: MeteoSensorDescription
+
+    def __init__(
+        self,
+        coordinator: RainCoordinator,
+        entry: ConfigEntry,
+        description: MeteoSensorDescription,
+    ) -> None:
+        """Initialiseer de sensor."""
+        super().__init__(coordinator)
+        self.entity_description = description
+        self._attr_unique_id = f"{entry.entry_id}_{description.key}"
+        self._attr_device_info = _device(entry)
+
+    @property
+    def native_value(self):
+        """Huidige waarde."""
+        if self.coordinator.data is None:
+            return None
+        return self.entity_description.value(self.coordinator.data)
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        """De volledige verwachting hangt aan de starttijd-sensor.
+
+        Zo kun je er zelf een grafiek of automatisering op bouwen zonder dat
+        elke sensor dezelfde lijst meedraagt.
+        """
+        data = self.coordinator.data
+        if not data or self.entity_description.key != "rain_starts":
+            return {}
+        return {
+            "regent": data.get("regent"),
+            "stopt_over": data.get("stopt_over"),
+            "totaal_mm_2u": data.get("totaal"),
+            "bron": data.get("bron"),
+            "verwachting": data.get("verwachting"),
+        }
+
+
+class AlertSensor(CoordinatorEntity[AlertCoordinator], SensorEntity):
+    """Het zwaarste actieve waarschuwingsniveau."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "alert_level"
+
+    def __init__(self, coordinator: AlertCoordinator, entry: ConfigEntry) -> None:
+        """Initialiseer de sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_alert_level"
+        self._attr_device_info = _device(entry)
+
+    @property
+    def native_value(self) -> str | None:
+        """Groen als er niets speelt, anders de kleur van de waarschuwing."""
+        if self.coordinator.data is None:
+            return None
+        return self.coordinator.data.get("niveau") or "groen"
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        """Alle actieve waarschuwingen, zwaarste eerst."""
+        data = self.coordinator.data
+        if not data:
+            return {}
+        return {
+            "aantal": data.get("aantal"),
+            "soort": data.get("soort"),
+            "gebied": data.get("gebied"),
+            "land": data.get("land"),
+            "waarschuwingen": data.get("actief"),
         }

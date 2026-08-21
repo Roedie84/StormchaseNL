@@ -31,7 +31,32 @@ sensoren uit en rekent daar bovenop.
 | `sensor.stormchase_lifted_index` | Stabiliteit; negatief is onstabiel. |
 | `sensor.stormchase_convectieve_remming` | CIN, de deksel op de atmosfeer. |
 | `sensor.stormchase_chase_potentie` | Score 0-100. Zie hieronder. |
+| `sensor.stormchase_regen_begint_over` | Minuten tot de eerste regen. Draagt de volledige verwachting per 5 minuten als attribuut. |
+| `sensor.stormchase_neerslagintensiteit` | Wat er nu valt, in mm/u. |
+| `sensor.stormchase_neerslagpiek_2_uur` | Zwaarste bui in de komende twee uur. |
 | `sensor.stormchase_actieve_locatie` | Diagnostisch: welke locatie nu gebruikt wordt, met de coördinaten als attribuut. |
+
+### Weer
+
+`weather.stormchase` geeft de actuele omstandigheden en een verwachting per
+uur en per dag op de actieve locatie, via Open-Meteo. Bruikbaar in elke
+standaard weerkaart van Home Assistant.
+
+### Waarschuwingen
+
+`sensor.stormchase_waarschuwingsniveau` staat op groen, geel, oranje of rood.
+De bron is MeteoAlarm, de Europese koepel waar nationale weerdiensten hun
+waarschuwingen aan leveren, waaronder het KNMI. Daardoor werkt het ook buiten
+Nederland.
+
+Het land staat standaard op automatisch: de integratie zoekt op in welk land
+je bent en haalt de bijbehorende feed op. Rijd je een grens over, dan
+verschuiven de waarschuwingen mee. Handmatig kiezen kan ook. Het regioveld is een tekstfilter op de
+gebiedsnaam uit de feed: vul bijvoorbeeld `Gelderland` in om alleen die
+provincie te volgen, of laat het leeg voor het hele land.
+
+Waarschuwingsmeldingen negeren de wachttijd en het stiltevenster, omdat ze
+over gevaar gaan. Elke waarschuwing wordt maar een keer gemeld.
 
 ### Binary sensors
 
@@ -39,6 +64,8 @@ sensoren uit en rekent daar bovenop.
 |---|---|
 | `binary_sensor.stormchase_onweer_nabij` | Aan binnen de ingestelde waarschuwingsafstand. |
 | `binary_sensor.stormchase_onweer_nadert` | Aan bij structureel afnemende afstand. |
+| `binary_sensor.stormchase_regen_verwacht` | Aan bij regen nu of binnen de ingestelde tijd. |
+| `binary_sensor.stormchase_weerwaarschuwing` | Aan bij een actieve officiele waarschuwing. |
 
 Beide hebben attributen met afstand, azimut, snelheid en aankomsttijd, zodat
 je automatiseringen niet meerdere entiteiten hoeven uit te lezen.
@@ -85,6 +112,13 @@ de integratie. Wijzigingen worden direct doorgevoerd.
 
 ## Locatie
 
+Alles wat de integratie ophaalt hangt aan één locatie-instelling: het
+weerbericht, de onweersparameters, de neerslagverwachting, de kaarten op het
+dashboard en sinds 0.7.0 ook het land voor de waarschuwingen.
+
+Wat er **niet** aan hangt: de afstand tot de blikseminslagen. Die komt van de
+Blitzortung-integratie, en die heeft zijn eigen locatie-instelling.
+
 Standaard gebruikt de integratie de thuislocatie uit je Home Assistant
 configuratie. Bij het instellen kun je kiezen uit vier bronnen:
 
@@ -108,14 +142,50 @@ daar ook aan.
 
 ## Meldingen
 
-De integratie stuurt zelf geen berichten, maar vuurt events af waar je
-automatiseringen op kunt bouwen:
+De integratie stuurt de meldingen zelf. Bij het instellen kies je een of meer
+notify-diensten; daarna komen de berichten binnen zonder dat er een
+automatisering aan te pas komt.
+
+| Instelling | Betekenis |
+|---|---|
+| Meldingsdiensten | Leeg laten zet de meldingen uit. |
+| Alleen melden binnen | Verder weg dan dit levert geen bericht op. |
+| Ook bij nadering | Een vroeger bericht zodra de afstand structureel afneemt. |
+| Melden als het over is | Sein veilig zodra het onweer is weggetrokken. |
+| Wachttijd | Voorkomt herhaling bij een grillige cel. |
+| Stiltevenster | Twee gelijke tijden betekent: altijd melden. |
+| Ook bij regen | Bericht zodra er neerslag aankomt. |
+| Minuten vooruit | Hoe ver van tevoren, standaard tien minuten. |
+| Vanaf intensiteit | Onder deze waarde heet het droog, zodat motregen geen bericht oplevert. |
+
+### Neerslag
+
+De verwachting komt van de neerslagtekst van Buienradar: per vijf minuten,
+twee uur vooruit, op exacte coordinaten. Dat is nauwkeuriger dan een
+uurverwachting en precies wat je nodig hebt voor "over tien minuten regen".
+
+Buiten het radarbereik van Buienradar, dus in de praktijk buiten Nederland en
+de directe omgeving, schakelt de integratie automatisch over op de
+kwartierwaarden van Open-Meteo. Grover, maar overal beschikbaar. Welke bron
+actief is staat in het attribuut `bron` van
+`sensor.stormchase_regen_begint_over`.
+
+`switch.stormchase_meldingen` zet ze tijdelijk uit zonder de instellingen aan
+te raken. De service `stormchase.test_notification` stuurt een proefbericht
+langs alle drempels heen, om te controleren of het aankomt.
+
+### Events
+
+Wil je meer dan de ingebouwde meldingen bieden, dan kun je zelf op de events
+reageren:
 
 | Event | Wanneer |
 |---|---|
 | `stormchase_nearby` | De afstand komt binnen de waarschuwingsafstand. |
 | `stormchase_approaching` | De afstand neemt structureel af. |
 | `stormchase_cleared` | De afstand is weer boven anderhalf keer de waarschuwingsafstand. |
+| `stormchase_rain_incoming` | Er komt regen aan binnen de ingestelde tijd. |
+| `stormchase_alert` | Nieuwe officiele weerwaarschuwing. |
 
 Events vuren bij een *overgang*, niet bij elke update. Je krijgt dus één
 melding per onweersgebied in plaats van bij elke inslag opnieuw.
@@ -125,13 +195,11 @@ Elk event draagt dezelfde gegevens: `afstand`, `azimut`, `snelheid`,
 
 ### Blueprint
 
-`blueprints/automation/stormchase/onweersmelding.yaml` bevat een kant-en-klare
-automatisering. Kopieer het bestand naar `config/blueprints/automation/` en
-maak er een automatisering van, of importeer hem via de URL.
+`blueprints/automation/stormchase/onweersmelding.yaml` doet hetzelfde als de
+ingebouwde meldingen, maar dan als automatisering die je zelf kunt uitbreiden
+met eigen voorwaarden. Alleen nodig als de ingebouwde variant tekortschiet.
 
-Instelbaar: de notify-service, maximale afstand, of je ook bij nadering wil
-melden, een wachttijd tegen herhaling, een optioneel stiltevenster en extra
-voorwaarden. De titel is vrij in te vullen, dus Achterhoeks mag.
+**Gebruik ze niet allebei tegelijk**, anders krijg je elk bericht dubbel.
 
 ## Dashboard
 

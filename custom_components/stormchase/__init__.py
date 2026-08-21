@@ -11,17 +11,25 @@ import logging
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, ServiceCall
 
 from homeassistant.loader import async_get_integration
 
-from .const import DOMAIN
+from .const import DOMAIN, SERVICE_TEST_NOTIFICATION
 from .coordinator import MeteoCoordinator, StormCoordinator
+from .alerts import AlertCoordinator
 from .frontend import async_register_frontend
+from .notifier import StormNotifier
+from .rain import RainCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.BINARY_SENSOR]
+PLATFORMS: list[Platform] = [
+    Platform.SENSOR,
+    Platform.BINARY_SENSOR,
+    Platform.SWITCH,
+    Platform.WEATHER,
+]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -31,6 +39,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     storm = StormCoordinator(hass, entry)
     meteo = MeteoCoordinator(hass, entry)
+    regen = RainCoordinator(hass, entry)
+    waarschuwingen = AlertCoordinator(hass, entry)
 
     # De storm-coordinator mag de meteo-coordinator laten verversen zodra
     # de locatie flink verschuift.
@@ -40,11 +50,28 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Open-Meteo mag falen zonder de hele integratie te blokkeren; de
     # bliksemsensoren zijn het belangrijkste deel.
     await meteo.async_refresh()
+    # Regen mag net als de weerparameters falen zonder de rest te blokkeren.
+    await regen.async_refresh()
+    await waarschuwingen.async_refresh()
 
-    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = {
-        "storm": storm,
-        "meteo": meteo,
-    }
+    # De notifier luistert naar de events die de coordinator afvuurt en
+    # stuurt daar meldingen over. Zit in de integratie zelf, zodat er geen
+    # losse automatisering nodig is.
+    notifier = StormNotifier(hass, entry)
+    notifier.start()
+
+    gegevens = hass.data.setdefault(DOMAIN, {}).setdefault(entry.entry_id, {})
+    gegevens.update(
+        {
+            "storm": storm,
+            "meteo": meteo,
+            "rain": regen,
+            "alerts": waarschuwingen,
+            "notifier": notifier,
+        }
+    )
+
+    await _async_register_services(hass)
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
@@ -52,13 +79,32 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return True
 
 
+async def _async_register_services(hass: HomeAssistant) -> None:
+    """Registreer de proefmelding-service, eenmalig."""
+    if hass.services.has_service(DOMAIN, SERVICE_TEST_NOTIFICATION):
+        return
+
+    async def _test(call: ServiceCall) -> None:
+        """Stuur een proefmelding via alle ingestelde diensten."""
+        for gegevens in hass.data.get(DOMAIN, {}).values():
+            notifier = gegevens.get("notifier")
+            if notifier is not None:
+                await notifier.async_test()
+
+    hass.services.async_register(DOMAIN, SERVICE_TEST_NOTIFICATION, _test)
+
+
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Ruim de integratie op."""
     unloaded = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unloaded:
-        hass.data[DOMAIN].pop(entry.entry_id)
+        gegevens = hass.data[DOMAIN].pop(entry.entry_id, {})
+        notifier = gegevens.get("notifier")
+        if notifier is not None:
+            notifier.stop()
         if not hass.data[DOMAIN]:
             hass.data.pop(DOMAIN)
+            hass.services.async_remove(DOMAIN, SERVICE_TEST_NOTIFICATION)
     return unloaded
 
 

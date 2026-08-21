@@ -371,8 +371,23 @@ class MeteoCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
         params = {
             "latitude": round(latitude, 4),
             "longitude": round(longitude, 4),
-            "hourly": METEO_HOURLY,
-            "forecast_days": 2,
+            "hourly": (
+                f"{METEO_HOURLY},temperature_2m,apparent_temperature,"
+                "precipitation,precipitation_probability,weather_code,"
+                "wind_speed_10m,wind_direction_10m,wind_gusts_10m,"
+                "relative_humidity_2m,pressure_msl"
+            ),
+            "current": (
+                "temperature_2m,apparent_temperature,relative_humidity_2m,"
+                "is_day,precipitation,weather_code,cloud_cover,pressure_msl,"
+                "wind_speed_10m,wind_direction_10m,wind_gusts_10m"
+            ),
+            "daily": (
+                "weather_code,temperature_2m_max,temperature_2m_min,"
+                "precipitation_sum,precipitation_probability_max,"
+                "wind_speed_10m_max,wind_direction_10m_dominant"
+            ),
+            "forecast_days": 7,
             "timezone": str(self.hass.config.time_zone),
         }
 
@@ -417,4 +432,8 @@ class MeteoCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
             "latitude": latitude,
             "longitude": longitude,
             "location_source": source_name,
+            "current": payload.get("current") or {},
+            "hourly": hourly,
+            "hourly_index": index,
+            "daily": payload.get("daily") or {},
         }

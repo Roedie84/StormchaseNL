@@ -158,6 +158,51 @@ class StormchaseStrategy {
 
     cards.push(kop(config.title || "Stormchase", "mdi:flash", "title"));
 
+    // ---- Officiele weerwaarschuwing, alleen als er een geldt ----
+    if (hass.states["binary_sensor.stormchase_weerwaarschuwing"]) {
+      cards.push({
+        type: "conditional",
+        conditions: [
+          {
+            condition: "state",
+            entity: "binary_sensor.stormchase_weerwaarschuwing",
+            state: "on",
+          },
+        ],
+        card: {
+          type: "custom:mushroom-template-card",
+          icon: "mdi:alert-decagram",
+          icon_color:
+            "{% set n = states('sensor.stormchase_waarschuwingsniveau') %}" +
+            "{{ 'red' if n == 'rood' else 'orange' if n == 'oranje' else 'yellow' }}",
+          primary:
+            "Code {{ states('sensor.stormchase_waarschuwingsniveau') }}" +
+            "{% set s = state_attr('sensor.stormchase_waarschuwingsniveau','soort') %}" +
+            "{% if s %} \u00b7 {{ s }}{% endif %}",
+          secondary:
+            "{% set g = state_attr('sensor.stormchase_waarschuwingsniveau','gebied') %}" +
+            "{% set n = state_attr('sensor.stormchase_waarschuwingsniveau','aantal') | int(0) %}" +
+            "{% if g %}{{ g }}{% endif %}" +
+            "{% if n > 1 %} \u00b7 {{ n }} waarschuwingen actief{% endif %}",
+          multiline_secondary: true,
+          card_mod: {
+            style:
+              "{% set n = states('sensor.stormchase_waarschuwingsniveau') %}" +
+              "{% set c = '#ff5c6c' if n == 'rood' else '#ff9f43' if n == 'oranje' else '#f5d431' %}" +
+              `
+              ha-card {
+                background: rgba(255, 180, 40, .10);
+                border: 1px solid {{ c }};
+                border-left: 3px solid {{ c }};
+                border-radius: 16px;
+              }
+              ha-card .primary { color: {{ c }} !important; font-weight: 700; }
+            `,
+          },
+        },
+      });
+    }
+
     // ---- Statusregel: vat in een oogopslag samen wat er speelt ----
     // De kleur en tekst volgen de ernst, zodat je bij rustig weer niet
     // hetzelfde beeld krijgt als wanneer er iets aankomt.
@@ -282,6 +327,85 @@ class StormchaseStrategy {
             "{{ state_attr('sensor.stormchase_actieve_locatie','longitude') | round(3) }}",
         })
       );
+    }
+
+    // ---- Neerslag ----
+    if (bruikbaar(hass, "sensor.stormchase_neerslagintensiteit")) {
+      cards.push(kop("Neerslag", "mdi:weather-pouring"));
+
+      cards.push({
+        type: "custom:mushroom-template-card",
+        icon:
+          "{% if is_state('binary_sensor.stormchase_regen_verwacht','on') %}" +
+          "mdi:weather-pouring{% else %}mdi:weather-partly-cloudy{% endif %}",
+        icon_color:
+          "{% if is_state('binary_sensor.stormchase_regen_verwacht','on') %}" +
+          "blue{% else %}disabled{% endif %}",
+        primary:
+          "{% set r = state_attr('sensor.stormchase_regen_begint_over','regent') %}" +
+          "{% set start = states('sensor.stormchase_regen_begint_over') %}" +
+          "{% if r %}Het regent" +
+          "{% elif start not in ['unknown','unavailable','none'] %}" +
+          "Regen over {{ start }} min" +
+          "{% else %}Droog{% endif %}",
+        secondary:
+          "{% set r = state_attr('sensor.stormchase_regen_begint_over','regent') %}" +
+          "{% set stop = state_attr('sensor.stormchase_regen_begint_over','stopt_over') %}" +
+          "{% set piek = states('sensor.stormchase_neerslagpiek_2_uur') | float(0) %}" +
+          "{% if r and stop %}Nog ongeveer {{ stop }} min \u00b7 " +
+          "{{ states('sensor.stormchase_neerslagintensiteit') }} mm/u" +
+          "{% elif r %}{{ states('sensor.stormchase_neerslagintensiteit') }} mm/u" +
+          "{% elif piek > 0 %}Piek {{ piek }} mm/u komende 2 uur" +
+          "{% else %}Niets verwacht de komende 2 uur{% endif %}",
+        multiline_secondary: true,
+        card_mod: { style: TILE_STYLE },
+      });
+
+      // Verwachting per 5 minuten, uit de attributen van de startsensor
+      cards.push({
+        type: "custom:apexcharts-card",
+        header: {
+          show: true,
+          title: "Neerslag \u00b7 komende 2 uur",
+          show_states: false,
+        },
+        series: [
+          {
+            entity: "sensor.stormchase_regen_begint_over",
+            name: "mm/u",
+            color: "#5eb3f5",
+            type: "area",
+            opacity: 0.3,
+            stroke_width: 2,
+            curve: "smooth",
+            data_generator: `
+              const nu = Date.now();
+              const reeks = entity.attributes.verwachting || [];
+              return reeks.map((p) => [nu + p.minuten * 60000, p.mm_per_uur]);
+            `,
+          },
+        ],
+        apex_config: {
+          chart: { height: 180, background: "transparent" },
+          grid: { borderColor: "rgba(255,255,255,.06)" },
+          yaxis: { min: 0, forceNiceScale: true },
+          xaxis: { type: "datetime" },
+        },
+        card_mod: { style: PANEL_STYLE },
+      });
+    }
+
+    // ---- Weer op de actieve locatie ----
+    if (hass.states["weather.stormchase"]) {
+      cards.push(kop("Weer op locatie", "mdi:weather-partly-cloudy"));
+      cards.push({
+        type: "weather-forecast",
+        entity: "weather.stormchase",
+        forecast_type: "hourly",
+        show_current: true,
+        show_forecast: true,
+        card_mod: { style: PANEL_STYLE },
+      });
     }
 
     // ---- Afstandsringen ----
@@ -505,6 +629,18 @@ class StormchaseStrategy {
       cards.push(grafiek);
     }
 
+    // ---- Meldingen aan/uit ----
+    if (hass.states["switch.stormchase_meldingen"]) {
+      cards.push({
+        type: "custom:mushroom-entity-card",
+        entity: "switch.stormchase_meldingen",
+        name: "Onweersmeldingen",
+        secondary_info: "state",
+        tap_action: { action: "toggle" },
+        card_mod: { style: TILE_STYLE },
+      });
+    }
+
     return { type: "grid", column_span: 1, cards };
   }
 
@@ -600,6 +736,14 @@ class StormchaseStrategy {
         entity: "sensor.stormchase_aankomst",
         name: "Aankomst",
         color: "red",
+      });
+    }
+    if (bruikbaar(hass, "sensor.stormchase_regen_begint_over")) {
+      lijst.push({
+        type: "entity",
+        entity: "sensor.stormchase_regen_begint_over",
+        name: "Regen over",
+        color: "blue",
       });
     }
     if (bruikbaar(hass, "sensor.stormchase_chase_potentie")) {

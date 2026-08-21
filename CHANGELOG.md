@@ -5,6 +5,107 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.7.0] — 2026-08-21
+
+### Toegevoegd
+
+- **Waarschuwingen volgen nu ook je locatie.** Het land staat standaard op
+  automatisch: de integratie zoekt op in welk land je bent en haalt de
+  MeteoAlarm-feed van dat land op. Rijd je Duitsland binnen, dan krijg je
+  Duitse waarschuwingen. Handmatig een land kiezen kan nog steeds.
+- Het gevonden land staat in het attribuut `land` van
+  `sensor.stormchase_waarschuwingsniveau`.
+
+### Gewijzigd
+
+- Het land wordt alleen opnieuw opgezocht als je meer dan ongeveer vijftig
+  kilometer verplaatst bent, zodat er niet elk kwartier een verzoek uitgaat.
+- Voor landen zonder MeteoAlarm-feed blijft de sensor leeg in plaats van een
+  fout te geven.
+
+## [0.6.0] — 2026-08-21
+
+Weerbericht en officiele waarschuwingen.
+
+### Toegevoegd
+
+- **Weerentiteit `weather.stormchase`** met de actuele omstandigheden en een
+  verwachting per uur en per dag, op de locatie die de integratie gebruikt.
+  Volgt de integratie een device_tracker, dan reist het weerbericht mee.
+  Bron is Open-Meteo; er is geen API-sleutel nodig.
+- **Officiele weerwaarschuwingen via MeteoAlarm**, de Europese koepel waar
+  onder meer het KNMI aan levert. Werkt daardoor in heel Europa in plaats van
+  alleen in Nederland.
+  - `sensor.stormchase_waarschuwingsniveau` toont groen, geel, oranje of
+    rood, met alle actieve waarschuwingen als attribuut.
+  - `binary_sensor.stormchase_weerwaarschuwing` is aan zolang er een geldt.
+  - Instelbaar: het land, een optioneel filter op regionaam, vanaf welk
+    niveau je bericht wil en of er gemeld moet worden.
+  - Event `stormchase_alert` per nieuwe waarschuwing, elk hoogstens een keer.
+- Op het dashboard: een gekleurde banner bovenaan bij een actieve
+  waarschuwing, en een weerkaart met uurverwachting.
+
+### Opmerking
+
+Waarschuwingsmeldingen negeren de wachttijd en het stiltevenster. Ze komen
+van een nationale weerdienst en gaan over gevaar; elke waarschuwing wordt
+bovendien maar een keer gemeld, dus herhaling is geen risico.
+
+## [0.5.0] — 2026-08-21
+
+Neerslagverwachting erbij.
+
+### Toegevoegd
+
+- **Regenmelding.** Je krijgt bericht wanneer er binnen de ingestelde tijd
+  regen aankomt, standaard tien minuten vooruit. De melding noemt de zwaarte
+  en de piekintensiteit: "Over ongeveer 10 minuten flinke bui, tot 6,2 mm/u."
+- **Bron: Buienradar.** De neerslagtekst geeft per vijf minuten een
+  verwachting voor de komende twee uur, op exacte coordinaten. Buiten het
+  radarbereik valt de integratie automatisch terug op de kwartierwaarden van
+  Open-Meteo; welke bron actief is staat in de attributen.
+- Nieuwe sensoren: `regen_begint_over`, `neerslagintensiteit` en
+  `neerslagpiek_2_uur`. De eerste draagt de volledige verwachting als
+  attribuut, zodat je er zelf op kunt bouwen.
+- Nieuwe binary sensor `regen_verwacht`, aan bij regen nu of binnenkort.
+- Event `stormchase_rain_incoming`, dat alleen bij de overgang van droog naar
+  "komt eraan" afgaat.
+- Op het dashboard: een neerslagblok met de stand van zaken en een grafiek
+  van de komende twee uur, plus een badge met de tijd tot de eerste druppel.
+- Instelbaar bij de meldingen: aan of uit, hoeveel minuten vooruit, en vanaf
+  welke intensiteit het meetelt zodat motregen geen bericht oplevert.
+
+### Gewijzigd
+
+- Regen en onweer hebben elk hun eigen wachttijd, zodat een regenmelding geen
+  onweerswaarschuwing kan tegenhouden.
+
+## [0.4.0] — 2026-08-21
+
+Meldingen zitten nu in de integratie zelf.
+
+### Toegevoegd
+
+- **Ingebouwde meldingen.** Geen losse automatisering of blueprint meer
+  nodig: kies bij het instellen een of meer notify-diensten en de integratie
+  stuurt zelf berichten bij onweer. Instelbaar zijn de maximale afstand, of
+  je ook bij nadering wil melden, of je bericht krijgt als het weer over is,
+  de titel, een wachttijd tegen herhaling en een stiltevenster.
+- **Schakelaar `switch.stormchase_meldingen`** om de meldingen tijdelijk uit
+  te zetten zonder de instellingen aan te raken. De stand blijft bewaard na
+  een herstart en staat als kaart op het dashboard.
+- **Service `stormchase.test_notification`** die een proefmelding stuurt,
+  langs alle drempels en wachttijden heen, om te controleren of de berichten
+  aankomen.
+- De meldingstekst noemt de windrichting voluit, plus de trend en de
+  geschatte aankomsttijd als die bekend zijn.
+
+### Opmerking
+
+De blueprint blijft in de repo staan voor wie meer wil dan de ingebouwde
+meldingen bieden, bijvoorbeeld eigen voorwaarden of een ander berichtformaat.
+Gebruik ze niet allebei tegelijk, anders krijg je dubbele berichten.
+
 ## [0.3.0] — 2026-08-21
 
 Herontwerp van het dashboard.
@@ -194,6 +295,10 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.7.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.7.0
+[0.6.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.6.0
+[0.5.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.5.0
+[0.4.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.4.0
 [0.3.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.3.0
 [0.2.3]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.2.3
 [0.2.2]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.2.2
