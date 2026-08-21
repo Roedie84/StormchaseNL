@@ -445,12 +445,19 @@ class LocationSensor(CoordinatorEntity[StormCoordinator], SensorEntity):
             "longitude": data.longitude,
         }
 
+        uit["afstand_via"] = data.afstand_bron
+
         if data.blitzortung:
             uit["blitzortung_meet_vanaf"] = data.blitzortung.get("bron")
             uit["blitzortung_integratie"] = data.blitzortung.get("naam")
             uit["afwijking_km"] = data.afwijking_km
 
-            if data.afwijking_km is not None and data.afwijking_km > 5:
+            # Alleen waarschuwen als we het niet zelf kunnen rechttrekken
+            if (
+                data.afwijking_km is not None
+                and data.afwijking_km > 5
+                and data.afstand_bron != "herberekend"
+            ):
                 uit["let_op"] = (
                     f"Blitzortung meet {data.afwijking_km} km verderop. "
                     "Kies daar dezelfde locatiebron, anders horen de "

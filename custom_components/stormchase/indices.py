@@ -30,6 +30,22 @@ VRIESNIVEAU_BOVEN = 3500
 CODES_HAGEL = {96, 99}
 
 
+def peiling(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """Bereken de richting van punt 1 naar punt 2, in graden vanaf noord.
+
+    Nodig om zelf de azimut van een blikseminslag te bepalen wanneer we de
+    afstand herberekenen vanaf een andere positie dan waar de bron mee
+    rekent.
+    """
+    f1, f2 = math.radians(lat1), math.radians(lat2)
+    dl = math.radians(lon2 - lon1)
+
+    x = math.sin(dl) * math.cos(f2)
+    y = math.cos(f1) * math.sin(f2) - math.sin(f1) * math.cos(f2) * math.cos(dl)
+
+    return round((math.degrees(math.atan2(x, y)) + 360) % 360, 1)
+
+
 def _componenten(snelheid: float, richting: float) -> tuple[float, float]:
     """Zet windsnelheid en -richting om naar oost- en noordcomponent.
 

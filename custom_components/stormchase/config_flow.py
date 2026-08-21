@@ -33,6 +33,7 @@ from .const import (
     CONF_NOTIFY_TITLE,
     CONF_QUIET_FROM,
     CONF_QUIET_TO,
+    CONF_MOVING_SPEED,
     CONF_ONLY_STATIONARY,
     CONF_RAIN_LEAD,
     CONF_RAIN_NOTIFY,
@@ -40,6 +41,7 @@ from .const import (
     CONF_STATIONARY_MINUTES,
     CONF_WIND_NOTIFY,
     CONF_WIND_THRESHOLD,
+    DEFAULT_MOVING_SPEED,
     DEFAULT_STATIONARY_MINUTES,
     DEFAULT_WIND_THRESHOLD,
     DEFAULT_RAIN_LEAD,
@@ -289,9 +291,19 @@ def _notify_schema(hass, defaults: dict[str, Any]) -> vol.Schema:
                 )
             ),
             vol.Required(
-                CONF_ONLY_STATIONARY,
+                CONF_MOVING_SPEED,
+    CONF_ONLY_STATIONARY,
                 default=defaults.get(CONF_ONLY_STATIONARY, True),
             ): selector.BooleanSelector(),
+            vol.Required(
+                CONF_MOVING_SPEED,
+                default=defaults.get(CONF_MOVING_SPEED, DEFAULT_MOVING_SPEED),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=5, max=120, step=5, unit_of_measurement="km/h",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
             vol.Required(
                 CONF_STATIONARY_MINUTES,
                 default=defaults.get(

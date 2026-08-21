@@ -19,7 +19,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from homeassistant.util import dt as dt_util
 from homeassistant.util.location import distance as location_distance
 
-from .indices import hagelkans, rotatiekans, total_totals, windschering
+from .indices import hagelkans, peiling, rotatiekans, total_totals, windschering
 
 from .const import (
     CLEARED_FACTOR,
@@ -39,10 +39,12 @@ from .const import (
     CONF_ZONE_ENTITY,
     DEFAULT_GEO_PATTERN,
     DEFAULT_RING_WINDOW,
+    CONF_MOVING_SPEED,
+    DEFAULT_MOVING_SPEED,
     DEFAULT_STATIONARY_MINUTES,
+    SNELHEID_VENSTER,
     MAX_INSLAGEN,
     LOCATIE_GESCHIEDENIS,
-    STATIONARY_RADIUS_KM,
     DEFAULT_RING_FAR,
     DEFAULT_RING_MID,
     DEFAULT_RING_NEAR,
@@ -199,12 +201,14 @@ class StormData:
     markers: int = 0
     rings: dict[int, int] = field(default_factory=dict)
     ring_bron: str = "geen"
+    afstand_bron: str = "sensor"
     last_strike: datetime | None = None
     latitude: float | None = None
     longitude: float | None = None
     location_source: str = "thuis"
     onderweg: bool | None = None
-    stil_sinds: int | None = None  # minuten op dezelfde plek
+    stil_sinds: int | None = None  # minuten onder de snelheidsdrempel
+    reissnelheid: float | None = None  # km/u
     blitzortung: dict | None = None
     afwijking_km: float | None = None
 
@@ -239,6 +243,7 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         # afstandssensor verspringt is dat een nieuwe inslag.
         self._inslagen: deque[tuple[float, float]] = deque(maxlen=MAX_INSLAGEN)
         self._vorige_inslag: datetime | None = None
+        self._laatste_beweging: float | None = None
 
     @property
     def ring_bounds(self) -> list[int]:
@@ -292,6 +297,45 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
             return float(state.state)
         except (TypeError, ValueError):
             return None
+
+    def _uit_geo_location(
+        self, pattern: str, latitude: float, longitude: float
+    ) -> tuple[list[tuple[float, float]], datetime | None]:
+        """Bereken afstand en richting van elke inslag vanaf onze positie.
+
+        De state van een geo_location entiteit is de afstand zoals de bron
+        die berekent, vanaf het punt dat daar is ingesteld. Staat dat punt
+        ergens anders dan waar jij bent, dan klopt die afstand niet voor jou.
+        De coordinaten in de attributen zijn wel absoluut, dus daaruit valt
+        de juiste afstand af te leiden.
+        """
+        punten: list[tuple[float, float]] = []
+        laatste: datetime | None = None
+
+        for state in self.hass.states.async_all("geo_location"):
+            if pattern not in state.entity_id:
+                continue
+
+            breedte = state.attributes.get(ATTR_LATITUDE)
+            lengte = state.attributes.get(ATTR_LONGITUDE)
+            if breedte is None or lengte is None:
+                continue
+
+            meters = location_distance(latitude, longitude, breedte, lengte)
+            if meters is None:
+                continue
+
+            punten.append(
+                (
+                    round(meters / 1000, 1),
+                    peiling(latitude, longitude, float(breedte), float(lengte)),
+                )
+            )
+
+            if laatste is None or state.last_changed > laatste:
+                laatste = state.last_changed
+
+        return punten, laatste
 
     def _count_rings(self, pattern: str) -> tuple[int, dict[int, int], str]:
         """Tel de inslagen per afstandsring.
@@ -360,41 +404,97 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         slope = numerator / denominator
         return round(-slope * 3600, 1)
 
-    def _beweging(self, latitude: float, longitude: float) -> tuple[bool | None, int | None]:
-        """Sta je stil of ben je onderweg?
+    def _beweging(
+        self, latitude: float, longitude: float
+    ) -> tuple[bool | None, int | None, float | None]:
+        """Bepaal of je onderweg bent, op basis van snelheid.
 
-        Kijkt hoe lang geleden je voor het laatst meer dan een kilometer van
-        je huidige positie was. Blijft dat binnen het venster, dan ben je
-        onderweg; ligt het erbuiten, dan sta je ergens.
+        Snelheid en niet afstand: iemand die stilstaat in de file blijft
+        binnen een straal maar is wel degelijk onderweg, en een wandelaar die
+        een blokje om gaat is dat niet. Boven de drempel ben je onderweg;
+        eronder tel je pas weer als ter plaatse zodra je die drempel een tijd
+        lang niet meer gehaald hebt.
 
-        Bedoeld om meldingen over het weer ter plaatse te onderdrukken zolang
-        je rijdt: dan is de plek waar je nu bent binnen tien minuten toch
-        weer een andere.
+        Levert de tracker zelf een snelheid, dan heeft die de voorkeur: die
+        komt uit de GPS en is nauwkeuriger dan wat wij uit twee punten
+        afleiden.
         """
         nu = dt_util.utcnow().timestamp()
         self._locaties.append((nu, latitude, longitude))
 
+        drempel = float(self._opt(CONF_MOVING_SPEED, DEFAULT_MOVING_SPEED))
         venster = int(self._opt(CONF_STATIONARY_MINUTES, DEFAULT_STATIONARY_MINUTES))
-        drempel = STATIONARY_RADIUS_KM * 1000
 
-        # Zoek het meest recente punt dat te ver weg lag
-        laatst_ver: float | None = None
-        for stempel, lat, lon in self._locaties:
-            afstand = location_distance(latitude, longitude, lat, lon)
-            if afstand is not None and afstand > drempel:
-                laatst_ver = stempel
+        snelheid = self._snelheid_van_tracker()
+        if snelheid is None:
+            snelheid = self._snelheid_uit_punten(nu, latitude, longitude)
 
-        if laatst_ver is None:
-            # Nooit ver weg geweest binnen de bewaarde reeks
+        if snelheid is None:
+            return None, None, None
+
+        if snelheid > drempel:
+            self._laatste_beweging = nu
+
+        if self._laatste_beweging is None:
+            # Sinds het opstarten nooit boven de drempel geweest
             stil = int((nu - self._locaties[0][0]) / 60)
         else:
-            stil = int((nu - laatst_ver) / 60)
+            stil = int((nu - self._laatste_beweging) / 60)
 
-        # Te weinig geschiedenis om iets te kunnen zeggen
-        if (nu - self._locaties[0][0]) < 60:
-            return None, None
+        onderweg = snelheid > drempel or stil < venster
+        return onderweg, stil, round(snelheid, 1)
 
-        return stil < venster, stil
+    def _snelheid_van_tracker(self) -> float | None:
+        """Lees de snelheid uit de gevolgde tracker, als die hem meegeeft."""
+        if self._opt(CONF_LOCATION_MODE, MODE_HOME) != MODE_TRACKER:
+            return None
+
+        entity_id = self._opt(CONF_TRACKER_ENTITY)
+        if not entity_id:
+            return None
+
+        state = self.hass.states.get(entity_id)
+        if state is None:
+            return None
+
+        rauw = state.attributes.get("speed")
+        if rauw is None:
+            return None
+
+        try:
+            snelheid = float(rauw)
+        except (TypeError, ValueError):
+            return None
+
+        # De companion-app geeft meters per seconde; negatief betekent
+        # onbekend.
+        if snelheid < 0:
+            return None
+        return snelheid * 3.6
+
+    def _snelheid_uit_punten(
+        self, nu: float, latitude: float, longitude: float
+    ) -> float | None:
+        """Leid de snelheid af uit de bewaarde locatiepunten."""
+        oudste = None
+        for stempel, lat, lon in self._locaties:
+            if nu - stempel <= SNELHEID_VENSTER:
+                oudste = (stempel, lat, lon)
+                break
+
+        if oudste is None:
+            return None
+
+        verstreken = nu - oudste[0]
+        if verstreken < 30:
+            # Te kort om er iets zinnigs uit te halen
+            return None
+
+        meters = location_distance(latitude, longitude, oudste[1], oudste[2])
+        if meters is None:
+            return None
+
+        return meters / verstreken * 3.6
 
     @staticmethod
     def _trend_from_speed(speed: float | None) -> str:
@@ -462,12 +562,40 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         counter = self._read_float(self._opt(CONF_COUNTER_SENSOR))
         pattern = self._opt(CONF_GEO_PATTERN, DEFAULT_GEO_PATTERN)
 
+        latitude, longitude, source_name = self.resolve_location()
+        onderweg, stil_sinds, eigen_snelheid = self._beweging(latitude, longitude)
+
+        # Kunnen we de inslagen zelf doorrekenen vanaf waar we nu zijn? Dan
+        # heeft dat de voorkeur boven de waarden van de bron, want die rekent
+        # mogelijk vanaf een heel ander punt. Dit moet gebeuren voordat de
+        # snelheid wordt bepaald, anders rekent de trend met de oude maatstaf.
+        punten, gewijzigd = self._uit_geo_location(pattern, latitude, longitude)
+        afstand_bron = "sensor"
         last_strike = None
+
+        if punten:
+            punten.sort()
+            distance, azimuth = punten[0]
+            afstand_bron = "herberekend"
+            last_strike = gewijzigd
+
+            markers = len(punten)
+            rings = {
+                grens: sum(1 for d, _ in punten if d < grens)
+                for grens in self.ring_bounds
+            }
+            ring_bron = "geo_location (herberekend)"
+        else:
+            markers, rings, ring_bron = self._count_rings(pattern)
+            bron_state = self.hass.states.get(self._opt(CONF_DISTANCE_SENSOR, ""))
+            if bron_state is not None and distance is not None:
+                last_strike = bron_state.last_changed
+
+        # Pas nu de reeks bijwerken, met de afstand die we uiteindelijk
+        # gebruiken. Anders lopen twee maatstaven door elkaar en springt de
+        # berekende snelheid bij het omschakelen.
         if distance is not None:
             self._history.append((dt_util.utcnow().timestamp(), distance))
-            source = self.hass.states.get(self._opt(CONF_DISTANCE_SENSOR, ""))
-            if source is not None:
-                last_strike = source.last_changed
 
         speed = self._speed_from_history()
         trend = self._trend_from_speed(speed)
@@ -475,10 +603,6 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         eta = None
         if speed is not None and speed > SPEED_DEADZONE and distance:
             eta = round(distance / speed * 60, 0)
-
-        markers, rings, ring_bron = self._count_rings(pattern)
-        latitude, longitude, source_name = self.resolve_location()
-        onderweg, stil_sinds = self._beweging(latitude, longitude)
 
         # Meet Blitzortung vanaf hetzelfde punt als wij?
         bz = blitzortung_locatie(self.hass)
@@ -505,12 +629,14 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
             markers=markers,
             rings=rings,
             ring_bron=ring_bron,
+            afstand_bron=afstand_bron,
             last_strike=last_strike,
             latitude=latitude,
             longitude=longitude,
             location_source=source_name,
             onderweg=onderweg,
             stil_sinds=stil_sinds,
+            reissnelheid=eigen_snelheid,
             blitzortung=bz,
             afwijking_km=afwijking,
         )

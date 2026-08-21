@@ -144,6 +144,11 @@ Wat er **niet** aan hangt: de afstand tot de blikseminslagen. Die komt van de
 Blitzortung-integratie, en die heeft zijn eigen locatie-instelling. Zorg dat
 je daar dezelfde bron kiest.
 
+Maakt die integratie `geo_location` entiteiten aan, dan herberekent
+Stormchase de afstand en richting van elke inslag vanaf jouw positie. Het
+vaste punt van Blitzortung doet er dan niet meer toe. Het attribuut
+`afstand_via` laat zien of dat lukt.
+
 Die integratie toont haar positie niet als entiteit, dus Stormchase leest de
 instellingen uit en vergelijkt ze. Het attribuut `afwijking_km` op
 `sensor.stormchase_actieve_locatie` laat zien hoe ver de twee uit elkaar
@@ -188,16 +193,25 @@ automatisering aan te pas komt.
 | Ook bij regen | Bericht zodra er neerslag aankomt. |
 | Ook bij wind | Bericht bij windstoten boven de drempel, standaard 60 km/u. |
 | Alleen ter plaatse | Regen- en windmeldingen wachten tot je ergens bent. |
-| Zo lang op dezelfde plek | Hoe lang je binnen een kilometer moet blijven, standaard tien minuten. |
+| Onderweg vanaf snelheid | Boven deze snelheid ben je onderweg, standaard 30 km/u. |
+| Zo lang trager | Hoe lang je onder die drempel moet blijven voor je weer als ter plaatse telt. |
 | Minuten vooruit | Hoe ver van tevoren, standaard tien minuten. |
 | Vanaf intensiteit | Onder deze waarde heet het droog, zodat motregen geen bericht oplevert. |
 
 ### Onderweg of ter plaatse
 
-`binary_sensor.stormchase_onderweg` staat aan zolang je in beweging bent.
-De integratie kijkt hoe lang geleden je voor het laatst meer dan een
-kilometer van je huidige positie was; blijft dat binnen het venster, dan ben
-je onderweg.
+`binary_sensor.stormchase_onderweg` staat aan zolang je sneller beweegt dan
+de ingestelde drempel, standaard 30 km/u. Je telt pas weer als ter plaatse
+zodra je die snelheid tien minuten lang niet meer gehaald hebt.
+
+Snelheid en niet afstand, want stilstaan in de file gebeurt binnen een straal
+van nul meter terwijl je wel degelijk onderweg bent, en een wandelaar legt in
+tien minuten makkelijk een kilometer af. Wandelen en fietsen tellen dus als
+ter plaatse.
+
+Geeft je tracker zelf een snelheid door, zoals de companion-app doet, dan
+wordt die gebruikt; anders wordt hij afgeleid uit de locatiepunten van de
+laatste drie minuten.
 
 Meldingen over regen en wind wachten daarop, want tijdens het rijden is een
 bericht over het weer hier alweer achterhaald voor je het leest. Onweer

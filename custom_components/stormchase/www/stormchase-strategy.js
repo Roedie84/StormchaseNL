@@ -411,9 +411,12 @@ class StormchaseStrategy {
             "{% if is_state('binary_sensor.stormchase_onderweg','on') %}Onderweg" +
             "{% else %}Ter plaatse{% endif %}",
           secondary:
+            "{% set v = state_attr('binary_sensor.stormchase_onderweg','snelheid_kmh') %}" +
             "{% set m = state_attr('binary_sensor.stormchase_onderweg','stil_sinds_minuten') %}" +
-            "{% if m is not none %}{{ m }} min op deze plek" +
-            "{% else %}Locatie wordt nog bepaald{% endif %}",
+            "{% if v is none %}Locatie wordt nog bepaald" +
+            "{% elif is_state('binary_sensor.stormchase_onderweg','on') %}" +
+            "{{ v | round(0) }} km/u" +
+            "{% else %}{{ v | round(0) }} km/u \u00b7 {{ m }} min ter plaatse{% endif %}",
         })
       );
     }
@@ -431,7 +434,8 @@ class StormchaseStrategy {
     // eromheen staat, en dat is niet te zien zonder deze melding.
     const loc = hass.states["sensor.stormchase_actieve_locatie"];
     const afwijking = Number(loc?.attributes?.afwijking_km);
-    if (Number.isFinite(afwijking) && afwijking > 5) {
+    const herberekend = loc?.attributes?.afstand_via === "herberekend";
+    if (Number.isFinite(afwijking) && afwijking > 5 && !herberekend) {
       cards.push(
         tegel({
           icon: "mdi:map-marker-alert",

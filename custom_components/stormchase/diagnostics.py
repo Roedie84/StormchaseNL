@@ -120,8 +120,10 @@ async def async_get_config_entry_diagnostics(
             "markers": storm_data.markers if storm_data else None,
             "ringen": storm_data.rings if storm_data else None,
             "ringen_via": storm_data.ring_bron if storm_data else None,
+            "afstand_via": storm_data.afstand_bron if storm_data else None,
             "onderweg": storm_data.onderweg if storm_data else None,
             "stil_sinds_minuten": storm_data.stil_sinds if storm_data else None,
+            "reissnelheid_kmh": storm_data.reissnelheid if storm_data else None,
         },
         "parameters": _kort(meteo_data, ("cape", "cape_peak", "lifted_index", "cin")),
         "neerslag": {

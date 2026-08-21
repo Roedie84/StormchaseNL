@@ -64,9 +64,12 @@ CONF_ONLY_STATIONARY = "only_stationary"
 CONF_STATIONARY_MINUTES = "stationary_minutes"
 
 DEFAULT_WIND_THRESHOLD = 60      # km/u windstoten
-DEFAULT_STATIONARY_MINUTES = 10  # zo lang op dezelfde plek voor 'ter plaatse'
-STATIONARY_RADIUS_KM = 1.0       # hierbinnen tel je als stilstaand
-LOCATIE_GESCHIEDENIS = 120       # aantal bewaarde locatiepunten
+CONF_MOVING_SPEED = "moving_speed"
+
+DEFAULT_STATIONARY_MINUTES = 10  # zo lang traag voor je weer 'ter plaatse' bent
+DEFAULT_MOVING_SPEED = 30        # km/u; hierboven ben je onderweg
+SNELHEID_VENSTER = 180           # seconden waarover de snelheid wordt bepaald
+LOCATIE_GESCHIEDENIS = 240       # aantal bewaarde locatiepunten
 
 EVENT_WIND = f"{DOMAIN}_wind"
 

@@ -239,6 +239,7 @@ class MovingBinarySensor(CoordinatorEntity[StormCoordinator], BinarySensorEntity
         if not data:
             return {}
         return {
+            "snelheid_kmh": data.reissnelheid,
             "stil_sinds_minuten": data.stil_sinds,
             "locatie_bron": data.location_source,
         }

@@ -10,7 +10,7 @@
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/Roedie84/StormchaseNL/issues",
   "requirements": [],
-  "version": "0.12.1",
+  "version": "0.14.0",
   "dependencies": [
     "http",
     "frontend",

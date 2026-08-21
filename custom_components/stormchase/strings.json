@@ -44,7 +44,8 @@
           "wind_notify": "Melden bij harde windstoten",
           "wind_threshold": "Windstoten vanaf",
           "only_stationary": "Alleen melden als ik ergens ben, niet onderweg",
-          "stationary_minutes": "Zo lang op dezelfde plek"
+          "stationary_minutes": "Zo lang trager voor weer 'ter plaatse'",
+          "moving_speed": "Onderweg vanaf snelheid"
         }
       },
       "alerts": {
@@ -109,7 +110,8 @@
           "wind_notify": "Melden bij harde windstoten",
           "wind_threshold": "Windstoten vanaf",
           "only_stationary": "Alleen melden als ik ergens ben, niet onderweg",
-          "stationary_minutes": "Zo lang op dezelfde plek"
+          "stationary_minutes": "Zo lang trager voor weer 'ter plaatse'",
+          "moving_speed": "Onderweg vanaf snelheid"
         }
       },
       "alerts": {

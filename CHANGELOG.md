@@ -5,6 +5,62 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.14.0] — 2026-08-21
+
+### Gewijzigd
+
+- **Onderweg wordt nu op snelheid bepaald, niet op afstand.** De vorige
+  aanpak keek of je binnen een kilometer van je vorige positie bleef. Dat
+  ging twee kanten op mis: stilstaan in de file telde als ter plaatse,
+  terwijl een wandelaar die een blokje van iets meer dan een kilometer om
+  ging als onderweg gold. Boven de ingestelde snelheid, standaard 30 km/u,
+  ben je onderweg.
+- Je telt pas weer als ter plaatse zodra je die drempel een tijd lang niet
+  meer gehaald hebt, standaard tien minuten. Zo krijg je niet bij elk
+  stoplicht een reeks meldingen.
+- Levert je tracker zelf een snelheid, zoals de companion-app doet, dan
+  wordt die gebruikt. Anders wordt de snelheid afgeleid uit de
+  locatiepunten van de laatste drie minuten.
+- Nieuwe instelling **Onderweg vanaf snelheid**.
+- `binary_sensor.stormchase_onderweg` krijgt het attribuut `snelheid_kmh`,
+  en de dashboardtegel toont die snelheid.
+
+### Getest gedrag
+
+Wandelen op 5 km/u en fietsen op 22 km/u tellen als ter plaatse. Rijden op
+100 km/u niet, en na het parkeren duurt het precies tien minuten voordat de
+meldingen weer doorkomen. Stilstaan in de file blijft onderweg.
+
+## [0.13.0] — 2026-08-21
+
+### Toegevoegd
+
+- **Bliksemafstanden worden herberekend vanaf je eigen positie.** De
+  Blitzortung-integratie rekent vanaf een vast punt dat je daar instelt; ben
+  je ergens anders, dan klopt die afstand niet voor jou. De coordinaten in de
+  attributen van de `geo_location` entiteiten zijn wel absoluut, dus daaruit
+  wordt de juiste afstand en richting afgeleid.
+  - Afstand, azimut, de drie ringen en het aantal markers komen dan allemaal
+    uit die herberekening.
+  - De naderingssnelheid rekent mee met dezelfde maatstaf, zodat de trend
+    niet verspringt bij het omschakelen.
+- Het attribuut `afstand_via` op `sensor.stormchase_actieve_locatie` laat
+  zien welke bron actief is: `herberekend` of `sensor`.
+- De waarschuwing over een afwijkend meetpunt verdwijnt zodra de
+  herberekening actief is, want dan is het probleem opgelost.
+
+### Waarom dit uitmaakt
+
+Meet Blitzortung vanaf Lochem terwijl jij bij Trier staat, dan meldt de bron
+onweer op 207 kilometer terwijl er een inslag op 6 kilometer ligt, en blijven
+alle drie de ringen op nul staan.
+
+### Voorwaarde
+
+Dit werkt alleen als je Blitzortung-integratie `geo_location` entiteiten
+aanmaakt met coordinaten in de attributen. Doet hij dat niet, dan blijft de
+oude werkwijze gelden en blijven de afstanden gebonden aan het vaste punt.
+
 ## [0.12.1] — 2026-08-21
 
 ### Toegevoegd
@@ -498,6 +554,8 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.14.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.14.0
+[0.13.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.13.0
 [0.12.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.12.1
 [0.12.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.12.0
 [0.11.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.11.0

@@ -44,7 +44,8 @@
           "wind_notify": "Notify on strong wind gusts",
           "wind_threshold": "Wind gusts from",
           "only_stationary": "Only notify when stationary, not while travelling",
-          "stationary_minutes": "This long in the same place"
+          "stationary_minutes": "This long slower before stationary again",
+          "moving_speed": "Travelling from speed"
         }
       },
       "alerts": {
@@ -109,7 +110,8 @@
           "wind_notify": "Notify on strong wind gusts",
           "wind_threshold": "Wind gusts from",
           "only_stationary": "Only notify when stationary, not while travelling",
-          "stationary_minutes": "This long in the same place"
+          "stationary_minutes": "This long slower before stationary again",
+          "moving_speed": "Travelling from speed"
         }
       },
       "alerts": {
