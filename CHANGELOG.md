@@ -5,6 +5,70 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.10.0] — 2026-08-21
+
+### Gewijzigd
+
+- **Kaarten passen zich aan de schermbreedte aan.** De strategie draait in de
+  browser en leest de breedte uit. Onder de 700 pixels krijgen de kaarten een
+  staande verhouding, waarbij de iRadar-kaart anderhalf keer zo hoog wordt als
+  breed in plaats van een strookje. De kaartenkolom pakt op een telefoon
+  bovendien de volle breedte.
+- **Het zwaarweerblok staat er nu altijd**, ook bij nul. Juist het oplopen
+  van rotatie- en hagelkans is wat je wil zien aankomen. Grijze iconen maken
+  duidelijk dat er niets speelt.
+- Windschering over 0-1 km en de Total Totals index staan er nu ook bij; het
+  vriesniveau kleurt groen binnen het gunstige venster voor hagel.
+
+### Toegevoegd
+
+- **Blok "Alle waarden"** onderaan met elke entiteit die de integratie
+  levert. Vangnet voor alles zonder eigen tegel, en nieuwe sensoren in een
+  volgende versie verschijnen er vanzelf in. Uit te zetten met
+  `alle_waarden: false` in de strategie-opties.
+- Strategie-optie `map_ratio` om de verhouding van de kaarten zelf vast te
+  zetten, ongeacht schermbreedte.
+
+## [0.9.0] — 2026-08-21
+
+Rotatie- en hagelkans.
+
+### Wat dit wel en niet is
+
+Rotatie en hagel worden **niet gedetecteerd**. Rotatie vaststellen vraagt
+dopplerradar en hagel vraagt dual-polarisatie; die ruwe data publiceert geen
+enkele vrij beschikbare bron. Wat hier is toegevoegd berekent of de
+*omgeving* rotatie en hagel toelaat, zoals een stormjager dat 's ochtends uit
+een sondering afleidt. Een hoge score betekent dat buien die zich vormen zich
+zo kunnen gedragen, niet dat er nu iets draait.
+
+### Toegevoegd
+
+- `sensor.stormchase_rotatiekans`, het product van CAPE en de windschering
+  over 0-6 km. Beide zijn nodig: zonder energie gebeurt er niets, zonder
+  schering roteert een bui niet.
+- `sensor.stormchase_hagelkans`, het product van CAPE, windschering en de
+  hoogte van het vriesniveau. Ligt dat te hoog, dan smelt hagel voor hij de
+  grond haalt; ligt het te laag, dan is de bui meestal te zwak.
+- `sensor.stormchase_windschering_0_6_km` en `_0_1_km`, berekend als
+  vectorverschil tussen de wind aan de grond en op 500 respectievelijk 850
+  hPa. Draaiende wind levert schering op, ook bij gelijke snelheid, en dat
+  draaien is wat een bui aan het roteren brengt.
+- `sensor.stormchase_vriesniveau` en `sensor.stormchase_total_totals_index`.
+- Beide kansen dragen hun opbouw als attribuut, zodat je kunt zien waar een
+  getal vandaan komt.
+- Op het dashboard verschijnt een blok met rotatie, hagel, schering en
+  vriesniveau, maar alleen als er iets te melden valt.
+
+### Gebruikte drempels
+
+- Windschering 72 km/u over 0-6 km: klassieke grens waarboven supercellen
+  mogelijk worden.
+- CAPE 2000 J/kg voor rotatie, 2500 voor hagel.
+- Vriesniveau tussen 2000 en 3500 meter is het gunstige venster voor hagel.
+- Meldt het model zelf onweer met hagel, WMO-code 96 of 99, dan komt de
+  hagelkans op minimaal 60 procent.
+
 ## [0.8.0] — 2026-08-21
 
 ### Toegevoegd
@@ -343,6 +407,8 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.10.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.10.0
+[0.9.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.9.0
 [0.8.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.8.0
 [0.7.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.7.1
 [0.7.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.7.0

@@ -18,6 +18,8 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from homeassistant.util import dt as dt_util
 from homeassistant.util.location import distance as location_distance
 
+from .indices import hagelkans, rotatiekans, total_totals, windschering
+
 from .const import (
     CLEARED_FACTOR,
     CONF_AZIMUTH_SENSOR,
@@ -385,7 +387,12 @@ class MeteoCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
                 f"{METEO_HOURLY},temperature_2m,apparent_temperature,"
                 "precipitation,precipitation_probability,weather_code,"
                 "wind_speed_10m,wind_direction_10m,wind_gusts_10m,"
-                "relative_humidity_2m,pressure_msl"
+                "relative_humidity_2m,pressure_msl,freezing_level_height,"
+                # Winden op hoogte, nodig voor de windschering
+                "wind_speed_850hPa,wind_direction_850hPa,"
+                "wind_speed_500hPa,wind_direction_500hPa,"
+                # Temperaturen op hoogte, nodig voor Total Totals
+                "temperature_850hPa,dew_point_850hPa,temperature_500hPa"
             ),
             "current": (
                 "temperature_2m,apparent_temperature,relative_humidity_2m,"
@@ -438,8 +445,43 @@ class MeteoCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
         if self.stats is not None:
             self.stats.bronnen["open_meteo"].succes()
 
+        # Windschering en de afgeleide kansen op rotatie en hagel. Dit zijn
+        # omgevingsinschattingen; zie indices.py voor wat ze wel en niet
+        # zeggen.
+        schering_6km = windschering(
+            at_index("wind_speed_10m"),
+            at_index("wind_direction_10m"),
+            at_index("wind_speed_500hPa"),
+            at_index("wind_direction_500hPa"),
+        )
+        schering_1km = windschering(
+            at_index("wind_speed_10m"),
+            at_index("wind_direction_10m"),
+            at_index("wind_speed_850hPa"),
+            at_index("wind_direction_850hPa"),
+        )
+        vriesniveau = at_index("freezing_level_height")
+        cape_nu = at_index("cape")
+
+        rotatie, rotatie_detail = rotatiekans(cape_nu, schering_6km)
+        hagel, hagel_detail = hagelkans(
+            cape_nu, schering_6km, vriesniveau, at_index("weather_code")
+        )
+
         return {
             "cape": at_index("cape"),
+            "schering_6km": schering_6km,
+            "schering_1km": schering_1km,
+            "vriesniveau": vriesniveau,
+            "total_totals": total_totals(
+                at_index("temperature_850hPa"),
+                at_index("dew_point_850hPa"),
+                at_index("temperature_500hPa"),
+            ),
+            "rotatiekans": rotatie,
+            "rotatie_detail": rotatie_detail,
+            "hagelkans": hagel,
+            "hagel_detail": hagel_detail,
             "cape_peak": max(cape_window) if cape_window else None,
             "lifted_index": at_index("lifted_index"),
             "cin": at_index("convective_inhibition"),

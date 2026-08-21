@@ -36,6 +36,21 @@ sensoren uit en rekent daar bovenop.
 | `sensor.stormchase_neerslagpiek_2_uur` | Zwaarste bui in de komende twee uur. |
 | `sensor.stormchase_actieve_locatie` | Diagnostisch: welke locatie nu gebruikt wordt, met de coördinaten als attribuut. |
 
+### Rotatie en hagel
+
+`sensor.stormchase_rotatiekans` en `sensor.stormchase_hagelkans` geven een
+score van 0 tot 100.
+
+**Dit is geen detectie.** Of een bui daadwerkelijk roteert, stel je alleen
+vast met dopplerradar; hagel vraagt dual-polarisatie. Die ruwe data is niet
+vrij beschikbaar. Wat deze sensoren berekenen is of de atmosfeer rotatie en
+hagel toelaat, uit CAPE, windschering en de hoogte van het vriesniveau. Voor
+het echte beeld tijdens een bui blijf je aangewezen op iRadar of een andere
+app met celdetectie.
+
+De opbouw van beide scores staat in de attributen. `indices.py` bevat de
+gebruikte drempels met uitleg erbij.
+
 ### Weer
 
 `weather.stormchase` geeft de actuele omstandigheden en een verwachting per
@@ -260,12 +275,17 @@ strategy:
   latitude: 52.10                    # anders de actieve locatie
   longitude: 6.63
   iradar_url: https://iradar.app/... # je eigen embed-URL
+  map_ratio: "120%"                  # anders automatisch per schermbreedte
+  alle_waarden: false                # laat het vangnet-blok weg
   maps:
     iradar: true
     blitzortung: true
     buienradar: true
     windy: false
 ```
+
+De kaarten passen hun verhouding aan de schermbreedte aan: op een telefoon
+staand, op een breed scherm liggend. Met `map_ratio` zet je dat vast.
 
 ### Alternatief: statische YAML
 

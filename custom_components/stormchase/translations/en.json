@@ -160,6 +160,24 @@
       },
       "alert_level": {
         "name": "Warning level"
+      },
+      "wind_shear_6km": {
+        "name": "Wind shear 0-6 km"
+      },
+      "wind_shear_1km": {
+        "name": "Wind shear 0-1 km"
+      },
+      "freezing_level": {
+        "name": "Freezing level"
+      },
+      "total_totals": {
+        "name": "Total Totals index"
+      },
+      "rotation": {
+        "name": "Rotation potential"
+      },
+      "hail": {
+        "name": "Hail potential"
       }
     },
     "binary_sensor": {

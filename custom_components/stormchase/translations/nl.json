@@ -160,6 +160,24 @@
       },
       "alert_level": {
         "name": "Waarschuwingsniveau"
+      },
+      "wind_shear_6km": {
+        "name": "Windschering 0-6 km"
+      },
+      "wind_shear_1km": {
+        "name": "Windschering 0-1 km"
+      },
+      "freezing_level": {
+        "name": "Vriesniveau"
+      },
+      "total_totals": {
+        "name": "Total Totals index"
+      },
+      "rotation": {
+        "name": "Rotatiekans"
+      },
+      "hail": {
+        "name": "Hagelkans"
       }
     },
     "binary_sensor": {

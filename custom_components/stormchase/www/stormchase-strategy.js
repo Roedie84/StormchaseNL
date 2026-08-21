@@ -89,6 +89,16 @@ const KOMPASROOS = [
   "Z", "ZZW", "ZW", "WZW", "W", "WNW", "NW", "NNW",
 ];
 
+/**
+ * Draait dit op een smal scherm?
+ *
+ * De strategie wordt in de browser uitgevoerd, dus de schermbreedte is
+ * gewoon beschikbaar. Op een telefoon vallen de secties onder elkaar en is
+ * een kaart met een brede verhouding onbruikbaar klein.
+ */
+const isSmal = () =>
+  typeof window !== "undefined" && window.innerWidth > 0 && window.innerWidth < 700;
+
 /** Bestaat de entiteit en heeft hij een bruikbare waarde? */
 const bruikbaar = (hass, entityId) => {
   if (!entityId) return false;
@@ -565,6 +575,79 @@ class StormchaseStrategy {
       });
     }
 
+    // ---- Zwaar weer: rotatie, hagel en de ingredienten ----
+    // Altijd tonen, ook bij nul. Juist het verloop naar boven is wat je wil
+    // zien aankomen, en grijze iconen maken duidelijk dat er niets speelt.
+    if (bruikbaar(hass, "sensor.stormchase_rotatiekans")) {
+      cards.push(
+        kop("Zwaar weer \u00b7 kans op basis van omgeving", "mdi:alert-rhombus")
+      );
+
+      cards.push({
+        type: "grid",
+        columns: 2,
+        square: false,
+        cards: [
+          tegel({
+            icon: "mdi:rotate-3d-variant",
+            icon_color:
+              "{% set r = states('sensor.stormchase_rotatiekans') | float(0) %}" +
+              "{{ 'red' if r > 60 else 'orange' if r > 30 else 'amber' if r > 10 else 'disabled' }}",
+            primary: "{{ states('sensor.stormchase_rotatiekans') }}%",
+            secondary: "Rotatiekans",
+          }),
+          tegel({
+            icon: "mdi:weather-hail",
+            icon_color:
+              "{% set h = states('sensor.stormchase_hagelkans') | float(0) %}" +
+              "{{ 'red' if h > 60 else 'orange' if h > 30 else 'amber' if h > 10 else 'disabled' }}",
+            primary: "{{ states('sensor.stormchase_hagelkans') }}%",
+            secondary: "Hagelkans",
+          }),
+        ],
+      });
+
+      cards.push({
+        type: "grid",
+        columns: 2,
+        square: false,
+        cards: [
+          tegel({
+            icon: "mdi:weather-windy",
+            icon_color:
+              "{% set s = states('sensor.stormchase_windschering_0_6_km') | float(0) %}" +
+              "{{ 'red' if s > 72 else 'orange' if s > 50 else 'amber' if s > 30 else 'disabled' }}",
+            primary: waarde("sensor.stormchase_windschering_0_6_km", " km/u"),
+            secondary: "Schering 0-6 km",
+          }),
+          tegel({
+            icon: "mdi:weather-windy-variant",
+            icon_color:
+              "{% set s = states('sensor.stormchase_windschering_0_1_km') | float(0) %}" +
+              "{{ 'orange' if s > 30 else 'amber' if s > 15 else 'disabled' }}",
+            primary: waarde("sensor.stormchase_windschering_0_1_km", " km/u"),
+            secondary: "Schering 0-1 km",
+          }),
+          tegel({
+            icon: "mdi:snowflake-thermometer",
+            icon_color:
+              "{% set v = states('sensor.stormchase_vriesniveau') | float(0) %}" +
+              "{{ 'green' if 2000 <= v <= 3500 else 'disabled' }}",
+            primary: waarde("sensor.stormchase_vriesniveau", " m"),
+            secondary: "Vriesniveau",
+          }),
+          tegel({
+            icon: "mdi:sigma",
+            icon_color:
+              "{% set t = states('sensor.stormchase_total_totals_index') | float(0) %}" +
+              "{{ 'red' if t > 56 else 'orange' if t > 50 else 'amber' if t > 44 else 'disabled' }}",
+            primary: waarde("sensor.stormchase_total_totals_index"),
+            secondary: "Total Totals",
+          }),
+        ],
+      });
+    }
+
     // ---- Kompas, alleen zinvol als er richting is ----
     if (bron.azimut && bruikbaar(hass, bron.azimut)) {
       cards.push({
@@ -687,6 +770,18 @@ class StormchaseStrategy {
       cards.push(grafiek);
     }
 
+    // ---- Alle waarden ----
+    // Vangnet: wat hierboven geen eigen tegel heeft, staat hier alsnog.
+    // Voegt de integratie later een sensor toe, dan verschijnt die vanzelf.
+    if (config.alle_waarden !== false && (config._alle || []).length) {
+      cards.push(kop("Alle waarden", "mdi:format-list-bulleted"));
+      cards.push({
+        type: "entities",
+        entities: config._alle,
+        card_mod: { style: PANEL_STYLE },
+      });
+    }
+
     // ---- Meldingen aan/uit ----
     if (hass.states["switch.stormchase_meldingen"]) {
       cards.push({
@@ -705,6 +800,13 @@ class StormchaseStrategy {
   /** De rechterkolom: de kaarten. */
   static kaartenSectie(config, hass) {
     const kaarten = config.maps || {};
+    const smal = isSmal();
+
+    // Op een telefoon krijgt een kaart de volle breedte van een smalle
+    // kolom; een brede verhouding levert dan een strookje op. Hoger maken
+    // dus, zodat je er daadwerkelijk iets op ziet.
+    const verhouding = (breed, mobiel) =>
+      config.map_ratio || (smal ? mobiel : breed);
 
     // Volg de actieve locatie van de integratie, zodat de kaarten op
     // vakantie meeverhuizen in plaats van thuis te blijven hangen.
@@ -726,7 +828,7 @@ class StormchaseStrategy {
       cards.push({
         type: "iframe",
         url: config.iradar_url || "https://iradar.app/",
-        aspect_ratio: "62%",
+        aspect_ratio: verhouding("62%", "150%"),
         card_mod: { style: FRAME_STYLE },
       });
     }
@@ -739,7 +841,7 @@ class StormchaseStrategy {
           "https://map.blitzortung.org/index.php?interactive=1&NavigationControl=1" +
           "&FullScreenControl=0&Cookies=0&InfoDiv=0&MenuButtonDiv=0&ScaleControl=1" +
           `&Advertisment=0&MapStyle=1&MapStyleRangeValue=3#8/${lat}/${lon}`,
-        aspect_ratio: "75%",
+        aspect_ratio: verhouding("75%", "120%"),
         card_mod: { style: FRAME_STYLE },
       });
     }
@@ -751,7 +853,7 @@ class StormchaseStrategy {
         url:
           "https://gadgets.buienradar.nl/gadget/zoommap/" +
           `?lat=${lat}&lng=${lon}&overname=2&zoom=10&size=3&voor=1`,
-        aspect_ratio: "78%",
+        aspect_ratio: verhouding("78%", "115%"),
         card_mod: { style: FRAME_STYLE },
       });
     }
@@ -765,12 +867,12 @@ class StormchaseStrategy {
           "&overlay=cape&type=map&metricWind=km%2Fh&metricTemp=%C2%B0C" +
           "&menu=&message=&marker=&calendar=&pressure=&location=coordinates" +
           "&detail=&radarRange=-1",
-        aspect_ratio: "75%",
+        aspect_ratio: verhouding("75%", "120%"),
         card_mod: { style: FRAME_STYLE },
       });
     }
 
-    return { type: "grid", column_span: 1, cards };
+    return { type: "grid", column_span: smal ? 2 : 1, cards };
   }
 
   /** Badges bovenaan: de cijfers die je tijdens een chase wil zien. */
@@ -829,13 +931,25 @@ class StormchaseStrategy {
     }
     const hulp = { ...hass, states: aliassen };
 
+    // De echte entity-id's van de integratie, gesorteerd. Bewust hier
+    // verzameld en niet uit de aliassen, anders komt alles dubbel.
+    const alle = Object.keys(hass.states)
+      .filter(
+        (id) =>
+          /^(sensor|binary_sensor|switch|weather)\./.test(id) &&
+          id.includes("stormchase")
+      )
+      .sort();
+
+    const uitgebreid = { ...config, _alle: alle };
+
     const view = {
       type: "sections",
       max_columns: 2,
-      badges: this.badges(config, hulp),
+      badges: this.badges(uitgebreid, hulp),
       sections: [
-        this.statusSectie(config, hulp),
-        this.kaartenSectie(config, hulp),
+        this.statusSectie(uitgebreid, hulp),
+        this.kaartenSectie(uitgebreid, hulp),
       ],
     };
 

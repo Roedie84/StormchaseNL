@@ -92,6 +92,37 @@ METEO_SENSORS: tuple[MeteoSensorDescription, ...] = (
         value=lambda data: data.get("lifted_index"),
     ),
     MeteoSensorDescription(
+        key="wind_shear_6km",
+        translation_key="wind_shear_6km",
+        native_unit_of_measurement="km/h",
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=0,
+        value=lambda data: data.get("schering_6km"),
+    ),
+    MeteoSensorDescription(
+        key="wind_shear_1km",
+        translation_key="wind_shear_1km",
+        native_unit_of_measurement="km/h",
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=0,
+        value=lambda data: data.get("schering_1km"),
+    ),
+    MeteoSensorDescription(
+        key="freezing_level",
+        translation_key="freezing_level",
+        native_unit_of_measurement="m",
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=0,
+        value=lambda data: data.get("vriesniveau"),
+    ),
+    MeteoSensorDescription(
+        key="total_totals",
+        translation_key="total_totals",
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=1,
+        value=lambda data: data.get("total_totals"),
+    ),
+    MeteoSensorDescription(
         key="cin",
         translation_key="cin",
         native_unit_of_measurement="J/kg",
@@ -157,6 +188,10 @@ async def async_setup_entry(
     regen: RainCoordinator = data["rain"]
     entities += [RainSensor(regen, entry, beschrijving) for beschrijving in RAIN_SENSORS]
     entities.append(LocationSensor(storm, entry))
+    entities += [
+        SevereSensor(meteo, entry, "rotation", "rotatiekans", "rotatie_detail"),
+        SevereSensor(meteo, entry, "hail", "hagelkans", "hagel_detail"),
+    ]
 
     async_add_entities(entities)
 
@@ -461,3 +496,47 @@ class AlertSensor(CoordinatorEntity[AlertCoordinator], SensorEntity):
             "land": data.get("land"),
             "waarschuwingen": data.get("actief"),
         }
+
+
+class SevereSensor(CoordinatorEntity[MeteoCoordinator], SensorEntity):
+    """Kans op rotatie of hagel, afgeleid uit de omgeving.
+
+    Nadrukkelijk geen detectie: rotatie vraagt dopplerradar en hagel vraagt
+    dual-polarisatie, en die data is niet vrij beschikbaar. Wat hier staat is
+    of de atmosfeer het toelaat. De opbouw van de score staat in de
+    attributen, zodat je kunt zien waar een getal vandaan komt.
+    """
+
+    _attr_has_entity_name = True
+    _attr_native_unit_of_measurement = "%"
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    def __init__(
+        self,
+        coordinator: MeteoCoordinator,
+        entry: ConfigEntry,
+        sleutel: str,
+        waardeveld: str,
+        detailveld: str,
+    ) -> None:
+        """Initialiseer de sensor."""
+        super().__init__(coordinator)
+        self._waardeveld = waardeveld
+        self._detailveld = detailveld
+        self._attr_translation_key = sleutel
+        self._attr_unique_id = f"{entry.entry_id}_{sleutel}"
+        self._attr_device_info = _device(entry)
+
+    @property
+    def native_value(self) -> int | None:
+        """De score van 0 tot 100."""
+        if self.coordinator.data is None:
+            return None
+        return self.coordinator.data.get(self._waardeveld)
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        """Hoe de score is opgebouwd."""
+        if self.coordinator.data is None:
+            return {}
+        return self.coordinator.data.get(self._detailveld) or {}

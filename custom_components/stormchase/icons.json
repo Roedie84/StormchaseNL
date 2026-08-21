@@ -42,6 +42,24 @@
       },
       "alert_level": {
         "default": "mdi:alert-decagram"
+      },
+      "wind_shear_6km": {
+        "default": "mdi:weather-windy"
+      },
+      "wind_shear_1km": {
+        "default": "mdi:weather-windy-variant"
+      },
+      "freezing_level": {
+        "default": "mdi:snowflake-thermometer"
+      },
+      "total_totals": {
+        "default": "mdi:sigma"
+      },
+      "rotation": {
+        "default": "mdi:rotate-3d-variant"
+      },
+      "hail": {
+        "default": "mdi:weather-hail"
       }
     },
     "binary_sensor": {
