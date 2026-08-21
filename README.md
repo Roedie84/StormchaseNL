@@ -49,6 +49,11 @@ De bron is MeteoAlarm, de Europese koepel waar nationale weerdiensten hun
 waarschuwingen aan leveren, waaronder het KNMI. Daardoor werkt het ook buiten
 Nederland.
 
+Waarschuwingen worden gefilterd op je eigen omgeving. Bij de landbepaling
+haalt de integratie ook de namen van je stad, streek en provincie op, en houdt
+alleen de waarschuwingen over waarvan de gebiedsomschrijving daarop aansluit.
+Zonder dat filter zou je alle waarschuwingen van een heel land krijgen.
+
 Het land staat standaard op automatisch: de integratie zoekt op in welk land
 je bent en haalt de bijbehorende feed op. Rijd je een grens over, dan
 verschuiven de waarschuwingen mee. Handmatig kiezen kan ook. Het regioveld is een tekstfilter op de
@@ -296,6 +301,21 @@ daar ook de ESTOFEX-laag aan voor de onweersverwachting over je radarbeeld.
           hier over ongeveer {{ states('sensor.stormchase_aankomst') }} minuten
           {%- endif %}.
 ```
+
+## Diagnostiek
+
+Bij een probleem: ga naar Instellingen → Apparaten & Diensten → Stormchase →
+driepuntsmenu → **Diagnostische gegevens downloaden**. Dat bestand bevat alles
+wat nodig is om mee te kijken.
+
+Wat erin zit: de instellingen, de actuele waarden, per bron het aantal
+geslaagde en mislukte ophaalrondes met de laatste foutmelding, welke
+neerslagbron gebruikt is, hoeveel events en meldingen er zijn geweest, en de
+laatste zestig afstandsmetingen met de berekende naderingssnelheid.
+
+Coordinaten staan afgerond tot ongeveer een kilometer. De gevolgde
+device_tracker, handmatige coordinaten en de namen van je meldingsdiensten
+worden weggelaten.
 
 ## Beperkingen
 

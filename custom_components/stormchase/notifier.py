@@ -66,6 +66,7 @@ class StormNotifier:
         # regenmelding een onweerswaarschuwing kunnen tegenhouden.
         self._laatste: datetime | None = None
         self._laatste_regen: datetime | None = None
+        self.stats = None  # wordt na het aanmaken gezet
         self._unsubs: list[callable] = []
 
     def _opt(self, key: str, default=None):
@@ -211,6 +212,12 @@ class StormNotifier:
                 )
             except Exception as err:  # noqa: BLE001 - dienst kan verdwenen zijn
                 _LOGGER.warning("Melding via %s mislukt: %s", dienst, err)
+                if self.stats is not None:
+                    self.stats.meldingen_mislukt += 1
+                continue
+
+            if self.stats is not None:
+                self.stats.noteer_melding(soort)
 
         if soort != "rain":
             self._laatste = dt_util.utcnow()

@@ -21,6 +21,7 @@ from .alerts import AlertCoordinator
 from .frontend import async_register_frontend
 from .notifier import StormNotifier
 from .rain import RainCoordinator
+from .stats import Statistieken
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -37,10 +38,24 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     integration = await async_get_integration(hass, DOMAIN)
     await async_register_frontend(hass, integration.version or "0")
 
+    # De statistieken worden door alle onderdelen gevuld en komen terug in
+    # het diagnosebestand.
+    stats = Statistieken()
+
     storm = StormCoordinator(hass, entry)
     meteo = MeteoCoordinator(hass, entry)
     regen = RainCoordinator(hass, entry)
     waarschuwingen = AlertCoordinator(hass, entry)
+
+    # De notifier luistert naar de events die de coordinator afvuurt en
+    # stuurt daar meldingen over. Zit in de integratie zelf, zodat er geen
+    # losse automatisering nodig is.
+    notifier = StormNotifier(hass, entry)
+
+    # Statistieken koppelen voor de eerste ophaalronde, anders mist die ronde
+    # in de diagnostiek en zie je een gefaalde start niet terug.
+    for onderdeel in (storm, meteo, regen, waarschuwingen, notifier):
+        onderdeel.stats = stats
 
     # De storm-coordinator mag de meteo-coordinator laten verversen zodra
     # de locatie flink verschuift.
@@ -54,10 +69,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await regen.async_refresh()
     await waarschuwingen.async_refresh()
 
-    # De notifier luistert naar de events die de coordinator afvuurt en
-    # stuurt daar meldingen over. Zit in de integratie zelf, zodat er geen
-    # losse automatisering nodig is.
-    notifier = StormNotifier(hass, entry)
     notifier.start()
 
     gegevens = hass.data.setdefault(DOMAIN, {}).setdefault(entry.entry_id, {})
@@ -68,6 +79,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             "rain": regen,
             "alerts": waarschuwingen,
             "notifier": notifier,
+            "stats": stats,
         }
     )
 

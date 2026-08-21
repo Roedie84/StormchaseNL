@@ -5,6 +5,54 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.8.0] — 2026-08-21
+
+### Toegevoegd
+
+- **Diagnostiek.** Bij de integratie staat nu een knop *Diagnostische
+  gegevens downloaden*. Het bestand bevat de instellingen, de actuele
+  waarden van alle onderdelen en statistieken over hoe de externe bronnen
+  zich hebben gedragen. Bedoeld om te delen bij een probleem.
+- **Statistieken** die vanaf het opstarten worden bijgehouden:
+  - Per bron het aantal geslaagde en mislukte ophaalrondes, het
+    slaagpercentage, en de laatste foutmelding met tijdstip.
+  - Welke neerslagbron er is gebruikt, Buienradar of Open-Meteo, en hoe
+    vaak. Zo zie je of de terugval vaker aanslaat dan bedoeld.
+  - Hoeveel events er zijn afgevuurd en hoeveel meldingen er zijn verstuurd
+    of mislukt.
+  - Bij de waarschuwingen: hoeveel er landelijk actief waren, hoeveel er na
+    filtering overbleven en op welke namen is gefilterd.
+  - De laatste zestig afstandsmetingen met de berekende naderingssnelheid,
+    om achteraf te kunnen beoordelen of de trend klopte.
+- Het diagnosebestand telt hoeveel `geo_location` markers er zijn en hoeveel
+  daarvan bij het ingestelde patroon passen. Draaien er twee
+  Blitzortung-integraties naast elkaar, dan is dat hier meteen zichtbaar.
+
+### Privacy
+
+Coordinaten worden afgerond tot twee decimalen, ongeveer een kilometer.
+De gevolgde device_tracker, handmatige coordinaten en de namen van je
+meldingsdiensten worden weggelaten.
+
+## [0.7.1] — 2026-08-21
+
+### Gerepareerd
+
+- **Dashboard bleef leeg bij een apparaat in een ruimte.** Home Assistant zet
+  de ruimtenaam voor de entity-id zodra je het apparaat aan een ruimte
+  toewijst: `sensor.woonkamer_stormchase_cape` in plaats van
+  `sensor.stormchase_cape`. De strategie ging uit van het tweede en vond
+  daardoor niets. Het voorvoegsel wordt nu herkend en overal toegepast.
+- **Waarschuwingen waren landelijk in plaats van lokaal.** Zonder regiofilter
+  kwamen alle waarschuwingen van een heel land binnen, veertig stuks in het
+  geval van Duitsland, en die konden over een gebied duizend kilometer
+  verderop gaan. De landbepaling haalt nu ook de namen van je stad, streek en
+  provincie op, en filtert de feed daarop terug naar je eigen omgeving. Een
+  handmatig ingevuld regiofilter gaat nog steeds voor.
+- Twee nieuwe attributen op `sensor.stormchase_waarschuwingsniveau`:
+  `gefilterd_op` laat zien welke namen zijn gebruikt en `aantal_in_land`
+  hoeveel er in het hele land actief zijn.
+
 ## [0.7.0] — 2026-08-21
 
 ### Toegevoegd
@@ -295,6 +343,8 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.8.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.8.0
+[0.7.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.7.1
 [0.7.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.7.0
 [0.6.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.6.0
 [0.5.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.5.0

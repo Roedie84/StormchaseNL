@@ -89,6 +89,9 @@ class AlertCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
         # elke ronde opnieuw hoeven te geocoderen.
         self._land_voor: tuple[float, float] | None = None
         self._gevonden_land: str | None = None
+        # Namen van de gebieden waar je nu bent: stad, streek, provincie.
+        # Daarmee filteren we de landelijke feed terug naar jouw omgeving.
+        self._gebiedsnamen: list[str] = []
 
     @property
     def instelling(self) -> str:
@@ -123,10 +126,36 @@ class AlertCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
                 payload = await response.json()
         except (aiohttp.ClientError, TimeoutError, ValueError) as err:
             _LOGGER.debug("Land niet te bepalen: %s", err)
+            if self.stats is not None:
+                self.stats.bronnen["geocodering"].fout(err)
             return self._gevonden_land
+
+        if self.stats is not None:
+            self.stats.bronnen["geocodering"].succes()
 
         code = (payload.get("countryCode") or "").upper()
         land = LANDCODES.get(code)
+
+        # Verzamel de bestuurlijke namen rond deze coordinaten. MeteoAlarm
+        # beschrijft gebieden met namen als "Kreis und Stadt Augsburg", dus
+        # een naam die daarin voorkomt is een bruikbaar filter.
+        namen: list[str] = []
+        for sleutel in ("locality", "city", "principalSubdivision"):
+            waarde = payload.get(sleutel)
+            if waarde:
+                namen.append(str(waarde))
+
+        info = payload.get("localityInfo") or {}
+        for niveau in info.get("administrative") or []:
+            naam = niveau.get("name")
+            if naam:
+                namen.append(str(naam))
+
+        # Korte namen leveren toevalstreffers op, dus die laten we vallen.
+        self._gebiedsnamen = sorted(
+            {n.lower() for n in namen if len(n) >= 4}, key=len, reverse=True
+        )
+        _LOGGER.debug("Gebiedsnamen voor filtering: %s", self._gebiedsnamen)
 
         if land is None:
             _LOGGER.debug("Geen MeteoAlarm-feed voor landcode %s", code or "onbekend")
@@ -150,11 +179,22 @@ class AlertCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
             return 1
 
     def _relevant(self, waarschuwing: dict) -> bool:
-        """Valt deze waarschuwing binnen het regiofilter?"""
-        if not self.regio:
-            return True
+        """Valt deze waarschuwing in jouw omgeving?
+
+        Een handmatig ingevuld filter gaat voor. Staat dat leeg, dan gebruiken
+        we de gebiedsnamen die bij de landbepaling zijn opgehaald. Zonder een
+        van beide zou je alle waarschuwingen van een heel land krijgen, en dat
+        zegt niets over waar jij bent.
+        """
         gebied = (waarschuwing.get("gebied") or "").lower()
-        return self.regio in gebied
+
+        if self.regio:
+            return self.regio in gebied
+
+        if not self._gebiedsnamen:
+            return True
+
+        return any(naam in gebied for naam in self._gebiedsnamen)
 
     async def _async_update_data(self) -> dict:
         """Haal de feed op en filter de actieve waarschuwingen."""
@@ -180,15 +220,20 @@ class AlertCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
                 response.raise_for_status()
                 tekst = await response.text()
         except (aiohttp.ClientError, TimeoutError) as err:
+            if self.stats is not None:
+                self.stats.bronnen["meteoalarm"].fout(err)
             raise UpdateFailed(f"MeteoAlarm niet bereikbaar: {err}") from err
 
         try:
             wortel = _parse_xml(tekst)
         except Exception as err:  # noqa: BLE001 - feed kan van vorm wisselen
+            if self.stats is not None:
+                self.stats.bronnen["meteoalarm"].fout(err)
             raise UpdateFailed(f"MeteoAlarm gaf onleesbare data: {err}") from err
 
         nu = dt_util.utcnow()
         actief: list[dict] = []
+        alles: list[dict] = []
 
         for entry in wortel.findall("atom:entry", NS):
             ernst = _tekst(entry, "cap:severity")
@@ -213,10 +258,20 @@ class AlertCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
                 "id": _tekst(entry, "atom:id"),
             }
 
+            alles.append(waarschuwing)
             if self._relevant(waarschuwing):
                 actief.append(waarschuwing)
 
+        totaal = len(alles)
         actief.sort(key=lambda w: w["rang"], reverse=True)
+
+        if self.stats is not None:
+            self.stats.bronnen["meteoalarm"].succes()
+            self.stats.alert_laatste_in_land = totaal
+            self.stats.alert_laatste_na_filter = len(actief)
+            self.stats.alert_filternamen = (
+                [self.regio] if self.regio else list(self._gebiedsnamen)
+            )
         zwaarste = actief[0] if actief else None
 
         data = {
@@ -227,6 +282,10 @@ class AlertCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
             "soort": zwaarste["soort"] if zwaarste else None,
             "gebied": zwaarste["gebied"] if zwaarste else None,
             "land": land,
+            "gefilterd_op": self.regio or (
+                ", ".join(self._gebiedsnamen[:3]) if self._gebiedsnamen else None
+            ),
+            "aantal_in_land": totaal,
         }
 
         self._vuur_events(actief)
@@ -249,6 +308,8 @@ class AlertCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
                 continue
 
             self._gemeld.add(sleutel)
+            if self.stats is not None:
+                self.stats.noteer_event("alert")
             self.hass.bus.async_fire(EVENT_ALERT, waarschuwing)
 
         # Verlopen waarschuwingen vergeten, zodat een herhaling later opnieuw

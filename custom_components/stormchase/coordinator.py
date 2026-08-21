@@ -73,6 +73,7 @@ class LocationMixin:
 
     hass: HomeAssistant
     entry: ConfigEntry
+    stats = None  # wordt na het aanmaken gezet
 
     def _opt(self, key: str, default=None):
         """Haal een optie op, met de config-entry data als fallback."""
@@ -267,12 +268,16 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
             nearby = data.distance < self.warn_distance
             if nearby and self._was_nearby is False:
                 self.hass.bus.async_fire(EVENT_NEARBY, payload)
+                if self.stats is not None:
+                    self.stats.noteer_event("nearby")
             elif (
                 not nearby
                 and self._was_nearby
                 and data.distance > self.warn_distance * CLEARED_FACTOR
             ):
                 self.hass.bus.async_fire(EVENT_CLEARED, payload)
+                if self.stats is not None:
+                    self.stats.noteer_event("cleared")
                 self._was_nearby = False
             if nearby:
                 self._was_nearby = True
@@ -283,6 +288,8 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
             approaching = data.speed > SPEED_DEADZONE
             if approaching and self._was_approaching is False:
                 self.hass.bus.async_fire(EVENT_APPROACHING, payload)
+                if self.stats is not None:
+                    self.stats.noteer_event("approaching")
             self._was_approaching = approaching
 
     async def _async_update_data(self) -> StormData:
@@ -328,6 +335,9 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
             longitude=longitude,
             location_source=source_name,
         )
+
+        if self.stats is not None:
+            self.stats.noteer_meting(distance, speed)
 
         self._fire_events(data)
         return data
@@ -397,6 +407,8 @@ class MeteoCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
                 response.raise_for_status()
                 payload = await response.json()
         except (aiohttp.ClientError, TimeoutError) as err:
+            if self.stats is not None:
+                self.stats.bronnen["open_meteo"].fout(err)
             raise UpdateFailed(f"Open-Meteo niet bereikbaar: {err}") from err
 
         hourly = payload.get("hourly") or {}
@@ -423,6 +435,8 @@ class MeteoCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
         ]
 
         self._fetched_at = (latitude, longitude)
+        if self.stats is not None:
+            self.stats.bronnen["open_meteo"].succes()
 
         return {
             "cape": at_index("cape"),

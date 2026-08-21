@@ -96,6 +96,64 @@ const bruikbaar = (hass, entityId) => {
   return !!state && !["unknown", "unavailable"].includes(state.state);
 };
 
+/**
+ * Bouw een vertaaltabel van "nette" naar echte entity-id's.
+ *
+ * Home Assistant zet de ruimtenaam voor de entity-id als het apparaat aan een
+ * ruimte is toegewezen: sensor.woonkamer_stormchase_cape in plaats van
+ * sensor.stormchase_cape. De kaarten hieronder gebruiken de nette vorm; deze
+ * tabel zet ze om naar wat er daadwerkelijk bestaat.
+ */
+const bouwVertaaltabel = (hass) => {
+  const tabel = {};
+  let voorvoegsel = "";
+
+  for (const id of Object.keys(hass.states)) {
+    const punt = id.indexOf(".");
+    const domein = id.slice(0, punt);
+    const naam = id.slice(punt + 1);
+
+    const positie = naam.indexOf("stormchase");
+    if (positie === -1) continue;
+
+    // Het voorvoegsel is voor alle entiteiten van de integratie gelijk;
+    // eenmaal gevonden geldt het ook voor entiteiten die nu niet bestaan.
+    if (positie > 0) voorvoegsel = naam.slice(0, positie);
+
+    const net = `${domein}.${naam.slice(positie)}`;
+    if (net !== id) tabel[net] = id;
+  }
+
+  return { tabel, voorvoegsel };
+};
+
+/**
+ * Vervang de nette id's door de echte, overal in de opgebouwde kaarten.
+ * Werkt met het gevonden voorvoegsel, zodat ook verwijzingen naar entiteiten
+ * die op dit moment geen waarde hebben goed terechtkomen.
+ */
+const pasVertaaltabelToe = (waarde, voorvoegsel) => {
+  if (!voorvoegsel) return waarde;
+
+  if (typeof waarde === "string") {
+    return waarde.replace(
+      /\b(sensor|binary_sensor|switch|weather)\.stormchase/g,
+      `$1.${voorvoegsel}stormchase`
+    );
+  }
+  if (Array.isArray(waarde)) {
+    return waarde.map((item) => pasVertaaltabelToe(item, voorvoegsel));
+  }
+  if (waarde && typeof waarde === "object") {
+    const uit = {};
+    for (const [sleutel, inhoud] of Object.entries(waarde)) {
+      uit[sleutel] = pasVertaaltabelToe(inhoud, voorvoegsel);
+    }
+    return uit;
+  }
+  return waarde;
+};
+
 /** Zoek een entiteit op achtervoegsel, zoals de config flow dat ook doet. */
 const raad = (hass, domein, achtervoegsel) =>
   Object.keys(hass.states).find(
@@ -761,15 +819,27 @@ class StormchaseStrategy {
   }
 
   static async bouwView(config, hass) {
-    return {
+    // Werk intern met de nette id's, ook als ze in werkelijkheid anders
+    // heten. Zo blijven de kaarten leesbaar en werkt het bij iedereen.
+    const { tabel, voorvoegsel } = bouwVertaaltabel(hass);
+
+    const aliassen = { ...hass.states };
+    for (const [net, echt] of Object.entries(tabel)) {
+      aliassen[net] = hass.states[echt];
+    }
+    const hulp = { ...hass, states: aliassen };
+
+    const view = {
       type: "sections",
       max_columns: 2,
-      badges: this.badges(config, hass),
+      badges: this.badges(config, hulp),
       sections: [
-        this.statusSectie(config, hass),
-        this.kaartenSectie(config, hass),
+        this.statusSectie(config, hulp),
+        this.kaartenSectie(config, hulp),
       ],
     };
+
+    return pasVertaaltabelToe(view, voorvoegsel);
   }
 }
 

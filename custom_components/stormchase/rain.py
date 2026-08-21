@@ -159,14 +159,23 @@ class RainCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
         """Bepaal of en wanneer het gaat regenen."""
         latitude, longitude, _ = self.resolve_location()
 
+        stats = getattr(self, "stats", None)
         bron = "buienradar"
+
         try:
             reeks = await self._buienradar(latitude, longitude)
+            if stats is not None:
+                stats.bronnen["buienradar"].succes()
+                stats.regen_via_buienradar += 1
         except (aiohttp.ClientError, TimeoutError, ValueError) as err:
             _LOGGER.debug("Buienradar niet bruikbaar (%s), terugval Open-Meteo", err)
+            if stats is not None:
+                stats.bronnen["buienradar"].fout(err)
             bron = "open-meteo"
             try:
                 reeks = await self._open_meteo(latitude, longitude)
+                if stats is not None:
+                    stats.regen_via_open_meteo += 1
             except (aiohttp.ClientError, TimeoutError, ValueError) as err2:
                 raise UpdateFailed(f"Geen neerslagverwachting: {err2}") from err2
 
@@ -222,6 +231,9 @@ class RainCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
         verwacht = begint is not None and begint <= self.vooruit
 
         if verwacht and self._was_verwacht is False:
+            stats = getattr(self, "stats", None)
+            if stats is not None:
+                stats.noteer_event("rain_incoming")
             self.hass.bus.async_fire(
                 EVENT_RAIN_INCOMING,
                 {
