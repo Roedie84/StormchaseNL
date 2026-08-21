@@ -17,6 +17,11 @@ from homeassistant.helpers import selector
 
 from .const import (
     ALERT_COUNTRIES,
+    CONF_BRIEFING,
+    CONF_BRIEFING_AFTERNOON,
+    CONF_BRIEFING_MORNING,
+    DEFAULT_BRIEFING_AFTERNOON,
+    DEFAULT_BRIEFING_MORNING,
     CONF_ADDRESS_SENSOR,
     ALERT_LEVEL_CHOICES,
     CONF_ALERT_COUNTRY,
@@ -40,11 +45,18 @@ from .const import (
     CONF_RAIN_NOTIFY,
     CONF_RAIN_THRESHOLD,
     CONF_STATIONARY_MINUTES,
+    CONF_FROST_THRESHOLD,
+    CONF_HEAT_THRESHOLD,
+    CONF_WEATHER_TYPES,
     CONF_WIND_NOTIFY,
     CONF_WIND_THRESHOLD,
     DEFAULT_MOVING_SPEED,
     DEFAULT_STATIONARY_MINUTES,
+    DEFAULT_FROST_THRESHOLD,
+    DEFAULT_HEAT_THRESHOLD,
+    DEFAULT_WEATHER_TYPES,
     DEFAULT_WIND_THRESHOLD,
+    WEATHER_TYPES,
     DEFAULT_RAIN_LEAD,
     DEFAULT_RAIN_THRESHOLD,
     DEFAULT_NOTIFY_COOLDOWN,
@@ -297,7 +309,10 @@ def _notify_schema(hass, defaults: dict[str, Any]) -> vol.Schema:
                 )
             ),
             vol.Required(
-                CONF_WIND_NOTIFY,
+                CONF_FROST_THRESHOLD,
+    CONF_HEAT_THRESHOLD,
+    CONF_WEATHER_TYPES,
+    CONF_WIND_NOTIFY,
                 default=defaults.get(CONF_WIND_NOTIFY, True),
             ): selector.BooleanSelector(),
             vol.Required(
@@ -378,6 +393,27 @@ def _alert_schema(defaults: dict[str, Any]) -> vol.Schema:
                 CONF_ALERT_NOTIFY,
                 default=defaults.get(CONF_ALERT_NOTIFY, True),
             ): selector.BooleanSelector(),
+        }
+    )
+
+
+def _briefing_schema(defaults: dict[str, Any]) -> vol.Schema:
+    """Instellingen voor het dagelijkse weerbericht."""
+    return vol.Schema(
+        {
+            vol.Required(
+                CONF_BRIEFING, default=defaults.get(CONF_BRIEFING, True)
+            ): selector.BooleanSelector(),
+            vol.Required(
+                CONF_BRIEFING_MORNING,
+                default=defaults.get(CONF_BRIEFING_MORNING, DEFAULT_BRIEFING_MORNING),
+            ): selector.TimeSelector(),
+            vol.Required(
+                CONF_BRIEFING_AFTERNOON,
+                default=defaults.get(
+                    CONF_BRIEFING_AFTERNOON, DEFAULT_BRIEFING_AFTERNOON
+                ),
+            ): selector.TimeSelector(),
         }
     )
 
@@ -467,10 +503,22 @@ class StormchaseConfigFlow(ConfigFlow, domain=DOMAIN):
         """Vraag de instellingen voor officiele waarschuwingen."""
         if user_input is not None:
             self._data.update(user_input)
-            return self.async_create_entry(title="Stormchase", data=self._data)
+            return await self.async_step_briefing()
 
         return self.async_show_form(
             step_id="alerts", data_schema=_alert_schema(self._data)
+        )
+
+    async def async_step_briefing(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Vraag wanneer het dagelijkse weerbericht moet komen."""
+        if user_input is not None:
+            self._data.update(user_input)
+            return self.async_create_entry(title="Stormchase", data=self._data)
+
+        return self.async_show_form(
+            step_id="briefing", data_schema=_briefing_schema(self._data)
         )
 
     @staticmethod
@@ -554,8 +602,20 @@ class StormchaseOptionsFlow(OptionsFlow):
         """Vraag de instellingen voor officiele waarschuwingen."""
         if user_input is not None:
             self._data.update(user_input)
-            return self.async_create_entry(title="", data=self._data)
+            return await self.async_step_briefing()
 
         return self.async_show_form(
             step_id="alerts", data_schema=_alert_schema(self._data)
+        )
+
+    async def async_step_briefing(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Vraag wanneer het dagelijkse weerbericht moet komen."""
+        if user_input is not None:
+            self._data.update(user_input)
+            return self.async_create_entry(title="", data=self._data)
+
+        return self.async_show_form(
+            step_id="briefing", data_schema=_briefing_schema(self._data)
         )

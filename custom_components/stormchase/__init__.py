@@ -15,9 +15,10 @@ from homeassistant.core import HomeAssistant, ServiceCall
 
 from homeassistant.loader import async_get_integration
 
-from .const import DOMAIN, SERVICE_TEST_NOTIFICATION
+from .const import DOMAIN, SERVICE_SEND_BRIEFING, SERVICE_TEST_NOTIFICATION
 from .coordinator import MeteoCoordinator, StormCoordinator
 from .alerts import AlertCoordinator
+from .briefing import Briefing
 from .frontend import async_register_frontend
 from .notifier import StormNotifier
 from .rain import RainCoordinator
@@ -93,6 +94,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         }
     )
 
+    # Het dagelijkse weerbericht plannen. Pas hierna, want het leest de
+    # gegevens van de coordinators uit hass.data.
+    briefing = Briefing(hass, entry)
+    briefing.start()
+    gegevens["briefing"] = briefing
+
     await _async_register_services(hass)
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
@@ -115,6 +122,15 @@ async def _async_register_services(hass: HomeAssistant) -> None:
 
     hass.services.async_register(DOMAIN, SERVICE_TEST_NOTIFICATION, _test)
 
+    async def _briefing(call: ServiceCall) -> None:
+        """Stuur het weerbericht nu, los van het schema."""
+        for gegevens in hass.data.get(DOMAIN, {}).values():
+            onderdeel = gegevens.get("briefing")
+            if onderdeel is not None:
+                await onderdeel.async_send()
+
+    hass.services.async_register(DOMAIN, SERVICE_SEND_BRIEFING, _briefing)
+
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Ruim de integratie op."""
@@ -124,9 +140,13 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         notifier = gegevens.get("notifier")
         if notifier is not None:
             notifier.stop()
+        briefing = gegevens.get("briefing")
+        if briefing is not None:
+            briefing.stop()
         if not hass.data[DOMAIN]:
             hass.data.pop(DOMAIN)
             hass.services.async_remove(DOMAIN, SERVICE_TEST_NOTIFICATION)
+            hass.services.async_remove(DOMAIN, SERVICE_SEND_BRIEFING)
     return unloaded
 
 

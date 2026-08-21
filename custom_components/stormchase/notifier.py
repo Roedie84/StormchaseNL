@@ -14,6 +14,7 @@ from .const import (
     CONF_ALERT_NOTIFY,
     CONF_ONLY_STATIONARY,
     CONF_RAIN_NOTIFY,
+    CONF_WEATHER_TYPES,
     CONF_WIND_NOTIFY,
     CONF_NOTIFY_MAX_DISTANCE,
     CONF_NOTIFY_ON_APPROACH,
@@ -33,7 +34,9 @@ from .const import (
     EVENT_NEARBY,
     EVENT_ALERT,
     EVENT_RAIN_INCOMING,
+    EVENT_WEATHER,
     EVENT_WIND,
+    ONDERWEG_RELEVANT,
     RICHTINGEN,
 )
 
@@ -72,6 +75,9 @@ class StormNotifier:
         self.stats = None  # wordt na het aanmaken gezet
         self.storm = None  # coordinator, voor de stilstandcontrole
         self._laatste_wind: datetime | None = None
+        # Elke weersituatie houdt zijn eigen wachttijd bij, zodat sneeuw geen
+        # vorstmelding kan tegenhouden.
+        self._laatste_weer: dict[str, datetime] = {}
         self._unsubs: list[callable] = []
 
     def _opt(self, key: str, default=None):
@@ -101,6 +107,7 @@ class StormNotifier:
             self.hass.bus.async_listen(EVENT_RAIN_INCOMING, self._handle_rain),
             self.hass.bus.async_listen(EVENT_ALERT, self._handle_alert),
             self.hass.bus.async_listen(EVENT_WIND, self._handle_wind),
+            self.hass.bus.async_listen(EVENT_WEATHER, self._handle_weather),
         ]
 
     def stop(self) -> None:
@@ -248,7 +255,9 @@ class StormNotifier:
             if self.stats is not None:
                 self.stats.noteer_melding(soort)
 
-        if soort not in ("rain", "wind"):
+        # Alleen onweersmeldingen delen de hoofdteller; regen, wind en de
+        # weersituaties hebben hun eigen wachttijd.
+        if soort in ("nearby", "approaching", "cleared"):
             self._laatste = dt_util.utcnow()
 
     @callback
@@ -369,6 +378,94 @@ class StormNotifier:
 
         await self._stuur(bericht, "wind", titel="Harde wind")
         self._laatste_wind = dt_util.utcnow()
+
+    @staticmethod
+    def _weerbericht(soort: str, data: dict) -> tuple[str, str]:
+        """Stel titel en tekst samen voor een weersituatie."""
+        temp = data.get("temperatuur")
+        gevoel = data.get("gevoelstemperatuur")
+        sneeuw = data.get("sneeuwval")
+        stoten = data.get("windstoten")
+
+        def graden(waarde) -> str:
+            if waarde is None:
+                return "onbekend"
+            return f"{waarde:.1f} \u00b0C".replace(".", ",")
+
+        if soort == "sneeuw":
+            tekst = f"Sneeuwval op je locatie bij {graden(temp)}"
+            if sneeuw:
+                tekst += f", ongeveer {sneeuw:.1f} cm per uur".replace(".", ",")
+            if stoten and stoten >= 40:
+                tekst += f", met windstoten tot {stoten:.0f} km/u"
+            return "Sneeuw", tekst + "."
+
+        if soort == "ijzel":
+            return (
+                "IJzel",
+                f"Onderkoelde neerslag bij {graden(temp)}. Wegen en paden "
+                "kunnen spiegelglad worden.",
+            )
+
+        if soort == "mist":
+            vocht = data.get("luchtvochtigheid")
+            tekst = "Dichte mist op je locatie"
+            if vocht:
+                tekst += f", luchtvochtigheid {vocht:.0f} procent"
+            return "Mist", tekst + "."
+
+        if soort == "hitte":
+            tekst = f"Het is {graden(temp)} op je locatie"
+            if gevoel is not None and abs(gevoel - (temp or 0)) >= 1:
+                tekst += f", gevoelstemperatuur {graden(gevoel)}"
+            return "Hitte", tekst + "."
+
+        if soort == "vorst":
+            tekst = f"Het vriest: {graden(temp)}"
+            if gevoel is not None and gevoel < (temp or 0) - 1:
+                tekst += f", gevoelstemperatuur {graden(gevoel)}"
+            return "Vorst", tekst + "."
+
+        return "Weer", f"Weersituatie: {soort}."
+
+    @callback
+    async def _handle_weather(self, event: Event) -> None:
+        """Bijzondere weersituatie op de huidige locatie."""
+        soort = event.data.get("soort", "")
+
+        gekozen = self._opt(CONF_WEATHER_TYPES) or []
+        if soort not in gekozen:
+            return
+        if not self.ingeschakeld or not self.diensten:
+            return
+        if self._in_stiltevenster():
+            return
+
+        # IJzel, sneeuw en mist gaan over gevaar onderweg; die komen ook door
+        # tijdens het rijden. De rest zegt pas iets als je ergens bent.
+        if soort not in ONDERWEG_RELEVANT and not self._ter_plaatse():
+            return
+
+        wacht = int(self._opt(CONF_NOTIFY_COOLDOWN, DEFAULT_NOTIFY_COOLDOWN))
+        vorige = self._laatste_weer.get(soort)
+        if wacht > 0 and vorige is not None:
+            if (dt_util.utcnow() - vorige).total_seconds() < wacht * 60:
+                return
+
+        titel, bericht = self._weerbericht(soort, event.data)
+        await self._stuur(bericht, f"weather_{soort}", titel=titel)
+        self._laatste_weer[soort] = dt_util.utcnow()
+
+    async def stuur_direct(self, bericht: str, soort: str, titel: str) -> None:
+        """Verstuur zonder wachttijd of stilstandcontrole.
+
+        Voor berichten die je zelf hebt ingepland, zoals het dagelijkse
+        weerbericht: dat moet komen op het moment dat je hebt afgesproken,
+        ook als er net iets anders gemeld is.
+        """
+        if not self.ingeschakeld or not self.diensten:
+            return
+        await self._stuur(bericht, soort, titel=titel)
 
     async def async_test(self) -> None:
         """Stuur een proefmelding, ongeacht drempels en wachttijden."""

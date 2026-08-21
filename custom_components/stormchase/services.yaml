@@ -4,3 +4,9 @@ test_notification:
     Stuurt een testbericht naar alle ingestelde meldingsdiensten, zonder te
     kijken naar afstand, wachttijd of stiltevenster. Handig om te controleren
     of de meldingen aankomen.
+
+send_briefing:
+  name: Weerbericht sturen
+  description: >-
+    Stelt het dagelijkse weerbericht nu samen en verstuurt het, los van de
+    ingeplande tijden.

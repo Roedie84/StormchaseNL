@@ -1137,8 +1137,28 @@ const registreer = (naam, klasse) => {
 registreer("ll-strategy-view-stormchase", StormchaseViewStrategy);
 registreer("ll-strategy-dashboard-stormchase", StormchaseDashboardStrategy);
 
+/**
+ * Log de versie waarmee dit script geladen is.
+ *
+ * De versie zit in de query van de URL waarmee de browser het bestand
+ * ophaalde. Zo is in de console meteen te zien of je het nieuwe script hebt
+ * of nog een oude uit de cache, wat anders alleen te raden valt aan de hand
+ * van gewijzigde labels op het dashboard.
+ */
+const eigenVersie = () => {
+  try {
+    const tag = document.querySelector(
+      'script[src*="stormchase-strategy"]'
+    );
+    if (!tag) return "onbekend";
+    return new URL(tag.src, location.href).searchParams.get("v") || "onbekend";
+  } catch (e) {
+    return "onbekend";
+  }
+};
+
 console.info(
-  "%c STORMCHASE %c strategie geladen ",
+  `%c STORMCHASE %c strategie geladen \u00b7 v${eigenVersie()} `,
   "background:#3a2a5e;color:#f5b731;font-weight:700",
   ""
 );

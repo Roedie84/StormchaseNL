@@ -113,6 +113,7 @@
     }
   },
   "services": {
-    "test_notification": "mdi:bell-check"
+    "test_notification": "mdi:bell-check",
+    "send_briefing": "mdi:text-box-outline"
   }
 }

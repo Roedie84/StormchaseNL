@@ -77,6 +77,10 @@ verschuiven de waarschuwingen mee. Handmatig kiezen kan ook. Het regioveld is ee
 gebiedsnaam uit de feed: vul bijvoorbeeld `Gelderland` in om alleen die
 provincie te volgen, of laat het leeg voor het hele land.
 
+Het soort waarschuwing wordt vertaald naar het Nederlands. MeteoAlarm levert
+dat als vrije Engelse tekst die per land verschilt, dus de herkenning gaat op
+trefwoord; `taal.py` bevat de lijst. Onbekende termen blijven zoals ze zijn.
+
 Waarschuwingsmeldingen negeren de wachttijd en het stiltevenster, omdat ze
 over gevaar gaan. Elke waarschuwing wordt maar een keer gemeld.
 
@@ -197,12 +201,44 @@ automatisering aan te pas komt.
 | Wachttijd | Voorkomt herhaling bij een grillige cel. |
 | Stiltevenster | Twee gelijke tijden betekent: altijd melden. |
 | Ook bij regen | Bericht zodra er neerslag aankomt. |
+| Weersituaties | Sneeuw, ijzel, mist, hitte en vorst, per stuk aan of uit. |
+| Hitte vanaf | Standaard 30 graden. |
+| Vorst vanaf | Standaard 0 graden. |
 | Ook bij wind | Bericht bij windstoten boven de drempel, standaard 60 km/u. |
 | Alleen ter plaatse | Regen- en windmeldingen wachten tot je ergens bent. |
 | Onderweg vanaf snelheid | Boven deze snelheid ben je onderweg, standaard 30 km/u. |
 | Zo lang trager | Hoe lang je onder die drempel moet blijven voor je weer als ter plaatse telt. |
 | Minuten vooruit | Hoe ver van tevoren, standaard tien minuten. |
 | Vanaf intensiteit | Onder deze waarde heet het droog, zodat motregen geen bericht oplevert. |
+
+### Dagelijks weerbericht
+
+Standaard om 07:00 en 13:00 een samenvatting: waarschuwingen, het weer nu, de
+verwachting voor vandaag, de neerslag voor de komende twee uur en onweer of de
+kans daarop.
+
+```
+Waarschuwing code oranje voor heavy rain in Trier-Saarburg, en nog 1 andere.
+Nu: Bewolkt, 19,4 °C, wind 14 km/u met stoten tot 38.
+Vandaag 27,8 °C, vannacht 15,2 °C, 70 procent kans op neerslag en tot 8,4 mm.
+Regen over ongeveer 35 minuten, piek 6,2 mm/u.
+Onweer op 44 km, nadert snel, hier over 78 minuten.
+```
+
+Regels zonder inhoud vallen weg. Het bericht negeert de wachttijd, de
+stilstandcontrole en het stiltevenster, want je hebt zelf een tijdstip
+gekozen. Met `stormchase.send_briefing` stuur je hem direct.
+
+### Weersituaties
+
+Naast onweer, regen en wind meldt de integratie sneeuw, ijzel, mist, hitte en
+vorst. Elk bericht bevat de bijbehorende cijfers: bij sneeuw de hoeveelheid
+per uur en de windstoten, bij mist de luchtvochtigheid, bij hitte en vorst de
+gevoelstemperatuur.
+
+Elke situatie meldt bij het intreden en niet zolang hij duurt, en houdt een
+eigen wachttijd bij zodat ze elkaar niet blokkeren. IJzel, sneeuw en mist
+komen ook door tijdens het rijden; hitte en vorst wachten tot je ergens bent.
 
 ### Onderweg of ter plaatse
 
@@ -288,6 +324,10 @@ strategy:
 
 Dat is alles — de integratie registreert het benodigde script zelf als
 Lovelace-bron.
+
+Controleren welk script je browser draait: open de console met F12 en zoek
+naar de regel `STORMCHASE strategie geladen`. Daar staat het versienummer
+achter.
 
 De URL van het script bevat het versienummer en de starttijd van Home
 Assistant, zodat je browser na elke herstart gedwongen wordt het opnieuw op te

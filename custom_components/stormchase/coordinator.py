@@ -55,9 +55,19 @@ from .const import (
     DEFAULT_WARN_DISTANCE,
     EVENT_APPROACHING,
     EVENT_CLEARED,
+    CODES_IJZEL,
+    CODES_MIST,
+    CODES_SNEEUW,
+    CONF_FROST_THRESHOLD,
+    CONF_HEAT_THRESHOLD,
+    CONF_WEATHER_TYPES,
     CONF_WIND_THRESHOLD,
+    DEFAULT_FROST_THRESHOLD,
+    DEFAULT_HEAT_THRESHOLD,
+    DEFAULT_WEATHER_TYPES,
     DEFAULT_WIND_THRESHOLD,
     EVENT_NEARBY,
+    EVENT_WEATHER,
     EVENT_WIND,
     METEO_HOURLY,
     METEO_INTERVAL,
@@ -726,6 +736,7 @@ class MeteoCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
         self._session = async_get_clientsession(hass)
         self._fetched_at: tuple[float, float] | None = None
         self._was_winderig: bool | None = None
+        self._vorige_condities: set[str] | None = None
 
     def _controleer_wind(self, windstoten: float | None) -> None:
         """Meld het als de wind boven de drempel uitkomt.
@@ -743,10 +754,67 @@ class MeteoCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
             if self.stats is not None:
                 self.stats.noteer_event("wind")
             self.hass.bus.async_fire(
-                EVENT_WIND, {"windstoten": windstoten, "drempel": drempel}
+                EVENT_WEATHER,
+    EVENT_WIND, {"windstoten": windstoten, "drempel": drempel}
             )
 
         self._was_winderig = winderig
+
+    def _controleer_weer(self, huidig: dict) -> None:
+        """Meld bijzondere weersituaties zodra ze intreden.
+
+        Alleen bij het intreden, niet zolang ze duren: bij vorst zou je
+        anders elk half uur opnieuw bericht krijgen tot de dooi invalt.
+        """
+        code = huidig.get("weather_code")
+        temperatuur = huidig.get("temperature_2m")
+
+        gekozen = set(self._opt(CONF_WEATHER_TYPES, DEFAULT_WEATHER_TYPES) or [])
+        actief: set[str] = set()
+
+        if code is not None:
+            code = int(code)
+            if code in CODES_SNEEUW:
+                actief.add("sneeuw")
+            if code in CODES_IJZEL:
+                actief.add("ijzel")
+            if code in CODES_MIST:
+                actief.add("mist")
+
+        if temperatuur is not None:
+            hitte = float(self._opt(CONF_HEAT_THRESHOLD, DEFAULT_HEAT_THRESHOLD))
+            vorst = float(self._opt(CONF_FROST_THRESHOLD, DEFAULT_FROST_THRESHOLD))
+            if temperatuur >= hitte:
+                actief.add("hitte")
+            if temperatuur <= vorst:
+                actief.add("vorst")
+
+        # Eerste ronde na het opstarten alleen vastleggen, anders krijg je bij
+        # elke herstart opnieuw bericht over een situatie die al liep.
+        if self._vorige_condities is None:
+            self._vorige_condities = actief
+            return
+
+        for soort in actief - self._vorige_condities:
+            if soort not in gekozen:
+                continue
+            if self.stats is not None:
+                self.stats.noteer_event("weather")
+            self.hass.bus.async_fire(
+                EVENT_WEATHER,
+                {
+                    "soort": soort,
+                    "temperatuur": temperatuur,
+                    "gevoelstemperatuur": huidig.get("apparent_temperature"),
+                    "weercode": code,
+                    "sneeuwval": huidig.get("snowfall"),
+                    "neerslag": huidig.get("precipitation"),
+                    "windstoten": huidig.get("wind_gusts_10m"),
+                    "luchtvochtigheid": huidig.get("relative_humidity_2m"),
+                },
+            )
+
+        self._vorige_condities = actief
 
     def note_location(self, latitude: float, longitude: float) -> None:
         """Forceer een verversing als de locatie flink verschoven is."""
@@ -780,7 +848,8 @@ class MeteoCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
             ),
             "current": (
                 "temperature_2m,apparent_temperature,relative_humidity_2m,"
-                "is_day,precipitation,weather_code,cloud_cover,pressure_msl,"
+                "is_day,precipitation,rain,showers,snowfall,weather_code,"
+                "cloud_cover,pressure_msl,"
                 "wind_speed_10m,wind_direction_10m,wind_gusts_10m"
             ),
             "daily": (
@@ -829,7 +898,9 @@ class MeteoCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
         if self.stats is not None:
             self.stats.bronnen["open_meteo"].succes()
 
-        self._controleer_wind((payload.get("current") or {}).get("wind_gusts_10m"))
+        huidig = payload.get("current") or {}
+        self._controleer_wind(huidig.get("wind_gusts_10m"))
+        self._controleer_weer(huidig)
 
         # Windschering en de afgeleide kansen op rotatie en hagel. Dit zijn
         # omgevingsinschattingen; zie indices.py voor wat ze wel en niet

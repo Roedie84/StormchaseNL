@@ -85,6 +85,7 @@ class Statistieken:
             "cleared": 0,
             "rain_incoming": 0,
             "wind": 0,
+            "weather": 0,
             "alert": 0,
         }
     )

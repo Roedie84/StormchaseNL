@@ -37,6 +37,7 @@ from .const import (
     METEOALARM_URL,
 )
 from .coordinator import LocationMixin
+from .taal import vertaal_soort
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -299,9 +300,15 @@ class AlertCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
             if verloopt is not None and verloopt < nu:
                 continue
 
+            oorspronkelijk = _tekst(entry, "cap:event")
+
             waarschuwing = {
                 "titel": _tekst(entry, "atom:title"),
-                "soort": _tekst(entry, "cap:event"),
+                # Vertaald bij de bron, zodat alles wat er verder mee doet
+                # Nederlands is. De oorspronkelijke term blijft bewaard om op
+                # te kunnen filteren of terug te zoeken.
+                "soort": vertaal_soort(oorspronkelijk),
+                "soort_origineel": oorspronkelijk,
                 "niveau": kleur,
                 "rang": rang,
                 "gebied": _tekst(entry, "cap:areaDesc"),

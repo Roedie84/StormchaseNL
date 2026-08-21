@@ -61,6 +61,53 @@ CONF_RING_WINDOW = "ring_window"
 DEFAULT_RING_WINDOW = 120  # minuten
 MAX_INSLAGEN = 5000        # bovengrens voor de bewaarde inslagen
 
+# Configuratie - dagelijks weerbericht
+CONF_BRIEFING = "briefing"
+CONF_BRIEFING_MORNING = "briefing_morning"
+CONF_BRIEFING_AFTERNOON = "briefing_afternoon"
+
+DEFAULT_BRIEFING_MORNING = "07:00:00"
+DEFAULT_BRIEFING_AFTERNOON = "13:00:00"
+
+SERVICE_SEND_BRIEFING = "send_briefing"
+
+# Weercodes in gewone taal, voor in het weerbericht
+WMO_TEKST = {
+    0: "onbewolkt", 1: "vrijwel onbewolkt", 2: "half bewolkt", 3: "bewolkt",
+    45: "mistig", 48: "mist met rijpvorming",
+    51: "lichte motregen", 53: "motregen", 55: "dichte motregen",
+    56: "lichte onderkoelde motregen", 57: "onderkoelde motregen",
+    61: "lichte regen", 63: "regen", 65: "zware regen",
+    66: "lichte onderkoelde regen", 67: "onderkoelde regen",
+    71: "lichte sneeuwval", 73: "sneeuwval", 75: "zware sneeuwval",
+    77: "korrelsneeuw",
+    80: "lichte buien", 81: "buien", 82: "zware buien",
+    85: "lichte sneeuwbuien", 86: "zware sneeuwbuien",
+    95: "onweer", 96: "onweer met lichte hagel", 99: "onweer met zware hagel",
+}
+
+# Configuratie - weersituaties
+CONF_WEATHER_TYPES = "weather_types"
+CONF_HEAT_THRESHOLD = "heat_threshold"
+CONF_FROST_THRESHOLD = "frost_threshold"
+
+WEATHER_TYPES = ["sneeuw", "ijzel", "mist", "hitte", "vorst"]
+DEFAULT_WEATHER_TYPES = ["sneeuw", "ijzel", "mist", "hitte", "vorst"]
+DEFAULT_HEAT_THRESHOLD = 30.0   # graden
+DEFAULT_FROST_THRESHOLD = 0.0   # graden
+
+EVENT_WEATHER = f"{DOMAIN}_weather"
+
+# WMO-weercodes per situatie
+CODES_SNEEUW = {71, 73, 75, 77, 85, 86}
+CODES_IJZEL = {56, 57, 66, 67}
+CODES_MIST = {45, 48}
+
+# Deze situaties gaan over gevaar onderweg en worden ook gemeld als je rijdt.
+# De rest wacht tot je ergens bent, want dan pas zegt het iets over waar je
+# de komende tijd zit.
+ONDERWEG_RELEVANT = {"ijzel", "sneeuw", "mist"}
+
 # Configuratie - wind en stilstand
 CONF_WIND_NOTIFY = "wind_notify"
 CONF_WIND_THRESHOLD = "wind_threshold"

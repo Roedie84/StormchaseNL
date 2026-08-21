@@ -5,6 +5,97 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.20.1] — 2026-08-21
+
+### Gewijzigd
+
+- **Het soort waarschuwing wordt vertaald.** MeteoAlarm levert dat als vrije
+  Engelse tekst, waardoor er in een verder Nederlands bericht ineens
+  "heavy rain" stond. Dat is nu "zware regen".
+- De vertaling gebeurt bij de bron, dus zowel het weerbericht, de melding als
+  het dashboard tonen Nederlands. De oorspronkelijke term blijft bewaard in
+  het attribuut `soort_origineel`.
+- Herkenning gaat op trefwoord en van specifiek naar algemeen, want de
+  formulering verschilt per land: het ene instituut schrijft "heavy rain",
+  het andere "rain-flood" of "severe thunderstorms". Zo wordt
+  "freezing rain" ijzel en niet regen.
+- Wordt een term niet herkend, dan blijft de oorspronkelijke tekst staan.
+  Liever een Engelse term die klopt dan een Nederlandse die de lading niet
+  dekt.
+
+## [0.20.0] — 2026-08-21
+
+### Toegevoegd
+
+- **Dagelijks weerbericht**, standaard om 07:00 en 13:00. Beide tijden zijn
+  instelbaar en het geheel is uit te zetten. Zet je ze gelijk, dan hou je er
+  een over.
+- Het bericht bundelt wat de integratie al weet: officiele waarschuwingen,
+  het weer nu, de verwachting voor vandaag, de neerslag voor de komende twee
+  uur en onweer of de kans daarop. Ben je niet thuis, dan staat je adres
+  eronder.
+- Regels die niets toevoegen worden weggelaten. Bij rustig weer hou je drie
+  regels over; bij onweer wordt het vanzelf uitgebreider.
+- Nieuwe service `stormchase.send_briefing` om het bericht nu te sturen, los
+  van het schema.
+
+### Opmerking
+
+Het weerbericht gaat langs de wachttijd en de stilstandcontrole heen: je hebt
+er zelf om gevraagd op een vast tijdstip, dus dan hoort het te komen. Het
+stiltevenster geldt er ook niet voor, dus zet de ochtendtijd niet vroeger dan
+je wakker wil worden.
+
+## [0.19.0] — 2026-08-21
+
+Meldingen voor vijf extra weersituaties.
+
+### Toegevoegd
+
+- **Sneeuw**, met temperatuur, hoeveelheid per uur en windstoten erbij als er
+  sprake is van sneeuwjacht.
+- **IJzel en onderkoelde regen**, met de waarschuwing dat wegen glad kunnen
+  worden.
+- **Dichte mist**, met de luchtvochtigheid.
+- **Hitte**, standaard vanaf 30 graden, met de gevoelstemperatuur als die
+  noemenswaardig afwijkt.
+- **Vorst**, standaard vanaf 0 graden, idem.
+- Alle vijf zijn per stuk aan en uit te zetten, en de drempels voor hitte en
+  vorst zijn instelbaar.
+
+### Hoe ze zich gedragen
+
+- Elke situatie meldt bij het **intreden**, niet zolang hij duurt. Bij vorst
+  zou je anders elk half uur bericht krijgen tot de dooi invalt.
+- Elke situatie houdt een **eigen wachttijd** bij, zodat sneeuw geen
+  vorstmelding kan tegenhouden.
+- IJzel, sneeuw en mist komen ook door **tijdens het rijden**, want die gaan
+  over gevaar onderweg. Hitte en vorst wachten tot je ergens bent, net als
+  regen.
+- Bij een herstart wordt de eerste ronde alleen vastgelegd, zodat je geen
+  bericht krijgt over iets dat al liep.
+
+### Gewijzigd
+
+- Alleen onweersmeldingen delen nog de hoofdwachttijd. Regen, wind en de
+  weersituaties hebben elk hun eigen teller, zodat ze elkaar niet blokkeren.
+
+## [0.18.1] — 2026-08-21
+
+### Gerepareerd
+
+- **"Regen over X min" terwijl het regende.** De huidige intensiteit werd
+  bepaald uit een enkel tijdvak van vijf minuten. Viel dat net in een dipje
+  tussen twee buien, dan gold het als droog terwijl je nat werd. Er wordt nu
+  gekeken naar het zwaarste tijdvak in de tien minuten rond dit moment.
+
+### Toegevoegd
+
+- Het dashboardscript logt zijn eigen versie in de browserconsole:
+  `STORMCHASE strategie geladen · v0.18.1`. Zo is meteen te zien of je het
+  nieuwe script hebt of nog een oude uit de cache, in plaats van dat je dat
+  moet afleiden uit gewijzigde labels op het dashboard.
+
 ## [0.18.0] — 2026-08-21
 
 ### Gewijzigd
@@ -672,6 +763,10 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.20.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.20.1
+[0.20.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.20.0
+[0.19.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.19.0
+[0.18.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.18.1
 [0.18.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.18.0
 [0.17.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.17.1
 [0.17.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.17.0

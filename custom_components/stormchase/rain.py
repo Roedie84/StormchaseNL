@@ -181,8 +181,11 @@ class RainCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
 
         drempel = self.drempel
 
-        # Wat valt er nu? Neem het dichtstbijzijnde tijdstip.
-        nu_intensiteit = next((mm for minuten, mm in reeks if minuten <= 5), 0.0)
+        # Wat valt er nu? Neem het zwaarste tijdvak rond dit moment in plaats
+        # van een enkel vakje van vijf minuten. Een bui met een dipje erin zou
+        # anders als droog gelden terwijl je nat wordt.
+        rondom = [mm for minuten, mm in reeks if -10 <= minuten <= 10]
+        nu_intensiteit = max(rondom) if rondom else 0.0
         regent = nu_intensiteit >= drempel
 
         # Wanneer begint het? Alleen relevant als het nu droog is.

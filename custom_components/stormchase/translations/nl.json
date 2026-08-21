@@ -47,7 +47,10 @@
           "wind_threshold": "Windstoten vanaf",
           "only_stationary": "Alleen melden als ik ergens ben, niet onderweg",
           "stationary_minutes": "Zo lang trager voor weer 'ter plaatse'",
-          "moving_speed": "Onderweg vanaf snelheid"
+          "moving_speed": "Onderweg vanaf snelheid",
+          "weather_types": "Melden bij deze weersituaties",
+          "heat_threshold": "Hitte vanaf",
+          "frost_threshold": "Vorst vanaf"
         }
       },
       "alerts": {
@@ -58,6 +61,15 @@
           "alert_region": "Regio (optioneel filter)",
           "alert_min_level": "Melden vanaf",
           "alert_notify": "Meldingen sturen bij waarschuwingen"
+        }
+      },
+      "briefing": {
+        "title": "Dagelijks weerbericht",
+        "description": "Een samenvatting van het weer, de verwachting, de neerslag en eventuele waarschuwingen. Zet beide tijden gelijk om er een over te houden.",
+        "data": {
+          "briefing": "Dagelijks weerbericht sturen",
+          "briefing_morning": "Ochtendbericht om",
+          "briefing_afternoon": "Middagbericht om"
         }
       }
     },
@@ -115,7 +127,10 @@
           "wind_threshold": "Windstoten vanaf",
           "only_stationary": "Alleen melden als ik ergens ben, niet onderweg",
           "stationary_minutes": "Zo lang trager voor weer 'ter plaatse'",
-          "moving_speed": "Onderweg vanaf snelheid"
+          "moving_speed": "Onderweg vanaf snelheid",
+          "weather_types": "Melden bij deze weersituaties",
+          "heat_threshold": "Hitte vanaf",
+          "frost_threshold": "Vorst vanaf"
         }
       },
       "alerts": {
@@ -126,6 +141,15 @@
           "alert_region": "Regio (optioneel filter)",
           "alert_min_level": "Melden vanaf",
           "alert_notify": "Meldingen sturen bij waarschuwingen"
+        }
+      },
+      "briefing": {
+        "title": "Dagelijks weerbericht",
+        "description": "Een samenvatting van het weer, de verwachting, de neerslag en eventuele waarschuwingen. Zet beide tijden gelijk om er een over te houden.",
+        "data": {
+          "briefing": "Dagelijks weerbericht sturen",
+          "briefing_morning": "Ochtendbericht om",
+          "briefing_afternoon": "Middagbericht om"
         }
       }
     },
@@ -266,12 +290,25 @@
         "oranje": "Code oranje",
         "rood": "Code rood"
       }
+    },
+    "weather_types": {
+      "options": {
+        "sneeuw": "Sneeuw",
+        "ijzel": "IJzel en onderkoelde regen",
+        "mist": "Dichte mist",
+        "hitte": "Hitte",
+        "vorst": "Vorst"
+      }
     }
   },
   "services": {
     "test_notification": {
       "name": "Proefmelding sturen",
       "description": "Stuurt een testbericht naar alle ingestelde meldingsdiensten."
+    },
+    "send_briefing": {
+      "name": "Weerbericht sturen",
+      "description": "Stuurt het dagelijkse weerbericht nu."
     }
   }
 }

@@ -47,7 +47,10 @@
           "wind_threshold": "Wind gusts from",
           "only_stationary": "Only notify when stationary, not while travelling",
           "stationary_minutes": "This long slower before stationary again",
-          "moving_speed": "Travelling from speed"
+          "moving_speed": "Travelling from speed",
+          "weather_types": "Notify for these conditions",
+          "heat_threshold": "Heat from",
+          "frost_threshold": "Frost from"
         }
       },
       "alerts": {
@@ -58,6 +61,15 @@
           "alert_region": "Region (optional filter)",
           "alert_min_level": "Notify from",
           "alert_notify": "Send notifications for warnings"
+        }
+      },
+      "briefing": {
+        "title": "Daily weather briefing",
+        "description": "A summary of the weather, forecast, precipitation and any warnings. Set both times the same to keep just one.",
+        "data": {
+          "briefing": "Send daily briefing",
+          "briefing_morning": "Morning briefing at",
+          "briefing_afternoon": "Afternoon briefing at"
         }
       }
     },
@@ -115,7 +127,10 @@
           "wind_threshold": "Wind gusts from",
           "only_stationary": "Only notify when stationary, not while travelling",
           "stationary_minutes": "This long slower before stationary again",
-          "moving_speed": "Travelling from speed"
+          "moving_speed": "Travelling from speed",
+          "weather_types": "Notify for these conditions",
+          "heat_threshold": "Heat from",
+          "frost_threshold": "Frost from"
         }
       },
       "alerts": {
@@ -126,6 +141,15 @@
           "alert_region": "Region (optional filter)",
           "alert_min_level": "Notify from",
           "alert_notify": "Send notifications for warnings"
+        }
+      },
+      "briefing": {
+        "title": "Daily weather briefing",
+        "description": "A summary of the weather, forecast, precipitation and any warnings. Set both times the same to keep just one.",
+        "data": {
+          "briefing": "Send daily briefing",
+          "briefing_morning": "Morning briefing at",
+          "briefing_afternoon": "Afternoon briefing at"
         }
       }
     },
@@ -266,12 +290,25 @@
         "oranje": "Orange",
         "rood": "Red"
       }
+    },
+    "weather_types": {
+      "options": {
+        "sneeuw": "Snow",
+        "ijzel": "Freezing rain",
+        "mist": "Dense fog",
+        "hitte": "Heat",
+        "vorst": "Frost"
+      }
     }
   },
   "services": {
     "test_notification": {
       "name": "Send test notification",
       "description": "Sends a test message to all configured notification services."
+    },
+    "send_briefing": {
+      "name": "Send briefing",
+      "description": "Sends the daily weather briefing now."
     }
   }
 }
