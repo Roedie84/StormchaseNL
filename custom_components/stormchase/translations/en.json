@@ -14,7 +14,8 @@
           "ring_mid": "Middle ring",
           "ring_far": "Outer ring",
           "location_mode": "Location",
-          "ring_window": "Time window for the rings"
+          "ring_window": "Time window for the rings",
+          "address_sensor": "Address sensor (optional)"
         }
       },
       "location": {
@@ -80,7 +81,8 @@
           "ring_mid": "Middle ring",
           "ring_far": "Outer ring",
           "location_mode": "Location",
-          "ring_window": "Time window for the rings"
+          "ring_window": "Time window for the rings",
+          "address_sensor": "Address sensor (optional)"
         }
       },
       "location": {

@@ -17,6 +17,7 @@ from homeassistant.helpers import selector
 
 from .const import (
     ALERT_COUNTRIES,
+    CONF_ADDRESS_SENSOR,
     ALERT_LEVEL_CHOICES,
     CONF_ALERT_COUNTRY,
     CONF_ALERT_MIN_LEVEL,
@@ -125,6 +126,12 @@ def _base_schema(hass, defaults: dict[str, Any]) -> vol.Schema:
                 CONF_COUNTER_SENSOR,
                 default=defaults.get(CONF_COUNTER_SENSOR)
                 or _guess(hass, "_lightning_counter"),
+            ): SENSOR_SELECTOR,
+            vol.Optional(
+                CONF_ADDRESS_SENSOR,
+                default=defaults.get(CONF_ADDRESS_SENSOR)
+                or _guess(hass, "_geocoded_location")
+                or vol.UNDEFINED,
             ): SENSOR_SELECTOR,
             vol.Required(
                 CONF_GEO_PATTERN,

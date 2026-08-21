@@ -445,6 +445,9 @@ class LocationSensor(CoordinatorEntity[StormCoordinator], SensorEntity):
             "longitude": data.longitude,
         }
 
+        if data.adres:
+            uit["adres"] = data.adres
+
         uit["afstand_via"] = data.afstand_bron
 
         if data.blitzortung:

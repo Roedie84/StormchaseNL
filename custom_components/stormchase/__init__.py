@@ -69,6 +69,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # De storm-coordinator mag de meteo-coordinator laten verversen zodra
     # de locatie flink verschuift.
     storm.meteo = meteo
+    storm.alerts = waarschuwingen
 
     await storm.async_config_entry_first_refresh()
     # Open-Meteo mag falen zonder de hele integratie te blokkeren; de

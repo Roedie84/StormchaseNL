@@ -23,6 +23,7 @@ CONF_LOCATION_MODE = "location_mode"
 CONF_ZONE_ENTITY = "zone_entity"
 CONF_TRACKER_ENTITY = "tracker_entity"
 CONF_MANUAL_LOCATION = "manual_location"
+CONF_ADDRESS_SENSOR = "address_sensor"
 
 MODE_HOME = "home"
 MODE_ZONE = "zone"
@@ -69,6 +70,7 @@ CONF_MOVING_SPEED = "moving_speed"
 DEFAULT_STATIONARY_MINUTES = 10  # zo lang traag voor je weer 'ter plaatse' bent
 DEFAULT_MOVING_SPEED = 30        # km/u; hierboven ben je onderweg
 SNELHEID_VENSTER = 180           # seconden waarover de snelheid wordt bepaald
+MAX_SNELHEID = 400               # km/u; hierboven is het geen echte beweging
 LOCATIE_GESCHIEDENIS = 240       # aantal bewaarde locatiepunten
 
 EVENT_WIND = f"{DOMAIN}_wind"

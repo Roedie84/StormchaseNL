@@ -23,6 +23,7 @@ from .indices import hagelkans, peiling, rotatiekans, total_totals, windschering
 
 from .const import (
     CLEARED_FACTOR,
+    CONF_ADDRESS_SENSOR,
     CONF_AZIMUTH_SENSOR,
     CONF_COUNTER_SENSOR,
     CONF_DISTANCE_SENSOR,
@@ -42,6 +43,7 @@ from .const import (
     CONF_MOVING_SPEED,
     DEFAULT_MOVING_SPEED,
     DEFAULT_STATIONARY_MINUTES,
+    MAX_SNELHEID,
     SNELHEID_VENSTER,
     MAX_INSLAGEN,
     LOCATIE_GESCHIEDENIS,
@@ -206,6 +208,7 @@ class StormData:
     latitude: float | None = None
     longitude: float | None = None
     location_source: str = "thuis"
+    adres: str | None = None
     onderweg: bool | None = None
     stil_sinds: int | None = None  # minuten onder de snelheidsdrempel
     reissnelheid: float | None = None  # km/u
@@ -231,6 +234,7 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         )
         self.entry = entry
         self.meteo: MeteoCoordinator | None = None
+        self.alerts = None  # AlertCoordinator, wordt na het aanmaken gezet
         self._history: deque[tuple[float, float]] = deque(maxlen=240)
         self._was_nearby: bool | None = None
         self._was_approaching: bool | None = None
@@ -244,6 +248,7 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         self._inslagen: deque[tuple[float, float]] = deque(maxlen=MAX_INSLAGEN)
         self._vorige_inslag: datetime | None = None
         self._laatste_beweging: float | None = None
+        self._vorige_bron: str | None = None
 
     @property
     def ring_bounds(self) -> list[int]:
@@ -285,6 +290,23 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         return async_track_state_change_event(
             self.hass, [entity_id], self._noteer_inslag
         )
+
+    def _lees_adres(self) -> str | None:
+        """Lees de adressensor uit, als er een is ingesteld.
+
+        De companion-app levert een geocoded_location sensor met het adres
+        waar je bent. Coordinaten zeggen weinig; een plaatsnaam maakt in een
+        oogopslag duidelijk waar de integratie naar kijkt.
+        """
+        entity_id = self._opt(CONF_ADDRESS_SENSOR)
+        if not entity_id:
+            return None
+
+        state = self.hass.states.get(entity_id)
+        if state is None or state.state in ("unknown", "unavailable", ""):
+            return None
+
+        return state.state
 
     def _read_float(self, entity_id: str | None) -> float | None:
         """Lees een sensorwaarde als float, of None als dat niet lukt."""
@@ -405,7 +427,7 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         return round(-slope * 3600, 1)
 
     def _beweging(
-        self, latitude: float, longitude: float
+        self, latitude: float, longitude: float, bron: str
     ) -> tuple[bool | None, int | None, float | None]:
         """Bepaal of je onderweg bent, op basis van snelheid.
 
@@ -420,6 +442,21 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         afleiden.
         """
         nu = dt_util.utcnow().timestamp()
+
+        # Wisselt de locatiebron, bijvoorbeeld omdat de tracker na het
+        # opstarten alsnog geladen is, dan springt de positie zonder dat je
+        # bewogen hebt. De oude punten zijn dan onbruikbaar.
+        if bron != self._vorige_bron:
+            if self._vorige_bron is not None:
+                _LOGGER.debug(
+                    "Locatiebron gewijzigd van %s naar %s, reeks gewist",
+                    self._vorige_bron,
+                    bron,
+                )
+            self._locaties.clear()
+            self._laatste_beweging = None
+            self._vorige_bron = bron
+
         self._locaties.append((nu, latitude, longitude))
 
         drempel = float(self._opt(CONF_MOVING_SPEED, DEFAULT_MOVING_SPEED))
@@ -432,15 +469,25 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         if snelheid is None:
             return None, None, None
 
+        # Een sprong die geen mens of auto kan maken komt van een verspringende
+        # positie, niet van beweging. Reeks wissen en opnieuw beginnen.
+        if snelheid > MAX_SNELHEID:
+            _LOGGER.debug("Onwaarschijnlijke snelheid %.0f km/u genegeerd", snelheid)
+            self._locaties.clear()
+            self._locaties.append((nu, latitude, longitude))
+            return None, None, None
+
         if snelheid > drempel:
             self._laatste_beweging = nu
 
         if self._laatste_beweging is None:
-            # Sinds het opstarten nooit boven de drempel geweest
+            # Sinds het opstarten nooit boven de drempel geweest: dan sta je
+            # gewoon stil, en geldt de nalooptijd niet. Die is er alleen om
+            # het stoplicht af te vangen na echt rijden.
             stil = int((nu - self._locaties[0][0]) / 60)
-        else:
-            stil = int((nu - self._laatste_beweging) / 60)
+            return snelheid > drempel, stil, round(snelheid, 1)
 
+        stil = int((nu - self._laatste_beweging) / 60)
         onderweg = snelheid > drempel or stil < venster
         return onderweg, stil, round(snelheid, 1)
 
@@ -563,7 +610,9 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         pattern = self._opt(CONF_GEO_PATTERN, DEFAULT_GEO_PATTERN)
 
         latitude, longitude, source_name = self.resolve_location()
-        onderweg, stil_sinds, eigen_snelheid = self._beweging(latitude, longitude)
+        onderweg, stil_sinds, eigen_snelheid = self._beweging(
+            latitude, longitude, source_name
+        )
 
         # Kunnen we de inslagen zelf doorrekenen vanaf waar we nu zijn? Dan
         # heeft dat de voorkeur boven de waarden van de bron, want die rekent
@@ -618,6 +667,8 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         # in plaats van tot het volgende half uur te wachten.
         if self.meteo is not None:
             self.meteo.note_location(latitude, longitude)
+        if self.alerts is not None:
+            self.alerts.note_location(latitude, longitude)
 
         data = StormData(
             distance=distance,
@@ -634,6 +685,7 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
             latitude=latitude,
             longitude=longitude,
             location_source=source_name,
+            adres=self._lees_adres(),
             onderweg=onderweg,
             stil_sinds=stil_sinds,
             reissnelheid=eigen_snelheid,

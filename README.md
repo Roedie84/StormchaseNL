@@ -34,7 +34,7 @@ sensoren uit en rekent daar bovenop.
 | `sensor.stormchase_regen_begint_over` | Minuten tot de eerste regen. Draagt de volledige verwachting per 5 minuten als attribuut. |
 | `sensor.stormchase_neerslagintensiteit` | Wat er nu valt, in mm/u. |
 | `sensor.stormchase_neerslagpiek_2_uur` | Zwaarste bui in de komende twee uur. |
-| `sensor.stormchase_actieve_locatie` | Diagnostisch: welke locatie nu gebruikt wordt, met de coördinaten als attribuut. |
+| `sensor.stormchase_actieve_locatie` | Welke locatie in gebruik is. Attributen: coordinaten, adres, en of Blitzortung vanaf hetzelfde punt meet. |
 
 ### Rotatie en hagel
 
@@ -121,6 +121,10 @@ map en herstart.
 De config flow raadt je Blitzortung-sensoren op basis van hun achtervoegsel
 (`_lightning_distance`, `_lightning_azimuth`, `_lightning_counter`). Klopt de
 gok niet, kies ze dan handmatig.
+
+**Adressensor** is optioneel. Wijs hem naar de `geocoded_location` sensor van
+de companion-app, dan staat je adres op het dashboard in plaats van
+coordinaten. De config flow raadt hem meestal goed.
 
 **Patroon in geo_location entity-id** bepaalt welke markers meetellen voor de
 afstandsringen. Standaard `lightning_strike`.

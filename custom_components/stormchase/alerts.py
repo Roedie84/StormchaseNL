@@ -95,6 +95,7 @@ class AlertCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
         # Namen van de gebieden waar je nu bent: stad, streek, provincie.
         # Daarmee filteren we de landelijke feed terug naar jouw omgeving.
         self._gebiedsnamen: list[str] = []
+        self._wacht_op_land = False
 
     @property
     def instelling(self) -> str:
@@ -183,6 +184,43 @@ class AlertCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
             return ALERT_LEVEL_CHOICES.index(keuze) + 1
         except ValueError:
             return 1
+
+    def note_location(self, latitude: float, longitude: float) -> None:
+        """Ververs meteen zodra de locatie bruikbaar wordt of flink wijzigt.
+
+        Bij het opstarten is een tracker soms nog niet geladen en valt de
+        landbepaling terug op de thuislocatie. Wachten tot het volgende
+        kwartier zou betekenen dat je al die tijd waarschuwingen van het
+        verkeerde land ziet.
+        """
+        if self.instelling != "auto":
+            return
+
+        if self._gevonden_land is None:
+            # Alleen als er niet al een poging loopt, anders vraagt elke
+            # ronde van dertig seconden een nieuwe verversing aan.
+            if not self._wacht_op_land:
+                self._wacht_op_land = True
+                self.hass.async_create_task(self._opnieuw())
+            return
+
+        if self._land_voor is None:
+            return
+
+        verschil = max(
+            abs(self._land_voor[0] - latitude),
+            abs(self._land_voor[1] - longitude),
+        )
+        if verschil >= 0.5:
+            _LOGGER.debug("Locatie flink verschoven, land opnieuw bepalen")
+            self.hass.async_create_task(self.async_request_refresh())
+
+    async def _opnieuw(self) -> None:
+        """Probeer het land opnieuw te bepalen."""
+        try:
+            await self.async_request_refresh()
+        finally:
+            self._wacht_op_land = False
 
     def _relevant(self, waarschuwing: dict) -> bool:
         """Valt deze waarschuwing in jouw omgeving?

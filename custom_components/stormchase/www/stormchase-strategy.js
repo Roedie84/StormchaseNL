@@ -432,9 +432,10 @@ class StormchaseStrategy {
     // ---- Meten Blitzortung en wij vanaf hetzelfde punt? ----
     // Loopt dat uiteen, dan horen de bliksemafstanden niet bij het weer dat
     // eromheen staat, en dat is niet te zien zonder deze melding.
-    const loc = hass.states["sensor.stormchase_actieve_locatie"];
-    const afwijking = Number(loc?.attributes?.afwijking_km);
-    const herberekend = loc?.attributes?.afstand_via === "herberekend";
+    const locatieState = hass.states["sensor.stormchase_actieve_locatie"];
+    const afwijking = Number(locatieState?.attributes?.afwijking_km);
+    const herberekend =
+      locatieState?.attributes?.afstand_via === "herberekend";
     if (Number.isFinite(afwijking) && afwijking > 5 && !herberekend) {
       cards.push(
         tegel({
@@ -449,18 +450,31 @@ class StormchaseStrategy {
       );
     }
 
-    // ---- Locatie, alleen als je niet thuis bent ----
-    const locatie = hass.states["sensor.stormchase_actieve_locatie"];
-    if (locatie && locatie.state !== "thuis") {
+    // ---- Waar je bent ----
+    // Met een adres erbij is deze tegel altijd zinvol; zonder adres alleen
+    // als je niet thuis bent, want anders voegt hij niets toe.
+    const heeftAdres = Boolean(locatieState?.attributes?.adres);
+    const nietThuis = locatieState && locatieState.state !== "thuis";
+
+    if (heeftAdres || nietThuis) {
       cards.push(
         tegel({
-          icon: "mdi:crosshairs-gps",
-          icon_color: "orange",
-          primary: "{{ states('sensor.stormchase_actieve_locatie') }}",
-          secondary:
-            "Meetpunt \u00b7 " +
+          icon: "mdi:map-marker",
+          icon_color: nietThuis ? "orange" : "blue",
+          primary:
+            "{% set a = state_attr('sensor.stormchase_actieve_locatie','adres') %}" +
+            "{% if a %}{{ a }}{% else %}" +
             "{{ state_attr('sensor.stormchase_actieve_locatie','latitude') | round(3) }}, " +
-            "{{ state_attr('sensor.stormchase_actieve_locatie','longitude') | round(3) }}",
+            "{{ state_attr('sensor.stormchase_actieve_locatie','longitude') | round(3) }}" +
+            "{% endif %}",
+          secondary:
+            "{{ states('sensor.stormchase_actieve_locatie') }}" +
+            "{% set a = state_attr('sensor.stormchase_actieve_locatie','adres') %}" +
+            "{% if a %} \u00b7 " +
+            "{{ state_attr('sensor.stormchase_actieve_locatie','latitude') | round(2) }}, " +
+            "{{ state_attr('sensor.stormchase_actieve_locatie','longitude') | round(2) }}" +
+            "{% endif %}",
+          multiline_secondary: true,
         })
       );
     }

@@ -14,7 +14,8 @@
           "ring_mid": "Middelste ring",
           "ring_far": "Buitenste ring",
           "location_mode": "Locatie",
-          "ring_window": "Tijdvenster voor de ringen"
+          "ring_window": "Tijdvenster voor de ringen",
+          "address_sensor": "Adressensor (optioneel)"
         }
       },
       "location": {
@@ -80,7 +81,8 @@
           "ring_mid": "Middelste ring",
           "ring_far": "Buitenste ring",
           "location_mode": "Locatie",
-          "ring_window": "Tijdvenster voor de ringen"
+          "ring_window": "Tijdvenster voor de ringen",
+          "address_sensor": "Adressensor (optioneel)"
         }
       },
       "location": {

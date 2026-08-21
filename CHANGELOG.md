@@ -5,6 +5,42 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.15.0] — 2026-08-21
+
+### Toegevoegd
+
+- **Adres op het dashboard.** Een optionele adressensor, zoals de
+  `geocoded_location` van de companion-app, wordt overgenomen als attribuut
+  `adres` op `sensor.stormchase_actieve_locatie` en getoond op het dashboard.
+  Coordinaten zeggen weinig; een plaatsnaam maakt in een oogopslag duidelijk
+  waar de integratie naar kijkt.
+- De config flow raadt de sensor op het achtervoegsel `_geocoded_location`,
+  dus meestal hoef je niets in te vullen.
+- De locatietegel verschijnt nu ook als je thuis bent, mits er een adres
+  bekend is. Zonder adres blijft hij weg zolang je thuis bent, want dan voegt
+  hij niets toe.
+
+## [0.14.1] — 2026-08-21
+
+### Gerepareerd
+
+- **Onzinnige reissnelheid na het opstarten.** Zolang een device_tracker nog
+  niet geladen is valt de locatie terug op je thuisadres. Zodra de tracker
+  daarna verschijnt springt de positie, en die sprong werd als beweging
+  gelezen: in de praktijk waarden van tienduizenden kilometers per uur, met
+  als gevolg dat je onterecht als onderweg gold en geen meldingen kreeg.
+  - Bij een wisseling van locatiebron wordt de reeks nu gewist.
+  - Snelheden boven 400 km/u worden genegeerd, want die komen van een
+    verspringende positie en niet van beweging. Vangt ook een foutieve
+    GPS-fix midden in een sessie af.
+- **Stilstaan vanaf het opstarten gold tien minuten als onderweg.** De
+  nalooptijd is bedoeld om het stoplicht af te vangen na echt rijden. Ben je
+  sinds de start nooit boven de drempel geweest, dan sta je gewoon stil.
+- **Waarschuwingen bleven een kwartier op het verkeerde land staan.** De
+  landbepaling werd bij het opstarten met de thuislocatie gedaan en pas bij
+  de volgende ronde gecorrigeerd. Zodra de locatie bruikbaar wordt of meer
+  dan een halve graad verschuift, wordt nu meteen opnieuw bepaald.
+
 ## [0.14.0] — 2026-08-21
 
 ### Gewijzigd
@@ -554,6 +590,8 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.15.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.15.0
+[0.14.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.14.1
 [0.14.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.14.0
 [0.13.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.13.0
 [0.12.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.12.1

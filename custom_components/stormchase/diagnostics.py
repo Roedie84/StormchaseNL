@@ -90,6 +90,7 @@ async def async_get_config_entry_diagnostics(
         ),
         "locatie": {
             "bron": storm_data.location_source if storm_data else None,
+            "adres_bekend": bool(storm_data.adres) if storm_data else None,
             "latitude_grof": _grof(storm_data.latitude) if storm_data else None,
             "longitude_grof": _grof(storm_data.longitude) if storm_data else None,
             "ha_thuis_grof": [
