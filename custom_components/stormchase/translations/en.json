@@ -52,7 +52,9 @@
           "heat_threshold": "Heat from",
           "frost_threshold": "Frost from",
           "outlook_notify": "Notify when the outlook escalates",
-          "outlook_level": "Notify from"
+          "outlook_level": "Notify from",
+          "critical_alerts": "Break through silent mode for hazards",
+          "dashboard_path": "Dashboard path for the button"
         }
       },
       "alerts": {
@@ -134,7 +136,9 @@
           "heat_threshold": "Heat from",
           "frost_threshold": "Frost from",
           "outlook_notify": "Notify when the outlook escalates",
-          "outlook_level": "Notify from"
+          "outlook_level": "Notify from",
+          "critical_alerts": "Break through silent mode for hazards",
+          "dashboard_path": "Dashboard path for the button"
         }
       },
       "alerts": {
@@ -234,6 +238,24 @@
       },
       "forecast": {
         "name": "Storm outlook"
+      },
+      "cell_direction": {
+        "name": "Cell direction"
+      },
+      "cell_speed": {
+        "name": "Cell speed"
+      },
+      "pass_distance": {
+        "name": "Pass distance"
+      },
+      "pass_time": {
+        "name": "Passing in"
+      },
+      "flash_rate": {
+        "name": "Flash rate"
+      },
+      "safe_in": {
+        "name": "Safe in"
       }
     },
     "binary_sensor": {
@@ -251,6 +273,9 @@
       },
       "moving": {
         "name": "Moving"
+      },
+      "shelter": {
+        "name": "Take shelter"
       }
     },
     "switch": {

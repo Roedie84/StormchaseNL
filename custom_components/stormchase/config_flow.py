@@ -41,6 +41,8 @@ from .const import (
     CONF_QUIET_TO,
     CONF_MOVING_SPEED,
     CONF_ONLY_STATIONARY,
+    CONF_CRITICAL,
+    CONF_DASHBOARD,
     CONF_OUTLOOK_LEVEL,
     CONF_OUTLOOK_NOTIFY,
     CONF_RAIN_LEAD,
@@ -55,6 +57,7 @@ from .const import (
     DEFAULT_MOVING_SPEED,
     DEFAULT_STATIONARY_MINUTES,
     DEFAULT_FROST_THRESHOLD,
+    DEFAULT_DASHBOARD,
     DEFAULT_OUTLOOK_LEVEL,
     DEFAULT_HEAT_THRESHOLD,
     DEFAULT_WEATHER_TYPES,
@@ -331,6 +334,8 @@ def _notify_schema(hass, defaults: dict[str, Any]) -> vol.Schema:
             vol.Required(
                 CONF_MOVING_SPEED,
     CONF_ONLY_STATIONARY,
+    CONF_CRITICAL,
+    CONF_DASHBOARD,
     CONF_OUTLOOK_LEVEL,
     CONF_OUTLOOK_NOTIFY,
                 default=defaults.get(CONF_ONLY_STATIONARY, True),
@@ -355,6 +360,13 @@ def _notify_schema(hass, defaults: dict[str, Any]) -> vol.Schema:
                     mode=selector.NumberSelectorMode.BOX,
                 )
             ),
+            vol.Required(
+                CONF_CRITICAL, default=defaults.get(CONF_CRITICAL, False)
+            ): selector.BooleanSelector(),
+            vol.Required(
+                CONF_DASHBOARD,
+                default=defaults.get(CONF_DASHBOARD, DEFAULT_DASHBOARD),
+            ): str,
             vol.Required(
                 CONF_QUIET_FROM,
                 default=defaults.get(CONF_QUIET_FROM, DEFAULT_QUIET),

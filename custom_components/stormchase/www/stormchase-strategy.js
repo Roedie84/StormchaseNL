@@ -243,6 +243,33 @@ class StormchaseStrategy {
 
     cards.push(kop(config.title || "Stormchase", "mdi:flash", "title"));
 
+    // ---- Schuilen: staat boven alles, want dit gaat over veiligheid ----
+    if (hass.states["binary_sensor.stormchase_schuilen"]) {
+      cards.push({
+        type: "conditional",
+        conditions: [
+          {
+            condition: "state",
+            entity: "binary_sensor.stormchase_schuilen",
+            state: "on",
+          },
+        ],
+        card: {
+          type: "custom:mushroom-template-card",
+          icon: "mdi:home-alert",
+          icon_color: "red",
+          primary: "Blijf binnen",
+          secondary:
+            "Onweer binnen 10 km" +
+            "{% set m = states('sensor.stormchase_veilig_over') %}" +
+            "{% if m not in ['unknown','unavailable','none'] %}" +
+            " \u00b7 veilig over {{ m }} min{% endif %}",
+          multiline_secondary: true,
+          card_mod: { style: heroStyle(KLEUR.gevaar) },
+        },
+      });
+    }
+
     // ---- Officiele weerwaarschuwing, alleen als er een geldt ----
     if (hass.states["binary_sensor.stormchase_weerwaarschuwing"]) {
       cards.push({
@@ -518,6 +545,62 @@ class StormchaseStrategy {
           multiline_secondary: true,
         })
       );
+    }
+
+    // ---- De cel als geheel ----
+    // Zegt meer dan de losse inslag: waar gaat de bui heen en komt hij hier
+    // langs, of schampt hij eraf?
+    if (bruikbaar(hass, "sensor.stormchase_celrichting")) {
+      cards.push(kop("Onweerscel", "mdi:arrow-decision"));
+
+      cards.push({
+        type: "custom:mushroom-template-card",
+        icon: "mdi:arrow-decision",
+        icon_color:
+          "{% set d = states('sensor.stormchase_passageafstand') | float(999) %}" +
+          "{{ 'red' if d < 10 else 'orange' if d < 25 else 'amber' if d < 50 else 'disabled' }}",
+        primary:
+          "Trekt naar het {{ states('sensor.stormchase_celrichting') }}" +
+          "{% if has_value('sensor.stormchase_celsnelheid') %}" +
+          " met {{ states('sensor.stormchase_celsnelheid') | round(0) }} km/u{% endif %}",
+        secondary:
+          "{% if has_value('sensor.stormchase_passage_over') %}" +
+          "Passeert over {{ states('sensor.stormchase_passage_over') }} min op " +
+          "{{ states('sensor.stormchase_passageafstand') }} km" +
+          "{% else %}Trekt weg of staat stil{% endif %}" +
+          "{% set n = state_attr('sensor.stormchase_celrichting','inslagen_in_cel') %}" +
+          "{% if n %} \u00b7 {{ n }} inslagen in de cel{% endif %}",
+        multiline_secondary: true,
+        card_mod: { style: TILE_STYLE },
+      });
+
+      cards.push({
+        type: "grid",
+        columns: 2,
+        square: false,
+        cards: [
+          tegel({
+            icon: "mdi:flash-triangle",
+            icon_color:
+              "{% set f = states('sensor.stormchase_inslagfrequentie') | float(0) %}" +
+              "{{ 'red' if f > 20 else 'orange' if f > 5 else 'amber' if f > 0 else 'disabled' }}",
+            primary: waarde("sensor.stormchase_inslagfrequentie", "/min"),
+            secondary:
+              "Inslagen \u00b7 " +
+              "{{ state_attr('sensor.stormchase_inslagfrequentie','trend') | default('') }}",
+          }),
+          tegel({
+            icon: "mdi:shield-clock",
+            icon_color:
+              "{% if is_state('binary_sensor.stormchase_schuilen','on') %}red{% else %}green{% endif %}",
+            primary:
+              "{% if is_state('binary_sensor.stormchase_schuilen','on') %}" +
+              "{{ states('sensor.stormchase_veilig_over') }} min" +
+              "{% else %}Veilig{% endif %}",
+            secondary: "30/30-regel",
+          }),
+        ],
+      });
     }
 
     // ---- Neerslag ----

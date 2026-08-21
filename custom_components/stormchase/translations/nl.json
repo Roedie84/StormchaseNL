@@ -52,7 +52,9 @@
           "heat_threshold": "Hitte vanaf",
           "frost_threshold": "Vorst vanaf",
           "outlook_notify": "Melden als het vooruitzicht opschaalt",
-          "outlook_level": "Melden vanaf"
+          "outlook_level": "Melden vanaf",
+          "critical_alerts": "Bij gevaar door de stille modus heen",
+          "dashboard_path": "Pad naar het dashboard voor de knop"
         }
       },
       "alerts": {
@@ -134,7 +136,9 @@
           "heat_threshold": "Hitte vanaf",
           "frost_threshold": "Vorst vanaf",
           "outlook_notify": "Melden als het vooruitzicht opschaalt",
-          "outlook_level": "Melden vanaf"
+          "outlook_level": "Melden vanaf",
+          "critical_alerts": "Bij gevaar door de stille modus heen",
+          "dashboard_path": "Pad naar het dashboard voor de knop"
         }
       },
       "alerts": {
@@ -234,6 +238,24 @@
       },
       "forecast": {
         "name": "Onweersverwachting"
+      },
+      "cell_direction": {
+        "name": "Celrichting"
+      },
+      "cell_speed": {
+        "name": "Celsnelheid"
+      },
+      "pass_distance": {
+        "name": "Passageafstand"
+      },
+      "pass_time": {
+        "name": "Passage over"
+      },
+      "flash_rate": {
+        "name": "Inslagfrequentie"
+      },
+      "safe_in": {
+        "name": "Veilig over"
       }
     },
     "binary_sensor": {
@@ -251,6 +273,9 @@
       },
       "moving": {
         "name": "Onderweg"
+      },
+      "shelter": {
+        "name": "Schuilen"
       }
     },
     "switch": {

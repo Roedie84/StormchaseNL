@@ -40,6 +40,7 @@ async def async_setup_entry(
                 hass.data[DOMAIN][entry.entry_id]["alerts"], entry
             ),
             MovingBinarySensor(storm, entry),
+            ShelterBinarySensor(storm, entry),
         ]
     )
 
@@ -242,4 +243,43 @@ class MovingBinarySensor(CoordinatorEntity[StormCoordinator], BinarySensorEntity
             "snelheid_kmh": data.reissnelheid,
             "stil_sinds_minuten": data.stil_sinds,
             "locatie_bron": data.location_source,
+        }
+
+
+class ShelterBinarySensor(CoordinatorEntity[StormCoordinator], BinarySensorEntity):
+    """De 30/30-regel: aan zolang je binnen hoort te blijven.
+
+    Gaat aan zodra er onweer binnen tien kilometer is, wat overeenkomt met
+    dertig seconden tussen flits en donder, en blijft aan tot dertig minuten
+    na de laatste inslag binnen die afstand. Juist de eerste en laatste
+    inslagen van een bui slaan het verst van de kern in.
+    """
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "shelter"
+    _attr_device_class = BinarySensorDeviceClass.SAFETY
+
+    def __init__(self, coordinator: StormCoordinator, entry: ConfigEntry) -> None:
+        """Initialiseer de sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_shelter"
+        self._attr_device_info = _device(entry)
+
+    @property
+    def is_on(self) -> bool | None:
+        """True zolang schuilen verstandig is."""
+        if not self.coordinator.data:
+            return None
+        return self.coordinator.data.schuilen
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        """Hoe lang nog."""
+        data = self.coordinator.data
+        if not data:
+            return {}
+        return {
+            "veilig_over_minuten": data.veilig_over,
+            "afstand": data.distance,
+            "drempel_km": 10,
         }

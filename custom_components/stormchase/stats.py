@@ -87,6 +87,7 @@ class Statistieken:
             "wind": 0,
             "weather": 0,
             "outlook": 0,
+            "shelter": 0,
             "alert": 0,
         }
     )

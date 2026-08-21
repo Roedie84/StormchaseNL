@@ -12,6 +12,10 @@ from homeassistant.util import dt as dt_util
 from .const import (
     CONF_NOTIFY_COOLDOWN,
     CONF_ALERT_NOTIFY,
+    CONF_CRITICAL,
+    CONF_DASHBOARD,
+    CRITICAL_SOORTEN,
+    DEFAULT_DASHBOARD,
     CONF_ONLY_STATIONARY,
     CONF_OUTLOOK_NOTIFY,
     CONF_RAIN_NOTIFY,
@@ -35,6 +39,7 @@ from .const import (
     EVENT_NEARBY,
     EVENT_ALERT,
     EVENT_RAIN_INCOMING,
+    EVENT_SHELTER,
     EVENT_OUTLOOK,
     EVENT_WEATHER,
     EVENT_WIND,
@@ -111,6 +116,7 @@ class StormNotifier:
             self.hass.bus.async_listen(EVENT_WIND, self._handle_wind),
             self.hass.bus.async_listen(EVENT_WEATHER, self._handle_weather),
             self.hass.bus.async_listen(EVENT_OUTLOOK, self._handle_outlook),
+            self.hass.bus.async_listen(EVENT_SHELTER, self._handle_shelter),
         ]
 
     def stop(self) -> None:
@@ -217,7 +223,24 @@ class StormNotifier:
         if eta:
             tekst += f", hier over ongeveer {int(eta)} minuten"
 
-        return tekst + "."
+        tekst += "."
+
+        # Wat de cel als geheel doet zegt meer dan de losse inslag
+        cel = data.get("cel") or {}
+        if cel.get("richting") and cel.get("snelheid"):
+            deel = f" Cel trekt naar het {cel['richting']} met {cel['snelheid']:.0f} km/u"
+            if cel.get("passage_over") is not None:
+                deel += (
+                    f" en passeert over {cel['passage_over']} minuten op "
+                    f"{cel['passage_afstand']:.0f} km"
+                )
+            tekst += deel + "."
+
+        frequentie = data.get("frequentie")
+        if frequentie and frequentie >= 1:
+            tekst += f" {frequentie:.0f} inslagen per minuut.".replace(".0 ", " ")
+
+        return tekst
 
     async def _stuur(
         self, bericht: str, soort: str = "nearby", titel: str | None = None
@@ -240,12 +263,7 @@ class StormNotifier:
                     {
                         "title": f"\u26a1 {titel}",
                         "message": bericht,
-                        "data": {
-                            "tag": f"{DOMAIN}_{soort}",
-                            "channel": "Onweer",
-                            "importance": "high",
-                            "notification_icon": "mdi:flash-alert",
-                        },
+                        "data": self._extras(soort),
                     },
                     blocking=False,
                 )
@@ -262,6 +280,63 @@ class StormNotifier:
         # weersituaties hebben hun eigen wachttijd.
         if soort in ("nearby", "approaching", "cleared"):
             self._laatste = dt_util.utcnow()
+
+    def _extras(self, soort: str) -> dict:
+        """De extra velden bij een melding.
+
+        Een knop naar het dashboard scheelt zoeken op het moment dat het ertoe
+        doet. Bij gevaar mag de melding door de stille modus heen, mits je dat
+        hebt aangezet: dat werkt alleen als je de app daar toestemming voor
+        hebt gegeven.
+        """
+        pad = self._opt(CONF_DASHBOARD, DEFAULT_DASHBOARD)
+
+        extras: dict = {
+            "tag": f"{DOMAIN}_{soort}",
+            "channel": "Onweer",
+            "importance": "high",
+            "notification_icon": "mdi:flash-alert",
+            "actions": [
+                {"action": "URI", "title": "Bekijk kaart", "uri": pad},
+            ],
+        }
+
+        dringend = self._opt(CONF_CRITICAL, False) and soort in CRITICAL_SOORTEN
+        if dringend:
+            # iOS wil een critical-vlag met volume, Android een eigen kanaal
+            extras["push"] = {
+                "interruption-level": "critical",
+                "sound": {"name": "default", "critical": 1, "volume": 1.0},
+            }
+            extras["channel"] = "Onweer dringend"
+            extras["importance"] = "max"
+            extras["ttl"] = 0
+            extras["priority"] = "high"
+
+        return extras
+
+    @callback
+    async def _handle_shelter(self, event: Event) -> None:
+        """De 30/30-regel gaat in of loopt af."""
+        if not self.ingeschakeld or not self.diensten:
+            return
+
+        if event.data.get("schuilen"):
+            afstand = event.data.get("afstand")
+            bericht = "Onweer binnen tien kilometer. Ga naar binnen."
+            if afstand:
+                bericht = (
+                    f"Onweer op {afstand:.1f} km. Ga naar binnen en blijf "
+                    "binnen tot dertig minuten na de laatste inslag."
+                ).replace(".", ",", 1)
+            await self._stuur(bericht, "shelter", titel="Schuilen")
+        else:
+            await self._stuur(
+                "Dertig minuten geen onweer meer in de buurt. Het is weer "
+                "veilig buiten.",
+                "safe",
+                titel="Veilig",
+            )
 
     @callback
     async def _handle_nearby(self, event: Event) -> None:

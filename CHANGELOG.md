@@ -5,6 +5,52 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.23.0] — 2026-08-21
+
+Vier toevoegingen voor het chasen zelf.
+
+### Celtracking
+
+- De inslagen worden geclusterd tot cellen en het zwaartepunt van de
+  dichtstbijzijnde wordt over tijd gevolgd. Daaruit volgt de richting waarheen
+  de bui trekt, de snelheid, en waar en wanneer hij je passeert.
+- Nieuwe sensoren: `celrichting`, `celsnelheid`, `passageafstand` en
+  `passage_over`.
+- Dit lost op dat de afstand tot de dichtstbijzijnde inslag van bui naar bui
+  springt. Een cel die 15 km ten zuiden langsschampt levert nu die 15 km op,
+  in plaats van een afstand die heen en weer stuitert.
+- Clusteren gebeurt op een raster van een kwart graad met samenvoeging van
+  buurvakjes, zodat een cel die net over een rasterlijn valt niet in tweeen
+  wordt geknipt. Dat scheelt een berekening van elke inslag tegen elke
+  andere, wat bij honderden inslagen per minuut telt.
+- Verspringt het zwaartepunt meer dan veertig kilometer, dan is er een andere
+  cel dichterbij gekomen en begint het spoor opnieuw.
+
+### Inslagfrequentie
+
+- `sensor.stormchase_inslagfrequentie` telt de inslagen per minuut, met in
+  het attribuut `trend` of het toeneemt of afneemt. Een cel die aantrekt
+  verraadt zich in de flitsfrequentie voordat de afstand iets doet.
+
+### 30/30-regel
+
+- `binary_sensor.stormchase_schuilen` gaat aan zodra er onweer binnen tien
+  kilometer is, wat overeenkomt met dertig seconden tussen flits en donder,
+  en blijft aan tot dertig minuten na de laatste inslag binnen die afstand.
+  Juist de eerste en laatste inslagen van een bui slaan het verst van de kern
+  in.
+- `sensor.stormchase_veilig_over` telt af. Er komt een melding bij het ingaan
+  en bij het aflopen, en op het dashboard een rode banner bovenaan.
+
+### Meldingen
+
+- Elke melding krijgt een knop naar het dashboard.
+- Optioneel gaan meldingen over gevaar door de stille modus heen, als critical
+  alert. Dat werkt alleen als je de companion-app daar toestemming voor hebt
+  gegeven. Staat standaard uit.
+- Onweersmeldingen noemen nu wat de cel doet: "Cel trekt naar het NO met 47
+  km/u en passeert over 18 minuten op 6 km. 8 inslagen per minuut."
+
 ## [0.22.1] — 2026-08-21
 
 ### Gerepareerd
@@ -859,6 +905,7 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.23.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.23.0
 [0.22.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.22.1
 [0.22.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.22.0
 [0.21.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.21.0

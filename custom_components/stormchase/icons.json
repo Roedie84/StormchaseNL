@@ -72,6 +72,24 @@
       },
       "forecast": {
         "default": "mdi:weather-lightning"
+      },
+      "cell_direction": {
+        "default": "mdi:arrow-decision"
+      },
+      "cell_speed": {
+        "default": "mdi:speedometer-medium"
+      },
+      "pass_distance": {
+        "default": "mdi:arrow-expand-horizontal"
+      },
+      "pass_time": {
+        "default": "mdi:clock-fast"
+      },
+      "flash_rate": {
+        "default": "mdi:flash-triangle"
+      },
+      "safe_in": {
+        "default": "mdi:shield-clock"
       }
     },
     "binary_sensor": {
@@ -103,6 +121,12 @@
         "default": "mdi:map-marker-check",
         "state": {
           "on": "mdi:car-side"
+        }
+      },
+      "shelter": {
+        "default": "mdi:home-outline",
+        "state": {
+          "on": "mdi:home-alert"
         }
       }
     },

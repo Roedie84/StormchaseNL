@@ -61,6 +61,23 @@ CONF_RING_WINDOW = "ring_window"
 DEFAULT_RING_WINDOW = 120  # minuten
 MAX_INSLAGEN = 5000        # bovengrens voor de bewaarde inslagen
 
+# Celtracking en veiligheid
+CELVENSTER = 900          # seconden inslagen die meetellen voor een cel
+CELSPOOR = 40             # aantal bewaarde zwaartepunten
+SCHUILAFSTAND = 10        # km; hierbinnen geldt de 30/30-regel
+SCHUILNALOOP = 30         # minuten na de laatste inslag binnen die afstand
+FREQUENTIEVENSTER = 300   # seconden voor de inslagfrequentie
+
+EVENT_SHELTER = f"{DOMAIN}_shelter"
+
+# Configuratie - meldingsvorm
+CONF_CRITICAL = "critical_alerts"
+CONF_DASHBOARD = "dashboard_path"
+DEFAULT_DASHBOARD = "/stormchase"
+
+# Soorten die door de stille modus heen mogen als critical alert is aangezet
+CRITICAL_SOORTEN = {"nearby", "shelter", "alert", "outlook"}
+
 # Configuratie - vooruitzicht
 CONF_OUTLOOK_NOTIFY = "outlook_notify"
 CONF_OUTLOOK_LEVEL = "outlook_level"

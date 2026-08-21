@@ -69,6 +69,48 @@ STORM_SENSORS: tuple[StormSensorDescription, ...] = (
         value=lambda data: data.eta,
     ),
     StormSensorDescription(
+        key="cell_direction",
+        translation_key="cell_direction",
+        value=lambda data: (data.cel or {}).get("richting"),
+    ),
+    StormSensorDescription(
+        key="cell_speed",
+        translation_key="cell_speed",
+        native_unit_of_measurement="km/h",
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=0,
+        value=lambda data: (data.cel or {}).get("snelheid"),
+    ),
+    StormSensorDescription(
+        key="pass_distance",
+        translation_key="pass_distance",
+        native_unit_of_measurement="km",
+        suggested_display_precision=1,
+        value=lambda data: (data.cel or {}).get("passage_afstand"),
+    ),
+    StormSensorDescription(
+        key="pass_time",
+        translation_key="pass_time",
+        native_unit_of_measurement="min",
+        suggested_display_precision=0,
+        value=lambda data: (data.cel or {}).get("passage_over"),
+    ),
+    StormSensorDescription(
+        key="flash_rate",
+        translation_key="flash_rate",
+        native_unit_of_measurement="/min",
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=1,
+        value=lambda data: data.frequentie,
+    ),
+    StormSensorDescription(
+        key="safe_in",
+        translation_key="safe_in",
+        native_unit_of_measurement="min",
+        suggested_display_precision=0,
+        value=lambda data: data.veilig_over,
+    ),
+    StormSensorDescription(
         key="trend",
         translation_key="trend",
         value=lambda data: data.trend,
@@ -268,6 +310,18 @@ class StormSensor(CoordinatorEntity[StormCoordinator], SensorEntity):
                 "afstand": data.distance,
                 "azimut": data.azimuth,
                 "trend": data.trend,
+            }
+
+        if self.entity_description.key == "flash_rate":
+            return {"trend": data.frequentie_trend}
+
+        if self.entity_description.key == "cell_direction":
+            cel = data.cel or {}
+            return {
+                "graden": cel.get("richting_graden"),
+                "inslagen_in_cel": cel.get("inslagen"),
+                "aantal_cellen": cel.get("cellen"),
+                "afstand_tot_cel": cel.get("afstand"),
             }
 
         if self.entity_description.key == "distance":

@@ -19,6 +19,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from homeassistant.util import dt as dt_util
 from homeassistant.util.location import distance as location_distance
 
+from .cel import frequentie, frequentietrend, volg_cel
 from .indices import (
     duiding_cape,
     duiding_schering,
@@ -46,7 +47,13 @@ from .const import (
     CONF_RING_NEAR,
     CONF_TRACKER_ENTITY,
     CONF_UPDATE_INTERVAL,
+    CELSPOOR,
+    CELVENSTER,
     CONF_RING_WINDOW,
+    EVENT_SHELTER,
+    FREQUENTIEVENSTER,
+    SCHUILAFSTAND,
+    SCHUILNALOOP,
     CONF_STATIONARY_MINUTES,
     CONF_WARN_DISTANCE,
     CONF_ZONE_ENTITY,
@@ -230,6 +237,11 @@ class StormData:
     rings: dict[int, int] = field(default_factory=dict)
     ring_bron: str = "geen"
     afstand_bron: str = "sensor"
+    cel: dict | None = None
+    frequentie: float | None = None
+    frequentie_trend: str | None = None
+    schuilen: bool | None = None
+    veilig_over: int | None = None
     last_strike: datetime | None = None
     latitude: float | None = None
     longitude: float | None = None
@@ -281,6 +293,12 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         self._vorige_inslag: datetime | None = None
         self._laatste_beweging: float | None = None
         self._vorige_bron: str | None = None
+        # Inslagen met hun positie, voor celtracking en frequentie
+        self._punten: deque[tuple[float, float, float]] = deque(maxlen=3000)
+        self._gezien: dict[str, float] = {}
+        self._celspoor: list[tuple[float, float, float]] = []
+        self._laatste_dichtbij: float | None = None
+        self._was_schuilen: bool | None = None
 
     @property
     def ring_bounds(self) -> list[int]:
@@ -388,6 +406,24 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
 
             if laatste is None or state.last_changed > laatste:
                 laatste = state.last_changed
+
+            # Elke inslag eenmalig vastleggen met positie en tijd, voor de
+            # celtracking en de frequentie.
+            if state.entity_id not in self._gezien:
+                stempel = dt_util.utcnow().timestamp()
+                self._gezien[state.entity_id] = stempel
+                self._punten.append((stempel, float(breedte), float(lengte)))
+
+        # Entiteiten die verdwenen zijn hoeven we niet te blijven onthouden
+        if len(self._gezien) > 5000:
+            actueel = {
+                s.entity_id
+                for s in self.hass.states.async_all("geo_location")
+                if pattern in s.entity_id
+            }
+            self._gezien = {
+                k: v for k, v in self._gezien.items() if k in actueel
+            }
 
         return punten, laatste
 
@@ -592,6 +628,28 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
             return TREND_RECEDE
         return TREND_STABLE
 
+    def _schuilregel(
+        self, afstand: float | None, nu: float
+    ) -> tuple[bool | None, int | None]:
+        """De 30/30-regel: schuilen binnen tien kilometer.
+
+        Tien kilometer komt overeen met dertig seconden tussen flits en
+        donder. Blijf binnen tot dertig minuten na de laatste inslag binnen
+        die afstand, want juist de eerste en laatste inslagen van een bui
+        slaan het verst van de kern in.
+        """
+        if afstand is not None and afstand <= SCHUILAFSTAND:
+            self._laatste_dichtbij = nu
+
+        if self._laatste_dichtbij is None:
+            return False, None
+
+        verstreken = (nu - self._laatste_dichtbij) / 60
+        if verstreken >= SCHUILNALOOP:
+            return False, None
+
+        return True, int(SCHUILNALOOP - verstreken)
+
     def _fire_events(self, data: StormData) -> None:
         """Vuur events af bij overgangen, niet bij elke update.
 
@@ -606,6 +664,8 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
             "trend": data.trend,
             "inslagen": data.rings,
             "locatie_bron": data.location_source,
+            "cel": data.cel,
+            "frequentie": data.frequentie,
         }
 
         if data.distance is not None:
@@ -627,6 +687,15 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
                 self._was_nearby = True
             elif self._was_nearby is None:
                 self._was_nearby = False
+
+        if data.schuilen is not None:
+            if data.schuilen and self._was_schuilen is False:
+                self.hass.bus.async_fire(EVENT_SHELTER, {**payload, "schuilen": True})
+                if self.stats is not None:
+                    self.stats.noteer_event("shelter")
+            elif not data.schuilen and self._was_schuilen:
+                self.hass.bus.async_fire(EVENT_SHELTER, {**payload, "schuilen": False})
+            self._was_schuilen = data.schuilen
 
         if data.speed is not None:
             approaching = data.speed > SPEED_DEADZONE
@@ -674,6 +743,26 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
             if bron_state is not None and distance is not None:
                 last_strike = bron_state.last_changed
 
+        # Celtracking, frequentie en de schuilregel
+        nu_ts = dt_util.utcnow().timestamp()
+        verse = [
+            (lat, lon)
+            for t, lat, lon in self._punten
+            if t >= nu_ts - CELVENSTER
+        ]
+
+        cel = None
+        if verse:
+            cel = volg_cel(verse, self._celspoor, latitude, longitude, nu_ts)
+            if cel is not None:
+                self._celspoor = cel.pop("geschiedenis")[-CELSPOOR:]
+
+        stempels = [t for t, _, _ in self._punten]
+        freq = frequentie(stempels, nu_ts, FREQUENTIEVENSTER)
+        freq_trend = frequentietrend(stempels, nu_ts, FREQUENTIEVENSTER)
+
+        schuilen, veilig_over = self._schuilregel(distance, nu_ts)
+
         # Pas nu de reeks bijwerken, met de afstand die we uiteindelijk
         # gebruiken. Anders lopen twee maatstaven door elkaar en springt de
         # berekende snelheid bij het omschakelen.
@@ -715,6 +804,11 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
             rings=rings,
             ring_bron=ring_bron,
             afstand_bron=afstand_bron,
+            cel=cel,
+            frequentie=freq,
+            frequentie_trend=freq_trend,
+            schuilen=schuilen,
+            veilig_over=veilig_over,
             last_strike=last_strike,
             latitude=latitude,
             longitude=longitude,
