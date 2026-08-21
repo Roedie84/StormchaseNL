@@ -116,48 +116,51 @@ const bruikbaar = (hass, entityId) => {
  */
 const bouwVertaaltabel = (hass) => {
   const tabel = {};
-  let voorvoegsel = "";
 
   for (const id of Object.keys(hass.states)) {
     const punt = id.indexOf(".");
     const domein = id.slice(0, punt);
     const naam = id.slice(punt + 1);
 
+    if (!["sensor", "binary_sensor", "switch", "weather"].includes(domein)) {
+      continue;
+    }
+
     const positie = naam.indexOf("stormchase");
     if (positie === -1) continue;
-
-    // Het voorvoegsel is voor alle entiteiten van de integratie gelijk;
-    // eenmaal gevonden geldt het ook voor entiteiten die nu niet bestaan.
-    if (positie > 0) voorvoegsel = naam.slice(0, positie);
 
     const net = `${domein}.${naam.slice(positie)}`;
     if (net !== id) tabel[net] = id;
   }
 
-  return { tabel, voorvoegsel };
+  return tabel;
 };
 
 /**
  * Vervang de nette id's door de echte, overal in de opgebouwde kaarten.
- * Werkt met het gevonden voorvoegsel, zodat ook verwijzingen naar entiteiten
- * die op dit moment geen waarde hebben goed terechtkomen.
+ *
+ * Bewust per entiteit en niet met een enkel voorvoegsel: entiteiten die in
+ * verschillende versies zijn aangemaakt kunnen door elkaar lopen, met en
+ * zonder ruimtenaam ervoor. Een gedeelde aanname breekt dan de helft.
+ *
+ * De langste sleutels eerst, anders zou sensor.stormchase_cape ook het begin
+ * van sensor.stormchase_cape_piek_12_uur vervangen.
  */
-const pasVertaaltabelToe = (waarde, voorvoegsel) => {
-  if (!voorvoegsel) return waarde;
-
+const pasVertaaltabelToe = (waarde, tabel, sleutels) => {
   if (typeof waarde === "string") {
-    return waarde.replace(
-      /\b(sensor|binary_sensor|switch|weather)\.stormchase/g,
-      `$1.${voorvoegsel}stormchase`
-    );
+    let uit = waarde;
+    for (const net of sleutels) {
+      if (uit.includes(net)) uit = uit.split(net).join(tabel[net]);
+    }
+    return uit;
   }
   if (Array.isArray(waarde)) {
-    return waarde.map((item) => pasVertaaltabelToe(item, voorvoegsel));
+    return waarde.map((item) => pasVertaaltabelToe(item, tabel, sleutels));
   }
   if (waarde && typeof waarde === "object") {
     const uit = {};
     for (const [sleutel, inhoud] of Object.entries(waarde)) {
-      uit[sleutel] = pasVertaaltabelToe(inhoud, voorvoegsel);
+      uit[sleutel] = pasVertaaltabelToe(inhoud, tabel, sleutels);
     }
     return uit;
   }
@@ -923,7 +926,8 @@ class StormchaseStrategy {
   static async bouwView(config, hass) {
     // Werk intern met de nette id's, ook als ze in werkelijkheid anders
     // heten. Zo blijven de kaarten leesbaar en werkt het bij iedereen.
-    const { tabel, voorvoegsel } = bouwVertaaltabel(hass);
+    const tabel = bouwVertaaltabel(hass);
+    const sleutels = Object.keys(tabel).sort((a, b) => b.length - a.length);
 
     const aliassen = { ...hass.states };
     for (const [net, echt] of Object.entries(tabel)) {
@@ -953,7 +957,7 @@ class StormchaseStrategy {
       ],
     };
 
-    return pasVertaaltabelToe(view, voorvoegsel);
+    return pasVertaaltabelToe(view, tabel, sleutels);
   }
 }
 

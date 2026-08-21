@@ -5,6 +5,22 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.10.1] — 2026-08-21
+
+### Gerepareerd
+
+- **Dashboard vond de helft van de entiteiten niet.** Entiteiten die in
+  verschillende versies zijn aangemaakt kunnen door elkaar lopen: de oudere
+  zonder ruimtenaam in de entity-id, de nieuwere met. De strategie leidde een
+  enkel voorvoegsel af en paste dat op alles toe, waardoor precies die ene
+  groep wegviel. De vertaling gaat nu per entiteit, zonder gedeelde aanname.
+  Langere namen worden eerst vervangen, zodat `stormchase_cape` niet het
+  begin van `stormchase_cape_piek_12_uur` opeet.
+- **Waarschuwingen bleven op het thuisland staan.** Bij het opstarten is een
+  device_tracker soms nog niet geladen; de landbepaling viel dan terug op de
+  thuislocatie en onthield dat. Zo'n voorlopige uitkomst wordt nu niet meer
+  bewaard.
+
 ## [0.10.0] — 2026-08-21
 
 ### Gewijzigd
@@ -407,6 +423,7 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.10.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.10.1
 [0.10.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.10.0
 [0.9.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.9.0
 [0.8.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.8.0

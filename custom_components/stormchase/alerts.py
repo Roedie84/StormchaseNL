@@ -21,6 +21,9 @@ from homeassistant.util import dt as dt_util
 
 from .const import (
     ALERT_INTERVAL,
+    MODE_HOME,
+    MODE_TRACKER,
+    MODE_ZONE,
     GEOCODE_URL,
     LANDCODES,
     ALERT_LEVEL_CHOICES,
@@ -98,7 +101,9 @@ class AlertCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
         """Wat de gebruiker heeft gekozen."""
         return self._opt(CONF_ALERT_COUNTRY, DEFAULT_ALERT_COUNTRY)
 
-    async def _bepaal_land(self, latitude: float, longitude: float) -> str | None:
+    async def _bepaal_land(
+        self, latitude: float, longitude: float, onthouden: bool = True
+    ) -> str | None:
         """Zoek het land op bij de huidige coordinaten.
 
         Alleen de landcode is nodig, geen adres. Het resultaat wordt bewaard
@@ -160,8 +165,9 @@ class AlertCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
         if land is None:
             _LOGGER.debug("Geen MeteoAlarm-feed voor landcode %s", code or "onbekend")
 
-        self._land_voor = (latitude, longitude)
-        self._gevonden_land = land
+        if onthouden:
+            self._land_voor = (latitude, longitude)
+            self._gevonden_land = land
         return land
 
     @property
@@ -202,8 +208,18 @@ class AlertCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
             return {"actief": [], "aantal": 0, "niveau": None, "rang": 0, "land": "uit"}
 
         if self.instelling == "auto":
-            latitude, longitude, _ = self.resolve_location()
-            land = await self._bepaal_land(latitude, longitude)
+            latitude, longitude, bron = self.resolve_location()
+
+            # Bij het opstarten is een device_tracker soms nog niet geladen en
+            # valt resolve_location terug op de thuislocatie. Dat resultaat
+            # mogen we niet onthouden, anders blijf je waarschuwingen van je
+            # thuisland krijgen terwijl je ergens anders bent.
+            modus = self._opt("location_mode", MODE_HOME)
+            nog_niet_klaar = modus in (MODE_TRACKER, MODE_ZONE) and bron == "thuis"
+
+            land = await self._bepaal_land(
+                latitude, longitude, onthouden=not nog_niet_klaar
+            )
             if land is None:
                 return {
                     "actief": [], "aantal": 0, "niveau": None, "rang": 0,
