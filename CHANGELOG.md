@@ -5,6 +5,19 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.18.0] — 2026-08-21
+
+### Gewijzigd
+
+- **De radar staat nu bovenaan over de volle breedte.** In een kolom van
+  halve breedte werd de kaart laag, terwijl het bij celdetectie juist om
+  oppervlak gaat: je wil de bui zien liggen ten opzichte van waar je bent.
+  Op een breed scherm wordt hij daardoor ongeveer anderhalf keer zo hoog.
+- De overige kaarten, Blitzortung, Buienradar en Windy, blijven in de
+  rechterkolom.
+- Nieuwe strategie-opties: `radar_boven: false` zet de radar terug in de
+  kolom, en `radar_ratio` legt de verhouding vast.
+
 ## [0.17.1] — 2026-08-21
 
 ### Gerepareerd
@@ -659,6 +672,7 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.18.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.18.0
 [0.17.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.17.1
 [0.17.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.17.0
 [0.16.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.16.0

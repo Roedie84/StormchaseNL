@@ -928,7 +928,9 @@ class StormchaseStrategy {
     ).toFixed(2);
     const cards = [kop("Kaarten", "mdi:map-marker-radius", "title")];
 
-    if (kaarten.iradar !== false) {
+    // Staat de radar al in zijn eigen rij bovenaan, dan hoeft hij hier niet
+    // nog een keer.
+    if (kaarten.iradar !== false && config.radar_boven === false) {
       cards.push(kop("iRadar · radar & celdetectie", "mdi:radar"));
       cards.push({
         type: "iframe",
@@ -978,6 +980,32 @@ class StormchaseStrategy {
     }
 
     return { type: "grid", column_span: smal ? 2 : 1, cards };
+  }
+
+  /**
+   * De radar in een eigen rij over de volle breedte.
+   *
+   * In een kolom van halve breedte wordt een liggende kaart laag, en juist
+   * bij celdetectie gaat het om oppervlak: je wil de bui zien liggen ten
+   * opzichte van waar je bent.
+   */
+  static radarSectie(config, hass) {
+    const smal = isSmal();
+    return {
+      type: "grid",
+      column_span: 2,
+      cards: [
+        kop("iRadar \u00b7 radar & celdetectie", "mdi:radar", "title"),
+        {
+          type: "iframe",
+          url: config.iradar_url || "https://iradar.app/",
+          // Over de volle breedte levert een lagere verhouding al een flinke
+          // kaart op; op een telefoon juist staand.
+          aspect_ratio: config.radar_ratio || (smal ? "150%" : "48%"),
+          card_mod: { style: FRAME_STYLE },
+        },
+      ],
+    };
   }
 
   /** Badges bovenaan: de cijfers die je tijdens een chase wil zien. */
@@ -1049,14 +1077,22 @@ class StormchaseStrategy {
 
     const uitgebreid = { ...config, _alle: alle };
 
+    const secties = [];
+    const kaarten = config.maps || {};
+
+    // De radar bovenaan, tenzij uitgezet
+    if (config.radar_boven !== false && kaarten.iradar !== false) {
+      secties.push(this.radarSectie(uitgebreid, hulp));
+    }
+
+    secties.push(this.statusSectie(uitgebreid, hulp));
+    secties.push(this.kaartenSectie(uitgebreid, hulp));
+
     const view = {
       type: "sections",
       max_columns: 2,
       badges: this.badges(uitgebreid, hulp),
-      sections: [
-        this.statusSectie(uitgebreid, hulp),
-        this.kaartenSectie(uitgebreid, hulp),
-      ],
+      sections: secties,
     };
 
     return pasVertaaltabelToe(view, tabel, sleutels);

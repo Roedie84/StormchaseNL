@@ -326,6 +326,8 @@ strategy:
   latitude: 52.10                    # anders de actieve locatie
   longitude: 6.63
   iradar_url: https://iradar.app/... # je eigen embed-URL
+  radar_boven: false                 # radar terug in de rechterkolom
+  radar_ratio: "70%"                 # verhouding van de radar bovenaan
   map_ratio: "120%"                  # anders automatisch per schermbreedte
   alle_waarden: false                # laat het vangnet-blok weg
   maps:
@@ -334,6 +336,10 @@ strategy:
     buienradar: true
     windy: false
 ```
+
+De radar staat standaard bovenaan over de volle breedte, want in een halve
+kolom wordt hij te laag om cellen op te kunnen beoordelen. De overige kaarten
+blijven in de rechterkolom.
 
 De kaarten passen hun verhouding aan de schermbreedte aan: op een telefoon
 staand, op een breed scherm liggend. Met `map_ratio` zet je dat vast.
