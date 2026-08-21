@@ -13,29 +13,74 @@
  * Alle opties zijn optioneel; zonder opties wordt alles automatisch bepaald.
  */
 
+/* Kleuren, op een plek zodat het geheel samenhangt. */
+const KLEUR = {
+  paneel: "rgba(30, 22, 52, .62)",
+  rand: "rgba(255, 255, 255, .07)",
+  gevaar: "#ff5c6c",
+  alert: "#f5b731",
+  rustig: "#4ade80",
+  gedempt: "#8a7fd0",
+};
+
+/* Cijfers met vaste breedte, anders springt de layout bij elke update. */
+const CIJFERS = 'font-variant-numeric: tabular-nums; font-feature-settings: "tnum";';
+
 const TILE_STYLE = `
   ha-card {
-    background: rgba(41,30,74,.55);
-    border: 1px solid rgba(255,255,255,.06);
-    border-radius: 16px;
+    background: ${KLEUR.paneel};
+    border: 1px solid ${KLEUR.rand};
+    border-radius: 14px;
   }
-  ha-card .primary { font-size: 22px; font-weight: 700; }
-  ha-card .secondary { font-size: 11px; letter-spacing: .5px; text-transform: uppercase; }
+  ha-card .primary {
+    font-size: 21px;
+    font-weight: 700;
+    ${CIJFERS}
+  }
+  ha-card .secondary {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.1px;
+    text-transform: uppercase;
+    opacity: .55;
+  }
 `;
 
 const PANEL_STYLE = `
   ha-card {
-    background: rgba(41,30,74,.55);
-    border: 1px solid rgba(255,255,255,.06);
+    background: ${KLEUR.paneel};
+    border: 1px solid ${KLEUR.rand};
     border-radius: 18px;
   }
 `;
 
 const FRAME_STYLE = `
   ha-card {
-    border: 1px solid rgba(255,255,255,.06);
+    border: 1px solid ${KLEUR.rand};
     border-radius: 18px;
     overflow: hidden;
+  }
+`;
+
+/* De statusregel bovenaan: kleur volgt de ernst van de situatie. */
+const heroStyle = (accent) => `
+  ha-card {
+    background: linear-gradient(135deg, rgba(30,22,52,.9), rgba(18,13,34,.9));
+    border: 1px solid ${accent}55;
+    border-left: 3px solid ${accent};
+    border-radius: 18px;
+  }
+  ha-card .primary {
+    font-size: 25px;
+    font-weight: 800;
+    letter-spacing: -.3px;
+    color: ${accent} !important;
+    ${CIJFERS}
+  }
+  ha-card .secondary {
+    font-size: 12px;
+    opacity: .7;
+    ${CIJFERS}
   }
 `;
 
@@ -63,6 +108,15 @@ const tegel = (opties) => ({
   card_mod: { style: TILE_STYLE },
   ...opties,
 });
+
+/**
+ * Toon een waarde, of een streepje als de sensor niets weet.
+ * Zonder dit staat er letterlijk "unknown km" op het dashboard zodra het
+ * een tijdje rustig is geweest.
+ */
+const waarde = (entityId, suffix = "") =>
+  `{% if has_value('${entityId}') %}{{ states('${entityId}') }}${suffix}` +
+  `{% else %}\u2014{% endif %}`;
 
 const kop = (heading, icon, style = "subtitle") => ({
   type: "heading",
@@ -100,56 +154,69 @@ class StormchaseStrategy {
   static statusSectie(config, hass) {
     const { bron, ringen } = this.verzamel(config, hass);
     const cards = [];
+    const heeftAfstand = bruikbaar(hass, bron.afstand);
 
     cards.push(kop(config.title || "Stormchase", "mdi:flash", "title"));
 
-    // Waarschuwingsbanner
-    if (bruikbaar(hass, "binary_sensor.stormchase_onweer_nabij")) {
-      cards.push({
-        type: "conditional",
-        conditions: [
-          {
-            condition: "state",
-            entity: "binary_sensor.stormchase_onweer_nabij",
-            state: "on",
-          },
-        ],
-        card: {
-          type: "custom:mushroom-template-card",
-          icon: "mdi:flash-alert",
-          icon_color: "red",
-          primary: bron.afstand
-            ? `Onweer op {{ states('${bron.afstand}') }} km — voorzichtig!`
-            : "Onweer in de buurt — voorzichtig!",
-          secondary:
-            "{{ states('sensor.stormchase_trend') }}" +
-            "{% if has_value('sensor.stormchase_aankomst') %}" +
-            " · hier over ongeveer {{ states('sensor.stormchase_aankomst') }} min" +
-            "{% endif %}",
-          multiline_secondary: true,
-          card_mod: {
-            style: `
-              ha-card {
-                background: rgba(255, 60, 90, .10);
-                border: 1px solid rgba(255, 92, 108, .55);
-                border-radius: 16px;
-              }
-              ha-card .primary { color: #ff5c6c !important; font-weight: 600; }
-            `,
-          },
-        },
-      });
-    }
+    // ---- Statusregel: vat in een oogopslag samen wat er speelt ----
+    // De kleur en tekst volgen de ernst, zodat je bij rustig weer niet
+    // hetzelfde beeld krijgt als wanneer er iets aankomt.
+    const nabij = "binary_sensor.stormchase_onweer_nabij";
+    const nadert = "binary_sensor.stormchase_onweer_nadert";
 
-    // Basistegels, alleen wat daadwerkelijk bestaat
+    const status = [
+      `{% set d = states('${bron.afstand || "sensor.none"}') %}`,
+      `{% set nabij = is_state('${nabij}','on') %}`,
+      `{% set nadert = is_state('${nadert}','on') %}`,
+      "{% set actief = d not in ['unknown','unavailable','none'] %}",
+    ].join("");
+
+    cards.push({
+      type: "custom:mushroom-template-card",
+      icon: `${status}{% if nabij %}mdi:flash-alert{% elif nadert %}mdi:radar` +
+        "{% elif actief %}mdi:weather-lightning{% else %}mdi:weather-night{% endif %}",
+      icon_color:
+        `${status}{% if nabij %}red{% elif nadert %}orange` +
+        "{% elif actief %}amber{% else %}green{% endif %}",
+      primary:
+        `${status}{% if nabij %}ONWEER NABIJ` +
+        "{% elif nadert %}NADERT{% elif actief %}ACTIEF{% else %}RUSTIG{% endif %}",
+      secondary:
+        status +
+        "{% if actief %}" +
+        "Laatste inslag {{ d }} km" +
+        `{% if has_value('${bron.azimut || "sensor.none"}') %}` +
+        ` in het {% set a = states('${bron.azimut}') | float(0) %}` +
+        `{{ ${JSON.stringify(KOMPASROOS)}[((a / 22.5) | round(0) | int) % 16] }}` +
+        "{% endif %}" +
+        "{% if has_value('sensor.stormchase_aankomst') %}" +
+        " \u00b7 hier over {{ states('sensor.stormchase_aankomst') }} min" +
+        "{% elif has_value('sensor.stormchase_trend') %}" +
+        " \u00b7 {{ states('sensor.stormchase_trend') }}" +
+        "{% endif %}" +
+        "{% else %}Geen blikseminslagen binnen bereik{% endif %}",
+      multiline_secondary: true,
+      card_mod: {
+        style:
+          `{% set nabij = is_state('${nabij}','on') %}` +
+          `{% set nadert = is_state('${nadert}','on') %}` +
+          `{% set d = states('${bron.afstand || "sensor.none"}') %}` +
+          "{% set actief = d not in ['unknown','unavailable','none'] %}" +
+          "{% if nabij %}" + heroStyle(KLEUR.gevaar) +
+          "{% elif nadert or actief %}" + heroStyle(KLEUR.alert) +
+          "{% else %}" + heroStyle(KLEUR.rustig) + "{% endif %}",
+      },
+    });
+
+    // ---- Kerncijfers ----
     const basis = [];
     if (bron.afstand) {
       basis.push(
         tegel({
           icon: "mdi:flash",
-          icon_color: "red",
-          primary: `{{ states('${bron.afstand}') }} km`,
-          secondary: "AFSTAND · laatste inslag",
+          icon_color: heeftAfstand ? "red" : "disabled",
+          primary: waarde(bron.afstand, " km"),
+          secondary: "Afstand",
         })
       );
     }
@@ -157,11 +224,33 @@ class StormchaseStrategy {
       basis.push(
         tegel({
           icon: "mdi:compass-outline",
-          icon_color: "blue",
-          primary: `{{ states('${bron.azimut}') }}°`,
+          icon_color: bruikbaar(hass, bron.azimut) ? "blue" : "disabled",
+          primary:
+            `{% if has_value('${bron.azimut}') %}` +
+            `{% set a = states('${bron.azimut}') | float(0) %}` +
+            `{{ ${JSON.stringify(KOMPASROOS)}[((a / 22.5) | round(0) | int) % 16] }}` +
+            "{% else %}\u2014{% endif %}",
           secondary:
-            `AZIMUT · {% set a = states('${bron.azimut}') | float(0) %}` +
-            `{{ ${JSON.stringify(KOMPASROOS)}[((a / 22.5) | round(0) | int) % 16] }}`,
+            `{% if has_value('${bron.azimut}') %}` +
+            `{{ states('${bron.azimut}') | round(0) }}\u00b0 richting` +
+            "{% else %}Richting{% endif %}",
+        })
+      );
+    }
+    if (bruikbaar(hass, "sensor.stormchase_naderingssnelheid")) {
+      basis.push(
+        tegel({
+          icon:
+            "{% set v = states('sensor.stormchase_naderingssnelheid') | float(0) %}" +
+            "{{ 'mdi:arrow-down-bold' if v > 1 else 'mdi:arrow-up-bold' if v < -1 else 'mdi:minus' }}",
+          icon_color:
+            "{% set v = states('sensor.stormchase_naderingssnelheid') | float(0) %}" +
+            "{{ 'red' if v > 3 else 'orange' if v > 1 else 'green' if v < -1 else 'disabled' }}",
+          primary:
+            "{% if has_value('sensor.stormchase_naderingssnelheid') %}" +
+            "{{ states('sensor.stormchase_naderingssnelheid') | float(0) | abs | round(0) }} km/u" +
+            "{% else %}\u2014{% endif %}",
+          secondary: "{{ states('sensor.stormchase_trend') }}",
         })
       );
     }
@@ -169,19 +258,9 @@ class StormchaseStrategy {
       basis.push(
         tegel({
           icon: "mdi:counter",
-          icon_color: "amber",
-          primary: `{{ states('${bron.teller}') }}`,
-          secondary: "AANTAL · tijdvenster",
-        })
-      );
-    }
-    if (bruikbaar(hass, "sensor.stormchase_actieve_markers")) {
-      basis.push(
-        tegel({
-          icon: "mdi:map-marker-multiple",
-          icon_color: "purple",
-          primary: "{{ states('sensor.stormchase_actieve_markers') }}",
-          secondary: "ACTIEVE MARKERS",
+          icon_color: bruikbaar(hass, bron.teller) ? "amber" : "disabled",
+          primary: waarde(bron.teller),
+          secondary: "Inslagen totaal",
         })
       );
     }
@@ -189,54 +268,24 @@ class StormchaseStrategy {
       cards.push({ type: "grid", columns: 2, square: false, cards: basis });
     }
 
-    // Locatie alleen tonen als je niet thuis zit; anders is het ruis
+    // ---- Locatie, alleen als je niet thuis bent ----
     const locatie = hass.states["sensor.stormchase_actieve_locatie"];
     if (locatie && locatie.state !== "thuis") {
       cards.push(
         tegel({
           icon: "mdi:crosshairs-gps",
           icon_color: "orange",
-          primary: "Locatie: {{ states('sensor.stormchase_actieve_locatie') }}",
+          primary: "{{ states('sensor.stormchase_actieve_locatie') }}",
           secondary:
+            "Meetpunt \u00b7 " +
             "{{ state_attr('sensor.stormchase_actieve_locatie','latitude') | round(3) }}, " +
             "{{ state_attr('sensor.stormchase_actieve_locatie','longitude') | round(3) }}",
         })
       );
     }
 
-    // Nadering en aankomst
-    if (bruikbaar(hass, "sensor.stormchase_naderingssnelheid")) {
-      cards.push({
-        type: "grid",
-        columns: 2,
-        square: false,
-        cards: [
-          tegel({
-            icon:
-              "{% set v = states('sensor.stormchase_naderingssnelheid') | float(0) %}" +
-              "{{ 'mdi:arrow-down-bold' if v > 1 else 'mdi:arrow-up-bold' if v < -1 else 'mdi:minus' }}",
-            icon_color:
-              "{% set v = states('sensor.stormchase_naderingssnelheid') | float(0) %}" +
-              "{{ 'red' if v > 3 else 'orange' if v > 1 else 'green' if v < -1 else 'grey' }}",
-            primary:
-              "{{ states('sensor.stormchase_naderingssnelheid') | float(0) | abs | round(0) }} km/u",
-            secondary: "NADERING · {{ states('sensor.stormchase_trend') }}",
-          }),
-          tegel({
-            icon: "mdi:timer-sand",
-            icon_color: "red",
-            primary:
-              "{% if has_value('sensor.stormchase_aankomst') %}" +
-              "{{ states('sensor.stormchase_aankomst') }} min{% else %}—{% endif %}",
-            secondary: "AANKOMST · geschat",
-          }),
-        ],
-      });
-    }
-
-    // Afstandsringen, hoeveel het er ook zijn
+    // ---- Afstandsringen ----
     if (ringen.length) {
-      const kleuren = ["red", "orange", "amber", "yellow", "grey"];
       cards.push(kop("Inslagen per ring", "mdi:target"));
       cards.push({
         type: "grid",
@@ -245,118 +294,104 @@ class StormchaseStrategy {
         cards: ringen.map((ring, i) =>
           tegel({
             icon: i === 0 ? "mdi:flash-alert" : "mdi:flash-outline",
-            icon_color: kleuren[Math.min(i, kleuren.length - 1)],
-            primary: `{{ states('${ring.id}') }}`,
-            secondary: `< ${ring.km} KM`,
+            // Grijs zolang er niets is; kleur pas als het telt.
+            icon_color:
+              `{{ '${["red", "orange", "amber"][Math.min(i, 2)]}'` +
+              ` if states('${ring.id}') | int(0) > 0 else 'disabled' }}`,
+            primary: waarde(ring.id),
+            secondary: `Binnen ${ring.km} km`,
           })
         ),
       });
     }
 
-    // Onweersparameters
+    // ---- Onweersparameters ----
     const parameters = [
       {
         id: "sensor.stormchase_cape",
         icon: "mdi:arrow-up-bold-box",
-        label: "CAPE · J/KG",
+        label: "CAPE",
         kleur:
           "{% set c = states('sensor.stormchase_cape') | float(0) %}" +
-          "{{ 'red' if c > 2500 else 'orange' if c > 1000 else 'amber' if c > 300 else 'grey' }}",
+          "{{ 'red' if c > 2500 else 'orange' if c > 1000 else 'amber' if c > 300 else 'disabled' }}",
       },
       {
         id: "sensor.stormchase_cape_piek_12_uur",
         icon: "mdi:chart-bell-curve",
-        label: "PIEK · 12U",
-        kleur: "purple",
+        label: "Piek 12u",
+        kleur:
+          "{% set c = states('sensor.stormchase_cape_piek_12_uur') | float(0) %}" +
+          "{{ 'purple' if c > 300 else 'disabled' }}",
       },
       {
         id: "sensor.stormchase_lifted_index",
         icon: "mdi:thermometer-chevron-down",
-        label: "LIFTED INDEX",
+        label: "Lifted index",
         kleur:
-          "{% set li = states('sensor.stormchase_lifted_index') | float(0) %}" +
-          "{{ 'red' if li < -6 else 'orange' if li < -3 else 'amber' if li < 0 else 'grey' }}",
+          "{% set li = states('sensor.stormchase_lifted_index') | float(99) %}" +
+          "{{ 'red' if li < -6 else 'orange' if li < -3 else 'amber' if li < 0 else 'disabled' }}",
       },
       {
         id: "sensor.stormchase_convectieve_remming",
         icon: "mdi:lock-outline",
-        label: "REMMING · J/KG",
+        label: "Remming",
         kleur: "blue",
       },
     ].filter((p) => bruikbaar(hass, p.id));
 
-    if (parameters.length || bruikbaar(hass, "sensor.stormchase_chase_potentie")) {
+    const heeftPotentie = bruikbaar(hass, "sensor.stormchase_chase_potentie");
+
+    if (parameters.length || heeftPotentie) {
       cards.push(kop("Onweersparameters", "mdi:weather-lightning"));
     }
 
-    if (bruikbaar(hass, "sensor.stormchase_chase_potentie")) {
-      cards.push(
-        tegel({
-          icon: "mdi:radar",
-          icon_color:
-            "{% set p = states('sensor.stormchase_chase_potentie') | float(0) %}" +
-            "{{ 'red' if p > 70 else 'orange' if p > 40 else 'amber' if p > 20 else 'grey' }}",
-          primary:
-            "Chase potentie: {{ states('sensor.stormchase_chase_potentie') }}%",
-          secondary:
-            "CAPE {{ state_attr('sensor.stormchase_chase_potentie','cape_bijdrage') }} · " +
-            "LI {{ state_attr('sensor.stormchase_chase_potentie','lifted_index_bijdrage') }} · " +
-            "inslagen {{ state_attr('sensor.stormchase_chase_potentie','inslagen_bijdrage') }}",
-          multiline_secondary: true,
-        })
-      );
+    if (heeftPotentie) {
+      cards.push({
+        type: "custom:mushroom-template-card",
+        icon: "mdi:radar",
+        icon_color:
+          "{% set p = states('sensor.stormchase_chase_potentie') | float(0) %}" +
+          "{{ 'red' if p > 70 else 'orange' if p > 40 else 'amber' if p > 20 else 'disabled' }}",
+        primary: "{{ states('sensor.stormchase_chase_potentie') }}% chase potentie",
+        secondary:
+          "{% set p = states('sensor.stormchase_chase_potentie') | float(0) %}" +
+          "{% if p > 70 %}Alle ingredienten aanwezig" +
+          "{% elif p > 40 %}Kans op onweer aanwezig" +
+          "{% elif p > 20 %}Beperkte kans" +
+          "{% else %}Weinig te verwachten{% endif %}" +
+          " \u00b7 CAPE {{ state_attr('sensor.stormchase_chase_potentie','cape_bijdrage') }}" +
+          " \u00b7 LI {{ state_attr('sensor.stormchase_chase_potentie','lifted_index_bijdrage') }}" +
+          " \u00b7 inslagen {{ state_attr('sensor.stormchase_chase_potentie','inslagen_bijdrage') }}",
+        multiline_secondary: true,
+        card_mod: { style: TILE_STYLE },
+      });
     }
 
     if (parameters.length) {
       cards.push({
         type: "grid",
-        columns: Math.min(parameters.length, 3),
+        columns: Math.min(parameters.length, 2),
         square: false,
         cards: parameters.map((p) =>
           tegel({
             icon: p.icon,
             icon_color: p.kleur,
-            primary: `{{ states('${p.id}') }}`,
+            primary: waarde(p.id),
             secondary: p.label,
           })
         ),
       });
     }
 
-    // Grote afstandkaart
-    if (bron.afstand) {
-      cards.push({
-        type: "custom:mushroom-template-card",
-        icon: "mdi:map-marker-distance",
-        icon_color: "red",
-        primary: `{{ states('${bron.afstand}') }} km`,
-        secondary:
-          (bron.azimut ? `Richting {{ states('${bron.azimut}') }}° · ` : "") +
-          "{{ states('sensor.stormchase_trend') }} · " +
-          "{{ states('sensor.stormchase_actieve_markers') }} actieve markers",
-        multiline_secondary: true,
-        card_mod: {
-          style: `
-            ha-card {
-              background: rgba(41,30,74,.55);
-              border: 1px solid rgba(255,92,108,.35);
-              border-radius: 18px;
-            }
-            ha-card .primary { font-size: 46px; font-weight: 800; color: #ff5c6c !important; }
-          `,
-        },
-      });
-    }
-
-    // Kompas
-    if (bron.azimut) {
+    // ---- Kompas, alleen zinvol als er richting is ----
+    if (bron.azimut && bruikbaar(hass, bron.azimut)) {
       cards.push({
         type: "custom:compass-card",
-        name: "RICHTING",
+        name: "Richting laatste inslag",
         indicator_sensors: [
           {
             sensor: bron.azimut,
-            indicator: { image: "arrow_outward", color: "#ff5c6c" },
+            indicator: { image: "arrow_outward", color: KLEUR.gevaar },
           },
         ],
         value_sensors: [{ sensor: bron.azimut }],
@@ -364,7 +399,7 @@ class StormchaseStrategy {
       });
     }
 
-    // Verloopgrafiek met de ringen als referentielijnen
+    // ---- Verloopgrafiek met de ringen als referentielijnen ----
     if (bron.afstand) {
       const grenzen = ringen.length
         ? [ringen[0].km, ringen[ringen.length - 1].km]
@@ -372,12 +407,16 @@ class StormchaseStrategy {
       cards.push({
         type: "custom:apexcharts-card",
         graph_span: "2h",
-        header: { show: true, title: "AFSTAND · LAATSTE 2 UUR", show_states: false },
+        header: {
+          show: true,
+          title: "Afstand \u00b7 laatste 2 uur",
+          show_states: false,
+        },
         series: [
           {
             entity: bron.afstand,
             name: "Afstand (km)",
-            color: "#f5b731",
+            color: KLEUR.alert,
             type: "line",
             curve: "stepline",
             stroke_width: 2,
@@ -385,27 +424,27 @@ class StormchaseStrategy {
           },
         ],
         apex_config: {
-          chart: { height: 240, background: "transparent" },
+          chart: { height: 220, background: "transparent" },
           grid: { borderColor: "rgba(255,255,255,.06)" },
           yaxis: { min: 0 },
           annotations: {
             yaxis: [
               {
                 y: grenzen[0],
-                borderColor: "#ff5c6c",
+                borderColor: KLEUR.gevaar,
                 strokeDashArray: 6,
                 label: {
                   text: `${grenzen[0]} km`,
-                  style: { background: "#ff5c6c", color: "#fff" },
+                  style: { background: KLEUR.gevaar, color: "#fff" },
                 },
               },
               {
                 y: grenzen[1],
-                borderColor: "#8a7fd0",
+                borderColor: KLEUR.gedempt,
                 strokeDashArray: 4,
                 label: {
                   text: `${grenzen[1]} km`,
-                  style: { background: "#8a7fd0", color: "#fff" },
+                  style: { background: KLEUR.gedempt, color: "#fff" },
                 },
               },
             ],
@@ -415,10 +454,8 @@ class StormchaseStrategy {
       });
     }
 
-    // CAPE-verloop, eventueel met de potentie op een tweede as
+    // ---- CAPE-verloop, eventueel met de potentie op een tweede as ----
     if (bruikbaar(hass, "sensor.stormchase_cape")) {
-      const tweeAssen = bruikbaar(hass, "sensor.stormchase_chase_potentie");
-
       const capeSerie = {
         entity: "sensor.stormchase_cape",
         name: "CAPE (J/kg)",
@@ -430,25 +467,29 @@ class StormchaseStrategy {
 
       // Apexcharts-card eist dat elke serie een as heeft zodra er meer dan
       // een as gedefinieerd is. Bij een enkele serie laten we yaxis weg.
-      if (tweeAssen) capeSerie.yaxis_id = "cape";
+      if (heeftPotentie) capeSerie.yaxis_id = "cape";
 
       const grafiek = {
         type: "custom:apexcharts-card",
         graph_span: "24h",
-        header: { show: true, title: "CAPE \u00b7 24 UUR", show_states: false },
+        header: {
+          show: true,
+          title: "Instabiliteit \u00b7 24 uur",
+          show_states: false,
+        },
         series: [capeSerie],
         apex_config: {
-          chart: { height: 220, background: "transparent" },
+          chart: { height: 200, background: "transparent" },
           grid: { borderColor: "rgba(255,255,255,.06)" },
         },
         card_mod: { style: PANEL_STYLE },
       };
 
-      if (tweeAssen) {
+      if (heeftPotentie) {
         grafiek.series.push({
           entity: "sensor.stormchase_chase_potentie",
           name: "Potentie (%)",
-          color: "#f5b731",
+          color: KLEUR.alert,
           type: "line",
           stroke_width: 2,
           yaxis_id: "pct",
@@ -491,7 +532,7 @@ class StormchaseStrategy {
       cards.push({
         type: "iframe",
         url: config.iradar_url || "https://iradar.app/",
-        aspect_ratio: "56%",
+        aspect_ratio: "62%",
         card_mod: { style: FRAME_STYLE },
       });
     }
@@ -516,7 +557,7 @@ class StormchaseStrategy {
         url:
           "https://gadgets.buienradar.nl/gadget/zoommap/" +
           `?lat=${lat}&lng=${lon}&overname=2&zoom=10&size=3&voor=1`,
-        aspect_ratio: "100%",
+        aspect_ratio: "78%",
         card_mod: { style: FRAME_STYLE },
       });
     }
@@ -538,10 +579,48 @@ class StormchaseStrategy {
     return { type: "grid", column_span: 1, cards };
   }
 
+  /** Badges bovenaan: de cijfers die je tijdens een chase wil zien. */
+  static badges(config, hass) {
+    const { bron } = this.verzamel(config, hass);
+    const lijst = [];
+
+    if (bron.afstand) {
+      lijst.push({
+        type: "entity",
+        entity: bron.afstand,
+        name: "Afstand",
+        color:
+          `{% set d = states('${bron.afstand}') | float(999) %}` +
+          "{{ 'red' if d < 15 else 'orange' if d < 30 else 'grey' }}",
+      });
+    }
+    if (bruikbaar(hass, "sensor.stormchase_aankomst")) {
+      lijst.push({
+        type: "entity",
+        entity: "sensor.stormchase_aankomst",
+        name: "Aankomst",
+        color: "red",
+      });
+    }
+    if (bruikbaar(hass, "sensor.stormchase_chase_potentie")) {
+      lijst.push({
+        type: "entity",
+        entity: "sensor.stormchase_chase_potentie",
+        name: "Potentie",
+        color:
+          "{% set p = states('sensor.stormchase_chase_potentie') | float(0) %}" +
+          "{{ 'red' if p > 70 else 'orange' if p > 40 else 'grey' }}",
+      });
+    }
+
+    return lijst;
+  }
+
   static async bouwView(config, hass) {
     return {
       type: "sections",
       max_columns: 2,
+      badges: this.badges(config, hass),
       sections: [
         this.statusSectie(config, hass),
         this.kaartenSectie(config, hass),

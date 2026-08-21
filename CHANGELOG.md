@@ -5,6 +5,35 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.3.0] — 2026-08-21
+
+Herontwerp van het dashboard.
+
+### Toegevoegd
+
+- **Statusregel bovenaan** die de situatie samenvat: RUSTIG, ACTIEF, NADERT
+  of ONWEER NABIJ. Kleur, icoon en toelichting volgen de ernst, zodat een
+  rustige avond er anders uitziet dan een naderende cel.
+- **Badges** bovenaan de view met afstand, aankomsttijd en chase-potentie.
+  Die verschijnen alleen als er waarde in zit.
+- Chase-potentie krijgt een tekstuele duiding naast het percentage.
+
+### Gewijzigd
+
+- Sensoren zonder waarde tonen een streepje in plaats van `unknown km`.
+- Iconen worden grijs zolang een waarde nul of onbekend is; kleur betekent nu
+  dat er daadwerkelijk iets aan de hand is.
+- Het kompas verschijnt alleen als er een richting bekend is.
+- De azimut-tegel toont de windrichting groot en de graden klein, in plaats
+  van andersom.
+- Naderingssnelheid staat nu tussen de kerncijfers in plaats van in een
+  aparte rij.
+- Cijfers gebruiken vaste breedte, zodat de layout niet meer verspringt bij
+  elke update.
+- Kleiner lettertype en strakkere afstanden in de labels.
+- De kaarten in de rechterkolom zijn lager, zodat de kolom beter in beeld
+  past.
+
 ## [0.2.3] — 2026-08-20
 
 ### Gerepareerd
@@ -165,6 +194,7 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.3.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.3.0
 [0.2.3]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.2.3
 [0.2.2]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.2.2
 [0.2.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.2.1
