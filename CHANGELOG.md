@@ -5,6 +5,39 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.24.0] — 2026-08-21
+
+Testsuite en zelfcontrole.
+
+### Toegevoegd
+
+- **Testsuite met 115 tests**, te draaien met `python -m pytest tests -q` en
+  automatisch bij elke push. Dekt de vertaling, de onweersindices, de
+  celtracking en de validatie.
+- **Structuurtests** die de fouten vangen die eerder pas bij een gebruiker
+  opdoken: formuliervelden met te veel argumenten, kale constantnamen als
+  dictsleutel, losse namen als statement, en stappen zonder vertaling. Op de
+  fout uit 0.23.0 losgelaten meldt de test meteen
+  `config_flow.py:312 heeft 3 argumenten`.
+- **Validatie van voorspellingen.** De integratie legt vast wat ze voorspelt
+  en kijkt het later na:
+  - Regen: begon het regenen wanneer we dachten?
+  - Aankomst: kwam het onweer binnen de waarschuwingsafstand op het verwachte
+    moment?
+  - Passage: klopte de voorspelde afstand waarop een cel zou langskomen?
+- Per soort komt er een samenvatting in de diagnostiek met het aantal
+  voorspellingen, hoeveel er uitkwamen, en de gemiddelde en grootste
+  afwijking. Daarmee zijn de drempels bij te stellen op echte metingen in
+  plaats van op aannames.
+- Voorspellingen die ruim over tijd zijn tellen als niet uitgekomen, zodat
+  een misser niet stilzwijgend verdwijnt.
+
+### Gewijzigd
+
+- De modules `cel.py`, `indices.py`, `taal.py` en `validatie.py` bevatten
+  bewust geen Home Assistant-imports, zodat ze los te testen zijn. Een test
+  bewaakt die scheiding.
+
 ## [0.23.2] — 2026-08-21
 
 ### Gewijzigd
@@ -943,6 +976,7 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.24.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.24.0
 [0.23.2]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.23.2
 [0.23.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.23.1
 [0.23.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.23.0

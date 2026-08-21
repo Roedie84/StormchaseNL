@@ -150,5 +150,8 @@ async def async_get_config_entry_diagnostics(
             "gebieden_in_land": (alert_data or {}).get("gebieden_in_land"),
         },
         "statistieken": stats.als_dict() if stats else None,
+        # Hoe goed kwamen de voorspellingen uit? Hiermee zijn de drempels op
+        # echte metingen bij te stellen in plaats van op aannames.
+        "validatie": storm.validatie.als_dict() if storm else None,
         "entiteiten": entiteiten,
     }

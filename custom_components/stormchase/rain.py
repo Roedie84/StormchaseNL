@@ -62,6 +62,7 @@ class RainCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
         self.entry = entry
         self._session = async_get_clientsession(hass)
         self._was_verwacht: bool | None = None
+        self.validatie = None  # wordt na het aanmaken gezet
 
     @property
     def drempel(self) -> float:
@@ -222,6 +223,22 @@ class RainCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
         }
 
         self._vuur_event(data)
+
+        # Voorspelling vastleggen en nakijken: begon het regenen wanneer we
+        # dachten?
+        if self.validatie is not None:
+            nu = dt_util.utcnow().timestamp()
+            self.validatie.verlopen(nu)
+
+            if regent:
+                self.validatie.uitgekomen(
+                    "regen", nu, {"intensiteit": nu_intensiteit}
+                )
+            elif begint_over is not None and begint_over <= 60:
+                self.validatie.voorspel(
+                    "regen", nu, begint_over, {"verwachte_piek": piek}
+                )
+
         return data
 
     def _vuur_event(self, data: dict) -> None:

@@ -20,6 +20,7 @@ from homeassistant.util import dt as dt_util
 from homeassistant.util.location import distance as location_distance
 
 from .cel import frequentie, frequentietrend, volg_cel
+from .validatie import Validatie
 from .indices import (
     duiding_cape,
     duiding_schering,
@@ -299,6 +300,10 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         self._celspoor: list[tuple[float, float, float]] = []
         self._laatste_dichtbij: float | None = None
         self._was_schuilen: bool | None = None
+        self.validatie = Validatie()
+        # Kleinste afstand sinds de laatste passagevoorspelling, om die
+        # achteraf tegen de werkelijkheid te kunnen houden.
+        self._min_afstand: float | None = None
 
     @property
     def ring_bounds(self) -> list[int]:
@@ -628,6 +633,45 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
             return TREND_RECEDE
         return TREND_STABLE
 
+    def _controleer_voorspellingen(
+        self, nu: float, afstand: float | None, eta_vooraf, cel: dict | None
+    ) -> None:
+        """Leg voorspellingen vast en kijk ze na.
+
+        Alleen de dingen die daadwerkelijk te controleren zijn: wanneer het
+        onweer aankomt en waar een cel passeert. De regenvoorspelling gebeurt
+        in de neerslagcoordinator, want die heeft de gegevens.
+        """
+        val = self.validatie
+        val.verlopen(nu)
+
+        # Onweer binnen de waarschuwingsafstand geldt als aangekomen
+        if afstand is not None and afstand <= self.warn_distance:
+            val.uitgekomen("aankomst", nu, {"afstand_bij_aankomst": afstand})
+
+        # Kleinste afstand bijhouden voor de passagebeoordeling
+        if afstand is not None:
+            if self._min_afstand is None or afstand < self._min_afstand:
+                self._min_afstand = afstand
+
+        if cel:
+            passage_over = cel.get("passage_over")
+            passage_afstand = cel.get("passage_afstand")
+            if passage_over is not None and passage_afstand is not None:
+                val.voorspel(
+                    "passage",
+                    nu,
+                    passage_over,
+                    {
+                        "verwachte_afstand": passage_afstand,
+                        "richting": cel.get("richting"),
+                    },
+                )
+                if "passage" not in val.open:
+                    self._min_afstand = afstand
+
+            val.passage_afgerond(nu, self._min_afstand)
+
     def _schuilregel(
         self, afstand: float | None, nu: float
     ) -> tuple[bool | None, int | None]:
@@ -762,6 +806,7 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         freq_trend = frequentietrend(stempels, nu_ts, FREQUENTIEVENSTER)
 
         schuilen, veilig_over = self._schuilregel(distance, nu_ts)
+        self._controleer_voorspellingen(nu_ts, distance, eta_vooraf=None, cel=cel)
 
         # Pas nu de reeks bijwerken, met de afstand die we uiteindelijk
         # gebruiken. Anders lopen twee maatstaven door elkaar en springt de
@@ -775,6 +820,16 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         eta = None
         if speed is not None and speed > SPEED_DEADZONE and distance:
             eta = int(round(distance / speed * 60))
+            # Alleen vastleggen zolang het nog een voorspelling is: onweer dat
+            # al binnen de waarschuwingsafstand zit valt niets meer over te
+            # zeggen.
+            if 5 <= eta <= 180 and distance > self.warn_distance:
+                self.validatie.voorspel(
+                    "aankomst",
+                    dt_util.utcnow().timestamp(),
+                    eta,
+                    {"afstand_bij_voorspelling": distance},
+                )
 
         # Meet Blitzortung vanaf hetzelfde punt als wij?
         bz = blitzortung_locatie(self.hass)

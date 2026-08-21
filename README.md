@@ -438,11 +438,22 @@ daar ook de ESTOFEX-laag aan voor de onweersverwachting over je radarbeeld.
           {%- endif %}.
 ```
 
+## Tests
+
+`python -m pytest tests -q` draait de suite; dat gebeurt ook automatisch bij
+elke push. Zie `tests/README.md` voor wat er getest wordt en waarom er
+structuurtests bij zitten.
+
 ## Diagnostiek
 
 Bij een probleem: ga naar Instellingen → Apparaten & Diensten → Stormchase →
 driepuntsmenu → **Diagnostische gegevens downloaden**. Dat bestand bevat alles
 wat nodig is om mee te kijken.
+
+Sinds 0.24.0 zit er ook een overzicht in van hoe goed de voorspellingen
+uitkwamen: begon het regenen wanneer we dachten, kwam het onweer op tijd aan,
+en klopte de afstand waarop een cel passeerde. Per soort met de gemiddelde en
+grootste afwijking.
 
 Wat erin zit: de instellingen, de actuele waarden, per bron het aantal
 geslaagde en mislukte ophaalrondes met de laatste foutmelding, welke
