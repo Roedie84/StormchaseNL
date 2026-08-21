@@ -290,7 +290,8 @@ class StormchaseStrategy {
           primary:
             "Code {{ states('sensor.stormchase_waarschuwingsniveau') }}" +
             "{% set s = state_attr('sensor.stormchase_waarschuwingsniveau','soort') %}" +
-            "{% if s %} \u00b7 {{ s }}{% endif %}",
+            "{% if s %} \u00b7 {% if s[:2] | lower == 'ij' %}IJ{{ s[2:] }}" +
+            "{% else %}{{ s[0] | upper }}{{ s[1:] }}{% endif %}{% endif %}",
           secondary:
             "{% set g = state_attr('sensor.stormchase_waarschuwingsniveau','gebied') %}" +
             "{% set n = state_attr('sensor.stormchase_waarschuwingsniveau','aantal') | int(0) %}" +
@@ -807,7 +808,8 @@ class StormchaseStrategy {
             "else 'yellow' if 'Kleine' in v else 'disabled' }}",
           primary: "{{ states('sensor.stormchase_onweersverwachting') }}",
           secondary:
-            "{{ state_attr('sensor.stormchase_onweersverwachting','toelichting') }}",
+            "{% set t = state_attr('sensor.stormchase_onweersverwachting'," +
+            "'toelichting') %}{% if t %}{{ t[0] | upper }}{{ t[1:] }}{% endif %}",
           multiline_secondary: true,
           card_mod: { style: TILE_STYLE },
         });
@@ -848,8 +850,8 @@ class StormchaseStrategy {
               "{% set s = states('sensor.stormchase_windschering_0_6_km') | float(0) %}" +
               "{{ 'red' if s > 72 else 'orange' if s > 50 else 'amber' if s > 30 else 'disabled' }}",
             primary:
-              "{{ state_attr('sensor.stormchase_onweersverwachting','windschering') " +
-              "| default('onbekend') | capitalize }}",
+              "{% set w = state_attr('sensor.stormchase_onweersverwachting'," +
+              "'windschering') | default('onbekend') %}{{ w[0] | upper }}{{ w[1:] }}",
             secondary:
               "Schering 0-6 km \u00b7 " +
               waarde("sensor.stormchase_windschering_0_6_km", " km/u"),
@@ -868,8 +870,8 @@ class StormchaseStrategy {
               "{% set v = states('sensor.stormchase_vriesniveau') | float(0) %}" +
               "{{ 'green' if 2000 <= v <= 3500 else 'disabled' }}",
             primary:
-              "{{ state_attr('sensor.stormchase_onweersverwachting','vriesniveau') " +
-              "| default('onbekend') | capitalize }}",
+              "{% set v = state_attr('sensor.stormchase_onweersverwachting'," +
+              "'vriesniveau') | default('onbekend') %}{{ v[0] | upper }}{{ v[1:] }}",
             secondary:
               "Vriesniveau \u00b7 " + waarde("sensor.stormchase_vriesniveau", " m"),
           }),
@@ -879,8 +881,8 @@ class StormchaseStrategy {
               "{% set t = states('sensor.stormchase_total_totals_index') | float(0) %}" +
               "{{ 'red' if t > 56 else 'orange' if t > 50 else 'amber' if t > 44 else 'disabled' }}",
             primary:
-              "{{ state_attr('sensor.stormchase_onweersverwachting','stabiliteit') " +
-              "| default('onbekend') | capitalize }}",
+              "{% set t = state_attr('sensor.stormchase_onweersverwachting'," +
+              "'stabiliteit') | default('onbekend') %}{{ t[0] | upper }}{{ t[1:] }}",
             secondary:
               "Stabiliteit \u00b7 Total Totals " +
               waarde("sensor.stormchase_total_totals_index"),

@@ -76,6 +76,23 @@ TREFWOORDEN: list[tuple[str, str]] = [
 ]
 
 
+def hoofdletter(tekst: str | None) -> str | None:
+    """Zet alleen de eerste letter om naar een hoofdletter.
+
+    Niet capitalize(): die verlaagt de rest van de tekst, waardoor "IJzel"
+    verandert in "Ijzel" en "CAPE 2400" in "Cape 2400".
+    """
+    if not tekst:
+        return tekst
+
+    # De ij is in het Nederlands een letter: aan het begin van een zin gaan
+    # beide tekens omhoog, dus IJzel en niet Ijzel.
+    if tekst[:2].lower() == "ij":
+        return "IJ" + tekst[2:]
+
+    return tekst[0].upper() + tekst[1:]
+
+
 def vertaal_soort(soort: str | None) -> str | None:
     """Vertaal het soort waarschuwing naar het Nederlands.
 

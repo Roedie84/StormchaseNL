@@ -5,6 +5,44 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.23.2] — 2026-08-21
+
+### Gewijzigd
+
+- **Hoofdletters kloppen nu overal.** Waarschuwingsmeldingen begonnen met een
+  kleine letter, omdat het soort waarschuwing rechtstreeks uit de feed komt.
+  Ook de toelichting onder de onweersverwachting en de trend achter de
+  nadering begonnen klein.
+- Er wordt niet langer `capitalize` gebruikt, want dat verlaagt de rest van de
+  tekst: "CAPE loopt op" werd daarmee "Cape loopt op". Alleen de eerste letter
+  gaat omhoog.
+- De ij wordt als een letter behandeld, zoals het in het Nederlands hoort:
+  "IJzel" en niet "Ijzel". Dat geldt zowel in de meldingen als op het
+  dashboard.
+- Midden in een zin blijft alles gewoon klein: "waarschuwing code oranje voor
+  zwaar onweer met zware regen".
+
+## [0.23.1] — 2026-08-21
+
+### Gerepareerd
+
+- **"Unknown error occurred" bij het instellen van de locatie.** In het
+  configuratiescherm waren op drie plekken constantnamen op de verkeerde
+  regel terechtgekomen, waardoor velden meerdere argumenten meekregen waar er
+  een verwacht werd. Het ergste geval zat in de trackerkeuze zelf, wat precies
+  de stap is waar de fout opdook.
+- Twee instellingen ontbraken daardoor in het formulier: het tijdvenster voor
+  de ringen en de keuze welke weersituaties gemeld worden. Ze werkten wel via
+  hun standaardwaarden, maar waren niet aan te passen.
+- Het verversingsinterval werd gewist zodra je terugschakelde naar de
+  thuislocatie.
+
+### Gewijzigd
+
+- Het meldingsformulier is opnieuw opgezet en gegroepeerd: waarheen, onweer,
+  regen, wind, weersituaties, vooruitzicht, wanneer, en de vorm van de
+  melding.
+
 ## [0.23.0] — 2026-08-21
 
 Vier toevoegingen voor het chasen zelf.
@@ -905,6 +943,8 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.23.2]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.23.2
+[0.23.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.23.1
 [0.23.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.23.0
 [0.22.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.22.1
 [0.22.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.22.0

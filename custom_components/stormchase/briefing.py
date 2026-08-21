@@ -18,6 +18,8 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.event import async_track_time_change
 from homeassistant.util import dt as dt_util
 
+from .taal import hoofdletter
+
 from .const import (
     CONF_BRIEFING,
     CONF_BRIEFING_AFTERNOON,
@@ -223,7 +225,11 @@ class Briefing:
             if rang == 0:
                 return f"{oordeel}."
 
-            regel = f"{oordeel}: {toelichting}" if toelichting else f"{oordeel}."
+            regel = (
+                f"{oordeel}: {hoofdletter(toelichting)}"
+                if toelichting
+                else f"{oordeel}."
+            )
             if not regel.endswith("."):
                 regel += "."
 

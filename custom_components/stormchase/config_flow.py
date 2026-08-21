@@ -93,7 +93,6 @@ from .const import (
     DOMAIN,
     LOCATION_MODES,
     MODE_HOME,
-    MODE_MANUAL,
     MODE_TRACKER,
     MODE_ZONE,
 )
@@ -164,7 +163,6 @@ def _base_schema(hass, defaults: dict[str, Any]) -> vol.Schema:
             ): _km(100),
             vol.Required(
                 CONF_RING_NEAR,
-    CONF_RING_WINDOW,
                 default=defaults.get(CONF_RING_NEAR, DEFAULT_RING_NEAR),
             ): _km(100),
             vol.Required(
@@ -225,7 +223,7 @@ def _location_schema(mode: str, defaults: dict[str, Any]) -> vol.Schema:
             {
                 vol.Required(
                     CONF_TRACKER_ENTITY,
-    CONF_UPDATE_INTERVAL, default=defaults.get(CONF_TRACKER_ENTITY)
+                    default=defaults.get(CONF_TRACKER_ENTITY),
                 ): selector.EntitySelector(
                     selector.EntitySelectorConfig(
                         domain=["device_tracker", "person"]
@@ -253,8 +251,21 @@ def _notify_schema(hass, defaults: dict[str, Any]) -> vol.Schema:
         for naam in diensten
     ]
 
+    def getal(minimum, maximum, stap, eenheid):
+        """Kort recept voor een getalveld."""
+        return selector.NumberSelector(
+            selector.NumberSelectorConfig(
+                min=minimum,
+                max=maximum,
+                step=stap,
+                unit_of_measurement=eenheid,
+                mode=selector.NumberSelectorMode.BOX,
+            )
+        )
+
     return vol.Schema(
         {
+            # --- Waarheen ---
             vol.Optional(
                 CONF_NOTIFY_SERVICES,
                 default=defaults.get(CONF_NOTIFY_SERVICES, []),
@@ -266,6 +277,11 @@ def _notify_schema(hass, defaults: dict[str, Any]) -> vol.Schema:
                     mode=selector.SelectSelectorMode.DROPDOWN,
                 )
             ),
+            vol.Required(
+                CONF_NOTIFY_TITLE,
+                default=defaults.get(CONF_NOTIFY_TITLE, DEFAULT_NOTIFY_TITLE),
+            ): str,
+            # --- Onweer ---
             vol.Required(
                 CONF_NOTIFY_MAX_DISTANCE,
                 default=defaults.get(
@@ -280,93 +296,80 @@ def _notify_schema(hass, defaults: dict[str, Any]) -> vol.Schema:
                 CONF_NOTIFY_ON_CLEARED,
                 default=defaults.get(CONF_NOTIFY_ON_CLEARED, False),
             ): selector.BooleanSelector(),
+            # --- Regen ---
             vol.Required(
-                CONF_NOTIFY_TITLE,
-                default=defaults.get(CONF_NOTIFY_TITLE, DEFAULT_NOTIFY_TITLE),
-            ): str,
-            vol.Required(
-                CONF_NOTIFY_COOLDOWN,
-                default=defaults.get(CONF_NOTIFY_COOLDOWN, DEFAULT_NOTIFY_COOLDOWN),
-            ): selector.NumberSelector(
-                selector.NumberSelectorConfig(
-                    min=0, max=180, step=5, unit_of_measurement="min",
-                    mode=selector.NumberSelectorMode.BOX,
-                )
-            ),
-            vol.Required(
-                CONF_RAIN_NOTIFY,
-                default=defaults.get(CONF_RAIN_NOTIFY, True),
+                CONF_RAIN_NOTIFY, default=defaults.get(CONF_RAIN_NOTIFY, True)
             ): selector.BooleanSelector(),
             vol.Required(
                 CONF_RAIN_LEAD,
                 default=defaults.get(CONF_RAIN_LEAD, DEFAULT_RAIN_LEAD),
-            ): selector.NumberSelector(
-                selector.NumberSelectorConfig(
-                    min=5, max=120, step=5, unit_of_measurement="min",
-                    mode=selector.NumberSelectorMode.BOX,
-                )
-            ),
+            ): getal(5, 120, 5, "min"),
             vol.Required(
                 CONF_RAIN_THRESHOLD,
                 default=defaults.get(CONF_RAIN_THRESHOLD, DEFAULT_RAIN_THRESHOLD),
-            ): selector.NumberSelector(
-                selector.NumberSelectorConfig(
-                    min=0.1, max=5, step=0.1, unit_of_measurement="mm/h",
-                    mode=selector.NumberSelectorMode.BOX,
-                )
-            ),
+            ): getal(0.1, 5, 0.1, "mm/h"),
+            # --- Wind ---
             vol.Required(
-                CONF_FROST_THRESHOLD,
-    CONF_HEAT_THRESHOLD,
-    CONF_WEATHER_TYPES,
-    CONF_WIND_NOTIFY,
-                default=defaults.get(CONF_WIND_NOTIFY, True),
+                CONF_WIND_NOTIFY, default=defaults.get(CONF_WIND_NOTIFY, True)
             ): selector.BooleanSelector(),
             vol.Required(
                 CONF_WIND_THRESHOLD,
                 default=defaults.get(CONF_WIND_THRESHOLD, DEFAULT_WIND_THRESHOLD),
-            ): selector.NumberSelector(
-                selector.NumberSelectorConfig(
-                    min=30, max=150, step=5, unit_of_measurement="km/h",
-                    mode=selector.NumberSelectorMode.BOX,
+            ): getal(30, 150, 5, "km/h"),
+            # --- Weersituaties ---
+            vol.Optional(
+                CONF_WEATHER_TYPES,
+                default=defaults.get(CONF_WEATHER_TYPES, DEFAULT_WEATHER_TYPES),
+            ): selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    options=WEATHER_TYPES,
+                    multiple=True,
+                    translation_key="weather_types",
+                    mode=selector.SelectSelectorMode.LIST,
                 )
             ),
             vol.Required(
-                CONF_MOVING_SPEED,
-    CONF_ONLY_STATIONARY,
-    CONF_CRITICAL,
-    CONF_DASHBOARD,
-    CONF_OUTLOOK_LEVEL,
-    CONF_OUTLOOK_NOTIFY,
+                CONF_HEAT_THRESHOLD,
+                default=defaults.get(CONF_HEAT_THRESHOLD, DEFAULT_HEAT_THRESHOLD),
+            ): getal(15, 45, 1, "\u00b0C"),
+            vol.Required(
+                CONF_FROST_THRESHOLD,
+                default=defaults.get(CONF_FROST_THRESHOLD, DEFAULT_FROST_THRESHOLD),
+            ): getal(-15, 5, 1, "\u00b0C"),
+            # --- Vooruitzicht ---
+            vol.Required(
+                CONF_OUTLOOK_NOTIFY,
+                default=defaults.get(CONF_OUTLOOK_NOTIFY, True),
+            ): selector.BooleanSelector(),
+            vol.Required(
+                CONF_OUTLOOK_LEVEL,
+                default=defaults.get(CONF_OUTLOOK_LEVEL, DEFAULT_OUTLOOK_LEVEL),
+            ): selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    options=OUTLOOK_LEVELS,
+                    translation_key="outlook_level",
+                    mode=selector.SelectSelectorMode.DROPDOWN,
+                )
+            ),
+            # --- Wanneer ---
+            vol.Required(
+                CONF_NOTIFY_COOLDOWN,
+                default=defaults.get(CONF_NOTIFY_COOLDOWN, DEFAULT_NOTIFY_COOLDOWN),
+            ): getal(0, 180, 5, "min"),
+            vol.Required(
+                CONF_ONLY_STATIONARY,
                 default=defaults.get(CONF_ONLY_STATIONARY, True),
             ): selector.BooleanSelector(),
             vol.Required(
                 CONF_MOVING_SPEED,
                 default=defaults.get(CONF_MOVING_SPEED, DEFAULT_MOVING_SPEED),
-            ): selector.NumberSelector(
-                selector.NumberSelectorConfig(
-                    min=5, max=120, step=5, unit_of_measurement="km/h",
-                    mode=selector.NumberSelectorMode.BOX,
-                )
-            ),
+            ): getal(5, 120, 5, "km/h"),
             vol.Required(
                 CONF_STATIONARY_MINUTES,
                 default=defaults.get(
                     CONF_STATIONARY_MINUTES, DEFAULT_STATIONARY_MINUTES
                 ),
-            ): selector.NumberSelector(
-                selector.NumberSelectorConfig(
-                    min=5, max=60, step=5, unit_of_measurement="min",
-                    mode=selector.NumberSelectorMode.BOX,
-                )
-            ),
-            vol.Required(
-                CONF_CRITICAL, default=defaults.get(CONF_CRITICAL, False)
-            ): selector.BooleanSelector(),
-            vol.Required(
-                CONF_DASHBOARD,
-                default=defaults.get(CONF_DASHBOARD, DEFAULT_DASHBOARD),
-            ): str,
+            ): getal(5, 60, 5, "min"),
             vol.Required(
                 CONF_QUIET_FROM,
                 default=defaults.get(CONF_QUIET_FROM, DEFAULT_QUIET),
@@ -375,6 +378,14 @@ def _notify_schema(hass, defaults: dict[str, Any]) -> vol.Schema:
                 CONF_QUIET_TO,
                 default=defaults.get(CONF_QUIET_TO, DEFAULT_QUIET),
             ): selector.TimeSelector(),
+            # --- Vorm ---
+            vol.Required(
+                CONF_CRITICAL, default=defaults.get(CONF_CRITICAL, False)
+            ): selector.BooleanSelector(),
+            vol.Required(
+                CONF_DASHBOARD,
+                default=defaults.get(CONF_DASHBOARD, DEFAULT_DASHBOARD),
+            ): str,
         }
     )
 
@@ -572,7 +583,6 @@ class StormchaseOptionsFlow(OptionsFlow):
                     for key in (
                         CONF_ZONE_ENTITY,
                         CONF_TRACKER_ENTITY,
-    CONF_UPDATE_INTERVAL,
                         CONF_MANUAL_LOCATION,
                     ):
                         self._data.pop(key, None)

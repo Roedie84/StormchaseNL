@@ -9,6 +9,8 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.util import dt as dt_util
 
+from .taal import hoofdletter
+
 from .const import (
     CONF_NOTIFY_COOLDOWN,
     CONF_ALERT_NOTIFY,
@@ -415,7 +417,7 @@ class StormNotifier:
         gebied = event.data.get("gebied")
         tot = event.data.get("tot")
 
-        bericht = f"{soort}"
+        bericht = hoofdletter(soort)
         if gebied:
             bericht += f" voor {gebied}"
         if tot:
@@ -553,7 +555,7 @@ class StormNotifier:
 
         bericht = f"{oordeel} in de komende uren."
         if toelichting:
-            bericht += f"\n{toelichting.capitalize()}"
+            bericht += f"\n{hoofdletter(toelichting)}"
 
         await self._stuur(bericht, "outlook", titel="Vooruitzicht")
 
