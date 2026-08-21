@@ -384,6 +384,67 @@ class StormchaseStrategy {
       cards.push({ type: "grid", columns: 2, square: false, cards: basis });
     }
 
+    // ---- Wind en of je onderweg bent ----
+    const windtegels = [];
+    if (bruikbaar(hass, "sensor.stormchase_windstoten")) {
+      windtegels.push(
+        tegel({
+          icon: "mdi:weather-windy",
+          icon_color:
+            "{% set w = states('sensor.stormchase_windstoten') | float(0) %}" +
+            "{{ 'red' if w > 90 else 'orange' if w > 60 else 'amber' if w > 40 else 'disabled' }}",
+          primary: waarde("sensor.stormchase_windstoten", " km/u"),
+          secondary: "Windstoten",
+        })
+      );
+    }
+    if (hass.states["binary_sensor.stormchase_onderweg"]) {
+      windtegels.push(
+        tegel({
+          icon:
+            "{% if is_state('binary_sensor.stormchase_onderweg','on') %}" +
+            "mdi:car-side{% else %}mdi:map-marker-check{% endif %}",
+          icon_color:
+            "{% if is_state('binary_sensor.stormchase_onderweg','on') %}" +
+            "orange{% else %}green{% endif %}",
+          primary:
+            "{% if is_state('binary_sensor.stormchase_onderweg','on') %}Onderweg" +
+            "{% else %}Ter plaatse{% endif %}",
+          secondary:
+            "{% set m = state_attr('binary_sensor.stormchase_onderweg','stil_sinds_minuten') %}" +
+            "{% if m is not none %}{{ m }} min op deze plek" +
+            "{% else %}Locatie wordt nog bepaald{% endif %}",
+        })
+      );
+    }
+    if (windtegels.length) {
+      cards.push({
+        type: "grid",
+        columns: 2,
+        square: false,
+        cards: windtegels,
+      });
+    }
+
+    // ---- Meten Blitzortung en wij vanaf hetzelfde punt? ----
+    // Loopt dat uiteen, dan horen de bliksemafstanden niet bij het weer dat
+    // eromheen staat, en dat is niet te zien zonder deze melding.
+    const loc = hass.states["sensor.stormchase_actieve_locatie"];
+    const afwijking = Number(loc?.attributes?.afwijking_km);
+    if (Number.isFinite(afwijking) && afwijking > 5) {
+      cards.push(
+        tegel({
+          icon: "mdi:map-marker-alert",
+          icon_color: "orange",
+          primary: `Blitzortung meet ${afwijking} km verderop`,
+          secondary:
+            "Kies daar dezelfde locatiebron, anders horen de bliksemafstanden " +
+            "niet bij dit weerbeeld",
+          multiline_secondary: true,
+        })
+      );
+    }
+
     // ---- Locatie, alleen als je niet thuis bent ----
     const locatie = hass.states["sensor.stormchase_actieve_locatie"];
     if (locatie && locatie.state !== "thuis") {

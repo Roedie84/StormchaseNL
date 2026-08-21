@@ -39,6 +39,7 @@ async def async_setup_entry(
             AlertActiveBinarySensor(
                 hass.data[DOMAIN][entry.entry_id]["alerts"], entry
             ),
+            MovingBinarySensor(storm, entry),
         ]
     )
 
@@ -203,4 +204,41 @@ class AlertActiveBinarySensor(CoordinatorEntity[AlertCoordinator], BinarySensorE
             "soort": data.get("soort"),
             "gebied": data.get("gebied"),
             "aantal": data.get("aantal"),
+        }
+
+
+class MovingBinarySensor(CoordinatorEntity[StormCoordinator], BinarySensorEntity):
+    """Aan wanneer je onderweg bent, uit wanneer je ergens staat.
+
+    Bepaalt of meldingen over het weer ter plaatse zinvol zijn: tijdens het
+    rijden is een bericht over regen hier alweer achterhaald voor je het
+    leest.
+    """
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "moving"
+    _attr_device_class = BinarySensorDeviceClass.MOVING
+
+    def __init__(self, coordinator: StormCoordinator, entry: ConfigEntry) -> None:
+        """Initialiseer de sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_moving"
+        self._attr_device_info = _device(entry)
+
+    @property
+    def is_on(self) -> bool | None:
+        """True als je in beweging bent."""
+        if not self.coordinator.data:
+            return None
+        return self.coordinator.data.onderweg
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        """Hoe lang je al op dezelfde plek staat."""
+        data = self.coordinator.data
+        if not data:
+            return {}
+        return {
+            "stil_sinds_minuten": data.stil_sinds,
+            "locatie_bron": data.location_source,
         }

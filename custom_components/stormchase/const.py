@@ -51,6 +51,25 @@ SPEED_DEADZONE = 1.0
 # opgehaald in plaats van te wachten op het volgende interval
 MOVE_THRESHOLD_KM = 15
 
+# Tijdvenster waarover de afstandsringen tellen. Sluit aan op het venster
+# dat de Blitzortung-integratie zelf gebruikt.
+CONF_RING_WINDOW = "ring_window"
+DEFAULT_RING_WINDOW = 120  # minuten
+MAX_INSLAGEN = 5000        # bovengrens voor de bewaarde inslagen
+
+# Configuratie - wind en stilstand
+CONF_WIND_NOTIFY = "wind_notify"
+CONF_WIND_THRESHOLD = "wind_threshold"
+CONF_ONLY_STATIONARY = "only_stationary"
+CONF_STATIONARY_MINUTES = "stationary_minutes"
+
+DEFAULT_WIND_THRESHOLD = 60      # km/u windstoten
+DEFAULT_STATIONARY_MINUTES = 10  # zo lang op dezelfde plek voor 'ter plaatse'
+STATIONARY_RADIUS_KM = 1.0       # hierbinnen tel je als stilstaand
+LOCATIE_GESCHIEDENIS = 120       # aantal bewaarde locatiepunten
+
+EVENT_WIND = f"{DOMAIN}_wind"
+
 # Configuratie - waarschuwingen
 CONF_ALERT_COUNTRY = "alert_country"
 CONF_ALERT_REGION = "alert_region"

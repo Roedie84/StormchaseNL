@@ -84,6 +84,7 @@ class Statistieken:
             "approaching": 0,
             "cleared": 0,
             "rain_incoming": 0,
+            "wind": 0,
             "alert": 0,
         }
     )

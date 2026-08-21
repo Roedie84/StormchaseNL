@@ -12,7 +12,9 @@ from homeassistant.util import dt as dt_util
 from .const import (
     CONF_NOTIFY_COOLDOWN,
     CONF_ALERT_NOTIFY,
+    CONF_ONLY_STATIONARY,
     CONF_RAIN_NOTIFY,
+    CONF_WIND_NOTIFY,
     CONF_NOTIFY_MAX_DISTANCE,
     CONF_NOTIFY_ON_APPROACH,
     CONF_NOTIFY_ON_CLEARED,
@@ -31,6 +33,7 @@ from .const import (
     EVENT_NEARBY,
     EVENT_ALERT,
     EVENT_RAIN_INCOMING,
+    EVENT_WIND,
     RICHTINGEN,
 )
 
@@ -67,6 +70,8 @@ class StormNotifier:
         self._laatste: datetime | None = None
         self._laatste_regen: datetime | None = None
         self.stats = None  # wordt na het aanmaken gezet
+        self.storm = None  # coordinator, voor de stilstandcontrole
+        self._laatste_wind: datetime | None = None
         self._unsubs: list[callable] = []
 
     def _opt(self, key: str, default=None):
@@ -95,6 +100,7 @@ class StormNotifier:
             self.hass.bus.async_listen(EVENT_CLEARED, self._handle_cleared),
             self.hass.bus.async_listen(EVENT_RAIN_INCOMING, self._handle_rain),
             self.hass.bus.async_listen(EVENT_ALERT, self._handle_alert),
+            self.hass.bus.async_listen(EVENT_WIND, self._handle_wind),
         ]
 
     def stop(self) -> None:
@@ -102,6 +108,29 @@ class StormNotifier:
         for unsub in self._unsubs:
             unsub()
         self._unsubs = []
+
+    def _ter_plaatse(self) -> bool:
+        """Sta je lang genoeg op deze plek om een melding zinvol te maken?
+
+        Tijdens het rijden verandert het weer ter plaatse elke paar minuten,
+        en dan is een bericht over regen hier alweer achterhaald voor je het
+        leest. Onweer en officiele waarschuwingen gaan hier bewust langs: die
+        wil je ook onderweg weten.
+        """
+        if not self._opt(CONF_ONLY_STATIONARY, True):
+            return True
+
+        if self.storm is None or self.storm.data is None:
+            return True
+
+        onderweg = self.storm.data.onderweg
+        # Nog te weinig gegevens om iets te zeggen: dan maar wel melden.
+        if onderweg is None:
+            return True
+
+        if onderweg:
+            _LOGGER.debug("Melding onderdrukt: onderweg")
+        return not onderweg
 
     def _in_stiltevenster(self) -> bool:
         """Valt dit moment binnen het ingestelde stiltevenster?"""
@@ -219,7 +248,7 @@ class StormNotifier:
             if self.stats is not None:
                 self.stats.noteer_melding(soort)
 
-        if soort != "rain":
+        if soort not in ("rain", "wind"):
             self._laatste = dt_util.utcnow()
 
     @callback
@@ -254,7 +283,7 @@ class StormNotifier:
             return
         if not self.ingeschakeld or not self.diensten:
             return
-        if self._in_stiltevenster():
+        if self._in_stiltevenster() or not self._ter_plaatse():
             return
 
         wacht = int(self._opt(CONF_NOTIFY_COOLDOWN, DEFAULT_NOTIFY_COOLDOWN))
@@ -310,6 +339,36 @@ class StormNotifier:
         bericht += "."
 
         await self._stuur(bericht, "alert", titel=f"Code {niveau}")
+
+    @callback
+    async def _handle_wind(self, event: Event) -> None:
+        """Harde windstoten op de huidige locatie."""
+        if not self._opt(CONF_WIND_NOTIFY, True):
+            return
+        if not self.ingeschakeld or not self.diensten:
+            return
+        if self._in_stiltevenster() or not self._ter_plaatse():
+            return
+
+        wacht = int(self._opt(CONF_NOTIFY_COOLDOWN, DEFAULT_NOTIFY_COOLDOWN))
+        if wacht > 0 and self._laatste_wind is not None:
+            verstreken = (dt_util.utcnow() - self._laatste_wind).total_seconds()
+            if verstreken < wacht * 60:
+                return
+
+        stoten = event.data.get("windstoten") or 0
+
+        if stoten >= 100:
+            zwaarte = "zware windstoten"
+        elif stoten >= 75:
+            zwaarte = "krachtige windstoten"
+        else:
+            zwaarte = "harde windstoten"
+
+        bericht = f"{zwaarte.capitalize()} tot {stoten:.0f} km/u op je locatie."
+
+        await self._stuur(bericht, "wind", titel="Harde wind")
+        self._laatste_wind = dt_util.utcnow()
 
     async def async_test(self) -> None:
         """Stuur een proefmelding, ongeacht drempels en wachttijden."""

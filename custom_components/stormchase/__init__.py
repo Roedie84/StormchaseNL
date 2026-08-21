@@ -57,6 +57,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     for onderdeel in (storm, meteo, regen, waarschuwingen, notifier):
         onderdeel.stats = stats
 
+    # De notifier heeft de storm-coordinator nodig om te zien of je stilstaat
+    notifier.storm = storm
+
+    # Luister op elke verandering van de afstandssensor, zodat we inslagen
+    # tussen twee ophaalrondes door niet missen.
+    afmelden = storm.volg_bronsensor()
+    if afmelden is not None:
+        entry.async_on_unload(afmelden)
+
     # De storm-coordinator mag de meteo-coordinator laten verversen zodra
     # de locatie flink verschuift.
     storm.meteo = meteo

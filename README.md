@@ -123,9 +123,13 @@ De config flow raadt je Blitzortung-sensoren op basis van hun achtervoegsel
 gok niet, kies ze dan handmatig.
 
 **Patroon in geo_location entity-id** bepaalt welke markers meetellen voor de
-afstandsringen. Standaard `lightning_strike`. Staan je ringen op 0 terwijl er
-wel onweer is, kijk dan onder Ontwikkelhulpmiddelen → Statussen met filter
-`geo_location.` welk patroon jouw entiteiten hebben.
+afstandsringen. Standaard `lightning_strike`.
+
+Maakt jouw Blitzortung-integratie geen `geo_location` entiteiten aan, dan
+telt de integratie zelf de sprongen van de afstandssensor binnen het
+ingestelde tijdvenster. Het attribuut `telling_via` op elke ringsensor laat
+zien welke van de twee actief is. `geo_location` is nauwkeuriger, want dat
+kent alle inslagen; de terugval ziet alleen de dichtstbijzijnde per moment.
 
 Alle instellingen zijn achteraf aan te passen via de knop *Configureren* bij
 de integratie. Wijzigingen worden direct doorgevoerd.
@@ -137,7 +141,14 @@ weerbericht, de onweersparameters, de neerslagverwachting, de kaarten op het
 dashboard en sinds 0.7.0 ook het land voor de waarschuwingen.
 
 Wat er **niet** aan hangt: de afstand tot de blikseminslagen. Die komt van de
-Blitzortung-integratie, en die heeft zijn eigen locatie-instelling.
+Blitzortung-integratie, en die heeft zijn eigen locatie-instelling. Zorg dat
+je daar dezelfde bron kiest.
+
+Die integratie toont haar positie niet als entiteit, dus Stormchase leest de
+instellingen uit en vergelijkt ze. Het attribuut `afwijking_km` op
+`sensor.stormchase_actieve_locatie` laat zien hoe ver de twee uit elkaar
+liggen; boven de vijf kilometer verschijnt er een waarschuwing op het
+dashboard.
 
 Standaard gebruikt de integratie de thuislocatie uit je Home Assistant
 configuratie. Bij het instellen kun je kiezen uit vier bronnen:
@@ -175,8 +186,23 @@ automatisering aan te pas komt.
 | Wachttijd | Voorkomt herhaling bij een grillige cel. |
 | Stiltevenster | Twee gelijke tijden betekent: altijd melden. |
 | Ook bij regen | Bericht zodra er neerslag aankomt. |
+| Ook bij wind | Bericht bij windstoten boven de drempel, standaard 60 km/u. |
+| Alleen ter plaatse | Regen- en windmeldingen wachten tot je ergens bent. |
+| Zo lang op dezelfde plek | Hoe lang je binnen een kilometer moet blijven, standaard tien minuten. |
 | Minuten vooruit | Hoe ver van tevoren, standaard tien minuten. |
 | Vanaf intensiteit | Onder deze waarde heet het droog, zodat motregen geen bericht oplevert. |
+
+### Onderweg of ter plaatse
+
+`binary_sensor.stormchase_onderweg` staat aan zolang je in beweging bent.
+De integratie kijkt hoe lang geleden je voor het laatst meer dan een
+kilometer van je huidige positie was; blijft dat binnen het venster, dan ben
+je onderweg.
+
+Meldingen over regen en wind wachten daarop, want tijdens het rijden is een
+bericht over het weer hier alweer achterhaald voor je het leest. Onweer
+binnen de waarschuwingsafstand en officiele waarschuwingen komen wel altijd
+door: die gaan over gevaar.
 
 ### Neerslag
 

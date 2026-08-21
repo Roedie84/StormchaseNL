@@ -92,6 +92,14 @@ METEO_SENSORS: tuple[MeteoSensorDescription, ...] = (
         value=lambda data: data.get("lifted_index"),
     ),
     MeteoSensorDescription(
+        key="wind_gusts",
+        translation_key="wind_gusts",
+        native_unit_of_measurement="km/h",
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=0,
+        value=lambda data: data.get("windstoten"),
+    ),
+    MeteoSensorDescription(
         key="wind_shear_6km",
         translation_key="wind_shear_6km",
         native_unit_of_measurement="km/h",
@@ -277,10 +285,22 @@ class RingSensor(CoordinatorEntity[StormCoordinator], SensorEntity):
 
     @property
     def native_value(self) -> int | None:
-        """Aantal markers binnen deze ring."""
+        """Aantal inslagen binnen deze ring."""
         if self.coordinator.data is None:
             return None
         return self.coordinator.data.rings.get(self._bound)
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        """Waar de telling vandaan komt.
+
+        geo_location is het meest volledig. Staat hier afstandssensor, dan
+        maakt je Blitzortung-integratie geen geo_location entiteiten aan en
+        tellen we de sprongen van de afstandssensor zelf.
+        """
+        if self.coordinator.data is None:
+            return {}
+        return {"telling_via": self.coordinator.data.ring_bron}
 
 
 class MeteoSensor(CoordinatorEntity[MeteoCoordinator], SensorEntity):
@@ -410,14 +430,36 @@ class LocationSensor(CoordinatorEntity[StormCoordinator], SensorEntity):
 
     @property
     def extra_state_attributes(self) -> dict:
-        """De coordinaten zelf."""
+        """De coordinaten, plus of Blitzortung vanaf hetzelfde punt meet.
+
+        Die integratie heeft geen eigen locatie-entiteit, dus zonder deze
+        vergelijking valt niet te controleren of de afstanden tot de inslagen
+        bij het getoonde weer horen.
+        """
         data = self.coordinator.data
         if not data:
             return {}
-        return {
+
+        uit = {
             "latitude": data.latitude,
             "longitude": data.longitude,
         }
+
+        if data.blitzortung:
+            uit["blitzortung_meet_vanaf"] = data.blitzortung.get("bron")
+            uit["blitzortung_integratie"] = data.blitzortung.get("naam")
+            uit["afwijking_km"] = data.afwijking_km
+
+            if data.afwijking_km is not None and data.afwijking_km > 5:
+                uit["let_op"] = (
+                    f"Blitzortung meet {data.afwijking_km} km verderop. "
+                    "Kies daar dezelfde locatiebron, anders horen de "
+                    "bliksemafstanden niet bij dit weerbeeld."
+                )
+        else:
+            uit["blitzortung_meet_vanaf"] = "niet gevonden"
+
+        return uit
 
 
 class RainSensor(CoordinatorEntity[RainCoordinator], SensorEntity):

@@ -33,9 +33,15 @@ from .const import (
     CONF_NOTIFY_TITLE,
     CONF_QUIET_FROM,
     CONF_QUIET_TO,
+    CONF_ONLY_STATIONARY,
     CONF_RAIN_LEAD,
     CONF_RAIN_NOTIFY,
     CONF_RAIN_THRESHOLD,
+    CONF_STATIONARY_MINUTES,
+    CONF_WIND_NOTIFY,
+    CONF_WIND_THRESHOLD,
+    DEFAULT_STATIONARY_MINUTES,
+    DEFAULT_WIND_THRESHOLD,
     DEFAULT_RAIN_LEAD,
     DEFAULT_RAIN_THRESHOLD,
     DEFAULT_NOTIFY_COOLDOWN,
@@ -50,6 +56,7 @@ from .const import (
     CONF_RING_FAR,
     CONF_RING_MID,
     CONF_RING_NEAR,
+    CONF_RING_WINDOW,
     CONF_TRACKER_ENTITY,
     CONF_WARN_DISTANCE,
     CONF_ZONE_ENTITY,
@@ -57,6 +64,7 @@ from .const import (
     DEFAULT_RING_FAR,
     DEFAULT_RING_MID,
     DEFAULT_RING_NEAR,
+    DEFAULT_RING_WINDOW,
     DEFAULT_WARN_DISTANCE,
     DOMAIN,
     LOCATION_MODES,
@@ -126,6 +134,7 @@ def _base_schema(hass, defaults: dict[str, Any]) -> vol.Schema:
             ): _km(100),
             vol.Required(
                 CONF_RING_NEAR,
+    CONF_RING_WINDOW,
                 default=defaults.get(CONF_RING_NEAR, DEFAULT_RING_NEAR),
             ): _km(100),
             vol.Required(
@@ -136,6 +145,15 @@ def _base_schema(hass, defaults: dict[str, Any]) -> vol.Schema:
                 CONF_RING_FAR,
                 default=defaults.get(CONF_RING_FAR, DEFAULT_RING_FAR),
             ): _km(500),
+            vol.Required(
+                CONF_RING_WINDOW,
+                default=defaults.get(CONF_RING_WINDOW, DEFAULT_RING_WINDOW),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=15, max=360, step=15, unit_of_measurement="min",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
             vol.Required(
                 CONF_LOCATION_MODE,
                 default=defaults.get(CONF_LOCATION_MODE, MODE_HOME),
@@ -254,6 +272,34 @@ def _notify_schema(hass, defaults: dict[str, Any]) -> vol.Schema:
             ): selector.NumberSelector(
                 selector.NumberSelectorConfig(
                     min=0.1, max=5, step=0.1, unit_of_measurement="mm/h",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
+            vol.Required(
+                CONF_WIND_NOTIFY,
+                default=defaults.get(CONF_WIND_NOTIFY, True),
+            ): selector.BooleanSelector(),
+            vol.Required(
+                CONF_WIND_THRESHOLD,
+                default=defaults.get(CONF_WIND_THRESHOLD, DEFAULT_WIND_THRESHOLD),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=30, max=150, step=5, unit_of_measurement="km/h",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
+            vol.Required(
+                CONF_ONLY_STATIONARY,
+                default=defaults.get(CONF_ONLY_STATIONARY, True),
+            ): selector.BooleanSelector(),
+            vol.Required(
+                CONF_STATIONARY_MINUTES,
+                default=defaults.get(
+                    CONF_STATIONARY_MINUTES, DEFAULT_STATIONARY_MINUTES
+                ),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=5, max=60, step=5, unit_of_measurement="min",
                     mode=selector.NumberSelectorMode.BOX,
                 )
             ),

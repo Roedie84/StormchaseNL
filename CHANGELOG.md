@@ -5,6 +5,81 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.12.1] — 2026-08-21
+
+### Toegevoegd
+
+- **Controle of beide integraties vanaf hetzelfde punt meten.** De
+  Blitzortung-integratie heeft geen entiteit die haar positie toont, waardoor
+  niet te zien was of de bliksemafstanden bij het getoonde weer horen. De
+  instellingen van die integratie worden nu uitgelezen en de posities
+  vergeleken.
+- `sensor.stormchase_actieve_locatie` krijgt de attributen
+  `blitzortung_meet_vanaf` en `afwijking_km`. Bij meer dan vijf kilometer
+  verschil komt er een `let_op` bij en verschijnt er een tegel op het
+  dashboard.
+- Ook zichtbaar in de diagnostiek.
+
+### Waarom dit ertoe doet
+
+Volgt Stormchase je telefoon en Blitzortung nog je thuisadres, dan zie je
+onweer op zeven kilometer terwijl dat zeven kilometer van huis is en niet van
+waar je staat. Beide integraties moeten dezelfde locatiebron gebruiken.
+
+## [0.12.0] — 2026-08-21
+
+### Toegevoegd
+
+- **Afstandsringen werken nu ook zonder geo_location.** Niet elke
+  Blitzortung-installatie maakt per inslag een `geo_location` entiteit aan,
+  en zonder die entiteiten bleven de drie ringen permanent op nul staan. De
+  integratie houdt de inslagen nu zelf bij: elke keer dat de afstandssensor
+  verspringt is dat een nieuwe inslag, en die worden geteld binnen een
+  instelbaar tijdvenster.
+- De telling gebeurt via een luisteraar op de afstandssensor in plaats van
+  via de ophaalronde van dertig seconden, want bij een actieve bui komen er
+  meerdere inslagen per minuut binnen.
+- Nieuwe instelling **Tijdvenster voor de ringen**, standaard 120 minuten,
+  zodat het aansluit op het venster van je Blitzortung-integratie.
+- Elke ringsensor draagt het attribuut `telling_via`: `geo_location` als die
+  entiteiten er zijn, `afstandssensor` bij de terugval, `geen` als er niets
+  te tellen valt.
+
+### Opmerking
+
+`geo_location` blijft nauwkeuriger, want dat kent alle inslagen binnen de
+radius. De terugval ziet alleen wat de afstandssensor toont, en die springt
+naar de dichtstbijzijnde inslag; twee inslagen op vrijwel dezelfde afstand
+tellen dan als een. Het geeft een goed beeld van de activiteit, maar geen
+exact aantal.
+
+## [0.11.0] — 2026-08-21
+
+Meldingen over het weer op je eigen plek.
+
+### Toegevoegd
+
+- **Windmelding.** Bericht zodra de windstoten op je locatie boven de
+  ingestelde drempel komen, standaard 60 km/u. De tekst schaalt mee: harde,
+  krachtige of zware windstoten. Alleen bij de overgang, dus niet elk half
+  uur opnieuw zolang het waait.
+- `sensor.stormchase_windstoten` met de actuele windstoten.
+- **Stilstanddetectie.** `binary_sensor.stormchase_onderweg` staat aan zolang
+  je in beweging bent, en uit zodra je langer dan de ingestelde tijd binnen
+  een kilometer van dezelfde plek blijft. Het attribuut
+  `stil_sinds_minuten` laat zien hoe lang dat al zo is.
+- **Meldingen over regen en wind wachten tot je ergens bent.** Standaard aan,
+  met een venster van tien minuten. Tijdens het rijden is een bericht over
+  regen hier alweer achterhaald voor je het leest.
+- Op het dashboard een tegel met de windstoten en een die laat zien of je
+  onderweg bent of ter plaatse, met de tijd erbij.
+
+### Bewust niet gefilterd
+
+Onweer binnen de waarschuwingsafstand en officiele weerwaarschuwingen komen
+altijd door, ook onderweg. Die gaan over gevaar, en juist in de auto wil je
+weten dat er onweer voor je ligt.
+
 ## [0.10.1] — 2026-08-21
 
 ### Gerepareerd
@@ -423,6 +498,9 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.12.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.12.1
+[0.12.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.12.0
+[0.11.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.11.0
 [0.10.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.10.1
 [0.10.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.10.0
 [0.9.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.9.0

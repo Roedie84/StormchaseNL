@@ -12,7 +12,8 @@ import async_timeout
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_LATITUDE, ATTR_LONGITUDE
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers.event import async_track_state_change_event
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
@@ -32,16 +33,26 @@ from .const import (
     CONF_RING_MID,
     CONF_RING_NEAR,
     CONF_TRACKER_ENTITY,
+    CONF_RING_WINDOW,
+    CONF_STATIONARY_MINUTES,
     CONF_WARN_DISTANCE,
     CONF_ZONE_ENTITY,
     DEFAULT_GEO_PATTERN,
+    DEFAULT_RING_WINDOW,
+    DEFAULT_STATIONARY_MINUTES,
+    MAX_INSLAGEN,
+    LOCATIE_GESCHIEDENIS,
+    STATIONARY_RADIUS_KM,
     DEFAULT_RING_FAR,
     DEFAULT_RING_MID,
     DEFAULT_RING_NEAR,
     DEFAULT_WARN_DISTANCE,
     EVENT_APPROACHING,
     EVENT_CLEARED,
+    CONF_WIND_THRESHOLD,
+    DEFAULT_WIND_THRESHOLD,
     EVENT_NEARBY,
+    EVENT_WIND,
     METEO_HOURLY,
     METEO_INTERVAL,
     METEO_URL,
@@ -127,6 +138,54 @@ class LocationMixin:
         return (home[0], home[1], "thuis")
 
 
+def blitzortung_locatie(hass: HomeAssistant) -> dict | None:
+    """Zoek op vanaf welk punt de Blitzortung-integratie meet.
+
+    Die integratie heeft zelf geen entiteit die haar positie toont, maar de
+    instellingen zijn wel uitleesbaar. Zo kun je nagaan of beide integraties
+    vanaf hetzelfde punt werken; wijken ze af, dan horen de afstanden tot de
+    inslagen niet bij het weer dat je ziet.
+    """
+    for entry in hass.config_entries.async_entries():
+        if "blitzortung" not in entry.domain.lower():
+            continue
+
+        gegevens = {**entry.data, **entry.options}
+
+        # Volgt de integratie een tracker of zone, pak dan de positie daarvan
+        for sleutel in ("tracker", "tracker_entity", "device_tracker", "zone"):
+            entity_id = gegevens.get(sleutel)
+            if entity_id:
+                state = hass.states.get(entity_id)
+                if state and ATTR_LATITUDE in state.attributes:
+                    return {
+                        "naam": entry.title,
+                        "bron": entity_id,
+                        "latitude": float(state.attributes[ATTR_LATITUDE]),
+                        "longitude": float(state.attributes[ATTR_LONGITUDE]),
+                    }
+
+        breedte = gegevens.get("latitude")
+        lengte = gegevens.get("longitude")
+        if breedte is not None and lengte is not None:
+            return {
+                "naam": entry.title,
+                "bron": "vaste coordinaten",
+                "latitude": float(breedte),
+                "longitude": float(lengte),
+            }
+
+        # Geen positie in de instellingen: dan gebruikt hij de thuislocatie
+        return {
+            "naam": entry.title,
+            "bron": "thuislocatie",
+            "latitude": hass.config.latitude,
+            "longitude": hass.config.longitude,
+        }
+
+    return None
+
+
 @dataclass
 class StormData:
     """Afgeleide gegevens over de actuele onweerssituatie."""
@@ -139,10 +198,15 @@ class StormData:
     trend: str = TREND_UNKNOWN
     markers: int = 0
     rings: dict[int, int] = field(default_factory=dict)
+    ring_bron: str = "geen"
     last_strike: datetime | None = None
     latitude: float | None = None
     longitude: float | None = None
     location_source: str = "thuis"
+    onderweg: bool | None = None
+    stil_sinds: int | None = None  # minuten op dezelfde plek
+    blitzortung: dict | None = None
+    afwijking_km: float | None = None
 
 
 class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
@@ -166,6 +230,15 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         self._history: deque[tuple[float, float]] = deque(maxlen=240)
         self._was_nearby: bool | None = None
         self._was_approaching: bool | None = None
+        # Locatiepunten om te bepalen of je onderweg bent of ergens staat
+        self._locaties: deque[tuple[float, float, float]] = deque(
+            maxlen=LOCATIE_GESCHIEDENIS
+        )
+        # Zelf bijgehouden inslagen, voor het geval de Blitzortung-integratie
+        # geen geo_location entiteiten aanmaakt. Elke keer dat de
+        # afstandssensor verspringt is dat een nieuwe inslag.
+        self._inslagen: deque[tuple[float, float]] = deque(maxlen=MAX_INSLAGEN)
+        self._vorige_inslag: datetime | None = None
 
     @property
     def ring_bounds(self) -> list[int]:
@@ -181,6 +254,33 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         """Afstand waarbinnen we van een waarschuwing spreken."""
         return float(self._opt(CONF_WARN_DISTANCE, DEFAULT_WARN_DISTANCE))
 
+    @callback
+    def _noteer_inslag(self, event) -> None:
+        """Leg elke verandering van de afstandssensor vast.
+
+        Via een luisteraar en niet via de dertig-secondenronde, anders mis je
+        inslagen die daartussen vallen. Bij een actieve onweersbui komen er
+        meerdere per minuut binnen.
+        """
+        nieuw = event.data.get("new_state")
+        if nieuw is None or nieuw.state in ("unknown", "unavailable", ""):
+            return
+        try:
+            afstand = float(nieuw.state)
+        except (TypeError, ValueError):
+            return
+
+        self._inslagen.append((dt_util.utcnow().timestamp(), afstand))
+
+    def volg_bronsensor(self):
+        """Begin met luisteren naar de afstandssensor."""
+        entity_id = self._opt(CONF_DISTANCE_SENSOR)
+        if not entity_id:
+            return None
+        return async_track_state_change_event(
+            self.hass, [entity_id], self._noteer_inslag
+        )
+
     def _read_float(self, entity_id: str | None) -> float | None:
         """Lees een sensorwaarde als float, of None als dat niet lukt."""
         if not entity_id:
@@ -193,19 +293,44 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         except (TypeError, ValueError):
             return None
 
-    def _count_rings(self, pattern: str) -> tuple[int, dict[int, int]]:
-        """Tel de geo_location markers per afstandsring."""
-        distances: list[float] = []
+    def _count_rings(self, pattern: str) -> tuple[int, dict[int, int], str]:
+        """Tel de inslagen per afstandsring.
+
+        Bij voorkeur uit de geo_location entiteiten van de
+        Blitzortung-integratie, want die kent alle inslagen. Maakt die ze
+        niet aan, dan vallen we terug op de inslagen die we zelf uit de
+        afstandssensor hebben opgevangen. Dat is minder volledig, want de
+        sensor toont alleen de laatste inslag, maar het geeft wel een
+        bruikbaar beeld van de activiteit.
+        """
+        afstanden: list[float] = []
         for state in self.hass.states.async_all("geo_location"):
             if pattern not in state.entity_id:
                 continue
             try:
-                distances.append(float(state.state))
+                afstanden.append(float(state.state))
             except (TypeError, ValueError):
                 continue
 
-        rings = {bound: sum(1 for d in distances if d < bound) for bound in self.ring_bounds}
-        return len(distances), rings
+        if afstanden:
+            rings = {
+                grens: sum(1 for d in afstanden if d < grens)
+                for grens in self.ring_bounds
+            }
+            return len(afstanden), rings, "geo_location"
+
+        # Terugval: onze eigen reeks, binnen het ingestelde tijdvenster
+        venster = int(self._opt(CONF_RING_WINDOW, DEFAULT_RING_WINDOW)) * 60
+        grens_tijd = dt_util.utcnow().timestamp() - venster
+        recent = [d for t, d in self._inslagen if t >= grens_tijd]
+
+        if not recent:
+            return 0, {grens: 0 for grens in self.ring_bounds}, "geen"
+
+        rings = {
+            grens: sum(1 for d in recent if d < grens) for grens in self.ring_bounds
+        }
+        return len(recent), rings, "afstandssensor"
 
     def _speed_from_history(self) -> float | None:
         """Bereken de naderingssnelheid via lineaire regressie.
@@ -234,6 +359,42 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         # slope in km per seconde -> km per uur, omgedraaid van teken
         slope = numerator / denominator
         return round(-slope * 3600, 1)
+
+    def _beweging(self, latitude: float, longitude: float) -> tuple[bool | None, int | None]:
+        """Sta je stil of ben je onderweg?
+
+        Kijkt hoe lang geleden je voor het laatst meer dan een kilometer van
+        je huidige positie was. Blijft dat binnen het venster, dan ben je
+        onderweg; ligt het erbuiten, dan sta je ergens.
+
+        Bedoeld om meldingen over het weer ter plaatse te onderdrukken zolang
+        je rijdt: dan is de plek waar je nu bent binnen tien minuten toch
+        weer een andere.
+        """
+        nu = dt_util.utcnow().timestamp()
+        self._locaties.append((nu, latitude, longitude))
+
+        venster = int(self._opt(CONF_STATIONARY_MINUTES, DEFAULT_STATIONARY_MINUTES))
+        drempel = STATIONARY_RADIUS_KM * 1000
+
+        # Zoek het meest recente punt dat te ver weg lag
+        laatst_ver: float | None = None
+        for stempel, lat, lon in self._locaties:
+            afstand = location_distance(latitude, longitude, lat, lon)
+            if afstand is not None and afstand > drempel:
+                laatst_ver = stempel
+
+        if laatst_ver is None:
+            # Nooit ver weg geweest binnen de bewaarde reeks
+            stil = int((nu - self._locaties[0][0]) / 60)
+        else:
+            stil = int((nu - laatst_ver) / 60)
+
+        # Te weinig geschiedenis om iets te kunnen zeggen
+        if (nu - self._locaties[0][0]) < 60:
+            return None, None
+
+        return stil < venster, stil
 
     @staticmethod
     def _trend_from_speed(speed: float | None) -> str:
@@ -315,8 +476,19 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         if speed is not None and speed > SPEED_DEADZONE and distance:
             eta = round(distance / speed * 60, 0)
 
-        markers, rings = self._count_rings(pattern)
+        markers, rings, ring_bron = self._count_rings(pattern)
         latitude, longitude, source_name = self.resolve_location()
+        onderweg, stil_sinds = self._beweging(latitude, longitude)
+
+        # Meet Blitzortung vanaf hetzelfde punt als wij?
+        bz = blitzortung_locatie(self.hass)
+        afwijking = None
+        if bz is not None:
+            meters = location_distance(
+                latitude, longitude, bz["latitude"], bz["longitude"]
+            )
+            if meters is not None:
+                afwijking = round(meters / 1000, 1)
 
         # Ben je verplaatst, haal de weerparameters dan meteen opnieuw op
         # in plaats van tot het volgende half uur te wachten.
@@ -332,10 +504,15 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
             trend=trend,
             markers=markers,
             rings=rings,
+            ring_bron=ring_bron,
             last_strike=last_strike,
             latitude=latitude,
             longitude=longitude,
             location_source=source_name,
+            onderweg=onderweg,
+            stil_sinds=stil_sinds,
+            blitzortung=bz,
+            afwijking_km=afwijking,
         )
 
         if self.stats is not None:
@@ -363,6 +540,28 @@ class MeteoCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
         self.entry = entry
         self._session = async_get_clientsession(hass)
         self._fetched_at: tuple[float, float] | None = None
+        self._was_winderig: bool | None = None
+
+    def _controleer_wind(self, windstoten: float | None) -> None:
+        """Meld het als de wind boven de drempel uitkomt.
+
+        Alleen bij de overgang, zodat je niet elk half uur opnieuw bericht
+        krijgt zolang het hard waait.
+        """
+        if windstoten is None:
+            return
+
+        drempel = float(self._opt(CONF_WIND_THRESHOLD, DEFAULT_WIND_THRESHOLD))
+        winderig = windstoten >= drempel
+
+        if winderig and self._was_winderig is False:
+            if self.stats is not None:
+                self.stats.noteer_event("wind")
+            self.hass.bus.async_fire(
+                EVENT_WIND, {"windstoten": windstoten, "drempel": drempel}
+            )
+
+        self._was_winderig = winderig
 
     def note_location(self, latitude: float, longitude: float) -> None:
         """Forceer een verversing als de locatie flink verschoven is."""
@@ -445,6 +644,8 @@ class MeteoCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
         if self.stats is not None:
             self.stats.bronnen["open_meteo"].succes()
 
+        self._controleer_wind((payload.get("current") or {}).get("wind_gusts_10m"))
+
         # Windschering en de afgeleide kansen op rotatie en hagel. Dit zijn
         # omgevingsinschattingen; zie indices.py voor wat ze wel en niet
         # zeggen.
@@ -488,6 +689,7 @@ class MeteoCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
             "latitude": latitude,
             "longitude": longitude,
             "location_source": source_name,
+            "windstoten": (payload.get("current") or {}).get("wind_gusts_10m"),
             "current": payload.get("current") or {},
             "hourly": hourly,
             "hourly_index": index,

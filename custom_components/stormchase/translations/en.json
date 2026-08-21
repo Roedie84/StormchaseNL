@@ -13,7 +13,8 @@
           "ring_near": "Inner ring",
           "ring_mid": "Middle ring",
           "ring_far": "Outer ring",
-          "location_mode": "Location"
+          "location_mode": "Location",
+          "ring_window": "Time window for the rings"
         }
       },
       "location": {
@@ -39,7 +40,11 @@
           "quiet_to": "Quiet hours to",
           "rain_notify": "Also notify when rain is approaching",
           "rain_lead": "How many minutes ahead to warn",
-          "rain_threshold": "Intensity from which it counts as rain"
+          "rain_threshold": "Intensity from which it counts as rain",
+          "wind_notify": "Notify on strong wind gusts",
+          "wind_threshold": "Wind gusts from",
+          "only_stationary": "Only notify when stationary, not while travelling",
+          "stationary_minutes": "This long in the same place"
         }
       },
       "alerts": {
@@ -73,7 +78,8 @@
           "ring_near": "Inner ring",
           "ring_mid": "Middle ring",
           "ring_far": "Outer ring",
-          "location_mode": "Location"
+          "location_mode": "Location",
+          "ring_window": "Time window for the rings"
         }
       },
       "location": {
@@ -99,7 +105,11 @@
           "quiet_to": "Quiet hours to",
           "rain_notify": "Also notify when rain is approaching",
           "rain_lead": "How many minutes ahead to warn",
-          "rain_threshold": "Intensity from which it counts as rain"
+          "rain_threshold": "Intensity from which it counts as rain",
+          "wind_notify": "Notify on strong wind gusts",
+          "wind_threshold": "Wind gusts from",
+          "only_stationary": "Only notify when stationary, not while travelling",
+          "stationary_minutes": "This long in the same place"
         }
       },
       "alerts": {
@@ -178,6 +188,9 @@
       },
       "hail": {
         "name": "Hail potential"
+      },
+      "wind_gusts": {
+        "name": "Wind gusts"
       }
     },
     "binary_sensor": {
@@ -192,6 +205,9 @@
       },
       "alert_active": {
         "name": "Weather warning"
+      },
+      "moving": {
+        "name": "Moving"
       }
     },
     "switch": {

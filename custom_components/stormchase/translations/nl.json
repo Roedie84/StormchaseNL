@@ -13,7 +13,8 @@
           "ring_near": "Binnenste ring",
           "ring_mid": "Middelste ring",
           "ring_far": "Buitenste ring",
-          "location_mode": "Locatie"
+          "location_mode": "Locatie",
+          "ring_window": "Tijdvenster voor de ringen"
         }
       },
       "location": {
@@ -39,7 +40,11 @@
           "quiet_to": "Stiltevenster tot",
           "rain_notify": "Ook melden als er regen aankomt",
           "rain_lead": "Hoeveel minuten vooruit waarschuwen",
-          "rain_threshold": "Vanaf welke intensiteit het regen heet"
+          "rain_threshold": "Vanaf welke intensiteit het regen heet",
+          "wind_notify": "Melden bij harde windstoten",
+          "wind_threshold": "Windstoten vanaf",
+          "only_stationary": "Alleen melden als ik ergens ben, niet onderweg",
+          "stationary_minutes": "Zo lang op dezelfde plek"
         }
       },
       "alerts": {
@@ -73,7 +78,8 @@
           "ring_near": "Binnenste ring",
           "ring_mid": "Middelste ring",
           "ring_far": "Buitenste ring",
-          "location_mode": "Locatie"
+          "location_mode": "Locatie",
+          "ring_window": "Tijdvenster voor de ringen"
         }
       },
       "location": {
@@ -99,7 +105,11 @@
           "quiet_to": "Stiltevenster tot",
           "rain_notify": "Ook melden als er regen aankomt",
           "rain_lead": "Hoeveel minuten vooruit waarschuwen",
-          "rain_threshold": "Vanaf welke intensiteit het regen heet"
+          "rain_threshold": "Vanaf welke intensiteit het regen heet",
+          "wind_notify": "Melden bij harde windstoten",
+          "wind_threshold": "Windstoten vanaf",
+          "only_stationary": "Alleen melden als ik ergens ben, niet onderweg",
+          "stationary_minutes": "Zo lang op dezelfde plek"
         }
       },
       "alerts": {
@@ -178,6 +188,9 @@
       },
       "hail": {
         "name": "Hagelkans"
+      },
+      "wind_gusts": {
+        "name": "Windstoten"
       }
     },
     "binary_sensor": {
@@ -192,6 +205,9 @@
       },
       "alert_active": {
         "name": "Weerwaarschuwing"
+      },
+      "moving": {
+        "name": "Onderweg"
       }
     },
     "switch": {
