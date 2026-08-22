@@ -301,6 +301,8 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         self._laatste_dichtbij: float | None = None
         self._was_schuilen: bool | None = None
         self.validatie = Validatie()
+        self.opslag = None  # wordt na het aanmaken gezet
+        self._bewaarde_uitkomsten = 0
         # Kleinste afstand sinds de laatste passagevoorspelling, om die
         # achteraf tegen de werkelijkheid te kunnen houden.
         self._min_afstand: float | None = None
@@ -653,6 +655,17 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         if afstand is not None:
             if self._min_afstand is None or afstand < self._min_afstand:
                 self._min_afstand = afstand
+
+        # Is er iets afgerond, bewaar het dan. Met vertraging, zodat een reeks
+        # afrondingen kort na elkaar tot een schrijfactie leidt.
+        if (
+            self.opslag is not None
+            and len(val.uitkomsten) != self._bewaarde_uitkomsten
+        ):
+            self._bewaarde_uitkomsten = len(val.uitkomsten)
+            self.opslag.async_delay_save(
+                lambda: {"uitkomsten": self.validatie.uitkomsten}, 60
+            )
 
         if cel:
             passage_over = cel.get("passage_over")

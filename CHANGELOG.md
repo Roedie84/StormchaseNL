@@ -5,6 +5,17 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.24.3] — 2026-08-22
+
+### Gerepareerd
+
+- **Validatiegegevens overleven nu een herstart.** De uitkomsten stonden
+  alleen in het geheugen, waardoor twaalf uur aan metingen verdween zodra
+  Home Assistant opnieuw opstartte. Ze worden nu bewaard en bij het opstarten
+  teruggehaald, zodat de zelfcontrole daadwerkelijk kan opbouwen.
+- Bewaren gebeurt met vertraging, zodat een reeks afrondingen kort na elkaar
+  tot een schrijfactie leidt in plaats van tot tien.
+
 ## [0.24.2] — 2026-08-22
 
 ### Gerepareerd
@@ -1024,6 +1035,7 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.24.3]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.24.3
 [0.24.2]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.24.2
 [0.24.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.24.1
 [0.24.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.24.0

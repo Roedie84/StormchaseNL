@@ -145,3 +145,47 @@ class TestHorizon:
         samen = val.samenvatting(per_horizon=False)
         assert samen["regen"]["aantal"] == 2
         assert samen["regen"]["gemiddelde_afwijking_min"] == 20.0
+
+
+class TestBewaren:
+    """Uitkomsten moeten een herstart overleven.
+
+    Zonder dat begint de zelfcontrole telkens opnieuw en verzamelt hij nooit
+    genoeg om iets over de nauwkeurigheid te kunnen zeggen. Twaalf uur aan
+    metingen ging op die manier een keer verloren.
+    """
+
+    def test_herstellen_uit_bewaarde_lijst(self):
+        bewaard = [
+            {"soort": "regen", "voorspeld_over_min": 12, "horizon": "tot 15 min",
+             "gemaakt_op": 0.0, "uitgekomen": True, "afwijking_min": -7.0},
+        ]
+        val = Validatie(bewaard)
+
+        assert len(val.uitkomsten) == 1
+        assert val.samenvatting()["regen (tot 15 min)"]["aantal"] == 1
+
+    def test_nieuwe_uitkomsten_komen_erbij(self):
+        val = Validatie([
+            {"soort": "regen", "voorspeld_over_min": 12, "horizon": "tot 15 min",
+             "gemaakt_op": 0.0, "uitgekomen": True, "afwijking_min": -7.0},
+        ])
+        val.voorspel("regen", 10000.0, 10, {})
+        val.uitgekomen("regen", 10000.0 + 12 * 60)
+
+        assert len(val.uitkomsten) == 2
+        assert val.samenvatting()["regen (tot 15 min)"]["aantal"] == 2
+
+    def test_zonder_bewaarde_lijst(self):
+        assert Validatie().uitkomsten == []
+        assert Validatie(None).uitkomsten == []
+
+    def test_bewaarde_lijst_wordt_gekopieerd(self):
+        """De oorspronkelijke lijst mag niet meeveranderen."""
+        origineel = []
+        val = Validatie(origineel)
+        val.voorspel("regen", 0.0, 10, {})
+        val.uitgekomen("regen", 600.0)
+
+        assert origineel == []
+        assert len(val.uitkomsten) == 1

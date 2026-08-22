@@ -13,6 +13,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant, ServiceCall
 
+from homeassistant.helpers.storage import Store
 from homeassistant.loader import async_get_integration
 
 from .const import DOMAIN, SERVICE_SEND_BRIEFING, SERVICE_TEST_NOTIFICATION
@@ -23,6 +24,7 @@ from .frontend import async_register_frontend
 from .notifier import StormNotifier
 from .rain import RainCoordinator
 from .stats import Statistieken
+from .validatie import Validatie
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -71,6 +73,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # de locatie flink verschuift.
     storm.meteo = meteo
     storm.alerts = waarschuwingen
+
+    # Uitkomsten van eerdere voorspellingen terughalen. Zonder dit begint de
+    # zelfcontrole bij elke herstart opnieuw, en dan verzamelt hij nooit
+    # genoeg om iets over de nauwkeurigheid te kunnen zeggen.
+    opslag = Store(hass, 1, f"{DOMAIN}_validatie")
+    bewaard = await opslag.async_load() or {}
+    storm.validatie = Validatie(bewaard.get("uitkomsten"))
+    storm.opslag = opslag
     # Regen en onweer delen dezelfde lijst met voorspellingen
     regen.validatie = storm.validatie
 
