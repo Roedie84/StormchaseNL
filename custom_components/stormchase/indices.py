@@ -29,6 +29,18 @@ VRIESNIVEAU_BOVEN = 3500
 # WMO-codes voor onweer met hagel
 CODES_HAGEL = {96, 99}
 
+# Lightning Potential Index, J/kg. Boven de eerste grens is onweer mogelijk,
+# boven de laatste gaat het hard.
+LPI_LICHT = 1.0
+LPI_FORS = 5.0
+LPI_ZWAAR = 20.0
+
+# Maximale opwaartse snelheid in m/s. Vanaf ongeveer twintig kan een bui
+# hagelstenen lang genoeg omhoog houden om ze fors te laten worden.
+UPDRAFT_MATIG = 5.0
+UPDRAFT_FORS = 10.0
+UPDRAFT_ZWAAR = 20.0
+
 
 def peiling(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     """Bereken de richting van punt 1 naar punt 2, in graden vanaf noord.
@@ -262,6 +274,8 @@ def onweersverwachting(
     schering: float | None,
     rotatie: int | None = None,
     hagel: int | None = None,
+    lpi: float | None = None,
+    updraft: float | None = None,
 ) -> tuple[str, str, int]:
     """Vat de hele situatie samen in een oordeel plus toelichting.
 
@@ -275,6 +289,34 @@ def onweersverwachting(
     rotatie = rotatie or 0
     hagel = hagel or 0
     schering_waarde = schering or 0
+
+    # Het model kan zelf al bliksem en een sterke opwaartse stroming melden.
+    # Dat weegt zwaarder dan mijn afgeleide drempels: het is de uitkomst van
+    # het weermodel zelf en niet iets wat ik uit losse velden bij elkaar reken.
+    if lpi is not None and lpi >= LPI_ZWAAR:
+        return (
+            "Kans op noodweer",
+            f"Model meldt zeer actief onweer, {duiding_updraft(updraft)} "
+            f"opwaartse stroming",
+            RANG_NOODWEER,
+        )
+
+    if (updraft is not None and updraft >= UPDRAFT_ZWAAR) or (
+        lpi is not None and lpi >= LPI_FORS and schering_waarde >= 50
+    ):
+        return (
+            "Kans op zwaar onweer",
+            f"{duiding_lpi(lpi)}, opwaartse stroming {duiding_updraft(updraft)}, "
+            f"schering {duiding_schering(schering)}",
+            RANG_ZWAAR,
+        )
+
+    if lpi is not None and lpi >= LPI_LICHT:
+        return (
+            "Kans op onweer",
+            f"{duiding_lpi(lpi)}, {stabiliteit}",
+            RANG_ONWEER,
+        )
 
     # Zonder energie of bij stabiele lucht gebeurt er niets, hoe hard het ook
     # waait op hoogte.
@@ -313,3 +355,68 @@ def onweersverwachting(
         f"{duiding_cape(cape_piek)}, lucht is {stabiliteit}",
         RANG_KLEIN,
     )
+
+
+def duiding_lpi(lpi: float | None) -> str:
+    """Hoeveel bliksem zit erin volgens het model?"""
+    if lpi is None:
+        return "onbekend"
+    if lpi < LPI_LICHT:
+        return "geen bliksem verwacht"
+    if lpi < LPI_FORS:
+        return "enkele ontladingen"
+    if lpi < LPI_ZWAAR:
+        return "actief onweer"
+    return "zeer actief onweer"
+
+
+def duiding_updraft(updraft: float | None) -> str:
+    """Hoe krachtig is de opwaartse stroming?"""
+    if updraft is None:
+        return "onbekend"
+    if updraft < UPDRAFT_MATIG:
+        return "zwak"
+    if updraft < UPDRAFT_FORS:
+        return "matig"
+    if updraft < UPDRAFT_ZWAAR:
+        return "krachtig"
+    return "zeer krachtig"
+
+
+def duiding_wolkentop(hoogte: float | None) -> str:
+    """Hoe hoog reikt de bui?"""
+    if hoogte is None:
+        return "onbekend"
+    if hoogte < 4000:
+        return "lage bewolking"
+    if hoogte < 8000:
+        return "opbouwende bui"
+    if hoogte < 11000:
+        return "forse bui"
+    return "zeer hoge toppen"
+
+
+def draairichting(richtingen: list[float | None]) -> str:
+    """Draait de wind met de hoogte mee met de klok of ertegenin?
+
+    Een hodograaf die met de klok meedraait hoort bij een omgeving waarin
+    supercellen zich kunnen organiseren; tegen de klok in werkt tegen. Dit is
+    de kern van wat een hodograaf laat zien, zonder dat je hem hoeft te
+    kunnen lezen.
+
+    De richtingen komen van laag naar hoog binnen.
+    """
+    bekend = [r for r in richtingen if r is not None]
+    if len(bekend) < 3:
+        return "onbekend"
+
+    totaal = 0.0
+    for onder, boven in zip(bekend, bekend[1:]):
+        verschil = (boven - onder + 540) % 360 - 180  # -180 tot +180
+        totaal += verschil
+
+    if totaal > 30:
+        return "rechtsdraaiend"
+    if totaal < -30:
+        return "linksdraaiend"
+    return "nauwelijks draaiing"

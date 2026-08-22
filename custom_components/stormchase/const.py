@@ -259,6 +259,19 @@ STRATEGY_URL = f"/{DOMAIN}/{STRATEGY_FILE}"
 
 # Open-Meteo
 METEO_URL = "https://api.open-meteo.com/v1/forecast"
+
+# ICON-D2 is het enige model met bliksempotentie, updraft en wolkentoppen, en
+# het levert kwartierwaarden. Alleen in Midden-Europa; daarbuiten komen deze
+# velden leeg terug en valt de integratie terug op de gewone waarden.
+MODEL_D2 = "dwd_icon_d2"
+D2_UURLIJKS = (
+    "lightning_potential,updraft,convective_cloud_top,convective_cloud_base"
+)
+D2_KWARTIER = "cape,lightning_potential,freezing_level_height"
+
+# De Lifted Index is een GFS-veld; ICON publiceert het niet. In Midden-Europa
+# kiest Open-Meteo standaard ICON, waardoor de waarde leeg bleef.
+MODEL_GFS = "gfs_seamless"
 METEO_HOURLY = "cape,lifted_index,convective_inhibition"
 
 # Events voor automatiseringen

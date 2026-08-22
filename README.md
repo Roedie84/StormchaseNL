@@ -49,6 +49,21 @@ Het gaat om de combinatie. CAPE van 2500 bij stabiele lucht levert niets op,
 en veel energie zonder windschering hooguit een losse bui die zichzelf binnen
 een uur opruimt. `indices.py` bevat de gebruikte drempels met uitleg.
 
+### Wat het model zelf meldt
+
+`sensor.stormchase_bliksempotentie`, `_opwaartse_stroming` en `_wolkentop`
+komen uit ICON-D2, het enige model dat die velden publiceert. Ze wegen
+zwaarder dan de afgeleide kansen hieronder: het zijn uitkomsten van het
+weermodel, geen combinaties die ik zelf maak.
+
+Alleen beschikbaar in Midden-Europa. Daarbuiten blijven ze leeg en vallen de
+verwachtingen terug op CAPE, stabiliteit en schering.
+
+`sensor.stormchase_draaiing_met_hoogte` zegt of de wind met de hoogte
+rechtsom of linksom draait. Rechtsdraaiend hoort bij een omgeving waarin
+supercellen zich kunnen organiseren. Dat is de kern van een hodograaf, zonder
+dat je hem hoeft te kunnen lezen.
+
 ### Rotatie en hagel
 
 `sensor.stormchase_rotatiekans` en `sensor.stormchase_hagelkans` geven een

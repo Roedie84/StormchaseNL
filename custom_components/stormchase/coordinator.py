@@ -22,7 +22,11 @@ from homeassistant.util.location import distance as location_distance
 from .cel import frequentie, frequentietrend, volg_cel
 from .validatie import Validatie
 from .indices import (
+    draairichting,
     duiding_cape,
+    duiding_lpi,
+    duiding_updraft,
+    duiding_wolkentop,
     duiding_schering,
     duiding_stabiliteit,
     duiding_vriesniveau,
@@ -94,7 +98,11 @@ from .const import (
     EVENT_WIND,
     METEO_HOURLY,
     METEO_INTERVAL,
+    D2_KWARTIER,
+    D2_UURLIJKS,
     METEO_URL,
+    MODEL_D2,
+    MODEL_GFS,
     MIN_SAMPLES,
     MODE_HOME,
     MODE_MANUAL,
@@ -919,6 +927,89 @@ class MeteoCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
         self._vorige_condities: set[str] | None = None
         self._vorige_rang: int | None = None
 
+    @staticmethod
+    def _uur_waarde(payload: dict | None, veld: str, stempel: str):
+        """Waarde bij het huidige uur uit een los antwoord."""
+        blok = (payload or {}).get("hourly") or {}
+        tijden = blok.get("time") or []
+        waarden = blok.get(veld) or []
+        if stempel in tijden:
+            index = tijden.index(stempel)
+            if index < len(waarden):
+                return waarden[index]
+        return None
+
+    @staticmethod
+    def _kwartier_waarde(payload: dict | None, veld: str, nu):
+        """Waarde bij het dichtstbijzijnde kwartier.
+
+        Kwartierwaarden zijn een stuk actueler dan uurwaarden; bij opbouwende
+        convectie scheelt dat merkbaar.
+        """
+        blok = (payload or {}).get("minutely_15") or {}
+        tijden = blok.get("time") or []
+        waarden = blok.get(veld) or []
+
+        beste = None
+        for index, stempel in enumerate(tijden):
+            moment = dt_util.parse_datetime(stempel)
+            if moment is None or index >= len(waarden) or waarden[index] is None:
+                continue
+            if moment.tzinfo is None:
+                moment = moment.replace(tzinfo=nu.tzinfo)
+            verschil = abs((moment - nu).total_seconds())
+            if verschil <= 900 and (beste is None or verschil < beste[0]):
+                beste = (verschil, waarden[index])
+
+        return beste[1] if beste else None
+
+    async def _extra_velden(self, latitude: float, longitude: float) -> dict:
+        """Haal de velden op die alleen ICON-D2 en GFS leveren.
+
+        Aparte verzoeken, zodat een storing hierin de hoofdgegevens niet
+        meesleept. Levert een model niets, dan blijven de bijbehorende
+        waarden leeg en werkt de rest gewoon door.
+        """
+        basis = {
+            "latitude": round(latitude, 4),
+            "longitude": round(longitude, 4),
+            "timezone": str(self.hass.config.time_zone),
+            "forecast_days": 2,
+        }
+
+        uit: dict = {}
+
+        # ICON-D2: bliksempotentie, updraft, wolkentoppen en kwartierwaarden
+        try:
+            async with async_timeout.timeout(20):
+                antwoord = await self._session.get(
+                    METEO_URL,
+                    params={
+                        **basis,
+                        "models": MODEL_D2,
+                        "hourly": D2_UURLIJKS,
+                        "minutely_15": D2_KWARTIER,
+                    },
+                )
+                antwoord.raise_for_status()
+                uit["d2"] = await antwoord.json()
+        except (aiohttp.ClientError, TimeoutError, ValueError) as err:
+            _LOGGER.debug("ICON-D2 niet beschikbaar: %s", err)
+
+        # GFS: alleen voor de Lifted Index
+        try:
+            async with async_timeout.timeout(20):
+                antwoord = await self._session.get(
+                    METEO_URL,
+                    params={**basis, "models": MODEL_GFS, "hourly": "lifted_index"},
+                )
+                antwoord.raise_for_status()
+                uit["gfs"] = await antwoord.json()
+        except (aiohttp.ClientError, TimeoutError, ValueError) as err:
+            _LOGGER.debug("GFS niet beschikbaar: %s", err)
+
+        return uit
+
     def _controleer_wind(self, windstoten: float | None) -> None:
         """Meld het als de wind boven de drempel uitkomt.
 
@@ -1087,6 +1178,8 @@ class MeteoCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
                 self.stats.bronnen["open_meteo"].fout(err)
             raise UpdateFailed(f"Open-Meteo niet bereikbaar: {err}") from err
 
+        extra = await self._extra_velden(latitude, longitude)
+
         hourly = payload.get("hourly") or {}
         times: list[str] = hourly.get("time") or []
         if not times:
@@ -1118,6 +1211,23 @@ class MeteoCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
         self._controleer_wind(huidig.get("wind_gusts_10m"))
         self._controleer_weer(huidig)
 
+        # Velden uit de losse verzoeken
+        nu_lokaal = dt_util.now()
+        d2 = extra.get("d2")
+        gfs = extra.get("gfs")
+
+        lpi = self._kwartier_waarde(d2, "lightning_potential", nu_lokaal)
+        if lpi is None:
+            lpi = self._uur_waarde(d2, "lightning_potential", stamp)
+
+        updraft = self._uur_waarde(d2, "updraft", stamp)
+        wolkentop = self._uur_waarde(d2, "convective_cloud_top", stamp)
+        wolkenbasis = self._uur_waarde(d2, "convective_cloud_base", stamp)
+
+        # Kwartierwaarden gaan voor op uurwaarden waar ze bestaan
+        cape_kwartier = self._kwartier_waarde(d2, "cape", nu_lokaal)
+        vries_kwartier = self._kwartier_waarde(d2, "freezing_level_height", nu_lokaal)
+
         # Windschering en de afgeleide kansen op rotatie en hagel. Dit zijn
         # omgevingsinschattingen; zie indices.py voor wat ze wel en niet
         # zeggen.
@@ -1133,8 +1243,27 @@ class MeteoCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
             at_index("wind_speed_850hPa"),
             at_index("wind_direction_850hPa"),
         )
-        vriesniveau = at_index("freezing_level_height")
-        cape_nu = at_index("cape")
+        schering_3km = windschering(
+            at_index("wind_speed_10m"),
+            at_index("wind_direction_10m"),
+            at_index("wind_speed_700hPa"),
+            at_index("wind_direction_700hPa"),
+        )
+        hodograaf = draairichting(
+            [
+                at_index("wind_direction_10m"),
+                at_index("wind_direction_850hPa"),
+                at_index("wind_direction_700hPa"),
+                at_index("wind_direction_500hPa"),
+            ]
+        )
+        vriesniveau = vries_kwartier
+        if vriesniveau is None:
+            vriesniveau = at_index("freezing_level_height")
+
+        cape_nu = cape_kwartier
+        if cape_nu is None:
+            cape_nu = at_index("cape")
 
         tt = total_totals(
             at_index("temperature_850hPa"),
@@ -1142,6 +1271,8 @@ class MeteoCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
             at_index("temperature_500hPa"),
         )
         li = at_index("lifted_index")
+        if li is None:
+            li = self._uur_waarde(gfs, "lifted_index", stamp)
 
         rotatie, rotatie_detail = rotatiekans(cape_nu, schering_6km)
         hagel, hagel_detail = hagelkans(
@@ -1150,7 +1281,7 @@ class MeteoCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
 
         cape_piek = max(cape_window) if cape_window else None
         oordeel, toelichting, rang = onweersverwachting(
-            cape_piek, li, tt, schering_6km, rotatie, hagel
+            cape_piek, li, tt, schering_6km, rotatie, hagel, lpi, updraft
         )
         self._controleer_vooruitzicht(oordeel, toelichting, rang)
 
@@ -1165,6 +1296,16 @@ class MeteoCoordinator(LocationMixin, DataUpdateCoordinator[dict]):
             "duiding_vriesniveau": duiding_vriesniveau(vriesniveau),
             "schering_6km": schering_6km,
             "schering_1km": schering_1km,
+            "schering_3km": schering_3km,
+            "hodograaf": hodograaf,
+            "lpi": lpi,
+            "updraft": updraft,
+            "wolkentop": wolkentop,
+            "wolkenbasis": wolkenbasis,
+            "duiding_lpi": duiding_lpi(lpi),
+            "duiding_updraft": duiding_updraft(updraft),
+            "duiding_wolkentop": duiding_wolkentop(wolkentop),
+            "kwartierdata": cape_kwartier is not None,
             "vriesniveau": vriesniveau,
             "total_totals": tt,
             "rotatiekans": rotatie,

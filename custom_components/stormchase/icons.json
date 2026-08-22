@@ -90,6 +90,21 @@
       },
       "safe_in": {
         "default": "mdi:shield-clock"
+      },
+      "lightning_potential": {
+        "default": "mdi:flash-triangle-outline"
+      },
+      "updraft": {
+        "default": "mdi:arrow-up-thick"
+      },
+      "cloud_top": {
+        "default": "mdi:cloud-arrow-up-outline"
+      },
+      "wind_shear_3km": {
+        "default": "mdi:weather-windy"
+      },
+      "hodograph": {
+        "default": "mdi:rotate-right"
       }
     },
     "binary_sensor": {

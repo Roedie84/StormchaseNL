@@ -133,3 +133,71 @@ class TestOnweersverwachting:
         _, toelichting, _ = onweersverwachting(1900, None, 53, 55)
         assert "energie" in toelichting
         assert "schering" in toelichting
+
+
+class TestModelvelden:
+    """Velden die ICON-D2 zelf levert wegen zwaarder dan afgeleide drempels."""
+
+    def test_duiding_lpi(self):
+        from indices import duiding_lpi
+
+        assert duiding_lpi(0.2) == "geen bliksem verwacht"
+        assert duiding_lpi(2) == "enkele ontladingen"
+        assert duiding_lpi(9) == "actief onweer"
+        assert duiding_lpi(40) == "zeer actief onweer"
+        assert duiding_lpi(None) == "onbekend"
+
+    def test_duiding_updraft(self):
+        from indices import duiding_updraft
+
+        assert duiding_updraft(2) == "zwak"
+        assert duiding_updraft(28) == "zeer krachtig"
+
+    def test_hoge_lpi_geeft_noodweer(self):
+        """Meldt het model zeer actief onweer, dan telt dat zwaarder."""
+        _, _, rang = onweersverwachting(300, None, 41, 20, lpi=35)
+        assert rang == 4
+
+    def test_sterke_updraft_geeft_zwaar_onweer(self):
+        _, _, rang = onweersverwachting(1500, None, 50, 40, lpi=6, updraft=24)
+        assert rang == 3
+
+    def test_lage_lpi_bij_stabiele_lucht(self):
+        """Zonder bliksem in het model blijft een stabiele dag rustig."""
+        _, _, rang = onweersverwachting(390, None, 41.3, 61, lpi=0.0, updraft=2.0)
+        assert rang == 0
+
+    def test_zonder_modelvelden_oude_gedrag(self):
+        """Buiten het bereik van ICON-D2 komt er niets binnen; dan de drempels."""
+        _, _, rang = onweersverwachting(1900, None, 53, 55, 45, 52)
+        assert rang == 3
+
+
+class TestDraairichting:
+    """De kern van een hodograaf, zonder dat je hem hoeft te lezen."""
+
+    def test_met_de_klok_mee(self):
+        from indices import draairichting
+
+        assert draairichting([225, 260, 300, 320]) == "rechtsdraaiend"
+
+    def test_tegen_de_klok_in(self):
+        from indices import draairichting
+
+        assert draairichting([270, 240, 210, 190]) == "linksdraaiend"
+
+    def test_nauwelijks_draaiing(self):
+        from indices import draairichting
+
+        assert draairichting([270, 272, 268, 275]) == "nauwelijks draaiing"
+
+    def test_over_de_noordgrens(self):
+        """350 naar 10 graden is twintig graden rechtsom, niet 340 linksom."""
+        from indices import draairichting
+
+        assert draairichting([350, 10, 30]) == "rechtsdraaiend"
+
+    def test_te_weinig_niveaus(self):
+        from indices import draairichting
+
+        assert draairichting([270, None, None]) == "onbekend"

@@ -839,6 +839,65 @@ class StormchaseStrategy {
         ],
       });
 
+      // Wat het model zelf meldt, in plaats van wat ik eruit afleid
+      if (bruikbaar(hass, "sensor.stormchase_bliksempotentie")) {
+        cards.push({
+          type: "grid",
+          columns: 2,
+          square: false,
+          cards: [
+            tegel({
+              icon: "mdi:flash-triangle-outline",
+              icon_color:
+                "{% set l = states('sensor.stormchase_bliksempotentie') | float(0) %}" +
+                "{{ 'red' if l > 20 else 'orange' if l > 5 else 'amber' if l > 1 else 'disabled' }}",
+              primary:
+                "{% set d = state_attr('sensor.stormchase_onweersverwachting'," +
+                "'bliksempotentie') | default('onbekend') %}{{ d[0] | upper }}{{ d[1:] }}",
+              secondary:
+                "Bliksempotentie \u00b7 " +
+                waarde("sensor.stormchase_bliksempotentie", " J/kg"),
+              multiline_secondary: true,
+            }),
+            tegel({
+              icon: "mdi:arrow-up-thick",
+              icon_color:
+                "{% set u = states('sensor.stormchase_opwaartse_stroming') | float(0) %}" +
+                "{{ 'red' if u > 20 else 'orange' if u > 10 else 'amber' if u > 5 else 'disabled' }}",
+              primary:
+                "{% set d = state_attr('sensor.stormchase_onweersverwachting'," +
+                "'opwaartse_stroming') | default('onbekend') %}{{ d[0] | upper }}{{ d[1:] }}",
+              secondary:
+                "Opwaartse stroming \u00b7 " +
+                waarde("sensor.stormchase_opwaartse_stroming", " m/s"),
+              multiline_secondary: true,
+            }),
+            tegel({
+              icon: "mdi:cloud-arrow-up-outline",
+              icon_color:
+                "{% set t = states('sensor.stormchase_wolkentop') | float(0) %}" +
+                "{{ 'red' if t > 11000 else 'orange' if t > 8000 else 'amber' if t > 4000 else 'disabled' }}",
+              primary:
+                "{% set d = state_attr('sensor.stormchase_onweersverwachting'," +
+                "'wolkentop') | default('onbekend') %}{{ d[0] | upper }}{{ d[1:] }}",
+              secondary:
+                "Wolkentop \u00b7 " + waarde("sensor.stormchase_wolkentop", " m"),
+              multiline_secondary: true,
+            }),
+            tegel({
+              icon: "mdi:rotate-right",
+              icon_color:
+                "{% if states('sensor.stormchase_draaiing_met_hoogte') == " +
+                "'rechtsdraaiend' %}orange{% else %}disabled{% endif %}",
+              primary:
+                "{% set d = states('sensor.stormchase_draaiing_met_hoogte') %}" +
+                "{{ d[0] | upper }}{{ d[1:] }}",
+              secondary: "Draaiing met hoogte",
+            }),
+          ],
+        });
+      }
+
       cards.push({
         type: "grid",
         columns: 2,
@@ -863,6 +922,14 @@ class StormchaseStrategy {
               "{{ 'orange' if s > 30 else 'amber' if s > 15 else 'disabled' }}",
             primary: waarde("sensor.stormchase_windschering_0_1_km", " km/u"),
             secondary: "Schering 0-1 km",
+          }),
+          tegel({
+            icon: "mdi:weather-windy",
+            icon_color:
+              "{% set s = states('sensor.stormchase_windschering_0_3_km') | float(0) %}" +
+              "{{ 'orange' if s > 50 else 'amber' if s > 25 else 'disabled' }}",
+            primary: waarde("sensor.stormchase_windschering_0_3_km", " km/u"),
+            secondary: "Schering 0-3 km",
           }),
           tegel({
             icon: "mdi:snowflake-thermometer",

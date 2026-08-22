@@ -165,6 +165,43 @@ METEO_SENSORS: tuple[MeteoSensorDescription, ...] = (
         value=lambda data: data.get("schering_6km"),
     ),
     MeteoSensorDescription(
+        key="lightning_potential",
+        translation_key="lightning_potential",
+        native_unit_of_measurement="J/kg",
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=1,
+        value=lambda data: data.get("lpi"),
+    ),
+    MeteoSensorDescription(
+        key="updraft",
+        translation_key="updraft",
+        native_unit_of_measurement="m/s",
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=1,
+        value=lambda data: data.get("updraft"),
+    ),
+    MeteoSensorDescription(
+        key="cloud_top",
+        translation_key="cloud_top",
+        native_unit_of_measurement="m",
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=0,
+        value=lambda data: data.get("wolkentop"),
+    ),
+    MeteoSensorDescription(
+        key="wind_shear_3km",
+        translation_key="wind_shear_3km",
+        native_unit_of_measurement="km/h",
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=0,
+        value=lambda data: data.get("schering_3km"),
+    ),
+    MeteoSensorDescription(
+        key="hodograph",
+        translation_key="hodograph",
+        value=lambda data: data.get("hodograaf"),
+    ),
+    MeteoSensorDescription(
         key="wind_shear_1km",
         translation_key="wind_shear_1km",
         native_unit_of_measurement="km/h",
@@ -729,4 +766,11 @@ class ForecastSensor(CoordinatorEntity[MeteoCoordinator], SensorEntity):
             "stabiliteit": data.get("duiding_stabiliteit"),
             "windschering": data.get("duiding_schering"),
             "vriesniveau": data.get("duiding_vriesniveau"),
+            "bliksempotentie": data.get("duiding_lpi"),
+            "opwaartse_stroming": data.get("duiding_updraft"),
+            "wolkentop": data.get("duiding_wolkentop"),
+            "hodograaf": data.get("hodograaf"),
+            # Kwartierwaarden zijn actueler dan uurwaarden; alleen
+            # beschikbaar binnen het bereik van ICON-D2
+            "kwartierdata": data.get("kwartierdata"),
         }

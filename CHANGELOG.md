@@ -5,6 +5,47 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.25.0] — 2026-08-22
+
+Modelvelden die er wel waren maar niet werden opgehaald.
+
+### Toegevoegd
+
+- **Bliksempotentie (LPI)** uit ICON-D2, een verticale integraal van de
+  gekwadrateerde opwaartse snelheid gewogen met de graupelconcentratie. Dat
+  is een bliksemverwachting uit het model zelf, in plaats van iets wat ik uit
+  losse velden afleid.
+- **Opwaartse stroming**, de maximale verticale snelheid tussen grond en tien
+  kilometer. Vanaf ongeveer twintig meter per seconde kan een bui hagelstenen
+  lang genoeg omhoog houden om ze fors te laten worden.
+- **Wolkentop en wolkenbasis** van de convectie, zodat je ziet hoe hoog een
+  bui reikt.
+- **Windschering over 0-3 km** naast 0-1 en 0-6.
+- **Draaiing met hoogte**: rechtsdraaiend, linksdraaiend of nauwelijks. Dat is
+  de kern van wat een hodograaf laat zien, zonder dat je hem hoeft te kunnen
+  lezen. Rechtsdraaiend hoort bij een omgeving waarin supercellen zich kunnen
+  organiseren.
+
+### Gewijzigd
+
+- **CAPE en vriesniveau komen nu van kwartierwaarden** waar die beschikbaar
+  zijn, in plaats van uurwaarden. Bij opbouwende convectie scheelt dat
+  merkbaar in actualiteit.
+- **De onweersverwachting weegt de modelvelden zwaarder** dan mijn afgeleide
+  drempels. Meldt het model zeer actief onweer, dan is dat noodweer, ongeacht
+  wat CAPE en schering zeggen. Komen die velden niet binnen, dan gelden de
+  oude drempels gewoon.
+- **De Lifted Index wordt nu bij GFS opgehaald.** Het is een GFS-veld dat
+  ICON niet publiceert, en in Midden-Europa kiest Open-Meteo standaard ICON.
+  Daarom bleef die waarde vijf diagnostieken lang leeg.
+
+### Opmerking
+
+Deze velden komen alleen van ICON-D2, dat Midden-Europa dekt met een
+resolutie van twee kilometer. Daarbuiten blijven ze leeg en werkt de rest
+gewoon door. De extra verzoeken staan los van het hoofdverzoek, zodat een
+storing daarin de rest niet meesleept.
+
 ## [0.24.3] — 2026-08-22
 
 ### Gerepareerd
@@ -1035,6 +1076,7 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.25.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.25.0
 [0.24.3]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.24.3
 [0.24.2]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.24.2
 [0.24.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.24.1

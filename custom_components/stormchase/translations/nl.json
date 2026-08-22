@@ -256,6 +256,21 @@
       },
       "safe_in": {
         "name": "Veilig over"
+      },
+      "lightning_potential": {
+        "name": "Bliksempotentie"
+      },
+      "updraft": {
+        "name": "Opwaartse stroming"
+      },
+      "cloud_top": {
+        "name": "Wolkentop"
+      },
+      "wind_shear_3km": {
+        "name": "Windschering 0-3 km"
+      },
+      "hodograph": {
+        "name": "Draaiing met hoogte"
       }
     },
     "binary_sensor": {

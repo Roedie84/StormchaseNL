@@ -256,6 +256,21 @@
       },
       "safe_in": {
         "name": "Safe in"
+      },
+      "lightning_potential": {
+        "name": "Lightning potential"
+      },
+      "updraft": {
+        "name": "Updraft"
+      },
+      "cloud_top": {
+        "name": "Cloud top"
+      },
+      "wind_shear_3km": {
+        "name": "Wind shear 0-3 km"
+      },
+      "hodograph": {
+        "name": "Turning with height"
       }
     },
     "binary_sensor": {
