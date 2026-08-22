@@ -84,7 +84,7 @@ class TestSamenvatting:
             val.voorspel("regen", gemaakt, 20, {})
             val.uitgekomen("regen", gemaakt + werkelijk * 60)
 
-        samenvatting = val.samenvatting()["regen"]
+        samenvatting = val.samenvatting()["regen (15 tot 45 min)"]
         assert samenvatting["aantal"] == 3
         assert samenvatting["uitgekomen"] == 3
         assert samenvatting["gemiddelde_afwijking_min"] == pytest.approx(3.0, abs=0.1)
@@ -96,7 +96,7 @@ class TestSamenvatting:
         val.voorspel("regen", 1000.0, 20, {})
         val.verlopen(1000.0 + (20 + 46) * 60)
 
-        samenvatting = val.samenvatting()["regen"]
+        samenvatting = val.samenvatting()["regen (15 tot 45 min)"]
         assert samenvatting["aantal"] == 2
         assert samenvatting["uitgekomen"] == 1
 
@@ -111,3 +111,37 @@ class TestSamenvatting:
         uit = val.als_dict()
         assert "aankomst" in uit["open"]
         assert uit["open"]["aankomst"]["verwacht_over_min"] == 45
+
+
+class TestHorizon:
+    """Voorspellingen ver vooruit horen niet op een hoop met dichtbij."""
+
+    def test_indeling(self):
+        from validatie import horizon
+
+        assert horizon(8) == "tot 15 min"
+        assert horizon(15) == "tot 15 min"
+        assert horizon(30) == "15 tot 45 min"
+        assert horizon(90) == "meer dan 45 min"
+
+    def test_samenvatting_splitst(self, val):
+        """Een misser ver vooruit mag het dichtbijgemiddelde niet verpesten."""
+        val.voorspel("regen", 0.0, 12, {})
+        val.uitgekomen("regen", 5 * 60)
+
+        val.voorspel("regen", 10000.0, 57, {})
+        val.uitgekomen("regen", 10000.0 + 90 * 60)
+
+        samenvatting = val.samenvatting()
+        assert samenvatting["regen (tot 15 min)"]["gemiddelde_afwijking_min"] == 7.0
+        assert samenvatting["regen (meer dan 45 min)"]["gemiddelde_afwijking_min"] == 33.0
+
+    def test_samenvoegen_kan_ook(self, val):
+        val.voorspel("regen", 0.0, 12, {})
+        val.uitgekomen("regen", 5 * 60)
+        val.voorspel("regen", 10000.0, 57, {})
+        val.uitgekomen("regen", 10000.0 + 90 * 60)
+
+        samen = val.samenvatting(per_horizon=False)
+        assert samen["regen"]["aantal"] == 2
+        assert samen["regen"]["gemiddelde_afwijking_min"] == 20.0

@@ -820,10 +820,11 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         eta = None
         if speed is not None and speed > SPEED_DEADZONE and distance:
             eta = int(round(distance / speed * 60))
-            # Alleen vastleggen zolang het nog een voorspelling is: onweer dat
-            # al binnen de waarschuwingsafstand zit valt niets meer over te
-            # zeggen.
-            if 5 <= eta <= 180 and distance > self.warn_distance:
+            # Alleen vastleggen zolang het nog een voorspelling is. Boven het
+            # uur is het extrapolatie van een afstandstrend over een kwartier;
+            # de eerste meting gaf een aankomst van 86 minuten die er nooit
+            # kwam.
+            if 5 <= eta <= 60 and distance > self.warn_distance:
                 self.validatie.voorspel(
                     "aankomst",
                     dt_util.utcnow().timestamp(),

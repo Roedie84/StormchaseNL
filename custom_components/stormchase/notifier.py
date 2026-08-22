@@ -22,6 +22,7 @@ from .const import (
     CONF_OUTLOOK_NOTIFY,
     CONF_RAIN_NOTIFY,
     CONF_WEATHER_TYPES,
+    DEFAULT_WEATHER_TYPES,
     CONF_WIND_NOTIFY,
     CONF_NOTIFY_MAX_DISTANCE,
     CONF_NOTIFY_ON_APPROACH,
@@ -513,7 +514,10 @@ class StormNotifier:
         """Bijzondere weersituatie op de huidige locatie."""
         soort = event.data.get("soort", "")
 
-        gekozen = self._opt(CONF_WEATHER_TYPES) or []
+        # Dezelfde standaard als de coordinator gebruikt. Stond hier eerst
+        # een lege lijst, waardoor elke weersituatie werd gedetecteerd en
+        # daarna weggegooid zolang je de instelling niet had opgeslagen.
+        gekozen = self._opt(CONF_WEATHER_TYPES, DEFAULT_WEATHER_TYPES) or []
         if soort not in gekozen:
             return
         if not self.ingeschakeld or not self.diensten:

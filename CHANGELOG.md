@@ -5,6 +5,30 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.24.1] — 2026-08-22
+
+Eerste versie die op echte validatiegegevens is bijgesteld.
+
+### Gerepareerd
+
+- **Weersituaties werden gedetecteerd maar nooit gemeld.** De coordinator
+  viel terug op de standaardlijst met situaties, de notifier op een lege
+  lijst. Zolang je die instelling niet handmatig had opgeslagen werd elke
+  sneeuw-, ijzel-, mist-, hitte- of vorstsituatie herkend en daarna
+  weggegooid. In twaalf uur draaien werden er twee gedetecteerd en nul
+  gemeld.
+
+### Gewijzigd
+
+- **Validatie splitst nu op horizon**: tot 15 minuten, 15 tot 45, en verder.
+  De eerste metingen lieten zien waarom dat nodig is: twaalf minuten vooruit
+  zat de regenvoorspelling er 7 minuten naast, 57 minuten vooruit 33 minuten.
+  Dat samen middelen tot 20 minuten verbergt precies wat je wil weten.
+- **Aankomstvoorspellingen worden alleen nog vastgelegd tot een uur vooruit.**
+  De eerste meting gaf een aankomst van 86 minuten die er nooit kwam. Boven
+  het uur is het geen voorspelling maar extrapolatie van een afstandstrend
+  over een kwartier.
+
 ## [0.24.0] — 2026-08-21
 
 Testsuite en zelfcontrole.
@@ -976,6 +1000,7 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.24.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.24.1
 [0.24.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.24.0
 [0.23.2]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.23.2
 [0.23.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.23.1

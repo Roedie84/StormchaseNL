@@ -17,6 +17,20 @@ from __future__ import annotations
 # Hoeveel afgeronde voorspellingen we bewaren
 MAX_UITKOMSTEN = 60
 
+# Voorspellingen worden per horizon gegroepeerd. Een nowcast tien minuten
+# vooruit is iets heel anders dan een uur vooruit, en dat door elkaar middelen
+# verbergt precies wat je wil weten.
+HORIZONNEN = [(15, "tot 15 min"), (45, "15 tot 45 min"), (10**9, "meer dan 45 min")]
+
+
+def horizon(minuten: float) -> str:
+    """In welke groep valt deze voorspelling?"""
+    for grens, naam in HORIZONNEN:
+        if minuten <= grens:
+            return naam
+    return HORIZONNEN[-1][1]
+
+
 # Een voorspelling die zo lang na het verwachte moment nog niet is uitgekomen,
 # geldt als niet uitgekomen.
 GEDULD_MINUTEN = {
@@ -61,6 +75,7 @@ class Validatie:
         regel = {
             "soort": soort,
             "voorspeld_over_min": voorspelling["verwacht_over"],
+            "horizon": horizon(voorspelling["verwacht_over"]),
             "gemaakt_op": voorspelling["gemaakt_op"],
             **uitkomst,
         }
@@ -120,12 +135,27 @@ class Validatie:
 
     # ---- Samenvatten ----
 
-    def samenvatting(self) -> dict:
-        """Per soort hoe goed de voorspellingen uitkwamen."""
+    def samenvatting(self, per_horizon: bool = True) -> dict:
+        """Hoe goed de voorspellingen uitkwamen, per soort en per horizon.
+
+        Zonder die opsplitsing trekt een enkele uitschieter ver vooruit het
+        gemiddelde scheef en lijkt de hele voorspelling slecht, terwijl hij
+        dichtbij prima werkt.
+        """
         uit: dict[str, dict] = {}
 
-        for soort in {r["soort"] for r in self.uitkomsten}:
-            regels = [r for r in self.uitkomsten if r["soort"] == soort]
+        sleutels = {
+            (r["soort"], r.get("horizon") if per_horizon else None)
+            for r in self.uitkomsten
+        }
+
+        for soort, groep in sleutels:
+            regels = [
+                r
+                for r in self.uitkomsten
+                if r["soort"] == soort
+                and (not per_horizon or r.get("horizon") == groep)
+            ]
             raak = [r for r in regels if r.get("uitgekomen")]
 
             samenvatting = {
@@ -146,9 +176,10 @@ class Validatie:
             if km:
                 samenvatting["gemiddelde_afwijking_km"] = round(sum(km) / len(km), 1)
 
-            uit[soort] = samenvatting
+            naam = f"{soort} ({groep})" if per_horizon and groep else soort
+            uit[naam] = samenvatting
 
-        return uit
+        return dict(sorted(uit.items()))
 
     def als_dict(self) -> dict:
         """Alles voor in de diagnostiek en om te bewaren."""
