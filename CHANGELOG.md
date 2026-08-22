@@ -5,6 +5,30 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.24.2] — 2026-08-22
+
+### Gerepareerd
+
+- **Het dashboardscript bevat geen niet-ASCII tekens meer.** Het middelpunt
+  dat als scheidingsteken werd gebruikt kwam er bij een gebruiker als `Â·`
+  uit, doordat het bestand ergens door een editor met de verkeerde codering
+  was gehaald. Alles staat nu als escape in de broncode, wat visueel niets
+  verandert maar het bestand bestand maakt tegen zo'n bewerking.
+
+### Toegevoegd
+
+- Vier tests op het strategiebestand zelf: alleen ASCII, niet afgekapt,
+  haakjes in balans, en beide strategieen worden geregistreerd. Een
+  syntaxfout in dat bestand levert namelijk alleen "Timeout waiting for
+  strategy element" op, wat lastig te herleiden is naar de oorzaak.
+
+### Bij problemen met het dashboard
+
+Krijg je die timeout, open dan `/stormchase/stormchase-strategy.js` in je
+browser en controleer of het bestand eindigt op `);` en of er `Â·` of `â€"`
+in staat. Zo ja, dan is het bestand onderweg beschadigd en moet het opnieuw
+uit de release worden geplaatst.
+
 ## [0.24.1] — 2026-08-22
 
 Eerste versie die op echte validatiegegevens is bijgesteld.
@@ -1000,6 +1024,7 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.24.2]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.24.2
 [0.24.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.24.1
 [0.24.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.24.0
 [0.23.2]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.23.2

@@ -1069,7 +1069,7 @@ class StormchaseStrategy {
     // Staat de radar al in zijn eigen rij bovenaan, dan hoeft hij hier niet
     // nog een keer.
     if (kaarten.iradar !== false && config.radar_boven === false) {
-      cards.push(kop("iRadar · radar & celdetectie", "mdi:radar"));
+      cards.push(kop("iRadar \u00b7 radar & celdetectie", "mdi:radar"));
       cards.push({
         type: "iframe",
         url: config.iradar_url || "https://iradar.app/",
@@ -1079,7 +1079,7 @@ class StormchaseStrategy {
     }
 
     if (kaarten.blitzortung !== false) {
-      cards.push(kop("Blitzortung · live inslagen", "mdi:flash-outline"));
+      cards.push(kop("Blitzortung \u00b7 live inslagen", "mdi:flash-outline"));
       cards.push({
         type: "iframe",
         url:
@@ -1092,7 +1092,7 @@ class StormchaseStrategy {
     }
 
     if (kaarten.buienradar !== false) {
-      cards.push(kop("Buienradar · neerslag 2 uur", "mdi:weather-pouring"));
+      cards.push(kop("Buienradar \u00b7 neerslag 2 uur", "mdi:weather-pouring"));
       cards.push({
         type: "iframe",
         url:
@@ -1104,7 +1104,7 @@ class StormchaseStrategy {
     }
 
     if (kaarten.windy !== false) {
-      cards.push(kop("Windy · CAPE", "mdi:weather-lightning-rainy"));
+      cards.push(kop("Windy \u00b7 CAPE", "mdi:weather-lightning-rainy"));
       cards.push({
         type: "iframe",
         url:

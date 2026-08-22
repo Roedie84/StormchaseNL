@@ -111,3 +111,43 @@ def test_vertalingen_dekken_alle_stappen():
         aanwezig = set(vertaling["config"]["step"]) | set(vertaling["options"]["step"])
         ontbreekt = stappen - aanwezig
         assert not ontbreekt, f"{bestand} mist {ontbreekt}"
+
+
+class TestStrategieBestand:
+    """Het dashboardscript wordt door de browser als module geladen.
+
+    Gaat er onderweg iets mis met de codering of raakt het bestand afgekapt,
+    dan registreert de module niets en krijgt de gebruiker alleen
+    "Timeout waiting for strategy element". Dat is dan lastig te herleiden,
+    dus we controleren het hier.
+    """
+
+    @pytest.fixture
+    def script(self):
+        pad = BRON / "www" / "stormchase-strategy.js"
+        assert pad.is_file(), "strategiebestand ontbreekt"
+        return pad.read_text(encoding="utf-8")
+
+    def test_alleen_ascii(self, script):
+        """Niet-ASCII overleeft een editor met de verkeerde codering niet.
+
+        Een middelpunt werd ooit Â·, wat het bestand onbruikbaar maakte.
+        Alles staat daarom als escape in de broncode.
+        """
+        raar = {c for c in script if ord(c) > 127}
+        assert not raar, f"niet-ASCII gevonden: {sorted(raar)}"
+
+    def test_niet_afgekapt(self, script):
+        """Het bestand moet eindigen op de afsluitende regel."""
+        assert script.rstrip().endswith(");"), "bestand lijkt afgekapt"
+
+    def test_haakjes_in_balans(self, script):
+        """Grove controle op een afgekapt bestand."""
+        for open_teken, sluit_teken in (("{", "}"), ("(", ")"), ("[", "]")):
+            assert script.count(open_teken) == script.count(sluit_teken), (
+                f"ongelijk aantal {open_teken}{sluit_teken}"
+            )
+
+    def test_registreert_beide_strategieen(self, script):
+        for naam in ("ll-strategy-view-stormchase", "ll-strategy-dashboard-stormchase"):
+            assert naam in script
