@@ -53,7 +53,13 @@ from .radar import (
     tegelraster,
 )
 from .const import DWD_WMS_URL
-from .wolken import VERVAGING, alfa_van_helderheid, mercatorrij, wms_url
+from .wolken import (
+    UITSNIJDING,
+    VERVAGING,
+    alfa_van_helderheid,
+    mercatorrij,
+    wms_url,
+)
 from .radarbron import RadarCoordinator
 
 
@@ -173,13 +179,19 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
         en licht vervaagd: donker is helder, licht is bewolkt, met vloeiende
         overgangen zoals op elke weerkaart.
         """
-        from PIL import Image, ImageFilter
+        from PIL import Image, ImageFilter, ImageOps
 
         recht = cls._herprojecteer(inhoud, raster)
         if recht is None:
             return
 
-        grijs = recht.convert("L").filter(ImageFilter.GaussianBlur(VERVAGING))
+        grijs = recht.convert("L")
+
+        # Uitrekken over het volledige bereik. Zonder dit zou een vaste
+        # drempel 's nachts vrijwel alle bewolking wegsnijden, omdat de
+        # gemeten waarden dan veel dichter bij elkaar liggen.
+        grijs = ImageOps.autocontrast(grijs, cutoff=UITSNIJDING)
+        grijs = grijs.filter(ImageFilter.GaussianBlur(VERVAGING))
         doorzicht = grijs.point(alfa_van_helderheid)
 
         wolk = Image.merge("RGBA", (grijs, grijs, grijs, doorzicht))

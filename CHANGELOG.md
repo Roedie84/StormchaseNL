@@ -5,6 +5,23 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.35.3] — 2026-08-26
+
+### Gerepareerd
+
+- **'s Nachts verdween vrijwel alle bewolking uit beeld.** De drempel werkte
+  op de ruwe waarden, en het bereik daarvan verschilt per moment: overdag
+  lopen de gemeten temperaturen ver uiteen, 's nachts liggen ze dicht bij
+  elkaar. Een vaste drempel sneed daardoor 's avonds alles weg wat geen hoge
+  bewolking was.
+- Het beeld wordt nu eerst uitgerekt over het volledige bereik. In een
+  nachtbeeld gaven heldere lucht en bewolking eerst nog doorzicht 39 tegen
+  64, wat neerkomt op grijs op grijs; na uitrekken is dat 0 tegen 140.
+- Dag en nacht komen daardoor op hetzelfde uit, ongeacht hoe het bronbeeld
+  eruitzag.
+- De uiterste twee procent blijft bij het uitrekken buiten beschouwing, zodat
+  een enkele uitschieter niet de hele schaal bepaalt.
+
 ## [0.35.2] — 2026-08-26
 
 ### Gewijzigd
@@ -1586,6 +1603,7 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.35.3]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.35.3
 [0.35.2]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.35.2
 [0.35.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.35.1
 [0.35.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.35.0

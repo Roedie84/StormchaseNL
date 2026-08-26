@@ -14,6 +14,11 @@ Daarom wordt hier het onbewerkte infraroodkanaal gebruikt en zelf omgezet naar
 grijstinten, zoals elke weerkaart bewolking toont: donker is helder, licht is
 bewolkt, met vloeiende overgangen ertussen.
 
+Het beeld wordt eerst uitgerekt over het volledige bereik. Dat is nodig omdat
+het contrast per moment verschilt: 's nachts liggen de gemeten temperaturen
+dichter bij elkaar dan overdag, en een vaste drempel zou dan vrijwel alle
+bewolking wegsnijden.
+
 De kaartdienst levert in EPSG:4326, terwijl het radarbeeld in webmercator
 staat. Zonder herprojectie schuift alles verticaal weg; die berekening staat
 hieronder en is los te testen.
@@ -33,9 +38,16 @@ STANDAARD_LAAG = "msg_fes:ir108"
 # zoveel dat de kaart eronder verdwijnt.
 STERKTE = 0.55
 
-# Onder deze helderheid rekenen we het tot onbewolkt. Zonder ondergrens legt
-# de laag ook over onbewolkte gebieden een grijze waas.
-DREMPEL = 70
+# Onder deze helderheid rekenen we het tot onbewolkt. Laag gehouden, want het
+# beeld wordt eerst uitgerekt over het volledige bereik; zonder die uitrekking
+# zou een vaste drempel 's nachts vrijwel alles wegsnijden, omdat de waarden
+# dan veel dichter bij elkaar liggen dan overdag.
+DREMPEL = 25
+
+# Welk deel van de donkerste en lichtste beeldpunten bij het uitrekken buiten
+# beschouwing blijft. Voorkomt dat een enkele uitschieter de hele schaal
+# bepaalt.
+UITSNIJDING = 2
 
 # Het bronbeeld is grof, ongeveer drie kilometer per beeldpunt. Een lichte
 # vervaging maakt de blokken tot vloeiende overgangen, zoals je op een

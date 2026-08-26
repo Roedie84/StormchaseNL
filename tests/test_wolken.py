@@ -151,14 +151,76 @@ class TestGrijstinten:
         assert sprong(bron) > 150
         assert sprong(zacht) < 50
 
-    def test_wolk_blijft_staan_na_vervaging(self):
-        from PIL import Image, ImageFilter
+    def test_wolk_blijft_staan_na_de_hele_bewerking(self):
+        """Dezelfde stappen als in de verwerking: uitrekken, vervagen, drempel.
 
-        from wolken import VERVAGING, alfa_van_helderheid
+        De uitrekstap hoort erbij; zonder die stap blijft er boven heldere
+        lucht een restje doorzicht staan.
+        """
+        from PIL import Image, ImageFilter, ImageOps
+
+        from wolken import UITSNIJDING, VERVAGING, alfa_van_helderheid
 
         bron = Image.new("L", (400, 100), 30)
         bron.paste(Image.new("L", (200, 100), 210), (200, 0))
-        zacht = bron.filter(ImageFilter.GaussianBlur(VERVAGING))
 
-        assert alfa_van_helderheid(zacht.getpixel((350, 50))) > 50
-        assert alfa_van_helderheid(zacht.getpixel((50, 50))) == 0
+        bewerkt = ImageOps.autocontrast(bron, cutoff=UITSNIJDING).filter(
+            ImageFilter.GaussianBlur(VERVAGING)
+        )
+
+        assert alfa_van_helderheid(bewerkt.getpixel((350, 50))) > 50
+        assert alfa_van_helderheid(bewerkt.getpixel((50, 50))) == 0
+
+
+class TestContrastUitrekken:
+    """Het bereik van het bronbeeld verschilt per moment.
+
+    Overdag lopen de gemeten temperaturen ver uiteen, 's nachts liggen ze
+    dicht bij elkaar. Een vaste drempel op de ruwe waarden sneed daardoor
+    's nachts vrijwel alle bewolking weg.
+    """
+
+    def maak(self, helder, bewolkt):
+        from PIL import Image
+
+        beeld = Image.new("L", (100, 100), helder)
+        beeld.paste(Image.new("L", (50, 100), bewolkt), (50, 0))
+        return beeld
+
+    def test_nacht_zonder_uitrekken_geeft_nauwelijks_verschil(self):
+        from wolken import alfa_van_helderheid
+
+        # Waarden dicht bij elkaar, zoals in een nachtbeeld
+        assert alfa_van_helderheid(130) - alfa_van_helderheid(90) < 40
+
+    def test_nacht_na_uitrekken_geeft_wel_verschil(self):
+        from PIL import ImageOps
+
+        from wolken import UITSNIJDING, alfa_van_helderheid
+
+        uitgerekt = ImageOps.autocontrast(self.maak(90, 130), cutoff=UITSNIJDING)
+
+        helder = alfa_van_helderheid(uitgerekt.getpixel((10, 50)))
+        bewolkt = alfa_van_helderheid(uitgerekt.getpixel((90, 50)))
+
+        assert helder == 0
+        assert bewolkt > 100
+
+    def test_dag_en_nacht_komen_gelijk_uit(self):
+        """Na uitrekken maakt het niet meer uit hoe het bereik eruitzag."""
+        from PIL import ImageOps
+
+        from wolken import UITSNIJDING, alfa_van_helderheid
+
+        nacht = ImageOps.autocontrast(self.maak(90, 130), cutoff=UITSNIJDING)
+        dag = ImageOps.autocontrast(self.maak(20, 230), cutoff=UITSNIJDING)
+
+        assert alfa_van_helderheid(nacht.getpixel((90, 50))) == (
+            alfa_van_helderheid(dag.getpixel((90, 50)))
+        )
+
+    def test_drempel_is_laag_genoeg(self):
+        """Na uitrekken hoort de drempel alleen ruis weg te nemen."""
+        from wolken import DREMPEL
+
+        assert DREMPEL <= 40
