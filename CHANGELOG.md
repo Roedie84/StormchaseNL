@@ -5,6 +5,22 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.35.1] — 2026-08-26
+
+### Gerepareerd
+
+- **De wolkenlaag kleurde precies andersom.** Het wolkenmasker deelt elk
+  beeldpunt in als helder boven land, helder boven zee, of bewolkt, en
+  kleurt die eerste twee groen en blauw. Over een kaart heen leverde dat een
+  beeld op waarin juist de onbewolkte gebieden het meest opvielen: grote
+  groene vlakken boven Duitsland die eruitzagen als neerslag maar
+  onbewolkte lucht waren.
+- Er wordt nu de wolktophoogte gebruikt. Die is doorzichtig waar geen wolk
+  staat, en de hoogte zegt meteen iets over de bui: hoge toppen betekenen
+  krachtige opwaartse stroming.
+- Een masker is bedoeld om te classificeren, niet om overheen te leggen. Dat
+  had ik moeten zien voordat ik het als standaard koos.
+
 ## [0.35.0] — 2026-08-26
 
 ### Toegevoegd
@@ -1544,6 +1560,7 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.35.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.35.1
 [0.35.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.35.0
 [0.34.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.34.0
 [0.33.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.33.1

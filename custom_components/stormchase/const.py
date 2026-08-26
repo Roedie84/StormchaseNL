@@ -59,9 +59,10 @@ DEFAULT_RADAR_ZOOM = 7
 DEFAULT_RADAR_KLEUR = 2
 CONF_WOLKEN = "wolken_op_radar"
 CONF_WOLKEN_LAAG = "wolken_laag"
-# Wolkenmasker van Meteosat: deelt elk beeldpunt in als helder of bewolkt,
-# ongeacht de hoogte van de wolk. Infrarood mist juist de lage bewolking.
-DEFAULT_WOLKEN_LAAG = "msg_fes:clm"
+# Wolktophoogte: doorzichtig waar geen wolk staat, en de hoogte zegt meteen
+# iets over de bui. Het wolkenmasker (msg_fes:clm) kleurt juist de heldere
+# gebieden groen en blauw, wat over een kaart heen onleesbaar wordt.
+DEFAULT_WOLKEN_LAAG = "msg_fes:cth"
 
 # De Duitse weerdienst publiceert zijn radarcompositie als open kaartdienst,
 # zonder sleutel. Actueler dan de wereldwijde verzameling van RainViewer,
