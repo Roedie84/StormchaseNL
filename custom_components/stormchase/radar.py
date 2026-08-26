@@ -89,8 +89,22 @@ def bouw_url(
 
 TEGELMAAT = 256
 
-# Donkere kaart zonder labels, past bij een donker dashboard
-BASISKAART = "https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png"
+# OpenStreetMap heeft geen sleutel nodig. De donkere varianten van andere
+# aanbieders zijn de laatste jaren allemaal achter een sleutel verdwenen, dus
+# we nemen de gewone kaart en maken hem zelf donker.
+BASISKAART = "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+
+# Hun gebruiksvoorwaarden vragen om een herkenbare naam bij het ophalen
+TEGEL_AGENT = "StormchaseNL Home Assistant integratie"
+
+# Hoeveel de kaart gedempt wordt voordat de radar erover gaat. Donker genoeg
+# om de neerslag te laten opvallen, licht genoeg om plaatsnamen te lezen.
+KAART_HELDERHEID = 0.45
+KAART_KLEUR = 0.55
+
+# Hoe ver terug de inslagen op het beeld getekend worden. Kwartier is genoeg
+# om de verplaatsing van een cel te zien zonder dat het een vlek wordt.
+INSLAG_VENSTER = 900
 
 
 def tegelpositie(latitude: float, longitude: float, zoom: int) -> tuple[float, float]:
@@ -138,6 +152,9 @@ def tegelraster(
 
     return {
         "tegels": tegels,
+        "begin_x": begin_x,
+        "begin_y": begin_y,
+        "zoom": zoom,
         # Waar het gevraagde punt ligt binnen het samengestelde beeld
         "midden_x": (x - begin_x) * TEGELMAAT,
         "midden_y": (y - begin_y) * TEGELMAAT,
@@ -167,3 +184,23 @@ def radartegel_url(
         f"{frame['host']}{frame['path']}/{TEGELMAAT}/{zoom}"
         f"/{tegel['x']}/{tegel['y']}/{kleur}/{opties}.png"
     )
+
+
+def pixelpositie(
+    latitude: float, longitude: float, raster: dict
+) -> tuple[float, float] | None:
+    """Reken coordinaten om naar een plek binnen het samengestelde beeld.
+
+    Nodig om blikseminslagen op de juiste plek te tekenen. Valt het punt
+    buiten het raster, dan komt er niets terug en wordt het overgeslagen.
+    """
+    x, y = tegelpositie(latitude, longitude, raster["zoom"])
+
+    px = (x - raster["begin_x"]) * TEGELMAAT
+    py = (y - raster["begin_y"]) * TEGELMAAT
+
+    afmeting = raster["afmeting"]
+    if not (0 <= px <= afmeting and 0 <= py <= afmeting):
+        return None
+
+    return (px, py)

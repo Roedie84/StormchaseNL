@@ -700,6 +700,19 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
 
             val.passage_afgerond(nu, self._min_afstand)
 
+    def recente_inslagen(self, venster: int = 900) -> list[tuple[float, float, float]]:
+        """Inslagen van de laatste minuten, met hun ouderdom in seconden.
+
+        Gebruikt om ze op het radarbeeld te tekenen: de radar laat zien waar
+        de neerslag hangt, de inslagen waar de bui echt actief is.
+        """
+        nu = dt_util.utcnow().timestamp()
+        return [
+            (nu - t, lat, lon)
+            for t, lat, lon in self._punten
+            if nu - t <= venster
+        ]
+
     def _schuilregel(
         self, afstand: float | None, nu: float
     ) -> tuple[bool | None, int | None]:

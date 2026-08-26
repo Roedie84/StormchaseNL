@@ -55,7 +55,12 @@ een uur opruimt. `indices.py` bevat de gebruikte drempels met uitleg.
 locatie die de integratie gebruikt. Geen ingesloten webpagina, dus geen
 cookiemelding en geen advertenties, en het schuift mee als je onderweg bent.
 
-Het zoomniveau is instelbaar van 1 tot 7. Bron is RainViewer.
+Op het beeld staan ook de blikseminslagen van het laatste kwartier: vers is
+fel wit, ouder dooft uit naar oranje. Daarmee zie je welke kant de activiteit
+op schuift. Je eigen positie is de witte ring in het midden.
+
+Het zoomniveau is instelbaar van 1 tot 7, de verversing van dertig seconden
+tot tien minuten. Radar van RainViewer, kaart van OpenStreetMap.
 
 ### Metingen naast voorspellingen
 

@@ -150,3 +150,83 @@ class TestTegels:
 
         raster = tegelraster(52.0, 6.0, 7)
         assert radartegel_url(None, raster["tegels"][0], 7) is None
+
+
+class TestBasiskaart:
+    """De ondergrond mag geen sleutel vereisen.
+
+    CARTO zette zijn donkere kaart achter een sleutel, wat een watermerk
+    "API KEY REQUIRED" dwars over het radarbeeld opleverde.
+    """
+
+    def test_geen_sleutel_in_de_url(self):
+        from radar import BASISKAART
+
+        for verdacht in ("apikey", "api_key", "access_token", "key="):
+            assert verdacht not in BASISKAART.lower()
+
+    def test_url_bevat_de_tegelvelden(self):
+        from radar import BASISKAART
+
+        for veld in ("{z}", "{x}", "{y}"):
+            assert veld in BASISKAART
+
+    def test_herkenbare_naam_bij_het_ophalen(self):
+        """OpenStreetMap vraagt om een herkenbare naam."""
+        from radar import TEGEL_AGENT
+
+        assert "Stormchase" in TEGEL_AGENT
+
+    def test_demping_maakt_donkerder_maar_niet_zwart(self):
+        from radar import KAART_HELDERHEID, KAART_KLEUR
+
+        assert 0 < KAART_HELDERHEID < 1
+        assert 0 < KAART_KLEUR <= 1
+
+
+class TestInslagenOpHetBeeld:
+    """Blikseminslagen op de juiste plek tekenen.
+
+    De radar laat zien waar de neerslag hangt, de inslagen waar de bui echt
+    actief is. Samen zie je of een cel aantrekt of uitdooft.
+    """
+
+    def test_eigen_positie_valt_op_het_middelpunt(self):
+        from radar import pixelpositie, tegelraster
+
+        raster = tegelraster(52.0964, 6.641, 7)
+        px, py = pixelpositie(52.0964, 6.641, raster)
+
+        assert px == pytest.approx(raster["midden_x"], abs=0.01)
+        assert py == pytest.approx(raster["midden_y"], abs=0.01)
+
+    def test_noordelijker_ligt_hoger_in_beeld(self):
+        from radar import pixelpositie, tegelraster
+
+        raster = tegelraster(52.0964, 6.641, 7)
+        _, midden = pixelpositie(52.0964, 6.641, raster)
+        _, noord = pixelpositie(53.0, 6.641, raster)
+
+        assert noord < midden
+
+    def test_oostelijker_ligt_rechter_in_beeld(self):
+        from radar import pixelpositie, tegelraster
+
+        raster = tegelraster(52.0964, 6.641, 7)
+        midden, _ = pixelpositie(52.0964, 6.641, raster)
+        oost, _ = pixelpositie(52.0964, 8.0, raster)
+
+        assert oost > midden
+
+    def test_buiten_beeld_geeft_niets(self):
+        from radar import pixelpositie, tegelraster
+
+        raster = tegelraster(52.0964, 6.641, 7)
+        assert pixelpositie(41.0, 6.641, raster) is None
+
+    def test_venster_is_een_kwartier(self):
+        """Lang genoeg om verplaatsing te zien, kort genoeg om geen vlek te
+        worden."""
+        from radar import INSLAG_VENSTER
+
+        assert 300 <= INSLAG_VENSTER <= 1800

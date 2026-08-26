@@ -17,7 +17,8 @@
           "ring_window": "Time window for the rings",
           "address_sensor": "Address sensor (optional)",
           "update_interval": "Update interval",
-          "radar_zoom": "Radar zoom level"
+          "radar_zoom": "Radar zoom level",
+          "radar_interval": "Radar refresh"
         }
       },
       "location": {
@@ -102,7 +103,8 @@
           "ring_window": "Time window for the rings",
           "address_sensor": "Address sensor (optional)",
           "update_interval": "Update interval",
-          "radar_zoom": "Radar zoom level"
+          "radar_zoom": "Radar zoom level",
+          "radar_interval": "Radar refresh"
         }
       },
       "location": {

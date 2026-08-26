@@ -48,7 +48,11 @@ BRIGHTSKY_URL = "https://api.brightsky.dev/current_weather"
 # Radarbeeld gecentreerd op je eigen positie, gratis en zonder sleutel.
 # Wereldwijde dekking uit meer dan duizend radars.
 RAINVIEWER_URL = "https://api.rainviewer.com/public/weather-maps.json"
-RADAR_INTERVAL = timedelta(minutes=5)
+# RainViewer publiceert ongeveer elke vijf minuten een nieuw beeld, maar niet
+# op vaste tijden. Vaker kijken betekent dat je een nieuw beeld eerder ziet;
+# het overzicht is klein, dus dat kost weinig.
+CONF_RADAR_INTERVAL = "radar_interval"
+DEFAULT_RADAR_INTERVAL = 60  # seconden
 CONF_RADAR_ZOOM = "radar_zoom"
 CONF_RADAR_KLEUR = "radar_kleur"
 DEFAULT_RADAR_ZOOM = 7

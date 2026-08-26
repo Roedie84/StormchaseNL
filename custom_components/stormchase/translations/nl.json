@@ -17,7 +17,8 @@
           "ring_window": "Tijdvenster voor de ringen",
           "address_sensor": "Adressensor (optioneel)",
           "update_interval": "Verversingsinterval",
-          "radar_zoom": "Zoomniveau radar"
+          "radar_zoom": "Zoomniveau radar",
+          "radar_interval": "Verversing radar"
         }
       },
       "location": {
@@ -102,7 +103,8 @@
           "ring_window": "Tijdvenster voor de ringen",
           "address_sensor": "Adressensor (optioneel)",
           "update_interval": "Verversingsinterval",
-          "radar_zoom": "Zoomniveau radar"
+          "radar_zoom": "Zoomniveau radar",
+          "radar_interval": "Verversing radar"
         }
       },
       "location": {

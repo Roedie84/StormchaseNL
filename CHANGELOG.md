@@ -5,6 +5,54 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.31.0] — 2026-08-26
+
+### Toegevoegd
+
+- **Blikseminslagen op het radarbeeld.** De inslagen van het laatste kwartier
+  worden op hun eigen positie getekend, waarbij verse inslagen fel wit zijn
+  en oudere naar oranje uitdoven. Daarmee zie je in een oogopslag welke kant
+  de activiteit op schuift, iets wat de radar alleen niet laat zien.
+- **Je eigen positie** staat als witte ring in het midden, anders zegt de
+  rest van het beeld weinig.
+- Het beeld ververst nu ook wanneer er inslagen bijkomen, niet alleen bij een
+  nieuw radarbeeld.
+
+### Gewijzigd
+
+- **Het radaroverzicht wordt elke minuut opgehaald** in plaats van elke vijf.
+  RainViewer publiceert ongeveer elke vijf minuten een nieuw beeld, maar niet
+  op vaste tijden; vaker kijken betekent dat je het eerder ziet. Het
+  overzicht is klein, dus dat kost weinig. Instelbaar van dertig seconden tot
+  tien minuten.
+
+### Gerepareerd
+
+- Bij het toevoegen van die instelling belandde er opnieuw een constantnaam
+  in het formulier. De structuurcontrole meldde het binnen tien seconden, met
+  regelnummer.
+
+## [0.30.1] — 2026-08-26
+
+### Gerepareerd
+
+- **"API KEY REQUIRED" dwars over het radarbeeld.** CARTO heeft zijn donkere
+  kaart achter een sleutel gezet. De ondergrond komt nu van OpenStreetMap,
+  dat geen sleutel vereist.
+- De donkere varianten van andere aanbieders zijn de laatste jaren allemaal
+  achter een sleutel verdwenen, dus de gewone kaart wordt nu zelf gedempt:
+  donker genoeg om de neerslag te laten opvallen, licht genoeg om
+  plaatsnamen te kunnen lezen.
+- Het dempen gebeurt voordat de radar erover gaat, anders zou die mee
+  verduisteren en onzichtbaar worden.
+- Bij het ophalen wordt een herkenbare naam meegestuurd, zoals hun
+  gebruiksvoorwaarden vragen.
+
+### Toegevoegd
+
+- Vier tests op de ondergrond, waaronder een die controleert dat er geen
+  sleutel in de URL staat.
+
 ## [0.30.0] — 2026-08-26
 
 Vier reparaties uit een diagnostiek en drie screenshots.
@@ -1341,6 +1389,8 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.31.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.31.0
+[0.30.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.30.1
 [0.30.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.30.0
 [0.29.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.29.1
 [0.29.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.29.0

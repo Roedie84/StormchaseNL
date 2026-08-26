@@ -33,7 +33,12 @@ from .const import (
     DOMAIN,
 )
 from .radar import (
+    INSLAG_VENSTER,
+    KAART_HELDERHEID,
+    KAART_KLEUR,
+    TEGEL_AGENT,
     basiskaart_url,
+    pixelpositie,
     radartegel_url,
     tegelraster,
 )
@@ -102,25 +107,70 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
         if url is None:
             return None
         try:
-            antwoord = await self._client.get(url, timeout=15)
+            antwoord = await self._client.get(
+                url, timeout=15, headers={"User-Agent": TEGEL_AGENT}
+            )
             antwoord.raise_for_status()
             return antwoord.content
         except Exception as err:  # noqa: BLE001 - een tegel mag ontbreken
             _LOGGER.debug("Tegel niet opgehaald: %s (%s)", url, err)
             return None
 
-    def _stel_samen(self, kaarten: list, radars: list, raster: dict) -> bytes:
+    @staticmethod
+    def _teken_inslagen(doek, raster: dict, inslagen: list) -> None:
+        """Zet de blikseminslagen op het beeld.
+
+        De radar laat zien waar de neerslag hangt, de inslagen waar de bui
+        echt actief is. Verse inslagen zijn fel wit, oudere doven uit, zodat
+        je in een oogopslag ziet welke kant de activiteit op schuift.
+        """
+        from PIL import ImageDraw
+
+        tekenaar = ImageDraw.Draw(doek, "RGBA")
+
+        for ouderdom, latitude, longitude in inslagen:
+            positie = pixelpositie(latitude, longitude, raster)
+            if positie is None:
+                continue
+
+            # Van fel wit naar diep oranje naarmate de inslag ouder wordt
+            deel = min(ouderdom / INSLAG_VENSTER, 1.0)
+            doorzicht = int(255 - deel * 190)
+            groen = int(255 - deel * 130)
+            straal = 4 if deel < 0.2 else 3
+
+            px, py = positie
+            tekenaar.ellipse(
+                (px - straal, py - straal, px + straal, py + straal),
+                fill=(255, groen, 60, doorzicht),
+            )
+
+    @staticmethod
+    def _teken_positie(doek, raster: dict) -> None:
+        """Markeer waar je zelf bent, anders zegt de rest weinig."""
+        from PIL import ImageDraw
+
+        tekenaar = ImageDraw.Draw(doek, "RGBA")
+        px, py = raster["midden_x"], raster["midden_y"]
+
+        tekenaar.ellipse((px - 7, py - 7, px + 7, py + 7), outline=(255, 255, 255, 180), width=2)
+        tekenaar.ellipse((px - 2, py - 2, px + 2, py + 2), fill=(255, 255, 255, 230))
+
+    def _stel_samen(
+        self, kaarten: list, radars: list, raster: dict, inslagen: list
+    ) -> bytes:
         """Leg de radar over de kaart en snijd rond het middelpunt uit.
 
         Draait in een aparte draad, want beeldbewerking blokkeert anders de
         rest van Home Assistant.
         """
-        from PIL import Image
+        from PIL import Image, ImageEnhance
 
         afmeting = raster["afmeting"]
         doek = Image.new("RGBA", (afmeting, afmeting), (18, 18, 22, 255))
 
-        for laag in (kaarten, radars):
+        def plak(laag):
+            """Leg een set tegels op het doek; een missende tegel is geen ramp."""
             for tegel, inhoud in zip(raster["tegels"], laag):
                 if inhoud is None:
                     continue
@@ -129,6 +179,20 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
                 except Exception:  # noqa: BLE001 - beschadigde tegel overslaan
                     continue
                 doek.paste(beeld, (tegel["plak_x"], tegel["plak_y"]), beeld)
+
+        # Eerst de kaart, die daarna gedempt wordt. De radar gaat er pas
+        # overheen, anders zou die mee verduisteren en onzichtbaar worden.
+        plak(kaarten)
+        doek = ImageEnhance.Brightness(doek.convert("RGB")).enhance(
+            KAART_HELDERHEID
+        )
+        doek = ImageEnhance.Color(doek).enhance(KAART_KLEUR).convert("RGBA")
+
+        plak(radars)
+
+        # Inslagen en de eigen positie gaan als laatste over alles heen
+        self._teken_inslagen(doek, raster, inslagen)
+        self._teken_positie(doek, raster)
 
         # Uitsnijden rond de gevraagde positie, binnen de randen blijven
         helft = UITSNEDE // 2
@@ -169,8 +233,12 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
         if not any(kaarten) and not any(radars):
             return None
 
+        inslagen = (
+            self._storm.recente_inslagen(INSLAG_VENSTER) if self._storm else []
+        )
+
         return await self.hass.async_add_executor_job(
-            self._stel_samen, list(kaarten), list(radars), raster
+            self._stel_samen, list(kaarten), list(radars), raster, inslagen
         )
 
     def _handle_coordinator_update(self) -> None:
@@ -181,7 +249,8 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
         """
         # Een nieuw frame of een verschoven positie betekent een nieuw beeld
         frame = self.coordinator.data or {}
-        kenmerk = (frame.get("path"), *(round(w, 3) for w in self._positie))
+        aantal = len(self._storm.recente_inslagen(INSLAG_VENSTER)) if self._storm else 0
+        kenmerk = (frame.get("path"), aantal, *(round(w, 3) for w in self._positie))
         if kenmerk != self._vorige_url:
             self._vorige_url = kenmerk
             self._attr_image_last_updated = dt_util.utcnow()

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from datetime import timedelta
 
 import aiohttp
 import async_timeout
@@ -12,7 +13,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
-from .const import RADAR_INTERVAL, RAINVIEWER_URL
+from .const import CONF_RADAR_INTERVAL, DEFAULT_RADAR_INTERVAL, RAINVIEWER_URL
 from .radar import laatste_frame
 from .verouderd import VerouderdMixin
 
@@ -28,11 +29,15 @@ class RadarCoordinator(VerouderdMixin, DataUpdateCoordinator[dict]):
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
         """Initialiseer de coordinator."""
+        seconden = entry.options.get(
+            CONF_RADAR_INTERVAL,
+            entry.data.get(CONF_RADAR_INTERVAL, DEFAULT_RADAR_INTERVAL),
+        )
         super().__init__(
             hass,
             _LOGGER,
             name=f"{entry.title} radar",
-            update_interval=RADAR_INTERVAL,
+            update_interval=timedelta(seconds=int(seconden)),
         )
         self.entry = entry
         self._session = async_get_clientsession(hass)

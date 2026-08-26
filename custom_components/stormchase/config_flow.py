@@ -42,6 +42,7 @@ from .const import (
     CONF_MOVING_SPEED,
     CONF_ONLY_STATIONARY,
     CONF_CRITICAL,
+    CONF_RADAR_INTERVAL,
     CONF_RADAR_ZOOM,
     CONF_DASHBOARD,
     CONF_OUTLOOK_LEVEL,
@@ -88,6 +89,7 @@ from .const import (
     DEFAULT_RING_FAR,
     DEFAULT_RING_MID,
     DEFAULT_RING_NEAR,
+    DEFAULT_RADAR_INTERVAL,
     DEFAULT_RADAR_ZOOM,
     DEFAULT_RING_WINDOW,
     DEFAULT_UPDATE_INTERVAL,
@@ -190,6 +192,15 @@ def _base_schema(hass, defaults: dict[str, Any]) -> vol.Schema:
             ): selector.NumberSelector(
                 selector.NumberSelectorConfig(
                     min=1, max=7, step=1, mode=selector.NumberSelectorMode.SLIDER
+                )
+            ),
+            vol.Required(
+                CONF_RADAR_INTERVAL,
+                default=defaults.get(CONF_RADAR_INTERVAL, DEFAULT_RADAR_INTERVAL),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=30, max=600, step=30, unit_of_measurement="s",
+                    mode=selector.NumberSelectorMode.BOX,
                 )
             ),
             vol.Required(
