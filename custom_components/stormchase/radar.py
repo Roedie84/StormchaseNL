@@ -48,6 +48,37 @@ def laatste_frame(payload: dict | None) -> dict | None:
     }
 
 
+def laatste_satelliet(payload: dict | None) -> dict | None:
+    """Pak het nieuwste infraroodbeeld uit het overzicht.
+
+    Satelliet laat bewolking zien, ook waar nog geen neerslag valt. Daarmee
+    zie je opbouwende cumulus voordat de radar iets oppikt.
+    """
+    if not payload:
+        return None
+
+    frames = ((payload.get("satellite") or {}).get("infrared")) or []
+    if not frames or not frames[-1].get("path"):
+        return None
+
+    return {
+        "host": payload.get("host") or "https://tilecache.rainviewer.com",
+        "path": frames[-1]["path"],
+        "tijd": frames[-1].get("time"),
+    }
+
+
+def satelliettegel_url(frame: dict | None, tegel: dict, zoom: int) -> str | None:
+    """URL van een wolkentegel. Infrarood kent geen kleurschema of opties."""
+    if frame is None:
+        return None
+
+    return (
+        f"{frame['host']}{frame['path']}/{TEGELMAAT}/{zoom}"
+        f"/{tegel['x']}/{tegel['y']}/0/0_0.png"
+    )
+
+
 def bouw_url(
     frame: dict | None,
     latitude: float,
@@ -204,3 +235,39 @@ def pixelpositie(
         return None
 
     return (px, py)
+
+
+def naar_pixels_per_uur(snelheid_kmh: float, raster: dict) -> float:
+    """Hoeveel pixels een cel in een uur aflegt op dit zoomniveau.
+
+    Nodig om de pijl van de celbeweging op schaal te tekenen: even lang als
+    de afstand die de bui werkelijk aflegt.
+    """
+    # Breedte van een tegel in kilometers op deze breedtegraad
+    n = 2.0 ** raster["zoom"]
+    km_per_tegel = 40075.0 / n
+
+    return snelheid_kmh / km_per_tegel * TEGELMAAT
+
+
+def beeldlabel(tijd: int | None, nu: float, verschuiving: int = 0) -> str:
+    """Tekst met het tijdstip van het beeld en hoe oud het is.
+
+    Het tijdstip van de opname zegt meer dan het moment waarop wij het
+    ophaalden: dat laatste kan vers zijn terwijl het beeld al tien minuten
+    oud is.
+
+    De verschuiving is het aantal seconden tussen lokale tijd en UTC.
+    """
+    if not tijd:
+        return "Tijd onbekend"
+
+    uren = int((tijd + verschuiving) // 3600 % 24)
+    minuten = int((tijd + verschuiving) // 60 % 60)
+    ouderdom = max(int((nu - tijd) // 60), 0)
+
+    if ouderdom == 0:
+        return f"Radar {uren:02d}:{minuten:02d} \u00b7 zojuist"
+    if ouderdom == 1:
+        return f"Radar {uren:02d}:{minuten:02d} \u00b7 1 minuut oud"
+    return f"Radar {uren:02d}:{minuten:02d} \u00b7 {ouderdom} minuten oud"

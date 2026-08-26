@@ -27,6 +27,24 @@ CONTINUITEIT_KM = 40.0
 # geen betekenis.
 MIN_CELSNELHEID = 5.0
 
+# Kleur naar activiteit, zoals op professionele stormkaarten: geel voor een
+# gewone bui, oranje als het aantrekt, rood bij een cel die er echt uit
+# springt. De grenzen zijn het aantal inslagen binnen het volgvenster.
+INTENSITEIT = [
+    (25, "rood"),
+    (8, "oranje"),
+    (0, "geel"),
+]
+
+
+def intensiteit(inslagen: int) -> str:
+    """Hoe actief is deze cel?"""
+    for grens, naam in INTENSITEIT:
+        if inslagen >= grens:
+            return naam
+    return "geel"
+
+
 KOMPAS = [
     "N", "NNO", "NO", "ONO", "O", "OZO", "ZO", "ZZO",
     "Z", "ZZW", "ZW", "WZW", "W", "WNW", "NW", "NNW",
@@ -210,6 +228,10 @@ def volg_cel(
     ]
 
     resultaat = {
+        "latitude": dichtstbij["latitude"],
+        "longitude": dichtstbij["longitude"],
+        # Het spoor van zwaartepunten, om de verplaatsing te kunnen tekenen
+        "spoor": [(lat, lon) for _, lat, lon in geschiedenis[-20:]],
         "afstand": dichtstbij["afstand"],
         "inslagen": dichtstbij["inslagen"],
         "cellen": len(cellen),
@@ -277,3 +299,77 @@ def frequentietrend(tijdstempels: list[float], nu: float, venster: int = 300) ->
     if verhouding < 0.85:
         return "neemt af"
     return "stabiel"
+
+
+def volg_cellen(
+    punten: list[tuple[float, float]],
+    sporen: list[list[tuple[float, float, float]]],
+    lat0: float,
+    lon0: float,
+    nu: float,
+) -> tuple[list[dict], list[list[tuple[float, float, float]]]]:
+    """Volg alle cellen tegelijk in plaats van alleen de dichtstbijzijnde.
+
+    Elke cel houdt een eigen spoor bij. Een nieuw zwaartepunt wordt gekoppeld
+    aan het spoor waarvan het laatste punt het dichtst ligt; is dat te ver,
+    dan begint er een nieuw spoor. Sporen die deze ronde niets kregen
+    vervallen, want die cel is uitgeregend of samengevloeid met een andere.
+    """
+    cellen = zoek_cellen(punten, lat0, lon0)
+    if not cellen:
+        return ([], [])
+
+    beschikbaar = list(sporen)
+    nieuwe_sporen: list[list[tuple[float, float, float]]] = []
+    uitkomst: list[dict] = []
+
+    for cel in cellen:
+        # Welk bestaand spoor hoort hierbij?
+        beste = None
+        for index, spoor in enumerate(beschikbaar):
+            if not spoor:
+                continue
+            _, vorige_lat, vorige_lon = spoor[-1]
+            x, y = naar_km(cel["latitude"], cel["longitude"], vorige_lat, vorige_lon)
+            afstand = math.hypot(x, y)
+            if afstand <= CONTINUITEIT_KM and (beste is None or afstand < beste[0]):
+                beste = (afstand, index)
+
+        if beste is None:
+            spoor = []
+        else:
+            spoor = beschikbaar.pop(beste[1])
+
+        spoor = (spoor + [(nu, cel["latitude"], cel["longitude"])])[-40:]
+        nieuwe_sporen.append(spoor)
+
+        gegevens = {
+            **cel,
+            "spoor": [(lat, lon) for _, lat, lon in spoor],
+            "intensiteit": intensiteit(cel["inslagen"]),
+            "richting": None,
+            "richting_graden": None,
+            "snelheid": None,
+            "passage_over": None,
+            "passage_afstand": None,
+        }
+
+        beweging = beweging_van_reeks(spoor, lat0, lon0)
+        if beweging is not None:
+            vx, vy = beweging
+            snelheid = math.hypot(vx, vy)
+            gegevens["snelheid"] = round(snelheid, 1)
+
+            if snelheid >= MIN_CELSNELHEID:
+                graden = richting_van_vector(vx, vy)
+                gegevens["richting_graden"] = round(graden, 1)
+                gegevens["richting"] = kompasrichting(graden)
+
+                positie = naar_km(cel["latitude"], cel["longitude"], lat0, lon0)
+                uitslag = passage(positie, (vx, vy))
+                if uitslag is not None:
+                    gegevens["passage_over"], gegevens["passage_afstand"] = uitslag
+
+        uitkomst.append(gegevens)
+
+    return (uitkomst, nieuwe_sporen)

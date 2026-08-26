@@ -55,7 +55,15 @@ een uur opruimt. `indices.py` bevat de gebruikte drempels met uitleg.
 locatie die de integratie gebruikt. Geen ingesloten webpagina, dus geen
 cookiemelding en geen advertenties, en het schuift mee als je onderweg bent.
 
-Op het beeld staan ook de blikseminslagen van het laatste kwartier: vers is
+Op het beeld liggen vier lagen over elkaar: de kaart, de bewolking uit
+infrarood, de neerslag, en daarbovenop de gevolgde onweerscellen.
+
+Elke cel krijgt een ring, gekleurd naar activiteit: geel voor een gewone bui,
+oranje vanaf acht inslagen, rood vanaf vijfentwintig. De ring groeit mee met
+het aantal inslagen. De lijn vooruit is de koers voor het komende uur, met een
+streepje per kwartier, zodat je de aankomsttijd direct afleest.
+
+Verder staan er de blikseminslagen van het laatste kwartier: vers is
 fel wit, ouder dooft uit naar oranje. Daarmee zie je welke kant de activiteit
 op schuift. Je eigen positie is de witte ring in het midden.
 

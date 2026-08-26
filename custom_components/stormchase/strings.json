@@ -18,7 +18,8 @@
           "address_sensor": "Adressensor (optioneel)",
           "update_interval": "Verversingsinterval",
           "radar_zoom": "Zoomniveau radar",
-          "radar_interval": "Verversing radar"
+          "radar_interval": "Verversing radar",
+          "wolken_op_radar": "Wolken op de radar"
         }
       },
       "location": {
@@ -104,7 +105,8 @@
           "address_sensor": "Adressensor (optioneel)",
           "update_interval": "Verversingsinterval",
           "radar_zoom": "Zoomniveau radar",
-          "radar_interval": "Verversing radar"
+          "radar_interval": "Verversing radar",
+          "wolken_op_radar": "Wolken op de radar"
         }
       },
       "location": {

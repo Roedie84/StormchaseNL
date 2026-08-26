@@ -43,6 +43,7 @@ from .const import (
     CONF_ONLY_STATIONARY,
     CONF_CRITICAL,
     CONF_RADAR_INTERVAL,
+    CONF_WOLKEN,
     CONF_RADAR_ZOOM,
     CONF_DASHBOARD,
     CONF_OUTLOOK_LEVEL,
@@ -194,6 +195,9 @@ def _base_schema(hass, defaults: dict[str, Any]) -> vol.Schema:
                     min=1, max=7, step=1, mode=selector.NumberSelectorMode.SLIDER
                 )
             ),
+            vol.Required(
+                CONF_WOLKEN, default=defaults.get(CONF_WOLKEN, True)
+            ): selector.BooleanSelector(),
             vol.Required(
                 CONF_RADAR_INTERVAL,
                 default=defaults.get(CONF_RADAR_INTERVAL, DEFAULT_RADAR_INTERVAL),

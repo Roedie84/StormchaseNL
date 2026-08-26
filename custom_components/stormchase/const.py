@@ -57,6 +57,7 @@ CONF_RADAR_ZOOM = "radar_zoom"
 CONF_RADAR_KLEUR = "radar_kleur"
 DEFAULT_RADAR_ZOOM = 7
 DEFAULT_RADAR_KLEUR = 2
+CONF_WOLKEN = "wolken_op_radar"
 
 # Het ensemble draait op een eigen subdomein; het gedeelde eindpunt gaf 404
 ENSEMBLE_URL = "https://ensemble-api.open-meteo.com/v1/ensemble"

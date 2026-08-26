@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import math
 from io import BytesIO
 
 from homeassistant.components.image import ImageEntity
@@ -27,6 +28,7 @@ UITSNEDE = 512
 
 from .const import (
     CONF_RADAR_KLEUR,
+    CONF_WOLKEN,
     CONF_RADAR_ZOOM,
     DEFAULT_RADAR_KLEUR,
     DEFAULT_RADAR_ZOOM,
@@ -39,7 +41,9 @@ from .radar import (
     TEGEL_AGENT,
     basiskaart_url,
     pixelpositie,
+    beeldlabel,
     radartegel_url,
+    satelliettegel_url,
     tegelraster,
 )
 from .radarbron import RadarCoordinator
@@ -145,6 +149,132 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
                 fill=(255, groen, 60, doorzicht),
             )
 
+    # Kleur per activiteit, zoals op professionele stormkaarten
+    KLEUREN = {
+        "geel": (255, 214, 60),
+        "oranje": (255, 149, 40),
+        "rood": (255, 71, 51),
+    }
+
+    @classmethod
+    def _teken_cellen(cls, doek, raster: dict, cellen: list) -> None:
+        """Teken elke cel met zijn koers en verwachte posities.
+
+        De ring geeft aan waar de bui zit en hoe actief hij is; de streepjes
+        op de lijn zijn de posities per kwartier vooruit. Zo zie je in een
+        oogopslag welke cel je kant op komt en wanneer.
+        """
+        for cel in cellen or []:
+            cls._teken_cel(doek, raster, cel)
+
+    @classmethod
+    def _teken_cel(cls, doek, raster: dict, cel: dict | None) -> None:
+        """Teken een enkele cel."""
+        if not cel or cel.get("latitude") is None:
+            return
+
+        from PIL import ImageDraw
+
+        from .radar import naar_pixels_per_uur
+
+        tekenaar = ImageDraw.Draw(doek, "RGBA")
+        kleur = cls.KLEUREN.get(cel.get("intensiteit", "geel"), cls.KLEUREN["geel"])
+
+        midden = pixelpositie(cel["latitude"], cel["longitude"], raster)
+        if midden is None:
+            return
+
+        # Het afgelegde spoor, gedempt zodat het niet met de koers concurreert
+        punten = []
+        for lat, lon in cel.get("spoor") or []:
+            positie = pixelpositie(lat, lon, raster)
+            if positie is not None:
+                punten.append(positie)
+
+        if len(punten) >= 2:
+            tekenaar.line(punten, fill=(*kleur, 90), width=2)
+
+        # De ring om de cel, groter naarmate er meer inslagen in zitten
+        straal = 8 + min(cel.get("inslagen", 0), 40) / 4
+        tekenaar.ellipse(
+            (
+                midden[0] - straal,
+                midden[1] - straal,
+                midden[0] + straal,
+                midden[1] + straal,
+            ),
+            outline=(*kleur, 235),
+            width=2,
+        )
+
+        richting = cel.get("richting_graden")
+        snelheid = cel.get("snelheid")
+        if richting is None or not snelheid:
+            return
+
+        # De koers vooruit, met een streepje per kwartier
+        per_uur = naar_pixels_per_uur(snelheid, raster)
+        hoek = math.radians(richting)
+
+        eind = (
+            midden[0] + math.sin(hoek) * per_uur,
+            midden[1] - math.cos(hoek) * per_uur,
+        )
+        tekenaar.line([midden, eind], fill=(*kleur, 200), width=2)
+
+        for kwartier in (1, 2, 3, 4):
+            afstand = per_uur * kwartier / 4
+            punt = (
+                midden[0] + math.sin(hoek) * afstand,
+                midden[1] - math.cos(hoek) * afstand,
+            )
+            dwars = hoek + math.pi / 2
+            tekenaar.line(
+                [
+                    (punt[0] - math.sin(dwars) * 5, punt[1] + math.cos(dwars) * 5),
+                    (punt[0] + math.sin(dwars) * 5, punt[1] - math.cos(dwars) * 5),
+                ],
+                fill=(*kleur, 200),
+                width=2,
+            )
+
+    @staticmethod
+    def _teken_label(doek, tekst: str) -> None:
+        """Zet linksonder wanneer het beeld gemaakt is.
+
+        Zonder dat weet je niet of je naar iets van net kijkt of naar een
+        beeld dat al een kwartier oud is omdat de bron hapert.
+        """
+        from PIL import ImageDraw, ImageFont
+
+        tekenaar = ImageDraw.Draw(doek, "RGBA")
+
+        try:
+            lettertype = ImageFont.load_default(size=14)
+        except TypeError:
+            # Oudere Pillow kent de maat nog niet
+            lettertype = ImageFont.load_default()
+
+        breedte, hoogte = doek.size
+        vak = tekenaar.textbbox((0, 0), tekst, font=lettertype)
+        rand = 6
+
+        tekenaar.rectangle(
+            (
+                rand,
+                hoogte - rand - (vak[3] - vak[1]) - 8,
+                rand + (vak[2] - vak[0]) + 12,
+                hoogte - rand,
+            ),
+            fill=(0, 0, 0, 150),
+        )
+        tekenaar.text(
+            (rand + 6, hoogte - rand - (vak[3] - vak[1]) - 4),
+            tekst,
+            font=lettertype,
+            fill=(235, 235, 235, 255),
+        )
+
     @staticmethod
     def _teken_positie(doek, raster: dict) -> None:
         """Markeer waar je zelf bent, anders zegt de rest weinig."""
@@ -157,7 +287,14 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
         tekenaar.ellipse((px - 2, py - 2, px + 2, py + 2), fill=(255, 255, 255, 230))
 
     def _stel_samen(
-        self, kaarten: list, radars: list, raster: dict, inslagen: list
+        self,
+        kaarten: list,
+        wolken: list,
+        radars: list,
+        raster: dict,
+        inslagen: list,
+        cel: list | None,
+        label: str,
     ) -> bytes:
         """Leg de radar over de kaart en snijd rond het middelpunt uit.
 
@@ -188,9 +325,13 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
         )
         doek = ImageEnhance.Color(doek).enhance(KAART_KLEUR).convert("RGBA")
 
+        # Wolken tussen kaart en radar: ze laten zien waar bewolking zit,
+        # ook waar nog geen neerslag valt.
+        plak(wolken)
         plak(radars)
 
-        # Inslagen en de eigen positie gaan als laatste over alles heen
+        # Cel, inslagen en de eigen positie gaan als laatste over alles heen
+        self._teken_cellen(doek, raster, cel)
         self._teken_inslagen(doek, raster, inslagen)
         self._teken_positie(doek, raster)
 
@@ -200,6 +341,7 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
         boven = int(min(max(raster["midden_y"] - helft, 0), afmeting - UITSNEDE))
 
         uitsnede = doek.crop((links, boven, links + UITSNEDE, boven + UITSNEDE))
+        self._teken_label(uitsnede, label)
 
         buffer = BytesIO()
         uitsnede.convert("RGB").save(buffer, format="PNG")
@@ -211,7 +353,9 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
         RainViewer levert alleen de neerslaglaag. Zonder ondergrond zweven er
         vlekken in het niets en is niet te zien waar de bui hangt.
         """
-        frame = self.coordinator.data
+        gegevens = self.coordinator.data or {}
+        frame = gegevens.get("radar")
+        wolkframe = gegevens.get("satelliet") if self._opt(CONF_WOLKEN, True) else None
         if frame is None:
             return None
 
@@ -222,6 +366,12 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
 
         kaarten = await asyncio.gather(
             *(self._haal_tegel(basiskaart_url(t, zoom)) for t in raster["tegels"])
+        )
+        wolken = await asyncio.gather(
+            *(
+                self._haal_tegel(satelliettegel_url(wolkframe, t, zoom))
+                for t in raster["tegels"]
+            )
         )
         radars = await asyncio.gather(
             *(
@@ -236,9 +386,21 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
         inslagen = (
             self._storm.recente_inslagen(INSLAG_VENSTER) if self._storm else []
         )
+        cellen = getattr(self._storm.data, "cellen", None) if self._storm else None
 
         return await self.hass.async_add_executor_job(
-            self._stel_samen, list(kaarten), list(radars), raster, inslagen
+            self._stel_samen,
+            list(kaarten),
+            list(wolken),
+            list(radars),
+            raster,
+            inslagen,
+            cellen,
+            beeldlabel(
+                frame.get("tijd"),
+                dt_util.utcnow().timestamp(),
+                int(dt_util.now().utcoffset().total_seconds()),
+            ),
         )
 
     def _handle_coordinator_update(self) -> None:
@@ -260,10 +422,16 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
     @property
     def extra_state_attributes(self) -> dict:
         """Wanneer het beeld gemaakt is en waar het op centreert."""
-        frame = self.coordinator.data or {}
+        frame = (self.coordinator.data or {}).get("radar") or {}
         gegevens = self._storm.data if self._storm else None
+        tijd = frame.get("tijd")
         return {
-            "beeld_tijd": frame.get("tijd"),
+            "beeld_tijd": tijd,
+            "beeld_leeftijd_minuten": (
+                max(int((dt_util.utcnow().timestamp() - tijd) // 60), 0)
+                if tijd
+                else None
+            ),
             "zoom": self._opt(CONF_RADAR_ZOOM, DEFAULT_RADAR_ZOOM),
             "locatie_bron": getattr(gegevens, "location_source", None),
         }

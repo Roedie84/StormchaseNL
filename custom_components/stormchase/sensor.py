@@ -360,11 +360,25 @@ class StormSensor(CoordinatorEntity[StormCoordinator], SensorEntity):
 
         if self.entity_description.key == "cell_direction":
             cel = data.cel or {}
+            alle = data.cellen or []
             return {
                 "graden": cel.get("richting_graden"),
                 "inslagen_in_cel": cel.get("inslagen"),
-                "aantal_cellen": cel.get("cellen"),
+                "aantal_cellen": len(alle) or cel.get("cellen"),
                 "afstand_tot_cel": cel.get("afstand"),
+                # Alle gevolgde cellen, voor wie er zelf iets mee wil
+                "cellen": [
+                    {
+                        "afstand": c.get("afstand"),
+                        "richting": c.get("richting"),
+                        "snelheid": c.get("snelheid"),
+                        "inslagen": c.get("inslagen"),
+                        "intensiteit": c.get("intensiteit"),
+                        "passage_over": c.get("passage_over"),
+                        "passage_afstand": c.get("passage_afstand"),
+                    }
+                    for c in alle
+                ],
             }
 
         if self.entity_description.key == "distance":

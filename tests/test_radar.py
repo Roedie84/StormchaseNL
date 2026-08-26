@@ -230,3 +230,120 @@ class TestInslagenOpHetBeeld:
         from radar import INSLAG_VENSTER
 
         assert 300 <= INSLAG_VENSTER <= 1800
+
+
+class TestWolken:
+    """Satelliet laat bewolking zien waar nog geen neerslag valt."""
+
+    def test_nieuwste_beeld(self):
+        from radar import laatste_satelliet
+
+        payload = {
+            "host": "https://tilecache.rainviewer.com",
+            "satellite": {
+                "infrared": [
+                    {"time": 1, "path": "/v2/satellite/a"},
+                    {"time": 2, "path": "/v2/satellite/b"},
+                ]
+            },
+        }
+        assert laatste_satelliet(payload)["tijd"] == 2
+
+    @pytest.mark.parametrize(
+        "payload", [None, {}, {"satellite": {}}, {"satellite": {"infrared": []}}]
+    )
+    def test_zonder_beeld(self, payload):
+        from radar import laatste_satelliet
+
+        assert laatste_satelliet(payload) is None
+
+    def test_tegel_url(self):
+        from radar import satelliettegel_url, tegelraster
+
+        raster = tegelraster(52.1, 6.65, 7)
+        frame = {"host": "https://x", "path": "/v2/satellite/b"}
+        url = satelliettegel_url(frame, raster["tegels"][0], 7)
+
+        assert url.endswith("/0/0_0.png")
+
+    def test_zonder_frame(self):
+        from radar import satelliettegel_url, tegelraster
+
+        raster = tegelraster(52.1, 6.65, 7)
+        assert satelliettegel_url(None, raster["tegels"][0], 7) is None
+
+
+class TestCelpijl:
+    """De pijl van de celbeweging moet op schaal staan."""
+
+    def test_schaal_klopt_met_de_werkelijke_afstand(self):
+        from radar import naar_pixels_per_uur, tegelraster
+
+        raster = tegelraster(52.1, 6.65, 7)
+        km_per_tegel = 40075.0 / 2 ** 7
+
+        # Een cel van 50 km/u legt in een uur 50 km af
+        pixels = naar_pixels_per_uur(50, raster)
+        verwacht = 50 / km_per_tegel * 256
+
+        assert pixels == pytest.approx(verwacht)
+
+    def test_sneller_is_langer(self):
+        from radar import naar_pixels_per_uur, tegelraster
+
+        raster = tegelraster(52.1, 6.65, 7)
+        assert naar_pixels_per_uur(90, raster) > naar_pixels_per_uur(30, raster)
+
+    def test_hoger_zoomniveau_geeft_langere_pijl(self):
+        """Bij meer detail beslaat dezelfde afstand meer pixels."""
+        from radar import naar_pixels_per_uur, tegelraster
+
+        laag = naar_pixels_per_uur(50, tegelraster(52.1, 6.65, 6))
+        hoog = naar_pixels_per_uur(50, tegelraster(52.1, 6.65, 7))
+        assert hoog == pytest.approx(laag * 2)
+
+
+class TestBeeldlabel:
+    """Het tijdstip van de opname, niet van het ophalen.
+
+    Die twee lopen uiteen: wij kunnen net iets opgehaald hebben terwijl het
+    beeld zelf al tien minuten oud is omdat de bron hapert.
+    """
+
+    NU = 1787750000
+    UUR = 7200  # twee uur voorsprong op UTC
+
+    def test_zojuist(self):
+        from radar import beeldlabel
+
+        assert "zojuist" in beeldlabel(self.NU, self.NU, self.UUR)
+
+    def test_enkelvoud_bij_een_minuut(self):
+        from radar import beeldlabel
+
+        tekst = beeldlabel(self.NU - 60, self.NU, self.UUR)
+        assert "1 minuut oud" in tekst
+        assert "minuten" not in tekst
+
+    def test_meervoud(self):
+        from radar import beeldlabel
+
+        assert "15 minuten oud" in beeldlabel(self.NU - 900, self.NU, self.UUR)
+
+    def test_tijd_wordt_lokaal_getoond(self):
+        from radar import beeldlabel
+
+        zonder = beeldlabel(self.NU, self.NU, 0)
+        met = beeldlabel(self.NU, self.NU, self.UUR)
+        assert zonder != met
+
+    def test_toekomstig_beeld_telt_niet_negatief(self):
+        """Een klok die iets voorloopt mag geen min-teken opleveren."""
+        from radar import beeldlabel
+
+        assert "-" not in beeldlabel(self.NU + 120, self.NU, self.UUR)
+
+    def test_zonder_tijd(self):
+        from radar import beeldlabel
+
+        assert beeldlabel(None, self.NU) == "Tijd onbekend"

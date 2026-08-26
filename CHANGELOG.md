@@ -5,6 +5,90 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.33.0] — 2026-08-26
+
+Celtracking zoals op professionele stormkaarten.
+
+### Toegevoegd
+
+- **Alle cellen worden nu gevolgd**, niet alleen de dichtstbijzijnde. Elke
+  cel houdt een eigen spoor bij; een nieuw zwaartepunt wordt gekoppeld aan
+  het spoor waarvan het laatste punt het dichtst ligt.
+- **Kleur naar activiteit**: geel voor een gewone bui, oranje vanaf acht
+  inslagen, rood vanaf vijfentwintig. De ring wordt bovendien groter naarmate
+  er meer inslagen in de cel zitten.
+- **Koerslijn met streepjes per kwartier**, een uur vooruit. Elk streepje is
+  waar de cel dan ligt als hij zijn koers houdt, dus je leest er direct de
+  aankomsttijd uit af.
+- Alle gevolgde cellen staan als attribuut op `sensor.stormchase_celrichting`,
+  met per cel de afstand, richting, snelheid, activiteit en passage.
+
+### Opmerking
+
+De sensoren blijven de dichtstbijzijnde cel volgen; de kaart toont ze
+allemaal. Dat onderscheid is bewust: een melding over de bui op honderd
+kilometer helpt niet, maar op de kaart wil je hem wel zien liggen.
+
+## [0.32.1] — 2026-08-26
+
+### Toegevoegd
+
+- **Tijdstip linksonder op het radarbeeld**, met hoe oud het is: "Radar 15:11
+  · 2 minuten oud". Zonder dat weet je niet of je naar iets van net kijkt
+  of naar een beeld dat al een kwartier stilstaat omdat de bron hapert.
+- Bewust het tijdstip van de opname en niet van het ophalen. Die twee lopen
+  uiteen: het overzicht kan vers zijn terwijl het beeld zelf ouder is.
+- De ouderdom staat ook als attribuut op de entiteit, zodat je er een
+  automatisering op kunt bouwen.
+
+## [0.32.0] — 2026-08-26
+
+### Toegevoegd
+
+- **Wolken op het radarbeeld.** De infraroodlaag van RainViewer ligt nu
+  tussen de kaart en de neerslag. Daarmee zie je bewolking waar nog geen
+  neerslag valt, en dus opbouwende cumulus voordat de radar iets oppikt. Uit
+  te zetten met een schakelaar in de instellingen.
+- **De onweerscel wordt getekend.** Het spoor van zwaartepunten laat zien
+  waar de bui vandaan komt, de ring waar hij nu zit, en de pijl waar hij over
+  een half uur ligt als hij zijn koers houdt.
+- De pijl staat op schaal: vijftig kilometer per uur levert een pijl op die
+  precies de vijfentwintig kilometer beslaat die de cel in dat half uur
+  aflegt. Bij een hoger zoomniveau wordt hij evenredig langer.
+
+### Gerepareerd
+
+- Bij het toevoegen van de wolkenschakelaar belandde er opnieuw een
+  constantnaam in het formulier. De structuurcontrole meldde het meteen.
+
+## [0.31.1] — 2026-08-26
+
+### Gerepareerd
+
+- **Een mislukte registratie herstelde zichzelf nooit.** Zodra de
+  dashboardstrategie een keer geregistreerd leek, werd het bij elke volgende
+  start overgeslagen. Ging het de eerste keer mis, dan bleef het dashboard
+  leeg met "Timeout waiting for strategy element", ook na herstarten. Beide
+  routes worden nu bij elke start opnieuw geprobeerd.
+- Het registreren van het bestandspad kan bij een herlaad van de integratie
+  melden dat het pad al bestaat. Dat is geen fout meer en houdt de rest niet
+  langer tegen.
+
+### Gewijzigd
+
+- Lukt het vastleggen als bron niet, dan staat dat nu als waarschuwing in het
+  logboek met de URL erbij, in plaats van als debugregel die je alleen ziet
+  als je ernaar zoekt. Lukt het wel, dan staat de URL er ook, zodat te
+  controleren valt of het versienummer klopt.
+- `lovelace` is als voorafgaande afhankelijkheid opgegeven, zodat de
+  integratie niet eerder laadt dan het onderdeel waar de bron in moet.
+
+### Als het dashboard leeg blijft
+
+Voeg `/stormchase/stormchase-strategy.js` handmatig toe onder Instellingen,
+Dashboards, driepuntsmenu, Bronnen, als type JavaScript-module. Dat is
+dezelfde route die de kaarten uit HACS gebruiken.
+
 ## [0.31.0] — 2026-08-26
 
 ### Toegevoegd
@@ -1389,6 +1473,10 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.33.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.33.0
+[0.32.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.32.1
+[0.32.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.32.0
+[0.31.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.31.1
 [0.31.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.31.0
 [0.30.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.30.1
 [0.30.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.30.0

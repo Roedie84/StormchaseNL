@@ -14,7 +14,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import CONF_RADAR_INTERVAL, DEFAULT_RADAR_INTERVAL, RAINVIEWER_URL
-from .radar import laatste_frame
+from .radar import laatste_frame, laatste_satelliet
 from .verouderd import VerouderdMixin
 
 _LOGGER = logging.getLogger(__name__)
@@ -62,4 +62,4 @@ class RadarCoordinator(VerouderdMixin, DataUpdateCoordinator[dict]):
         if frame is None:
             return self.val_terug(ValueError("geen radarbeelden in het overzicht"))
 
-        return self.onthoud(frame)
+        return self.onthoud({"radar": frame, "satelliet": laatste_satelliet(payload)})

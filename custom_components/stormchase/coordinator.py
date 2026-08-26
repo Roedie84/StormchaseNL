@@ -19,7 +19,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.util import dt as dt_util
 from homeassistant.util.location import distance as location_distance
 
-from .cel import frequentie, frequentietrend, volg_cel
+from .cel import frequentie, frequentietrend, volg_cel, volg_cellen
 from .spreiding import beoordeel, ensemble as vat_ensemble_samen, samenvatting
 from .tijd import MARGE_KWARTIER, MARGE_UUR, aantal_gevuld, dichtstbijzijnde, op_stempel
 from .validatie import Validatie
@@ -254,6 +254,7 @@ class StormData:
     ring_bron: str = "geen"
     afstand_bron: str = "sensor"
     cel: dict | None = None
+    cellen: list | None = None
     frequentie: float | None = None
     frequentie_trend: str | None = None
     schuilen: bool | None = None
@@ -313,6 +314,7 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         self._punten: deque[tuple[float, float, float]] = deque(maxlen=3000)
         self._gezien: dict[str, float] = {}
         self._celspoor: list[tuple[float, float, float]] = []
+        self._celsporen: list[list[tuple[float, float, float]]] = []
         self._laatste_dichtbij: float | None = None
         self._was_schuilen: bool | None = None
         self.validatie = Validatie()
@@ -837,10 +839,17 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         ]
 
         cel = None
+        cellen: list = []
         if verse:
             cel = volg_cel(verse, self._celspoor, latitude, longitude, nu_ts)
             if cel is not None:
                 self._celspoor = cel.pop("geschiedenis")[-CELSPOOR:]
+
+            # Alle cellen apart volgen, voor op de kaart. De dichtstbijzijnde
+            # blijft de bron voor de sensoren.
+            cellen, self._celsporen = volg_cellen(
+                verse, self._celsporen, latitude, longitude, nu_ts
+            )
 
         stempels = [t for t, _, _ in self._punten]
         freq = frequentie(stempels, nu_ts, FREQUENTIEVENSTER)
@@ -902,6 +911,7 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
             ring_bron=ring_bron,
             afstand_bron=afstand_bron,
             cel=cel,
+            cellen=cellen,
             frequentie=freq,
             frequentie_trend=freq_trend,
             schuilen=schuilen,

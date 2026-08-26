@@ -124,3 +124,67 @@ class TestFrequentie:
 
     def test_te_weinig(self):
         assert frequentietrend([1.0, 2.0], 1000.0) == "te weinig gegevens"
+
+
+class TestMeerdereCellen:
+    """Elke bui apart volgen, zoals op professionele stormkaarten.
+
+    Een enkele cel volgen zegt niets over de bui die van de andere kant
+    komt. Elke cel houdt daarom een eigen spoor bij.
+    """
+
+    def bouw(self, opzet, stappen=8, snelheid=45):
+        """Laat een aantal cellen naar het oosten trekken."""
+        from cel import naar_graden, volg_cellen
+
+        sporen = []
+        cellen = []
+        for stap in range(stappen):
+            t = stap * 60.0
+            punten = []
+            for dx, dy, aantal in opzet:
+                lat, lon = naar_graden(dx + snelheid * t / 3600, dy, *IK)
+                punten += [(lat + i * 0.008, lon + i * 0.008) for i in range(aantal)]
+            cellen, sporen = volg_cellen(punten, sporen, *IK, t)
+        return cellen
+
+    def test_elke_cel_wordt_gevonden(self):
+        cellen = self.bouw([(-70, -20, 35), (20, 30, 12), (60, -60, 3)])
+        assert len(cellen) == 3
+
+    def test_elke_cel_heeft_een_eigen_koers(self):
+        cellen = self.bouw([(-70, -20, 35), (20, 30, 12)])
+        for cel in cellen:
+            assert cel["richting"] == "O"
+            assert cel["snelheid"] == pytest.approx(45, abs=3)
+
+    def test_intensiteit_volgt_de_activiteit(self):
+        cellen = self.bouw([(-70, -20, 35), (20, 30, 12), (60, -60, 3)])
+        naar_aantal = {c["inslagen"]: c["intensiteit"] for c in cellen}
+
+        assert naar_aantal[35] == "rood"
+        assert naar_aantal[12] == "oranje"
+        assert naar_aantal[3] == "geel"
+
+    def test_drempels(self):
+        from cel import intensiteit
+
+        assert intensiteit(0) == "geel"
+        assert intensiteit(7) == "geel"
+        assert intensiteit(8) == "oranje"
+        assert intensiteit(24) == "oranje"
+        assert intensiteit(25) == "rood"
+
+    def test_sporen_blijven_gekoppeld(self):
+        """Twee cellen mogen elkaars spoor niet overnemen."""
+        cellen = self.bouw([(-70, -40, 20), (-70, 40, 20)])
+        assert len(cellen) == 2
+        for cel in cellen:
+            assert len(cel["spoor"]) >= 4
+
+    def test_zonder_inslagen(self):
+        from cel import volg_cellen
+
+        cellen, sporen = volg_cellen([], [], *IK, 0.0)
+        assert cellen == []
+        assert sporen == []

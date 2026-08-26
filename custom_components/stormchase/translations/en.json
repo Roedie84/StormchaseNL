@@ -18,7 +18,8 @@
           "address_sensor": "Address sensor (optional)",
           "update_interval": "Update interval",
           "radar_zoom": "Radar zoom level",
-          "radar_interval": "Radar refresh"
+          "radar_interval": "Radar refresh",
+          "wolken_op_radar": "Clouds on radar"
         }
       },
       "location": {
@@ -104,7 +105,8 @@
           "address_sensor": "Address sensor (optional)",
           "update_interval": "Update interval",
           "radar_zoom": "Radar zoom level",
-          "radar_interval": "Radar refresh"
+          "radar_interval": "Radar refresh",
+          "wolken_op_radar": "Clouds on radar"
         }
       },
       "location": {
