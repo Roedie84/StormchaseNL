@@ -1388,7 +1388,10 @@ class MeteoCoordinator(VerouderdMixin, LocationMixin, DataUpdateCoordinator[dict
             "hagelkans": hagel,
             "hagel_detail": hagel_detail,
             "cape_peak": cape_piek,
-            "lifted_index": at_index("lifted_index"),
+            # De opgeloste waarde, niet opnieuw het hoofdmodel bevragen: dat
+            # levert hier niets en liet de sensor leeg terwijl de verwachting
+            # wel met de juiste waarde rekende.
+            "lifted_index": li,
             "cin": at_index("convective_inhibition"),
             "latitude": latitude,
             "longitude": longitude,

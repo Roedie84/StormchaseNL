@@ -1219,7 +1219,9 @@ class StormchaseStrategy {
       });
     }
 
-    if (kaarten.blitzortung !== false) {
+    // Blitzortung blokkeerde het insluiten in augustus 2026. Het eigen
+    // radarbeeld hierboven en de inslagsensoren dekken hetzelfde af.
+    if (kaarten.blitzortung === true) {
       cards.push(kop("Blitzortung \u00b7 live inslagen", "mdi:flash-outline"));
       cards.push({
         type: "iframe",
@@ -1247,7 +1249,9 @@ class StormchaseStrategy {
     // Satelliet: laat opbouwende convectie zien voordat de radar neerslag
     // oppikt. SAT24 is van eigenaar gewisseld, dus deze kan stuklopen; met
     // satelliet_url wijs je hem naar een andere bron.
-    if (kaarten.satelliet !== false) {
+    // Meteox weigert insluiten, dus standaard uit. Aanzetten kan met
+    // maps: {satelliet: true} of met een eigen satelliet_url.
+    if (kaarten.satelliet === true) {
       cards.push(kop("Satelliet en bliksem", "mdi:satellite-variant"));
       cards.push({
         type: "iframe",

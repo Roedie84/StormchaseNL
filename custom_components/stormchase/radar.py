@@ -10,6 +10,8 @@ Bewust zonder Home Assistant erin, zodat het los te testen is.
 
 from __future__ import annotations
 
+import math
+
 # Het hoogste zoomniveau dat RainViewer aanbiedt
 MAX_ZOOM = 7
 MIN_ZOOM = 1
@@ -73,4 +75,95 @@ def bouw_url(
     return (
         f"{frame['host']}{frame['path']}/{formaat}/{zoom}"
         f"/{latitude:.4f}/{longitude:.4f}/{kleur}/{opties}.png"
+    )
+
+
+# ---------------------------------------------------------------------
+# Kaarttegels
+#
+# RainViewer levert alleen de neerslaglaag: een doorzichtige overlay zonder
+# ondergrond. Zonder kaart eronder zweven er blobs in het niets en zie je
+# niet waar de bui hangt. Daarom worden de tegels van een donkere kaart en
+# de radar over elkaar heen gelegd.
+# ---------------------------------------------------------------------
+
+TEGELMAAT = 256
+
+# Donkere kaart zonder labels, past bij een donker dashboard
+BASISKAART = "https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png"
+
+
+def tegelpositie(latitude: float, longitude: float, zoom: int) -> tuple[float, float]:
+    """Reken coordinaten om naar een tegelpositie met decimalen.
+
+    De standaard webmercator-omrekening. De decimalen geven aan waar binnen
+    de tegel het punt ligt, wat nodig is om het beeld precies op de locatie
+    te centreren.
+    """
+    n = 2.0 ** zoom
+    x = (longitude + 180.0) / 360.0 * n
+
+    rad = math.radians(latitude)
+    y = (1.0 - math.asinh(math.tan(rad)) / math.pi) / 2.0 * n
+
+    return (x, y)
+
+
+def tegelraster(
+    latitude: float, longitude: float, zoom: int, breedte: int = 3
+) -> dict:
+    """Bepaal welke tegels er nodig zijn en waar het middelpunt ligt.
+
+    Een raster van drie bij drie geeft genoeg omgeving om een bui te kunnen
+    plaatsen, ook als hij net buiten het midden valt.
+    """
+    x, y = tegelpositie(latitude, longitude, zoom)
+    midden = breedte // 2
+
+    begin_x = int(x) - midden
+    begin_y = int(y) - midden
+    grens = 2 ** zoom
+
+    tegels = []
+    for rij in range(breedte):
+        for kolom in range(breedte):
+            tegels.append(
+                {
+                    "x": (begin_x + kolom) % grens,
+                    "y": min(max(begin_y + rij, 0), grens - 1),
+                    "plak_x": kolom * TEGELMAAT,
+                    "plak_y": rij * TEGELMAAT,
+                }
+            )
+
+    return {
+        "tegels": tegels,
+        # Waar het gevraagde punt ligt binnen het samengestelde beeld
+        "midden_x": (x - begin_x) * TEGELMAAT,
+        "midden_y": (y - begin_y) * TEGELMAAT,
+        "afmeting": breedte * TEGELMAAT,
+    }
+
+
+def basiskaart_url(tegel: dict, zoom: int) -> str:
+    """URL van een kaarttegel."""
+    return BASISKAART.format(z=zoom, x=tegel["x"], y=tegel["y"])
+
+
+def radartegel_url(
+    frame: dict | None,
+    tegel: dict,
+    zoom: int,
+    kleur: int = 2,
+    vloeiend: bool = True,
+    sneeuw: bool = True,
+) -> str | None:
+    """URL van een radartegel op dezelfde positie."""
+    if frame is None:
+        return None
+
+    opties = f"{1 if vloeiend else 0}_{1 if sneeuw else 0}"
+    return (
+        f"{frame['host']}{frame['path']}/{TEGELMAAT}/{zoom}"
+        f"/{tegel['x']}/{tegel['y']}/{kleur}/{opties}.png"
     )

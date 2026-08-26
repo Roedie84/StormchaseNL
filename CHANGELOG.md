@@ -5,6 +5,38 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.30.0] — 2026-08-26
+
+Vier reparaties uit een diagnostiek en drie screenshots.
+
+### Gerepareerd
+
+- **Het radarbeeld had geen ondergrond.** RainViewer levert alleen de
+  neerslaglaag, als doorzichtige overlay. Zonder kaart eronder zweefden er
+  vlekken in het niets. De radar wordt nu over een donkere kaart gelegd en
+  rond je positie uitgesneden.
+- **Het ensemble gaf zeshonderd keer een 404.** Die API draait op een eigen
+  subdomein; het gedeelde eindpunt kent hem niet. Daarom stond de
+  onweerskans acht rondes lang op onbekend.
+- **De Lifted Index kwam wel binnen maar bereikte de sensor niet.** In de
+  teruggegeven gegevens werd het hoofdmodel opnieuw bevraagd in plaats van de
+  opgeloste waarde door te geven. De verwachting rekende dus met de juiste
+  waarde terwijl de sensor leeg bleef. In het antwoord zaten achtenveertig
+  waarden; dat het diagnosebestand dat telt maakte het verschil zichtbaar.
+- **Blitzortung en Meteox weigeren insluiten** en toonden een blokkade-icoon.
+  Beide staan nu standaard uit. Aanzetten kan met `maps: {blitzortung: true}`
+  of `{satelliet: true}`.
+
+### Toegevoegd
+
+- Zestien tests op de tegelberekening, waaronder de datumgrens en de polen.
+
+### Opmerking
+
+De integratie heeft nu Pillow nodig voor het samenstellen van het
+radarbeeld. Dat pakket zit al in Home Assistant, dus er wordt niets extra
+geinstalleerd.
+
 ## [0.29.1] — 2026-08-22
 
 Drie verdwaalde importregels, met uiteenlopende gevolgen.
@@ -1309,6 +1341,7 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.30.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.30.0
 [0.29.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.29.1
 [0.29.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.29.0
 [0.28.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.28.0

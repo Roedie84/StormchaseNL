@@ -7,6 +7,10 @@ de integratie gebruikt.
 
 from __future__ import annotations
 
+import asyncio
+import logging
+from io import BytesIO
+
 from homeassistant.components.image import ImageEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -15,6 +19,12 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import dt as dt_util
 
+_LOGGER = logging.getLogger(__name__)
+
+# Uitsnede rond het middelpunt; 512 bij een raster van 768 laat genoeg
+# omgeving zien zonder dat de randen van het raster in beeld komen.
+UITSNEDE = 512
+
 from .const import (
     CONF_RADAR_KLEUR,
     CONF_RADAR_ZOOM,
@@ -22,7 +32,11 @@ from .const import (
     DEFAULT_RADAR_ZOOM,
     DOMAIN,
 )
-from .radar import bouw_url
+from .radar import (
+    basiskaart_url,
+    radartegel_url,
+    tegelraster,
+)
 from .radarbron import RadarCoordinator
 
 
@@ -64,7 +78,7 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
             manufacturer="Stormchase",
             model="Onweersmonitor",
         )
-        self._vorige_url: str | None = None
+        self._vorige_url = None
 
     def _opt(self, sleutel: str, standaard):
         """Instelling ophalen."""
@@ -73,22 +87,90 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
         )
 
     @property
-    def image_url(self) -> str | None:
-        """De URL van het huidige beeld, gecentreerd op de actieve locatie."""
+    def _positie(self) -> tuple[float, float]:
+        """De locatie waarop het beeld gecentreerd wordt."""
         gegevens = self._storm.data if self._storm else None
         latitude = getattr(gegevens, "latitude", None)
         longitude = getattr(gegevens, "longitude", None)
 
         if latitude is None or longitude is None:
-            latitude = self.hass.config.latitude
-            longitude = self.hass.config.longitude
+            return (self.hass.config.latitude, self.hass.config.longitude)
+        return (latitude, longitude)
 
-        return bouw_url(
-            self.coordinator.data,
-            latitude,
-            longitude,
-            zoom=self._opt(CONF_RADAR_ZOOM, DEFAULT_RADAR_ZOOM),
-            kleur=self._opt(CONF_RADAR_KLEUR, DEFAULT_RADAR_KLEUR),
+    async def _haal_tegel(self, url: str | None) -> bytes | None:
+        """Haal een enkele tegel op; een missende tegel is geen probleem."""
+        if url is None:
+            return None
+        try:
+            antwoord = await self._client.get(url, timeout=15)
+            antwoord.raise_for_status()
+            return antwoord.content
+        except Exception as err:  # noqa: BLE001 - een tegel mag ontbreken
+            _LOGGER.debug("Tegel niet opgehaald: %s (%s)", url, err)
+            return None
+
+    def _stel_samen(self, kaarten: list, radars: list, raster: dict) -> bytes:
+        """Leg de radar over de kaart en snijd rond het middelpunt uit.
+
+        Draait in een aparte draad, want beeldbewerking blokkeert anders de
+        rest van Home Assistant.
+        """
+        from PIL import Image
+
+        afmeting = raster["afmeting"]
+        doek = Image.new("RGBA", (afmeting, afmeting), (18, 18, 22, 255))
+
+        for laag in (kaarten, radars):
+            for tegel, inhoud in zip(raster["tegels"], laag):
+                if inhoud is None:
+                    continue
+                try:
+                    beeld = Image.open(BytesIO(inhoud)).convert("RGBA")
+                except Exception:  # noqa: BLE001 - beschadigde tegel overslaan
+                    continue
+                doek.paste(beeld, (tegel["plak_x"], tegel["plak_y"]), beeld)
+
+        # Uitsnijden rond de gevraagde positie, binnen de randen blijven
+        helft = UITSNEDE // 2
+        links = int(min(max(raster["midden_x"] - helft, 0), afmeting - UITSNEDE))
+        boven = int(min(max(raster["midden_y"] - helft, 0), afmeting - UITSNEDE))
+
+        uitsnede = doek.crop((links, boven, links + UITSNEDE, boven + UITSNEDE))
+
+        buffer = BytesIO()
+        uitsnede.convert("RGB").save(buffer, format="PNG")
+        return buffer.getvalue()
+
+    async def async_image(self) -> bytes | None:
+        """Bouw het radarbeeld met een kaart eronder.
+
+        RainViewer levert alleen de neerslaglaag. Zonder ondergrond zweven er
+        vlekken in het niets en is niet te zien waar de bui hangt.
+        """
+        frame = self.coordinator.data
+        if frame is None:
+            return None
+
+        latitude, longitude = self._positie
+        zoom = int(self._opt(CONF_RADAR_ZOOM, DEFAULT_RADAR_ZOOM))
+        kleur = int(self._opt(CONF_RADAR_KLEUR, DEFAULT_RADAR_KLEUR))
+        raster = tegelraster(latitude, longitude, zoom)
+
+        kaarten = await asyncio.gather(
+            *(self._haal_tegel(basiskaart_url(t, zoom)) for t in raster["tegels"])
+        )
+        radars = await asyncio.gather(
+            *(
+                self._haal_tegel(radartegel_url(frame, t, zoom, kleur))
+                for t in raster["tegels"]
+            )
+        )
+
+        if not any(kaarten) and not any(radars):
+            return None
+
+        return await self.hass.async_add_executor_job(
+            self._stel_samen, list(kaarten), list(radars), raster
         )
 
     def _handle_coordinator_update(self) -> None:
@@ -97,9 +179,11 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
         Home Assistant haalt het plaatje pas op als de tijdstempel wijzigt,
         dus die moet mee wanneer de URL verandert.
         """
-        url = self.image_url
-        if url != self._vorige_url:
-            self._vorige_url = url
+        # Een nieuw frame of een verschoven positie betekent een nieuw beeld
+        frame = self.coordinator.data or {}
+        kenmerk = (frame.get("path"), *(round(w, 3) for w in self._positie))
+        if kenmerk != self._vorige_url:
+            self._vorige_url = kenmerk
             self._attr_image_last_updated = dt_util.utcnow()
 
         super()._handle_coordinator_update()

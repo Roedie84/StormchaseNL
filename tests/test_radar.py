@@ -76,3 +76,77 @@ class TestUrl:
 
     def test_zonder_frame(self):
         assert bouw_url(None, 52.1, 6.6) is None
+
+
+class TestTegels:
+    """Kaarttegels rond een positie.
+
+    RainViewer levert alleen de neerslaglaag. Zonder kaart eronder zweven er
+    vlekken in het niets en is niet te zien waar de bui hangt.
+    """
+
+    def test_nulpunt(self):
+        from radar import tegelpositie
+
+        # Op zoom 1 ligt het snijpunt van evenaar en nulmeridiaan in het
+        # midden van het raster van twee bij twee
+        x, y = tegelpositie(0, 0, 1)
+        assert x == pytest.approx(1.0)
+        assert y == pytest.approx(1.0)
+
+    def test_hoger_zoomniveau_verdubbelt(self):
+        from radar import tegelpositie
+
+        laag = tegelpositie(52.0, 6.0, 7)
+        hoog = tegelpositie(52.0, 6.0, 8)
+        assert hoog[0] == pytest.approx(laag[0] * 2)
+        assert hoog[1] == pytest.approx(laag[1] * 2)
+
+    def test_raster_is_compleet(self):
+        from radar import tegelraster
+
+        raster = tegelraster(52.0964, 6.641, 7)
+        assert len(raster["tegels"]) == 9
+        assert raster["afmeting"] == 768
+
+    def test_middelpunt_ligt_in_het_raster(self):
+        from radar import tegelraster
+
+        raster = tegelraster(52.0964, 6.641, 7)
+        assert 0 < raster["midden_x"] < raster["afmeting"]
+        assert 0 < raster["midden_y"] < raster["afmeting"]
+
+    def test_tegels_blijven_binnen_de_kaart(self):
+        """Bij de polen mag de rij niet buiten het raster vallen."""
+        from radar import tegelraster
+
+        for breedtegraad in (84.0, -84.0):
+            raster = tegelraster(breedtegraad, 6.0, 7)
+            for tegel in raster["tegels"]:
+                assert 0 <= tegel["y"] < 2 ** 7
+
+    def test_rond_de_datumgrens(self):
+        """Over de nulmeridiaan van 180 graden loopt de x-as door."""
+        from radar import tegelraster
+
+        raster = tegelraster(0.0, 179.9, 7)
+        for tegel in raster["tegels"]:
+            assert 0 <= tegel["x"] < 2 ** 7
+
+    def test_urls(self):
+        from radar import basiskaart_url, radartegel_url, tegelraster
+
+        raster = tegelraster(52.0964, 6.641, 7)
+        tegel = raster["tegels"][4]
+        frame = {"host": "https://tilecache.rainviewer.com", "path": "/v2/radar/abc"}
+
+        assert basiskaart_url(tegel, 7).endswith(f"/7/{tegel['x']}/{tegel['y']}.png")
+        assert radartegel_url(frame, tegel, 7).endswith(
+            f"/256/7/{tegel['x']}/{tegel['y']}/2/1_1.png"
+        )
+
+    def test_radartegel_zonder_frame(self):
+        from radar import radartegel_url, tegelraster
+
+        raster = tegelraster(52.0, 6.0, 7)
+        assert radartegel_url(None, raster["tegels"][0], 7) is None

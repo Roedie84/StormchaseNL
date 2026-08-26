@@ -54,7 +54,8 @@ CONF_RADAR_KLEUR = "radar_kleur"
 DEFAULT_RADAR_ZOOM = 7
 DEFAULT_RADAR_KLEUR = 2
 
-ENSEMBLE_URL = "https://api.open-meteo.com/v1/ensemble"
+# Het ensemble draait op een eigen subdomein; het gedeelde eindpunt gaf 404
+ENSEMBLE_URL = "https://ensemble-api.open-meteo.com/v1/ensemble"
 ENSEMBLE_LOKAAL = "icon_d2_eps"
 ENSEMBLE_WERELD = "gefs025"
 METING_INTERVAL = timedelta(minutes=15)
