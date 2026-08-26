@@ -53,7 +53,7 @@ from .radar import (
     tegelraster,
 )
 from .const import DWD_WMS_URL
-from .wolken import STERKTE, mercatorrij, wms_url
+from .wolken import VERVAGING, alfa_van_helderheid, mercatorrij, wms_url
 from .radarbron import RadarCoordinator
 
 
@@ -166,13 +166,28 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
 
     @classmethod
     def _plak_wolken(cls, doek, inhoud: bytes, raster: dict) -> None:
-        """Leg de bewolking over de kaart."""
-        cls._plak_gebiedsbeeld(doek, inhoud, raster, STERKTE)
+        """Leg de bewolking over de kaart, in grijstinten.
+
+        De afgeleide producten komen met hun eigen palet, dat over een kaart
+        heen onleesbaar wordt. Daarom wordt het beeld zelf omgezet naar grijs
+        en licht vervaagd: donker is helder, licht is bewolkt, met vloeiende
+        overgangen zoals op elke weerkaart.
+        """
+        from PIL import Image, ImageFilter
+
+        recht = cls._herprojecteer(inhoud, raster)
+        if recht is None:
+            return
+
+        grijs = recht.convert("L").filter(ImageFilter.GaussianBlur(VERVAGING))
+        doorzicht = grijs.point(alfa_van_helderheid)
+
+        wolk = Image.merge("RGBA", (grijs, grijs, grijs, doorzicht))
+        doek.paste(wolk, (0, 0), wolk)
 
     @staticmethod
-    def _plak_gebiedsbeeld(doek, inhoud: bytes, raster: dict, sterkte: float) -> None:
-        """Leg een beeld van een kaartdienst over het doek.
-
+    def _herprojecteer(inhoud: bytes, raster: dict):
+        """Zet een beeld van een kaartdienst om naar webmercator.
         Zulke diensten leveren een plat beeld op breedtegraad, terwijl het
         radarbeeld in webmercator staat. Zonder omrekening zou alles
         tientallen kilometers verkeerd komen te liggen; hier wordt het beeld
@@ -184,7 +199,7 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
             bron = Image.open(BytesIO(inhoud)).convert("RGBA")
         except Exception as err:  # noqa: BLE001 - laag mag ontbreken
             _LOGGER.debug("Beeld van de kaartdienst onbruikbaar: %s", err)
-            return
+            return None
 
         afmeting = raster["afmeting"]
         if bron.size != (afmeting, afmeting):
@@ -198,11 +213,14 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
             bronrij = min(max(bronrij, 0), afmeting - 1)
             recht.paste(bron.crop((0, bronrij, afmeting, bronrij + 1)), (0, rij))
 
-        if sterkte < 1.0:
-            recht.putalpha(
-                recht.getchannel("A").point(lambda waarde: int(waarde * sterkte))
-            )
-        doek.paste(recht, (0, 0), recht)
+        return recht
+
+    @classmethod
+    def _plak_gebiedsbeeld(cls, doek, inhoud: bytes, raster: dict) -> None:
+        """Leg een beeld van een kaartdienst ongewijzigd over het doek."""
+        recht = cls._herprojecteer(inhoud, raster)
+        if recht is not None:
+            doek.paste(recht, (0, 0), recht)
 
     @classmethod
     def _teken_cellen(cls, doek, raster: dict, cellen: list) -> None:
@@ -390,7 +408,7 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
         if wolken is not None:
             self._plak_wolken(doek, wolken, raster)
         if dwd_beeld is not None:
-            self._plak_gebiedsbeeld(doek, dwd_beeld, raster, 1.0)
+            self._plak_gebiedsbeeld(doek, dwd_beeld, raster)
         else:
             plak(radars)
 

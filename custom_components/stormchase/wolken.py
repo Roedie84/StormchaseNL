@@ -5,13 +5,14 @@ ijskoud en steekt scherp af, maar lage en middelhoge bewolking heeft een
 wolktop die nauwelijks kouder is dan de grond eronder en verdwijnt daardoor
 vrijwel volledig. Precies de bewolking die je op een chase-dag wil zien.
 
-EUMETSAT publiceert de wolktophoogte, die doorzichtig is waar geen wolk staat
-en meteen laat zien hoe hoog de toppen reiken. Hoge toppen betekenen krachtige
-opwaartse stroming.
+De afgeleide producten van EUMETSAT komen met hun eigen palet: het
+wolkenmasker kleurt heldere gebieden groen en blauw, de wolktophoogte gebruikt
+een regenboogschaal met harde blokken. Beide zijn gemaakt om los bekeken te
+worden, niet om over een kaart te leggen.
 
-Het wolkenmasker uit dezelfde reeks werkt ook, maar kleurt juist de heldere
-gebieden groen en blauw. Over een kaart heen levert dat een onleesbaar beeld
-op waarin onbewolkte gebieden het meest opvallen.
+Daarom wordt hier het onbewerkte infraroodkanaal gebruikt en zelf omgezet naar
+grijstinten, zoals elke weerkaart bewolking toont: donker is helder, licht is
+bewolkt, met vloeiende overgangen ertussen.
 
 De kaartdienst levert in EPSG:4326, terwijl het radarbeeld in webmercator
 staat. Zonder herprojectie schuift alles verticaal weg; die berekening staat
@@ -24,13 +25,22 @@ import math
 
 WMS_URL = "https://view.eumetsat.int/geoserver/wms"
 
-# Wolktophoogte van Meteosat, elk kwartier ververst, met dekking over heel
-# Europa. Andere lagen zijn met een instelling te kiezen.
-STANDAARD_LAAG = "msg_fes:cth"
+# Het infraroodkanaal op 10,8 micrometer: het standaardbeeld voor bewolking,
+# elk kwartier ververst en met dekking over heel Europa.
+STANDAARD_LAAG = "msg_fes:ir108"
 
 # Hoe zwaar de laag meetelt. Genoeg om de bewolking te zien liggen, niet
 # zoveel dat de kaart eronder verdwijnt.
-STERKTE = 0.4
+STERKTE = 0.55
+
+# Onder deze helderheid rekenen we het tot onbewolkt. Zonder ondergrens legt
+# de laag ook over onbewolkte gebieden een grijze waas.
+DREMPEL = 70
+
+# Het bronbeeld is grof, ongeveer drie kilometer per beeldpunt. Een lichte
+# vervaging maakt de blokken tot vloeiende overgangen, zoals je op een
+# weerkaart verwacht.
+VERVAGING = 2.5
 
 
 def wms_url(
@@ -89,3 +99,19 @@ def mercatorrij(
     # Terug naar een rij in het platte bronbeeld
     deel = (noord - breedtegraad) / max(noord - zuid, 1e-9)
     return deel * (hoogte - 1)
+
+
+def alfa_van_helderheid(
+    waarde: int, drempel: int = DREMPEL, sterkte: float = STERKTE
+) -> int:
+    """Zet de helderheid van een beeldpunt om naar doorzichtigheid.
+
+    Donker is heldere lucht en wordt volledig doorzichtig; hoe lichter, hoe
+    dichter de bewolking. Zo verdwijnt de waas boven onbewolkte gebieden en
+    blijft de kaart eronder leesbaar.
+    """
+    if waarde <= drempel:
+        return 0
+
+    deel = (waarde - drempel) / (255 - drempel)
+    return int(min(deel, 1.0) * 255 * sterkte)

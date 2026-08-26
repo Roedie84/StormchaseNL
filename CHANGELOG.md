@@ -5,6 +5,32 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.35.2] — 2026-08-26
+
+### Gewijzigd
+
+- **Bewolking wordt nu zelf omgezet naar grijstinten.** De afgeleide
+  producten van EUMETSAT komen met hun eigen palet: het wolkenmasker kleurt
+  heldere gebieden groen en blauw, de wolktophoogte gebruikt een
+  regenboogschaal met harde blokken. Beide zijn gemaakt om los bekeken te
+  worden, niet om over een kaart te leggen.
+- Er wordt nu het onbewerkte infraroodkanaal opgehaald en zelf verwerkt:
+  donker is heldere lucht en volledig doorzichtig, licht is bewolkt, met een
+  geleidelijke overgang ertussen. Zoals elke weerkaart bewolking toont.
+- **Vloeiende overgangen.** Het bronbeeld is grof, ongeveer drie kilometer
+  per beeldpunt, wat blokken oplevert. Een lichte vervaging maakt daar een
+  geleidelijk verloop van: een sprong van 180 wordt 28, uitgesmeerd over acht
+  beeldpunten.
+- Boven onbewolkte gebieden blijft de laag volledig doorzichtig, zodat de
+  kaart daar onaangetast blijft.
+
+### Leerpunt
+
+Drie versies achter elkaar heb ik geprobeerd de juiste laag te kiezen bij de
+aanbieder, terwijl het antwoord was om de ruwe meting te nemen en de
+weergave zelf te doen. Een kant-en-klaar product is gemaakt voor een ander
+doel dan het onze.
+
 ## [0.35.1] — 2026-08-26
 
 ### Gerepareerd
@@ -1560,6 +1586,7 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.35.2]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.35.2
 [0.35.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.35.1
 [0.35.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.35.0
 [0.34.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.34.0
