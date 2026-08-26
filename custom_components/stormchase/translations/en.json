@@ -1,0 +1,387 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Stormchase",
+        "description": "Location is taken from Home Assistant: {latitude}, {longitude}. The lightning sensors come from your existing Blitzortung integration.",
+        "data": {
+          "distance_sensor": "Distance sensor",
+          "azimuth_sensor": "Azimuth sensor",
+          "counter_sensor": "Counter sensor",
+          "geo_pattern": "Pattern in geo_location entity id",
+          "warn_distance": "Warning distance",
+          "ring_near": "Inner ring",
+          "ring_mid": "Middle ring",
+          "ring_far": "Outer ring",
+          "location_mode": "Location",
+          "ring_window": "Time window for the rings",
+          "address_sensor": "Address sensor (optional)",
+          "update_interval": "Update interval",
+          "radar_zoom": "Radar zoom level"
+        }
+      },
+      "location": {
+        "title": "Location",
+        "description": "Choose where the weather parameters should come from. When following a device or person the integration travels with you; if no GPS position is available it falls back to your home location.",
+        "data": {
+          "zone_entity": "Zone",
+          "tracker_entity": "Device or person to follow",
+          "manual_location": "Coordinates"
+        }
+      },
+      "notify": {
+        "title": "Notifications",
+        "description": "Leave the notification services empty to disable notifications. Set both quiet hours to the same time to always notify. Notifications can also be toggled later with a switch.",
+        "data": {
+          "notify_services": "Notification services",
+          "notify_max_distance": "Only notify within",
+          "notify_on_approach": "Also notify when the storm approaches",
+          "notify_on_cleared": "Notify when the storm has passed",
+          "notify_title": "Notification title",
+          "notify_cooldown": "Wait time between notifications",
+          "quiet_from": "Quiet hours from",
+          "quiet_to": "Quiet hours to",
+          "rain_notify": "Also notify when rain is approaching",
+          "rain_lead": "How many minutes ahead to warn",
+          "rain_threshold": "Intensity from which it counts as rain",
+          "wind_notify": "Notify on strong wind gusts",
+          "wind_threshold": "Wind gusts from",
+          "only_stationary": "Only notify when stationary, not while travelling",
+          "stationary_minutes": "This long slower before stationary again",
+          "moving_speed": "Travelling from speed",
+          "weather_types": "Notify for these conditions",
+          "heat_threshold": "Heat from",
+          "frost_threshold": "Frost from",
+          "outlook_notify": "Notify when the outlook escalates",
+          "outlook_level": "Notify from",
+          "critical_alerts": "Break through silent mode for hazards",
+          "dashboard_path": "Dashboard path for the button"
+        }
+      },
+      "alerts": {
+        "title": "Weather warnings",
+        "description": "Official warnings via MeteoAlarm. On automatic the integration looks up which country you are in, so you get the right warnings while travelling. Leave the region empty for the whole country.",
+        "data": {
+          "alert_country": "Country",
+          "alert_region": "Region (optional filter)",
+          "alert_min_level": "Notify from",
+          "alert_notify": "Send notifications for warnings"
+        }
+      },
+      "briefing": {
+        "title": "Daily weather briefing",
+        "description": "A summary of the weather, forecast, precipitation and any warnings. Set both times the same to keep just one.",
+        "data": {
+          "briefing": "Send daily briefing",
+          "briefing_morning": "Morning briefing at",
+          "briefing_afternoon": "Afternoon briefing at"
+        }
+      }
+    },
+    "error": {
+      "rings_not_ascending": "Rings must be ascending and distinct."
+    },
+    "abort": {
+      "already_configured": "Stormchase is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Stormchase settings",
+        "data": {
+          "distance_sensor": "Distance sensor",
+          "azimuth_sensor": "Azimuth sensor",
+          "counter_sensor": "Counter sensor",
+          "geo_pattern": "Pattern in geo_location entity id",
+          "warn_distance": "Warning distance",
+          "ring_near": "Inner ring",
+          "ring_mid": "Middle ring",
+          "ring_far": "Outer ring",
+          "location_mode": "Location",
+          "ring_window": "Time window for the rings",
+          "address_sensor": "Address sensor (optional)",
+          "update_interval": "Update interval",
+          "radar_zoom": "Radar zoom level"
+        }
+      },
+      "location": {
+        "title": "Location",
+        "description": "Choose where the weather parameters should come from. When following a device or person the integration travels with you; if no GPS position is available it falls back to your home location.",
+        "data": {
+          "zone_entity": "Zone",
+          "tracker_entity": "Device or person to follow",
+          "manual_location": "Coordinates"
+        }
+      },
+      "notify": {
+        "title": "Notifications",
+        "description": "Leave the notification services empty to disable notifications. Set both quiet hours to the same time to always notify. Notifications can also be toggled later with a switch.",
+        "data": {
+          "notify_services": "Notification services",
+          "notify_max_distance": "Only notify within",
+          "notify_on_approach": "Also notify when the storm approaches",
+          "notify_on_cleared": "Notify when the storm has passed",
+          "notify_title": "Notification title",
+          "notify_cooldown": "Wait time between notifications",
+          "quiet_from": "Quiet hours from",
+          "quiet_to": "Quiet hours to",
+          "rain_notify": "Also notify when rain is approaching",
+          "rain_lead": "How many minutes ahead to warn",
+          "rain_threshold": "Intensity from which it counts as rain",
+          "wind_notify": "Notify on strong wind gusts",
+          "wind_threshold": "Wind gusts from",
+          "only_stationary": "Only notify when stationary, not while travelling",
+          "stationary_minutes": "This long slower before stationary again",
+          "moving_speed": "Travelling from speed",
+          "weather_types": "Notify for these conditions",
+          "heat_threshold": "Heat from",
+          "frost_threshold": "Frost from",
+          "outlook_notify": "Notify when the outlook escalates",
+          "outlook_level": "Notify from",
+          "critical_alerts": "Break through silent mode for hazards",
+          "dashboard_path": "Dashboard path for the button"
+        }
+      },
+      "alerts": {
+        "title": "Weather warnings",
+        "description": "Official warnings via MeteoAlarm. On automatic the integration looks up which country you are in, so you get the right warnings while travelling. Leave the region empty for the whole country.",
+        "data": {
+          "alert_country": "Country",
+          "alert_region": "Region (optional filter)",
+          "alert_min_level": "Notify from",
+          "alert_notify": "Send notifications for warnings"
+        }
+      },
+      "briefing": {
+        "title": "Daily weather briefing",
+        "description": "A summary of the weather, forecast, precipitation and any warnings. Set both times the same to keep just one.",
+        "data": {
+          "briefing": "Send daily briefing",
+          "briefing_morning": "Morning briefing at",
+          "briefing_afternoon": "Afternoon briefing at"
+        }
+      }
+    },
+    "error": {
+      "rings_not_ascending": "Rings must be ascending and distinct."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "approach_speed": {
+        "name": "Approach speed"
+      },
+      "eta": {
+        "name": "Arrival"
+      },
+      "trend": {
+        "name": "Trend"
+      },
+      "markers": {
+        "name": "Active markers"
+      },
+      "cape": {
+        "name": "CAPE"
+      },
+      "cape_peak": {
+        "name": "CAPE peak 12 hours"
+      },
+      "lifted_index": {
+        "name": "Lifted Index"
+      },
+      "cin": {
+        "name": "Convective inhibition"
+      },
+      "chase_potential": {
+        "name": "Chase potential"
+      },
+      "location": {
+        "name": "Active location"
+      },
+      "rain_starts": {
+        "name": "Rain starts in"
+      },
+      "rain_intensity": {
+        "name": "Precipitation intensity"
+      },
+      "rain_peak": {
+        "name": "Precipitation peak 2 hours"
+      },
+      "alert_level": {
+        "name": "Warning level"
+      },
+      "wind_shear_6km": {
+        "name": "Wind shear 0-6 km"
+      },
+      "wind_shear_1km": {
+        "name": "Wind shear 0-1 km"
+      },
+      "freezing_level": {
+        "name": "Freezing level"
+      },
+      "total_totals": {
+        "name": "Total Totals index"
+      },
+      "rotation": {
+        "name": "Rotation potential"
+      },
+      "hail": {
+        "name": "Hail potential"
+      },
+      "wind_gusts": {
+        "name": "Wind gusts"
+      },
+      "distance": {
+        "name": "Distance"
+      },
+      "azimuth": {
+        "name": "Azimuth"
+      },
+      "forecast": {
+        "name": "Storm outlook"
+      },
+      "cell_direction": {
+        "name": "Cell direction"
+      },
+      "cell_speed": {
+        "name": "Cell speed"
+      },
+      "pass_distance": {
+        "name": "Pass distance"
+      },
+      "pass_time": {
+        "name": "Passing in"
+      },
+      "flash_rate": {
+        "name": "Flash rate"
+      },
+      "safe_in": {
+        "name": "Safe in"
+      },
+      "lightning_potential": {
+        "name": "Lightning potential"
+      },
+      "updraft": {
+        "name": "Updraft"
+      },
+      "cloud_top": {
+        "name": "Cloud top"
+      },
+      "wind_shear_3km": {
+        "name": "Wind shear 0-3 km"
+      },
+      "hodograph": {
+        "name": "Turning with height"
+      },
+      "model_agreement": {
+        "name": "Model agreement"
+      },
+      "meting": {
+        "name": "Station measurement"
+      },
+      "bronstatus": {
+        "name": "Source status"
+      },
+      "ensemble": {
+        "name": "Ensemble storm chance"
+      }
+    },
+    "binary_sensor": {
+      "nearby": {
+        "name": "Storm nearby"
+      },
+      "approaching": {
+        "name": "Storm approaching"
+      },
+      "rain_expected": {
+        "name": "Rain expected"
+      },
+      "alert_active": {
+        "name": "Weather warning"
+      },
+      "moving": {
+        "name": "Moving"
+      },
+      "shelter": {
+        "name": "Take shelter"
+      }
+    },
+    "switch": {
+      "notifications": {
+        "name": "Notifications"
+      }
+    },
+    "image": {
+      "radar": {
+        "name": "Radar"
+      }
+    }
+  },
+  "selector": {
+    "location_mode": {
+      "options": {
+        "home": "Home Assistant home location",
+        "zone": "A zone",
+        "tracker": "Follow a device or person",
+        "manual": "Manual coordinates"
+      }
+    },
+    "alert_country": {
+      "options": {
+        "uit": "Disabled",
+        "netherlands": "Netherlands",
+        "belgium": "Belgium",
+        "germany": "Germany",
+        "luxembourg": "Luxembourg",
+        "france": "France",
+        "united-kingdom": "United Kingdom",
+        "denmark": "Denmark",
+        "austria": "Austria",
+        "switzerland": "Switzerland",
+        "italy": "Italy",
+        "spain": "Spain",
+        "portugal": "Portugal",
+        "poland": "Poland",
+        "czechia": "Czechia",
+        "norway": "Norway",
+        "sweden": "Sweden",
+        "ireland": "Ireland",
+        "auto": "Automatic, follows your location"
+      }
+    },
+    "alert_level": {
+      "options": {
+        "geel": "Yellow",
+        "oranje": "Orange",
+        "rood": "Red"
+      }
+    },
+    "weather_types": {
+      "options": {
+        "sneeuw": "Snow",
+        "ijzel": "Freezing rain",
+        "mist": "Dense fog",
+        "hitte": "Heat",
+        "vorst": "Frost"
+      }
+    },
+    "outlook_level": {
+      "options": {
+        "onweer": "Chance of thunderstorms",
+        "zwaar": "Chance of severe storms",
+        "noodweer": "Chance of extreme weather"
+      }
+    }
+  },
+  "services": {
+    "test_notification": {
+      "name": "Send test notification",
+      "description": "Sends a test message to all configured notification services."
+    },
+    "send_briefing": {
+      "name": "Send briefing",
+      "description": "Sends the daily weather briefing now."
+    }
+  }
+}

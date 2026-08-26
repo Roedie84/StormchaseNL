@@ -1,0 +1,178 @@
+{
+  "entity": {
+    "sensor": {
+      "approach_speed": {
+        "default": "mdi:speedometer"
+      },
+      "eta": {
+        "default": "mdi:timer-sand"
+      },
+      "trend": {
+        "default": "mdi:swap-vertical"
+      },
+      "markers": {
+        "default": "mdi:map-marker-multiple"
+      },
+      "cape": {
+        "default": "mdi:arrow-up-bold-box"
+      },
+      "cape_peak": {
+        "default": "mdi:chart-bell-curve"
+      },
+      "lifted_index": {
+        "default": "mdi:thermometer-chevron-down"
+      },
+      "cin": {
+        "default": "mdi:lock-outline"
+      },
+      "chase_potential": {
+        "default": "mdi:radar"
+      },
+      "location": {
+        "default": "mdi:crosshairs-gps"
+      },
+      "rain_starts": {
+        "default": "mdi:weather-rainy"
+      },
+      "rain_intensity": {
+        "default": "mdi:water"
+      },
+      "rain_peak": {
+        "default": "mdi:weather-pouring"
+      },
+      "alert_level": {
+        "default": "mdi:alert-decagram"
+      },
+      "wind_shear_6km": {
+        "default": "mdi:weather-windy"
+      },
+      "wind_shear_1km": {
+        "default": "mdi:weather-windy-variant"
+      },
+      "freezing_level": {
+        "default": "mdi:snowflake-thermometer"
+      },
+      "total_totals": {
+        "default": "mdi:sigma"
+      },
+      "rotation": {
+        "default": "mdi:rotate-3d-variant"
+      },
+      "hail": {
+        "default": "mdi:weather-hail"
+      },
+      "wind_gusts": {
+        "default": "mdi:weather-windy"
+      },
+      "distance": {
+        "default": "mdi:flash"
+      },
+      "azimuth": {
+        "default": "mdi:compass-outline"
+      },
+      "forecast": {
+        "default": "mdi:weather-lightning"
+      },
+      "cell_direction": {
+        "default": "mdi:arrow-decision"
+      },
+      "cell_speed": {
+        "default": "mdi:speedometer-medium"
+      },
+      "pass_distance": {
+        "default": "mdi:arrow-expand-horizontal"
+      },
+      "pass_time": {
+        "default": "mdi:clock-fast"
+      },
+      "flash_rate": {
+        "default": "mdi:flash-triangle"
+      },
+      "safe_in": {
+        "default": "mdi:shield-clock"
+      },
+      "lightning_potential": {
+        "default": "mdi:flash-triangle-outline"
+      },
+      "updraft": {
+        "default": "mdi:arrow-up-thick"
+      },
+      "cloud_top": {
+        "default": "mdi:cloud-arrow-up-outline"
+      },
+      "wind_shear_3km": {
+        "default": "mdi:weather-windy"
+      },
+      "hodograph": {
+        "default": "mdi:rotate-right"
+      },
+      "model_agreement": {
+        "default": "mdi:scale-balance"
+      },
+      "meting": {
+        "default": "mdi:thermometer-check"
+      },
+      "bronstatus": {
+        "default": "mdi:server-network"
+      },
+      "ensemble": {
+        "default": "mdi:chart-scatter-plot"
+      }
+    },
+    "binary_sensor": {
+      "nearby": {
+        "default": "mdi:flash-outline",
+        "state": {
+          "on": "mdi:flash-alert"
+        }
+      },
+      "approaching": {
+        "default": "mdi:minus",
+        "state": {
+          "on": "mdi:arrow-down-bold"
+        }
+      },
+      "rain_expected": {
+        "default": "mdi:weather-partly-cloudy",
+        "state": {
+          "on": "mdi:weather-pouring"
+        }
+      },
+      "alert_active": {
+        "default": "mdi:shield-check",
+        "state": {
+          "on": "mdi:alert-decagram"
+        }
+      },
+      "moving": {
+        "default": "mdi:map-marker-check",
+        "state": {
+          "on": "mdi:car-side"
+        }
+      },
+      "shelter": {
+        "default": "mdi:home-outline",
+        "state": {
+          "on": "mdi:home-alert"
+        }
+      }
+    },
+    "switch": {
+      "notifications": {
+        "default": "mdi:bell-off",
+        "state": {
+          "on": "mdi:bell-ring"
+        }
+      }
+    },
+    "image": {
+      "radar": {
+        "default": "mdi:radar"
+      }
+    }
+  },
+  "services": {
+    "test_notification": "mdi:bell-check",
+    "send_briefing": "mdi:text-box-outline"
+  }
+}

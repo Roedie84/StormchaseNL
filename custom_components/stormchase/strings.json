@@ -1,0 +1,387 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Stormchase",
+        "description": "Locatie wordt overgenomen uit Home Assistant: {latitude}, {longitude}. De bliksemsensoren komen uit je bestaande Blitzortung-integratie.",
+        "data": {
+          "distance_sensor": "Afstandssensor",
+          "azimuth_sensor": "Azimutsensor",
+          "counter_sensor": "Tellersensor",
+          "geo_pattern": "Patroon in geo_location entity-id",
+          "warn_distance": "Waarschuwingsafstand",
+          "ring_near": "Binnenste ring",
+          "ring_mid": "Middelste ring",
+          "ring_far": "Buitenste ring",
+          "location_mode": "Locatie",
+          "ring_window": "Tijdvenster voor de ringen",
+          "address_sensor": "Adressensor (optioneel)",
+          "update_interval": "Verversingsinterval",
+          "radar_zoom": "Zoomniveau radar"
+        }
+      },
+      "location": {
+        "title": "Locatie",
+        "description": "Kies waar de weerparameters vandaan moeten komen. Bij een apparaat of persoon verhuist de integratie mee; ontbreekt de GPS-positie, dan valt hij terug op je thuislocatie.",
+        "data": {
+          "zone_entity": "Zone",
+          "tracker_entity": "Te volgen apparaat of persoon",
+          "manual_location": "Coördinaten"
+        }
+      },
+      "notify": {
+        "title": "Meldingen",
+        "description": "Laat de meldingsdiensten leeg om meldingen uit te zetten. Zet het stiltevenster op twee gelijke tijden om altijd te melden. De meldingen zijn later ook via een schakelaar aan en uit te zetten.",
+        "data": {
+          "notify_services": "Meldingsdiensten",
+          "notify_max_distance": "Alleen melden binnen",
+          "notify_on_approach": "Ook melden zodra het onweer nadert",
+          "notify_on_cleared": "Melden als het onweer weggetrokken is",
+          "notify_title": "Titel van de melding",
+          "notify_cooldown": "Wachttijd tussen meldingen",
+          "quiet_from": "Stiltevenster van",
+          "quiet_to": "Stiltevenster tot",
+          "rain_notify": "Ook melden als er regen aankomt",
+          "rain_lead": "Hoeveel minuten vooruit waarschuwen",
+          "rain_threshold": "Vanaf welke intensiteit het regen heet",
+          "wind_notify": "Melden bij harde windstoten",
+          "wind_threshold": "Windstoten vanaf",
+          "only_stationary": "Alleen melden als ik ergens ben, niet onderweg",
+          "stationary_minutes": "Zo lang trager voor weer 'ter plaatse'",
+          "moving_speed": "Onderweg vanaf snelheid",
+          "weather_types": "Melden bij deze weersituaties",
+          "heat_threshold": "Hitte vanaf",
+          "frost_threshold": "Vorst vanaf",
+          "outlook_notify": "Melden als het vooruitzicht opschaalt",
+          "outlook_level": "Melden vanaf",
+          "critical_alerts": "Bij gevaar door de stille modus heen",
+          "dashboard_path": "Pad naar het dashboard voor de knop"
+        }
+      },
+      "alerts": {
+        "title": "Weerwaarschuwingen",
+        "description": "Officiele waarschuwingen via MeteoAlarm, waar onder meer het KNMI aan levert. Op automatisch zoekt de integratie zelf op in welk land je bent, zodat je op reis de juiste waarschuwingen krijgt. Laat de regio leeg voor het hele land, of vul een deel van de regionaam in om te filteren, bijvoorbeeld Gelderland.",
+        "data": {
+          "alert_country": "Land",
+          "alert_region": "Regio (optioneel filter)",
+          "alert_min_level": "Melden vanaf",
+          "alert_notify": "Meldingen sturen bij waarschuwingen"
+        }
+      },
+      "briefing": {
+        "title": "Dagelijks weerbericht",
+        "description": "Een samenvatting van het weer, de verwachting, de neerslag en eventuele waarschuwingen. Zet beide tijden gelijk om er een over te houden.",
+        "data": {
+          "briefing": "Dagelijks weerbericht sturen",
+          "briefing_morning": "Ochtendbericht om",
+          "briefing_afternoon": "Middagbericht om"
+        }
+      }
+    },
+    "error": {
+      "rings_not_ascending": "De ringen moeten oplopend zijn en van elkaar verschillen."
+    },
+    "abort": {
+      "already_configured": "Stormchase is al ingesteld."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Stormchase instellingen",
+        "data": {
+          "distance_sensor": "Afstandssensor",
+          "azimuth_sensor": "Azimutsensor",
+          "counter_sensor": "Tellersensor",
+          "geo_pattern": "Patroon in geo_location entity-id",
+          "warn_distance": "Waarschuwingsafstand",
+          "ring_near": "Binnenste ring",
+          "ring_mid": "Middelste ring",
+          "ring_far": "Buitenste ring",
+          "location_mode": "Locatie",
+          "ring_window": "Tijdvenster voor de ringen",
+          "address_sensor": "Adressensor (optioneel)",
+          "update_interval": "Verversingsinterval",
+          "radar_zoom": "Zoomniveau radar"
+        }
+      },
+      "location": {
+        "title": "Locatie",
+        "description": "Kies waar de weerparameters vandaan moeten komen. Bij een apparaat of persoon verhuist de integratie mee; ontbreekt de GPS-positie, dan valt hij terug op je thuislocatie.",
+        "data": {
+          "zone_entity": "Zone",
+          "tracker_entity": "Te volgen apparaat of persoon",
+          "manual_location": "Coördinaten"
+        }
+      },
+      "notify": {
+        "title": "Meldingen",
+        "description": "Laat de meldingsdiensten leeg om meldingen uit te zetten. Zet het stiltevenster op twee gelijke tijden om altijd te melden. De meldingen zijn later ook via een schakelaar aan en uit te zetten.",
+        "data": {
+          "notify_services": "Meldingsdiensten",
+          "notify_max_distance": "Alleen melden binnen",
+          "notify_on_approach": "Ook melden zodra het onweer nadert",
+          "notify_on_cleared": "Melden als het onweer weggetrokken is",
+          "notify_title": "Titel van de melding",
+          "notify_cooldown": "Wachttijd tussen meldingen",
+          "quiet_from": "Stiltevenster van",
+          "quiet_to": "Stiltevenster tot",
+          "rain_notify": "Ook melden als er regen aankomt",
+          "rain_lead": "Hoeveel minuten vooruit waarschuwen",
+          "rain_threshold": "Vanaf welke intensiteit het regen heet",
+          "wind_notify": "Melden bij harde windstoten",
+          "wind_threshold": "Windstoten vanaf",
+          "only_stationary": "Alleen melden als ik ergens ben, niet onderweg",
+          "stationary_minutes": "Zo lang trager voor weer 'ter plaatse'",
+          "moving_speed": "Onderweg vanaf snelheid",
+          "weather_types": "Melden bij deze weersituaties",
+          "heat_threshold": "Hitte vanaf",
+          "frost_threshold": "Vorst vanaf",
+          "outlook_notify": "Melden als het vooruitzicht opschaalt",
+          "outlook_level": "Melden vanaf",
+          "critical_alerts": "Bij gevaar door de stille modus heen",
+          "dashboard_path": "Pad naar het dashboard voor de knop"
+        }
+      },
+      "alerts": {
+        "title": "Weerwaarschuwingen",
+        "description": "Officiele waarschuwingen via MeteoAlarm, waar onder meer het KNMI aan levert. Op automatisch zoekt de integratie zelf op in welk land je bent, zodat je op reis de juiste waarschuwingen krijgt. Laat de regio leeg voor het hele land, of vul een deel van de regionaam in om te filteren, bijvoorbeeld Gelderland.",
+        "data": {
+          "alert_country": "Land",
+          "alert_region": "Regio (optioneel filter)",
+          "alert_min_level": "Melden vanaf",
+          "alert_notify": "Meldingen sturen bij waarschuwingen"
+        }
+      },
+      "briefing": {
+        "title": "Dagelijks weerbericht",
+        "description": "Een samenvatting van het weer, de verwachting, de neerslag en eventuele waarschuwingen. Zet beide tijden gelijk om er een over te houden.",
+        "data": {
+          "briefing": "Dagelijks weerbericht sturen",
+          "briefing_morning": "Ochtendbericht om",
+          "briefing_afternoon": "Middagbericht om"
+        }
+      }
+    },
+    "error": {
+      "rings_not_ascending": "De ringen moeten oplopend zijn en van elkaar verschillen."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "approach_speed": {
+        "name": "Naderingssnelheid"
+      },
+      "eta": {
+        "name": "Aankomst"
+      },
+      "trend": {
+        "name": "Trend"
+      },
+      "markers": {
+        "name": "Actieve markers"
+      },
+      "cape": {
+        "name": "CAPE"
+      },
+      "cape_peak": {
+        "name": "CAPE piek 12 uur"
+      },
+      "lifted_index": {
+        "name": "Lifted Index"
+      },
+      "cin": {
+        "name": "Convectieve remming"
+      },
+      "chase_potential": {
+        "name": "Chase potentie"
+      },
+      "location": {
+        "name": "Actieve locatie"
+      },
+      "rain_starts": {
+        "name": "Regen begint over"
+      },
+      "rain_intensity": {
+        "name": "Neerslagintensiteit"
+      },
+      "rain_peak": {
+        "name": "Neerslagpiek 2 uur"
+      },
+      "alert_level": {
+        "name": "Waarschuwingsniveau"
+      },
+      "wind_shear_6km": {
+        "name": "Windschering 0-6 km"
+      },
+      "wind_shear_1km": {
+        "name": "Windschering 0-1 km"
+      },
+      "freezing_level": {
+        "name": "Vriesniveau"
+      },
+      "total_totals": {
+        "name": "Total Totals index"
+      },
+      "rotation": {
+        "name": "Rotatiekans"
+      },
+      "hail": {
+        "name": "Hagelkans"
+      },
+      "wind_gusts": {
+        "name": "Windstoten"
+      },
+      "distance": {
+        "name": "Afstand"
+      },
+      "azimuth": {
+        "name": "Azimut"
+      },
+      "forecast": {
+        "name": "Onweersverwachting"
+      },
+      "cell_direction": {
+        "name": "Celrichting"
+      },
+      "cell_speed": {
+        "name": "Celsnelheid"
+      },
+      "pass_distance": {
+        "name": "Passageafstand"
+      },
+      "pass_time": {
+        "name": "Passage over"
+      },
+      "flash_rate": {
+        "name": "Inslagfrequentie"
+      },
+      "safe_in": {
+        "name": "Veilig over"
+      },
+      "lightning_potential": {
+        "name": "Bliksempotentie"
+      },
+      "updraft": {
+        "name": "Opwaartse stroming"
+      },
+      "cloud_top": {
+        "name": "Wolkentop"
+      },
+      "wind_shear_3km": {
+        "name": "Windschering 0-3 km"
+      },
+      "hodograph": {
+        "name": "Draaiing met hoogte"
+      },
+      "model_agreement": {
+        "name": "Modelovereenstemming"
+      },
+      "meting": {
+        "name": "Meting weerstation"
+      },
+      "bronstatus": {
+        "name": "Bronstatus"
+      },
+      "ensemble": {
+        "name": "Onweerskans ensemble"
+      }
+    },
+    "binary_sensor": {
+      "nearby": {
+        "name": "Onweer nabij"
+      },
+      "approaching": {
+        "name": "Onweer nadert"
+      },
+      "rain_expected": {
+        "name": "Regen verwacht"
+      },
+      "alert_active": {
+        "name": "Weerwaarschuwing"
+      },
+      "moving": {
+        "name": "Onderweg"
+      },
+      "shelter": {
+        "name": "Schuilen"
+      }
+    },
+    "switch": {
+      "notifications": {
+        "name": "Meldingen"
+      }
+    },
+    "image": {
+      "radar": {
+        "name": "Radar"
+      }
+    }
+  },
+  "selector": {
+    "location_mode": {
+      "options": {
+        "home": "Thuislocatie van Home Assistant",
+        "zone": "Een zone",
+        "tracker": "Volg een apparaat of persoon",
+        "manual": "Handmatige coördinaten"
+      }
+    },
+    "alert_country": {
+      "options": {
+        "uit": "Uitgeschakeld",
+        "netherlands": "Nederland",
+        "belgium": "Belgie",
+        "germany": "Duitsland",
+        "luxembourg": "Luxemburg",
+        "france": "Frankrijk",
+        "united-kingdom": "Verenigd Koninkrijk",
+        "denmark": "Denemarken",
+        "austria": "Oostenrijk",
+        "switzerland": "Zwitserland",
+        "italy": "Italie",
+        "spain": "Spanje",
+        "portugal": "Portugal",
+        "poland": "Polen",
+        "czechia": "Tsjechie",
+        "norway": "Noorwegen",
+        "sweden": "Zweden",
+        "ireland": "Ierland",
+        "auto": "Automatisch, volgt je locatie"
+      }
+    },
+    "alert_level": {
+      "options": {
+        "geel": "Code geel",
+        "oranje": "Code oranje",
+        "rood": "Code rood"
+      }
+    },
+    "weather_types": {
+      "options": {
+        "sneeuw": "Sneeuw",
+        "ijzel": "IJzel en onderkoelde regen",
+        "mist": "Dichte mist",
+        "hitte": "Hitte",
+        "vorst": "Vorst"
+      }
+    },
+    "outlook_level": {
+      "options": {
+        "onweer": "Kans op onweer",
+        "zwaar": "Kans op zwaar onweer",
+        "noodweer": "Kans op noodweer"
+      }
+    }
+  },
+  "services": {
+    "test_notification": {
+      "name": "Proefmelding sturen",
+      "description": "Stuurt een testbericht naar alle ingestelde meldingsdiensten."
+    },
+    "send_briefing": {
+      "name": "Weerbericht sturen",
+      "description": "Stuurt het dagelijkse weerbericht nu."
+    }
+  }
+}

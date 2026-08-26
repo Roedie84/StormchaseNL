@@ -1,0 +1,19 @@
+{
+  "domain": "stormchase",
+  "name": "Stormchase",
+  "codeowners": [
+    "@Roedie84"
+  ],
+  "config_flow": true,
+  "documentation": "https://github.com/Roedie84/StormchaseNL",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/Roedie84/StormchaseNL/issues",
+  "requirements": [],
+  "version": "0.29.1",
+  "dependencies": [
+    "http",
+    "frontend",
+    "lovelace"
+  ]
+}
