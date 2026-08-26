@@ -19,7 +19,10 @@
           "update_interval": "Verversingsinterval",
           "radar_zoom": "Zoomniveau radar",
           "radar_interval": "Verversing radar",
-          "wolken_op_radar": "Wolken op de radar"
+          "wolken_op_radar": "Wolken op de radar",
+          "wolken_laag": "Wolkenlaag",
+          "radarbron": "Radarbron",
+          "dwd_laag": "Laag van de Duitse weerdienst"
         }
       },
       "location": {
@@ -106,7 +109,10 @@
           "update_interval": "Verversingsinterval",
           "radar_zoom": "Zoomniveau radar",
           "radar_interval": "Verversing radar",
-          "wolken_op_radar": "Wolken op de radar"
+          "wolken_op_radar": "Wolken op de radar",
+          "wolken_laag": "Wolkenlaag",
+          "radarbron": "Radarbron",
+          "dwd_laag": "Laag van de Duitse weerdienst"
         }
       },
       "location": {
@@ -375,6 +381,12 @@
         "onweer": "Kans op onweer",
         "zwaar": "Kans op zwaar onweer",
         "noodweer": "Kans op noodweer"
+      }
+    },
+    "radarbron": {
+      "options": {
+        "rainviewer": "RainViewer (wereldwijd)",
+        "dwd": "Duitse weerdienst (actueler, beperkt gebied)"
       }
     }
   },

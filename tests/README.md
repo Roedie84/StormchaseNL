@@ -20,6 +20,7 @@ scheiding.
 | `test_spreiding.py` | Mediaan, spreiding en modelovereenstemming |
 | `test_verouderd.py` | Terugval op oude gegevens bij een storing |
 | `test_radar.py` | Opbouw van de radar-URL's |
+| `test_wolken.py` | Kaartdienstverzoek en herprojectie van de wolkenlaag |
 | `test_structuur.py` | Controles op de code zelf |
 
 ## Waarom er structuurtests zijn

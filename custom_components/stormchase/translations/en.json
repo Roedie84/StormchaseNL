@@ -19,7 +19,10 @@
           "update_interval": "Update interval",
           "radar_zoom": "Radar zoom level",
           "radar_interval": "Radar refresh",
-          "wolken_op_radar": "Clouds on radar"
+          "wolken_op_radar": "Clouds on radar",
+          "wolken_laag": "Cloud layer",
+          "radarbron": "Radar source",
+          "dwd_laag": "German weather service layer"
         }
       },
       "location": {
@@ -106,7 +109,10 @@
           "update_interval": "Update interval",
           "radar_zoom": "Radar zoom level",
           "radar_interval": "Radar refresh",
-          "wolken_op_radar": "Clouds on radar"
+          "wolken_op_radar": "Clouds on radar",
+          "wolken_laag": "Cloud layer",
+          "radarbron": "Radar source",
+          "dwd_laag": "German weather service layer"
         }
       },
       "location": {
@@ -375,6 +381,12 @@
         "onweer": "Chance of thunderstorms",
         "zwaar": "Chance of severe storms",
         "noodweer": "Chance of extreme weather"
+      }
+    },
+    "radarbron": {
+      "options": {
+        "rainviewer": "RainViewer (worldwide)",
+        "dwd": "German weather service (fresher, limited area)"
       }
     }
   },

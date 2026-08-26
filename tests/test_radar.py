@@ -347,3 +347,39 @@ class TestBeeldlabel:
         from radar import beeldlabel
 
         assert beeldlabel(None, self.NU) == "Tijd onbekend"
+
+
+class TestWolkensterkte:
+    """Infrarood toont alle bewolking, ook hoge sluierbewolking.
+
+    Op volle sterkte legt dat een waas over de hele kaart en zijn
+    plaatsnamen niet meer te lezen.
+    """
+
+    def test_gedempt_maar_zichtbaar(self):
+        from radar import WOLKEN_STERKTE
+
+        assert 0.2 <= WOLKEN_STERKTE <= 0.7
+
+    def test_kaart_blijft_doorschijnen(self):
+        from io import BytesIO
+
+        from PIL import Image
+
+        from radar import WOLKEN_STERKTE
+
+        kaart = Image.new("RGBA", (16, 16), (120, 120, 110, 255))
+        wolk = Image.new("RGBA", (16, 16), (210, 210, 215, 220))
+
+        vol = kaart.copy()
+        vol.paste(wolk, (0, 0), wolk)
+
+        gedempt = kaart.copy()
+        zacht = wolk.copy()
+        zacht.putalpha(
+            zacht.getchannel("A").point(lambda waarde: int(waarde * WOLKEN_STERKTE))
+        )
+        gedempt.paste(zacht, (0, 0), zacht)
+
+        # De gedempte versie ligt dichter bij de kaart eronder
+        assert abs(gedempt.getpixel((8, 8))[0] - 120) < abs(vol.getpixel((8, 8))[0] - 120)

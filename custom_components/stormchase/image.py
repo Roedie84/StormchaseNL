@@ -28,7 +28,13 @@ UITSNEDE = 512
 
 from .const import (
     CONF_RADAR_KLEUR,
+    CONF_DWD_LAAG,
+    CONF_RADARBRON,
     CONF_WOLKEN,
+    CONF_WOLKEN_LAAG,
+    DEFAULT_DWD_LAAG,
+    DEFAULT_RADARBRON,
+    DEFAULT_WOLKEN_LAAG,
     CONF_RADAR_ZOOM,
     DEFAULT_RADAR_KLEUR,
     DEFAULT_RADAR_ZOOM,
@@ -43,9 +49,11 @@ from .radar import (
     pixelpositie,
     beeldlabel,
     radartegel_url,
-    satelliettegel_url,
+    rastergrenzen,
     tegelraster,
 )
+from .const import DWD_WMS_URL
+from .wolken import STERKTE, mercatorrij, wms_url
 from .radarbron import RadarCoordinator
 
 
@@ -155,6 +163,46 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
         "oranje": (255, 149, 40),
         "rood": (255, 71, 51),
     }
+
+    @classmethod
+    def _plak_wolken(cls, doek, inhoud: bytes, raster: dict) -> None:
+        """Leg de bewolking over de kaart."""
+        cls._plak_gebiedsbeeld(doek, inhoud, raster, STERKTE)
+
+    @staticmethod
+    def _plak_gebiedsbeeld(doek, inhoud: bytes, raster: dict, sterkte: float) -> None:
+        """Leg een beeld van een kaartdienst over het doek.
+
+        Zulke diensten leveren een plat beeld op breedtegraad, terwijl het
+        radarbeeld in webmercator staat. Zonder omrekening zou alles
+        tientallen kilometers verkeerd komen te liggen; hier wordt het beeld
+        rij voor rij opnieuw opgebouwd.
+        """
+        from PIL import Image
+
+        try:
+            bron = Image.open(BytesIO(inhoud)).convert("RGBA")
+        except Exception as err:  # noqa: BLE001 - laag mag ontbreken
+            _LOGGER.debug("Beeld van de kaartdienst onbruikbaar: %s", err)
+            return
+
+        afmeting = raster["afmeting"]
+        if bron.size != (afmeting, afmeting):
+            bron = bron.resize((afmeting, afmeting))
+
+        zuid, _, noord, _ = rastergrenzen(raster)
+        recht = Image.new("RGBA", (afmeting, afmeting), (0, 0, 0, 0))
+
+        for rij in range(afmeting):
+            bronrij = int(round(mercatorrij(rij, afmeting, zuid, noord)))
+            bronrij = min(max(bronrij, 0), afmeting - 1)
+            recht.paste(bron.crop((0, bronrij, afmeting, bronrij + 1)), (0, rij))
+
+        if sterkte < 1.0:
+            recht.putalpha(
+                recht.getchannel("A").point(lambda waarde: int(waarde * sterkte))
+            )
+        doek.paste(recht, (0, 0), recht)
 
     @classmethod
     def _teken_cellen(cls, doek, raster: dict, cellen: list) -> None:
@@ -289,8 +337,9 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
     def _stel_samen(
         self,
         kaarten: list,
-        wolken: list,
+        wolken: bytes | None,
         radars: list,
+        dwd_beeld: bytes | None,
         raster: dict,
         inslagen: list,
         cel: list | None,
@@ -306,8 +355,12 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
         afmeting = raster["afmeting"]
         doek = Image.new("RGBA", (afmeting, afmeting), (18, 18, 22, 255))
 
-        def plak(laag):
-            """Leg een set tegels op het doek; een missende tegel is geen ramp."""
+        def plak(laag, sterkte: float = 1.0):
+            """Leg een set tegels op het doek; een missende tegel is geen ramp.
+
+            Met een sterkte onder een wordt de laag doorzichtiger gemaakt, wat
+            nodig is voor de wolken: die bedekken anders de hele kaart.
+            """
             for tegel, inhoud in zip(raster["tegels"], laag):
                 if inhoud is None:
                     continue
@@ -315,6 +368,13 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
                     beeld = Image.open(BytesIO(inhoud)).convert("RGBA")
                 except Exception:  # noqa: BLE001 - beschadigde tegel overslaan
                     continue
+
+                if sterkte < 1.0:
+                    doorzicht = beeld.getchannel("A").point(
+                        lambda waarde: int(waarde * sterkte)
+                    )
+                    beeld.putalpha(doorzicht)
+
                 doek.paste(beeld, (tegel["plak_x"], tegel["plak_y"]), beeld)
 
         # Eerst de kaart, die daarna gedempt wordt. De radar gaat er pas
@@ -327,8 +387,12 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
 
         # Wolken tussen kaart en radar: ze laten zien waar bewolking zit,
         # ook waar nog geen neerslag valt.
-        plak(wolken)
-        plak(radars)
+        if wolken is not None:
+            self._plak_wolken(doek, wolken, raster)
+        if dwd_beeld is not None:
+            self._plak_gebiedsbeeld(doek, dwd_beeld, raster, 1.0)
+        else:
+            plak(radars)
 
         # Cel, inslagen en de eigen positie gaan als laatste over alles heen
         self._teken_cellen(doek, raster, cel)
@@ -355,7 +419,6 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
         """
         gegevens = self.coordinator.data or {}
         frame = gegevens.get("radar")
-        wolkframe = gegevens.get("satelliet") if self._opt(CONF_WOLKEN, True) else None
         if frame is None:
             return None
 
@@ -367,20 +430,46 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
         kaarten = await asyncio.gather(
             *(self._haal_tegel(basiskaart_url(t, zoom)) for t in raster["tegels"])
         )
-        wolken = await asyncio.gather(
-            *(
-                self._haal_tegel(satelliettegel_url(wolkframe, t, zoom))
-                for t in raster["tegels"]
+        wolken = None
+        if self._opt(CONF_WOLKEN, True):
+            wolken = await self._haal_tegel(
+                wms_url(
+                    rastergrenzen(raster),
+                    raster["afmeting"],
+                    raster["afmeting"],
+                    self._opt(CONF_WOLKEN_LAAG, DEFAULT_WOLKEN_LAAG),
+                )
             )
-        )
-        radars = await asyncio.gather(
-            *(
-                self._haal_tegel(radartegel_url(frame, t, zoom, kleur))
-                for t in raster["tegels"]
-            )
-        )
+        # Twee wegen naar hetzelfde beeld: tegels van RainViewer, of een
+        # gebiedsverzoek bij de Duitse weerdienst. Die laatste is actueler
+        # maar houdt op bij de grens en omgeving.
+        via_dwd = self._opt(CONF_RADARBRON, DEFAULT_RADARBRON) == "dwd"
 
-        if not any(kaarten) and not any(radars):
+        radars: list = []
+        dwd_beeld = None
+
+        if via_dwd:
+            dwd_beeld = await self._haal_tegel(
+                wms_url(
+                    rastergrenzen(raster),
+                    raster["afmeting"],
+                    raster["afmeting"],
+                    self._opt(CONF_DWD_LAAG, DEFAULT_DWD_LAAG),
+                    DWD_WMS_URL,
+                )
+            )
+
+        if dwd_beeld is None:
+            radars = list(
+                await asyncio.gather(
+                    *(
+                        self._haal_tegel(radartegel_url(frame, t, zoom, kleur))
+                        for t in raster["tegels"]
+                    )
+                )
+            )
+
+        if not any(kaarten) and not any(radars) and dwd_beeld is None:
             return None
 
         inslagen = (
@@ -391,8 +480,9 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
         return await self.hass.async_add_executor_job(
             self._stel_samen,
             list(kaarten),
-            list(wolken),
+            wolken,
             list(radars),
+            dwd_beeld,
             raster,
             inslagen,
             cellen,

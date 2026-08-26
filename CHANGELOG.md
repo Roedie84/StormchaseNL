@@ -5,6 +5,77 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.35.0] — 2026-08-26
+
+### Toegevoegd
+
+- **Radar van de Duitse weerdienst als alternatieve bron.** Die publiceert
+  zijn radarcompositie als open kaartdienst zonder sleutel, en actueler dan
+  de wereldwijde verzameling van RainViewer. Te kiezen met de instelling
+  Radarbron.
+- Gebruikt dezelfde machinerie als de wolkenlaag: een gebiedsverzoek en
+  dezelfde herprojectie van plat naar webmercator. Dat scheelde bouwwerk en
+  betekent dat beide lagen op dezelfde manier getest zijn.
+- De laag is aan te passen, bijvoorbeeld naar de bliksemdichtheid die
+  diezelfde dienst publiceert.
+- Komt er niets terug van die dienst, dan valt hij terug op RainViewer in
+  plaats van een leeg beeld te tonen.
+
+### Afweging
+
+RainViewer blijft de standaard. De Duitse dienst is actueler maar de dekking
+houdt op bij de landsgrens en de directe omgeving; RainViewer werkt overal.
+Voor jouw omgeving in de Achterhoek en de Eifel zou de Duitse bron beter
+moeten uitpakken, verder weg niet.
+
+### Nog ongetest
+
+Zowel deze laag als de wolkenlaag uit 0.34.0 zijn gebouwd op de catalogus van
+de aanbieder, niet op een geslaagd verzoek. Komt er niets, kijk dan bij
+`sensor.stormchase_bronstatus`.
+
+## [0.34.0] — 2026-08-26
+
+### Gewijzigd
+
+- **De bewolking komt nu van EUMETSAT in plaats van infrarood.** Infrarood
+  meet wolktoptemperatuur: hoge bewolking is ijskoud en steekt scherp af,
+  maar lage en middelhoge bewolking heeft een top die nauwelijks kouder is
+  dan de grond eronder en verdween daardoor vrijwel volledig uit beeld.
+  Precies de bewolking die op een chase-dag telt.
+- Er wordt nu het wolkenmasker van Meteosat gebruikt, dat elk beeldpunt
+  indeelt als helder of bewolkt, ongeacht de hoogte van de wolk.
+- **Met herprojectie.** De kaartdienst levert een plat beeld op
+  breedtegraad, terwijl het radarbeeld in webmercator staat. Zonder
+  omrekening zou de bewolking er tientallen kilometers naast liggen: in het
+  midden van het beeld scheelt dat elf pixels, ongeveer acht kilometer. Het
+  beeld wordt daarom rij voor rij opnieuw opgebouwd.
+- De laag is met een instelling te wisselen, bijvoorbeeld naar
+  `msg_fes:cth` voor wolktophoogte.
+
+### Toegevoegd
+
+- Zestien tests op de grenzen, het verzoek en de herprojectie. Een daarvan
+  bewaakt de volgorde van de hoeken: bij EPSG:4326 komt de breedtegraad
+  eerst, en met de verkeerde volgorde komt er een leeg beeld terug zonder
+  foutmelding.
+
+### Nog open
+
+Een actuelere radar voor Nederland en Duitsland. De Duitse weerdienst
+publiceert die met vijf minuten resolutie, maar of dat als kaartdienst
+bereikbaar is heb ik nog niet nagegaan.
+
+## [0.33.1] — 2026-08-26
+
+### Gewijzigd
+
+- **De wolkenlaag was te dicht.** Infrarood toont alle bewolking, ook hoge
+  sluierbewolking, en dat legde op volle sterkte een grijze waas over de hele
+  kaart waardoor plaatsnamen niet meer te lezen waren. De laag wordt nu op
+  vijfenveertig procent getekend, genoeg om te zien waar bewolking zit zonder
+  de kaart eronder dicht te smeren.
+
 ## [0.33.0] — 2026-08-26
 
 Celtracking zoals op professionele stormkaarten.
@@ -1473,6 +1544,9 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.35.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.35.0
+[0.34.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.34.0
+[0.33.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.33.1
 [0.33.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.33.0
 [0.32.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.32.1
 [0.32.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.32.0

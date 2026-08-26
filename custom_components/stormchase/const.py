@@ -58,6 +58,21 @@ CONF_RADAR_KLEUR = "radar_kleur"
 DEFAULT_RADAR_ZOOM = 7
 DEFAULT_RADAR_KLEUR = 2
 CONF_WOLKEN = "wolken_op_radar"
+CONF_WOLKEN_LAAG = "wolken_laag"
+# Wolkenmasker van Meteosat: deelt elk beeldpunt in als helder of bewolkt,
+# ongeacht de hoogte van de wolk. Infrarood mist juist de lage bewolking.
+DEFAULT_WOLKEN_LAAG = "msg_fes:clm"
+
+# De Duitse weerdienst publiceert zijn radarcompositie als open kaartdienst,
+# zonder sleutel. Actueler dan de wereldwijde verzameling van RainViewer,
+# maar de dekking houdt op bij de landsgrens en de directe omgeving.
+DWD_WMS_URL = "https://maps.dwd.de/geoserver/dwd/ows"
+DEFAULT_DWD_LAAG = "dwd:Niederschlagsradar"
+
+CONF_RADARBRON = "radarbron"
+CONF_DWD_LAAG = "dwd_laag"
+RADARBRONNEN = ["rainviewer", "dwd"]
+DEFAULT_RADARBRON = "rainviewer"
 
 # Het ensemble draait op een eigen subdomein; het gedeelde eindpunt gaf 404
 ENSEMBLE_URL = "https://ensemble-api.open-meteo.com/v1/ensemble"

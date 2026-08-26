@@ -137,6 +137,10 @@ KAART_KLEUR = 0.55
 # om de verplaatsing van een cel te zien zonder dat het een vlek wordt.
 INSLAG_VENSTER = 900
 
+# Infrarood toont alle bewolking, ook hoge sluierbewolking. Op volle sterkte
+# legt dat een waas over de hele kaart en zijn plaatsnamen niet meer te lezen.
+WOLKEN_STERKTE = 0.45
+
 
 def tegelpositie(latitude: float, longitude: float, zoom: int) -> tuple[float, float]:
     """Reken coordinaten om naar een tegelpositie met decimalen.
@@ -271,3 +275,27 @@ def beeldlabel(tijd: int | None, nu: float, verschuiving: int = 0) -> str:
     if ouderdom == 1:
         return f"Radar {uren:02d}:{minuten:02d} \u00b7 1 minuut oud"
     return f"Radar {uren:02d}:{minuten:02d} \u00b7 {ouderdom} minuten oud"
+
+
+def coordinaat_van_tegel(x: float, y: float, zoom: int) -> tuple[float, float]:
+    """De omgekeerde weg: van tegelpositie terug naar coordinaten."""
+    n = 2.0 ** zoom
+    longitude = x / n * 360.0 - 180.0
+    latitude = math.degrees(math.atan(math.sinh(math.pi * (1 - 2 * y / n))))
+    return (latitude, longitude)
+
+
+def rastergrenzen(raster: dict) -> tuple[float, float, float, float]:
+    """De hoeken van het samengestelde beeld, als zuid, west, noord, oost.
+
+    Nodig om een kaartdienst om precies dit gebied te vragen.
+    """
+    zoom = raster["zoom"]
+    breedte = raster["afmeting"] // TEGELMAAT
+
+    noord, west = coordinaat_van_tegel(raster["begin_x"], raster["begin_y"], zoom)
+    zuid, oost = coordinaat_van_tegel(
+        raster["begin_x"] + breedte, raster["begin_y"] + breedte, zoom
+    )
+
+    return (zuid, west, noord, oost)

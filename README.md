@@ -68,7 +68,14 @@ fel wit, ouder dooft uit naar oranje. Daarmee zie je welke kant de activiteit
 op schuift. Je eigen positie is de witte ring in het midden.
 
 Het zoomniveau is instelbaar van 1 tot 7, de verversing van dertig seconden
-tot tien minuten. Radar van RainViewer, kaart van OpenStreetMap.
+tot tien minuten.
+
+Voor de radar zijn er twee bronnen. RainViewer werkt wereldwijd en is de
+standaard. De Duitse weerdienst is actueler maar dekt Duitsland en de directe
+omgeving; die is te kiezen met de instelling Radarbron. Komt er niets terug,
+dan valt hij terug op RainViewer.
+
+Kaart van OpenStreetMap, bewolking van EUMETSAT.
 
 ### Metingen naast voorspellingen
 

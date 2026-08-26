@@ -43,7 +43,10 @@ from .const import (
     CONF_ONLY_STATIONARY,
     CONF_CRITICAL,
     CONF_RADAR_INTERVAL,
+    CONF_DWD_LAAG,
+    CONF_RADARBRON,
     CONF_WOLKEN,
+    CONF_WOLKEN_LAAG,
     CONF_RADAR_ZOOM,
     CONF_DASHBOARD,
     CONF_OUTLOOK_LEVEL,
@@ -91,6 +94,10 @@ from .const import (
     DEFAULT_RING_MID,
     DEFAULT_RING_NEAR,
     DEFAULT_RADAR_INTERVAL,
+    DEFAULT_DWD_LAAG,
+    DEFAULT_RADARBRON,
+    DEFAULT_WOLKEN_LAAG,
+    RADARBRONNEN,
     DEFAULT_RADAR_ZOOM,
     DEFAULT_RING_WINDOW,
     DEFAULT_UPDATE_INTERVAL,
@@ -196,8 +203,26 @@ def _base_schema(hass, defaults: dict[str, Any]) -> vol.Schema:
                 )
             ),
             vol.Required(
+                CONF_RADARBRON,
+                default=defaults.get(CONF_RADARBRON, DEFAULT_RADARBRON),
+            ): selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    options=RADARBRONNEN,
+                    translation_key="radarbron",
+                    mode=selector.SelectSelectorMode.DROPDOWN,
+                )
+            ),
+            vol.Required(
+                CONF_DWD_LAAG,
+                default=defaults.get(CONF_DWD_LAAG, DEFAULT_DWD_LAAG),
+            ): str,
+            vol.Required(
                 CONF_WOLKEN, default=defaults.get(CONF_WOLKEN, True)
             ): selector.BooleanSelector(),
+            vol.Required(
+                CONF_WOLKEN_LAAG,
+                default=defaults.get(CONF_WOLKEN_LAAG, DEFAULT_WOLKEN_LAAG),
+            ): str,
             vol.Required(
                 CONF_RADAR_INTERVAL,
                 default=defaults.get(CONF_RADAR_INTERVAL, DEFAULT_RADAR_INTERVAL),

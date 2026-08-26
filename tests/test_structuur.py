@@ -144,7 +144,7 @@ def test_geen_losse_namen_als_statement():
 
 def test_kernmodules_zijn_vrij_van_home_assistant():
     """Deze modules moeten zonder Home Assistant te testen zijn."""
-    vrij = {"cel.py", "indices.py", "taal.py", "validatie.py", "tijd.py", "spreiding.py", "radar.py"}
+    vrij = {"cel.py", "indices.py", "taal.py", "validatie.py", "tijd.py", "spreiding.py", "radar.py", "wolken.py"}
     fouten = []
 
     for pad, boom in bomen():
