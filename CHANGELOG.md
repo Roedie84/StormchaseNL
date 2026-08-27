@@ -5,6 +5,20 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.35.4] — 2026-08-26
+
+### Gerepareerd
+
+- **De eerste melding van elke soort ging verloren bij het opstarten.** De
+  luisteraars werden pas aangezet nadat alle bronnen hun eerste ronde hadden
+  gedraaid, waardoor de gebeurtenissen uit die ronde in het niets vuurden. In
+  een echte meting werden zo twee officiele waarschuwingen afgevuurd en nul
+  verstuurd, terwijl er code oranje voor onweer gold.
+- Herstart je Home Assistant midden in een onweer, dan miste je daardoor de
+  eerste melding. De luisteraars staan nu aan voordat er iets wordt
+  opgehaald.
+- Een test bewaakt die volgorde.
+
 ## [0.35.3] — 2026-08-26
 
 ### Gerepareerd
@@ -1603,6 +1617,7 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.35.4]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.35.4
 [0.35.3]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.35.3
 [0.35.2]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.35.2
 [0.35.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.35.1

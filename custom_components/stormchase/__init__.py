@@ -89,6 +89,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Regen en onweer delen dezelfde lijst met voorspellingen
     regen.validatie = storm.validatie
 
+    # Luisteraars aanzetten voor de eerste ophaalronde. Anders vuren de
+    # gebeurtenissen uit die ronde in het niets: bij een herstart midden in
+    # een onweer zou je de eerste melding van elke soort mislopen.
+    notifier.start()
+
     await storm.async_config_entry_first_refresh()
     # Open-Meteo mag falen zonder de hele integratie te blokkeren; de
     # bliksemsensoren zijn het belangrijkste deel.
@@ -99,8 +104,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Metingen zijn een aanvulling; falen mag de rest niet blokkeren.
     await meting.async_refresh()
     await radar.async_refresh()
-
-    notifier.start()
 
     gegevens = hass.data.setdefault(DOMAIN, {}).setdefault(entry.entry_id, {})
     gegevens.update(

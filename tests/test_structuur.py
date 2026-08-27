@@ -219,3 +219,21 @@ class TestStrategieBestand:
     def test_registreert_beide_strategieen(self, script):
         for naam in ("ll-strategy-view-stormchase", "ll-strategy-dashboard-stormchase"):
             assert naam in script
+
+
+def test_luisteraars_staan_aan_voor_de_eerste_ronde():
+    """De notifier moet luisteren voordat er gegevens worden opgehaald.
+
+    Stond dat andersom, dan vuurden de gebeurtenissen uit de eerste ronde in
+    het niets. Bij een herstart midden in een onweer betekende dat de eerste
+    melding van elke soort verloren ging: in een echte meting twee
+    waarschuwingen afgevuurd en nul verstuurd.
+    """
+    bron = (BRON / "__init__.py").read_text(encoding="utf-8")
+
+    start = bron.index("notifier.start()")
+    eerste_ronde = bron.index("async_config_entry_first_refresh()")
+
+    assert start < eerste_ronde, (
+        "notifier.start() moet voor de eerste ophaalronde staan"
+    )
