@@ -383,3 +383,37 @@ class TestWolkensterkte:
 
         # De gedempte versie ligt dichter bij de kaart eronder
         assert abs(gedempt.getpixel((8, 8))[0] - 120) < abs(vol.getpixel((8, 8))[0] - 120)
+
+
+class TestZichtbaarheidInslagen:
+    """Inslagen moeten opvallen tegen felle radarkleuren.
+
+    Een oranje stip van drie pixels verdween volledig in het geel en rood
+    van een zware bui eronder.
+    """
+
+    def teken(self, achtergrond):
+        from PIL import Image, ImageDraw
+
+        doek = Image.new("RGBA", (60, 60), (*achtergrond, 255))
+        tekenaar = ImageDraw.Draw(doek, "RGBA")
+        for straal, kleur in (
+            (8, (20, 10, 40, 180)),
+            (6, (255, 255, 60, 255)),
+            (2, (255, 255, 255, 255)),
+        ):
+            tekenaar.ellipse((30 - straal, 30 - straal, 30 + straal, 30 + straal), fill=kleur)
+        return doek
+
+    def test_witte_kern_op_elke_ondergrond(self):
+        for achtergrond in ((250, 240, 60), (230, 60, 40), (40, 44, 40)):
+            doek = self.teken(achtergrond)
+            assert doek.getpixel((30, 30))[:3] == (255, 255, 255)
+
+    def test_donkere_rand_geeft_contrast_op_fel(self):
+        """Juist op geel en rood is de rand nodig."""
+        for achtergrond in ((250, 240, 60), (230, 60, 40)):
+            doek = self.teken(achtergrond)
+            rand = doek.getpixel((30, 23))[:3]
+            contrast = sum(abs(a - b) for a, b in zip(rand, achtergrond))
+            assert contrast > 200

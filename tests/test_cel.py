@@ -228,3 +228,65 @@ class TestPassagegrens:
         from cel import passage
 
         assert passage((30, 0), (50, 0)) is None
+
+
+class TestVoorrand:
+    """Bij een buienlijn ligt het zwaartepunt ver van de voorrand.
+
+    Gemeten geval: dichtstbijzijnde inslag op 4,3 kilometer terwijl het
+    zwaartepunt van dezelfde cel op 53 kilometer lag. De passage meldde toen
+    34 minuten terwijl de bui er al was.
+    """
+
+    def buienlijn(self, stappen=8, snelheid=90):
+        from cel import naar_graden, volg_cellen
+
+        sporen = []
+        cellen = []
+        for stap in range(stappen):
+            t = stap * 60.0
+            punten = []
+            for km in range(4, 100, 4):
+                lat, lon = naar_graden(-km + snelheid * t / 3600, (km - 50) * 0.3, *IK)
+                punten.append((lat, lon))
+            cellen, sporen = volg_cellen(punten, sporen, *IK, t)
+        return cellen[0]
+
+    def test_voorrand_ligt_dichterbij_dan_het_zwaartepunt(self):
+        cel = self.buienlijn()
+        assert cel["rand_afstand"] < cel["afstand"] / 2
+
+    def test_passage_rekent_vanaf_de_voorrand(self):
+        """Anders meldt hij een half uur terwijl de bui er al is."""
+        cel = self.buienlijn()
+        assert cel["passage_over"] < 10
+
+    def test_compacte_bui_verandert_nauwelijks(self):
+        """Bij een kleine cel liggen rand en zwaartepunt dicht bij elkaar."""
+        from cel import naar_graden, volg_cellen
+
+        sporen = []
+        cellen = []
+        for stap in range(8):
+            t = stap * 60.0
+            lat, lon = naar_graden(-30 + 50 * t / 3600, 0, *IK)
+            punten = [(lat + i * 0.01, lon + i * 0.01) for i in range(10)]
+            cellen, sporen = volg_cellen(punten, sporen, *IK, t)
+
+        cel = cellen[0]
+        assert abs(cel["afstand"] - cel["rand_afstand"]) < 10
+
+    def test_sorteren_op_voorrand(self):
+        """Een lange bui met de rand vlakbij komt voor een compacte verderop."""
+        from cel import naar_graden, zoek_cellen
+
+        punten = []
+        # Lange lijn: rand op 10 km, zwaartepunt ver weg
+        for km in range(10, 90, 4):
+            punten.append(naar_graden(-km, 40, *IK))
+        # Compacte bui op 30 km
+        for i in range(5):
+            punten.append(naar_graden(30 + i * 0.5, -40, *IK))
+
+        cellen = zoek_cellen(punten, *IK)
+        assert cellen[0]["rand_afstand"] < cellen[1]["rand_afstand"]

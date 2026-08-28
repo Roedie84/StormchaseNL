@@ -5,6 +5,57 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.37.0] — 2026-08-28
+
+### Gerepareerd
+
+- **De passagetijd rekende vanaf het zwaartepunt van een cel.** Bij een
+  compacte bui werkt dat prima, maar bij een buienlijn ligt het zwaartepunt
+  tientallen kilometers achter de voorrand. In een echte meting stond de
+  dichtstbijzijnde inslag op 4,3 kilometer terwijl dezelfde cel meldde dat de
+  passage over 34 minuten zou zijn.
+- De passage rekent nu vanaf de voorrand: de dichtstbijzijnde inslag die bij
+  die cel hoort. In een nagebouwde buienlijn scheelt dat 26 minuten tegen 1.
+- De beweging blijft van het zwaartepunt komen, want die is stabiel over de
+  tijd; alleen het startpunt van de berekening is verschoven.
+- Cellen worden nu op hun voorrand gesorteerd. Een lange bui waarvan de rand
+  vlakbij ligt is dringender dan een compacte bui waarvan het midden even ver
+  weg is.
+
+### Toegevoegd
+
+- `sensor.stormchase_celrichting` krijgt het attribuut
+  `afstand_tot_voorrand`, naast de bestaande afstand tot het zwaartepunt.
+
+## [0.36.4] — 2026-08-28
+
+### Gewijzigd
+
+- **Blikseminslagen vielen weg tegen de radarkleuren.** Een oranje stip van
+  drie pixels verdwijnt volledig in het geel en rood van een zware bui
+  eronder. De stippen zijn nu groter, krijgen een donkere rand en een witte
+  kern, waardoor ze op elke ondergrond opvallen.
+- Ook oudere inslagen blijven beter zichtbaar; die doofden eerder te ver uit.
+
+### Opmerking
+
+Inslagen verschijnen alleen binnen de radius die je Blitzortung-integratie
+hanteert. Buien verder weg staan wel als neerslag op het beeld, maar zonder
+inslagen erbij.
+
+## [0.36.3] — 2026-08-28
+
+### Gerepareerd
+
+- **Het radarbeeld bleef leeg na een herstart.** Het kreeg pas een tijdstempel
+  bij de eerste verversingsronde, en zonder die stempel weet Home Assistant
+  niet dat er een beeld is. Tot een minuut na het opstarten bleef het vak
+  daardoor grijs. De stempel wordt nu meteen gezet.
+- **Het beeld werd als JPEG aangekondigd terwijl het PNG is.** Dat was de
+  standaardwaarde die ik nooit had overschreven. Browsers weigeren zo'n
+  mismatch en tonen een gebroken afbeelding.
+- Drie tests bewaken beide punten.
+
 ## [0.36.2] — 2026-08-28
 
 ### Gerepareerd
@@ -1678,6 +1729,9 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.37.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.37.0
+[0.36.4]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.36.4
+[0.36.3]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.36.3
 [0.36.2]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.36.2
 [0.36.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.36.1
 [0.36.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.36.0

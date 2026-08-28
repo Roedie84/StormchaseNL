@@ -132,16 +132,30 @@ def zoek_cellen(
         gem_lon = sum(p[1] for p in groep) / len(groep)
         x, y = naar_km(gem_lat, gem_lon, lat0, lon0)
 
+        # Ook de dichtstbijzijnde inslag van deze cel. Bij een buienlijn ligt
+        # het zwaartepunt tientallen kilometers verderop terwijl de voorrand
+        # al boven je hangt; voor de vraag wanneer het je raakt telt die rand.
+        rand = min(
+            groep,
+            key=lambda p: math.hypot(*naar_km(p[0], p[1], lat0, lon0)),
+        )
+        rand_x, rand_y = naar_km(rand[0], rand[1], lat0, lon0)
+
         cellen.append(
             {
                 "latitude": gem_lat,
                 "longitude": gem_lon,
                 "inslagen": len(groep),
                 "afstand": round(math.hypot(x, y), 1),
+                "rand_latitude": rand[0],
+                "rand_longitude": rand[1],
+                "rand_afstand": round(math.hypot(rand_x, rand_y), 1),
             }
         )
 
-    cellen.sort(key=lambda c: c["afstand"])
+    # Op de voorrand sorteren: een lange bui waarvan de rand vlakbij ligt is
+    # dringender dan een compacte bui waarvan het midden even ver weg is.
+    cellen.sort(key=lambda c: c["rand_afstand"])
     return cellen
 
 
@@ -377,7 +391,12 @@ def volg_cellen(
                 gegevens["richting_graden"] = round(graden, 1)
                 gegevens["richting"] = kompasrichting(graden)
 
-                positie = naar_km(cel["latitude"], cel["longitude"], lat0, lon0)
+                # De beweging komt van het zwaartepunt, want dat is stabiel
+                # over de tijd. De passage rekent vanaf de voorrand, want die
+                # bepaalt wanneer het je raakt.
+                positie = naar_km(
+                    cel["rand_latitude"], cel["rand_longitude"], lat0, lon0
+                )
                 uitslag = passage(positie, (vx, vy))
                 if uitslag is not None:
                     gegevens["passage_over"], gegevens["passage_afstand"] = uitslag

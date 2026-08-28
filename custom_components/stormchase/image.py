@@ -80,6 +80,9 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
 
     _attr_has_entity_name = True
     _attr_translation_key = "radar"
+    # Het beeld wordt als PNG samengesteld. Zonder dit kondigt Home Assistant
+    # het als JPEG aan, wat browsers weigeren te tonen.
+    _attr_content_type = "image/png"
 
     def __init__(
         self,
@@ -102,6 +105,9 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
             model="Onweersmonitor",
         )
         self._vorige_url = None
+        # Meteen een tijdstempel, anders weet Home Assistant niet dat er een
+        # beeld is en blijft het vak leeg tot de eerste verversingsronde.
+        self._attr_image_last_updated = dt_util.utcnow()
 
     def _opt(self, sleutel: str, standaard):
         """Instelling ophalen."""
@@ -153,14 +159,26 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
 
             # Van fel wit naar diep oranje naarmate de inslag ouder wordt
             deel = min(ouderdom / INSLAG_VENSTER, 1.0)
-            doorzicht = int(255 - deel * 190)
+            doorzicht = int(255 - deel * 120)
             groen = int(255 - deel * 130)
-            straal = 4 if deel < 0.2 else 3
+            straal = 6 if deel < 0.2 else 5
 
             px, py = positie
+
+            # Een donkere rand eromheen, anders verdwijnt een oranje stip in
+            # het geel en rood van de radar eronder.
+            tekenaar.ellipse(
+                (px - straal - 2, py - straal - 2, px + straal + 2, py + straal + 2),
+                fill=(20, 10, 40, min(doorzicht, 180)),
+            )
             tekenaar.ellipse(
                 (px - straal, py - straal, px + straal, py + straal),
                 fill=(255, groen, 60, doorzicht),
+            )
+            # Witte kern: die blijft op elke ondergrond zichtbaar
+            tekenaar.ellipse(
+                (px - 2, py - 2, px + 2, py + 2),
+                fill=(255, 255, 255, doorzicht),
             )
 
     # Kleur per activiteit, zoals op professionele stormkaarten

@@ -237,3 +237,28 @@ def test_luisteraars_staan_aan_voor_de_eerste_ronde():
     assert start < eerste_ronde, (
         "notifier.start() moet voor de eerste ophaalronde staan"
     )
+
+
+class TestRadarbeeld:
+    """Het beeld moet zich meteen na een herstart aanbieden.
+
+    Twee dingen gingen daar mis: het beeld werd als JPEG aangekondigd
+    terwijl het PNG is, en het kreeg pas een tijdstempel bij de eerste
+    verversingsronde. Samen leverde dat een grijs vak met een gebroken
+    afbeelding op tot een minuut na de start.
+    """
+
+    @pytest.fixture
+    def bron(self):
+        return (BRON / "image.py").read_text(encoding="utf-8")
+
+    def test_kondigt_zich_aan_als_png(self, bron):
+        assert '_attr_content_type = "image/png"' in bron
+
+    def test_tijdstempel_staat_er_meteen(self, bron):
+        """De stempel moet in de constructor gezet worden, niet pas later."""
+        constructor = bron[bron.index("def __init__") : bron.index("def _opt")]
+        assert "_attr_image_last_updated" in constructor
+
+    def test_beeld_wordt_als_png_opgeslagen(self, bron):
+        assert 'format="PNG"' in bron

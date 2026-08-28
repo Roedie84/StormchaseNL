@@ -366,10 +366,14 @@ class StormSensor(CoordinatorEntity[StormCoordinator], SensorEntity):
                 "inslagen_in_cel": cel.get("inslagen"),
                 "aantal_cellen": len(alle) or cel.get("cellen"),
                 "afstand_tot_cel": cel.get("afstand"),
+                # De voorrand bepaalt wanneer het je raakt; het zwaartepunt
+                # ligt bij een buienlijn tientallen kilometers verderop.
+                "afstand_tot_voorrand": cel.get("rand_afstand"),
                 # Alle gevolgde cellen, voor wie er zelf iets mee wil
                 "cellen": [
                     {
                         "afstand": c.get("afstand"),
+                        "voorrand": c.get("rand_afstand"),
                         "richting": c.get("richting"),
                         "snelheid": c.get("snelheid"),
                         "inslagen": c.get("inslagen"),
