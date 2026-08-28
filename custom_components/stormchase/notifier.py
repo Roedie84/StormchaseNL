@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from datetime import datetime, time
 
@@ -17,6 +18,7 @@ from .const import (
     CONF_CRITICAL,
     CONF_DASHBOARD,
     CRITICAL_SOORTEN,
+    WACHT_OP_DIENST,
     DEFAULT_DASHBOARD,
     CONF_ONLY_STATIONARY,
     CONF_OUTLOOK_NOTIFY,
@@ -245,6 +247,25 @@ class StormNotifier:
 
         return tekst
 
+    async def _wacht_op_dienst(self, domein: str, naam: str) -> bool:
+        """Wacht tot een meldingsdienst bestaat.
+
+        De diensten van de companion-app worden door Home Assistant pas
+        aangemaakt nadat die integratie geladen is, en dat kan later zijn dan
+        wij. Meteen opgeven zou betekenen dat je de eerste melding na een
+        herstart misloopt, precies wanneer je die het hardst nodig hebt.
+        """
+        if self.hass.services.has_service(domein, naam):
+            return True
+
+        for _ in range(int(WACHT_OP_DIENST / 2)):
+            await asyncio.sleep(2)
+            if self.hass.services.has_service(domein, naam):
+                _LOGGER.debug("Dienst %s.%s is er nu", domein, naam)
+                return True
+
+        return False
+
     async def _stuur(
         self, bericht: str, soort: str = "nearby", titel: str | None = None
     ) -> None:
@@ -258,6 +279,16 @@ class StormNotifier:
             domein, _, naam = dienst.partition(".")
             if not naam:
                 domein, naam = "notify", dienst
+
+            if not await self._wacht_op_dienst(domein, naam):
+                _LOGGER.warning(
+                    "Meldingsdienst %s.%s bestaat niet; melding niet verstuurd",
+                    domein,
+                    naam,
+                )
+                if self.stats is not None:
+                    self.stats.meldingen_mislukt += 1
+                continue
 
             try:
                 await self.hass.services.async_call(

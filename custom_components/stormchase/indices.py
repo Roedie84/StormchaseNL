@@ -276,6 +276,7 @@ def onweersverwachting(
     hagel: int | None = None,
     lpi: float | None = None,
     updraft: float | None = None,
+    kans: int | None = None,
 ) -> tuple[str, str, int]:
     """Vat de hele situatie samen in een oordeel plus toelichting.
 
@@ -318,9 +319,30 @@ def onweersverwachting(
             RANG_ONWEER,
         )
 
-    # Zonder energie of bij stabiele lucht gebeurt er niets, hoe hard het ook
-    # waait op hoogte.
-    if energie < 150 or stabiel:
+    # Het ensemble telt zwaar mee: dat zijn twintig doorrekeningen van
+    # hetzelfde model, en die zeggen meer over de dag dan een enkele waarde
+    # van dit uur.
+    if kans is not None and kans >= 60 and energie >= 500:
+        if schering_waarde >= 50:
+            return (
+                "Kans op zwaar onweer",
+                f"{kans} procent van de leden geeft onweer, "
+                f"{duiding_cape(cape_piek)}, schering "
+                f"{duiding_schering(schering)}",
+                RANG_ZWAAR,
+            )
+        return (
+            "Kans op onweer",
+            f"{kans} procent van de leden geeft onweer, "
+            f"{duiding_cape(cape_piek)}",
+            RANG_ONWEER,
+        )
+
+    # Zonder energie gebeurt er niets. Stabiele lucht houdt het alleen tegen
+    # als er ook weinig energie is: de stabiliteit geldt voor dit uur,
+    # terwijl de piek over de hele dag gaat. Die twee door elkaar halen liet
+    # een dag met 1300 J/kg en zware schering als rustig gelden.
+    if energie < 150 or (stabiel and energie < 500):
         return (
             "Geen onweer verwacht",
             f"{duiding_cape(cape_piek)}, lucht is {stabiliteit}",

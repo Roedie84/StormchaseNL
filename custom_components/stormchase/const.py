@@ -121,6 +121,11 @@ DEFAULT_DASHBOARD = "/stormchase"
 # Soorten die door de stille modus heen mogen als critical alert is aangezet
 CRITICAL_SOORTEN = {"nearby", "shelter", "alert", "outlook"}
 
+# Hoe lang gewacht wordt op een meldingsdienst die nog niet bestaat. De
+# diensten van de companion-app verschijnen pas als die integratie geladen is,
+# en dat kan later zijn dan wij. Zestig seconden dekt een gewone start ruim.
+WACHT_OP_DIENST = 60
+
 # Configuratie - vooruitzicht
 CONF_OUTLOOK_NOTIFY = "outlook_notify"
 CONF_OUTLOOK_LEVEL = "outlook_level"

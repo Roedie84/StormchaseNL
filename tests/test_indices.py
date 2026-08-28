@@ -111,10 +111,19 @@ class TestKansen:
 
 
 class TestOnweersverwachting:
-    def test_stabiele_lucht_geeft_niets(self):
-        oordeel, _, rang = onweersverwachting(2400, None, 41, 80)
+    def test_stabiele_lucht_bij_weinig_energie_geeft_niets(self):
+        """Stabiel houdt het alleen tegen als er ook weinig energie is.
+
+        De stabiliteit geldt voor dit uur, de CAPE-piek voor de hele dag.
+        Een stabiele ochtend sluit een onweersavond niet uit.
+        """
+        oordeel, _, rang = onweersverwachting(300, None, 41, 80)
         assert oordeel == "Geen onweer verwacht"
         assert rang == 0
+
+    def test_stabiele_lucht_bij_veel_energie_niet(self):
+        _, _, rang = onweersverwachting(2400, None, 41, 80)
+        assert rang > 0
 
     def test_weinig_energie_geeft_niets(self):
         _, _, rang = onweersverwachting(50, None, 55, 80)
@@ -201,3 +210,38 @@ class TestDraairichting:
         from indices import draairichting
 
         assert draairichting([270, None, None]) == "onbekend"
+
+
+class TestEnsembleInHetOordeel:
+    """Twintig doorrekeningen wegen zwaarder dan een enkele waarde.
+
+    Een echte meting gaf "Geen onweer verwacht" terwijl het ensemble op
+    negentig procent stond, de CAPE-piek op 1300 en de schering op 88 km/u.
+    De oorzaak was een Lifted Index van precies nul die als veto werkte.
+    """
+
+    def test_ensemble_haalt_het_oordeel_omhoog(self):
+        _, _, rang = onweersverwachting(1300, 0.0, None, 88.1, kans=90)
+        assert rang == 3
+
+    def test_stabiliteit_van_dit_uur_overrulet_de_piek_niet(self):
+        """De index geldt voor nu, de piek voor de hele dag."""
+        _, _, rang = onweersverwachting(1800, 0.5, 50, 60)
+        assert rang > 0
+
+    def test_weinig_energie_blijft_rustig(self):
+        """Een hoge kans zonder energie levert nog steeds niets op."""
+        _, _, rang = onweersverwachting(200, 2.0, 42, 70, kans=80)
+        assert rang == 0
+
+    def test_lage_kans_blijft_rustig(self):
+        _, _, rang = onweersverwachting(200, 3.0, 40, 20, kans=5)
+        assert rang == 0
+
+    def test_zonder_ensemble_werkt_het_oude_pad(self):
+        _, _, rang = onweersverwachting(1300, 0.0, None, 88)
+        assert rang >= 2
+
+    def test_toelichting_noemt_de_kans(self):
+        _, toelichting, _ = onweersverwachting(1300, 0.0, None, 88.1, kans=90)
+        assert "90 procent" in toelichting

@@ -5,6 +5,67 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.36.2] — 2026-08-28
+
+### Gerepareerd
+
+- **De eerste melding na een herstart kon alsnog mislukken.** Sinds 0.35.4
+  staan de luisteraars aan voordat er iets wordt opgehaald, zodat er geen
+  gebeurtenissen meer verloren gaan. Maar daardoor vuren ze nu zo vroeg dat
+  de meldingsdiensten van de companion-app nog niet bestaan: die worden pas
+  aangemaakt als die integratie geladen is, en dat kan later zijn dan wij.
+  Twee meldingen liepen daarop stuk, allebei op dezelfde seconde vlak na het
+  opstarten.
+- Er wordt nu tot een minuut gewacht tot de dienst verschijnt, en dan alsnog
+  verstuurd. Blijft hij weg, dan komt er een duidelijke regel in het logboek
+  met de naam van de dienst erbij.
+
+### Opmerking
+
+Dit was het spiegelbeeld van de vorige reparatie: eerst gingen de
+gebeurtenissen verloren omdat de luisteraars te laat aanstonden, daarna
+mislukten de meldingen omdat ze te vroeg vertrokken. Wachten lost beide op.
+
+## [0.36.1] — 2026-08-28
+
+Eerste versie die op metingen van een echt onweer is bijgesteld.
+
+### Gewijzigd
+
+- **Passagevoorspellingen stoppen bij drie kwartier vooruit.** De validatie
+  na het onweer van gisteren gaf: tot een kwartier vooruit 0,2 kilometer
+  ernaast, tot drie kwartier 3,8 kilometer, en daarboven 16,9 kilometer met
+  een trefkans van een op drie. Verder dan dat is het geen voorspelling meer.
+- **Aankomstvoorspellingen idem.** Boven de drie kwartier kwam er een van de
+  drie uit, met een afwijking van 47 minuten, ongeveer even groot als de
+  voorspelling zelf. De grens ging van een uur naar drie kwartier.
+
+### Wat er tijdens dat onweer goed ging
+
+De hele meldingsketen draaide voor het eerst volledig: naderend, nabij,
+schuilen, veilig, en weggetrokken, plus drie officiele waarschuwingen en een
+windmelding. Dat de luisteraars sinds 0.35.4 aanstaan voordat er iets wordt
+opgehaald, was daarbij het verschil.
+
+## [0.36.0] — 2026-08-26
+
+### Gerepareerd
+
+- **Een enkele waarde kon het hele oordeel omverwerpen.** Een Lifted Index
+  van precies nul gold als stabiele lucht, en daarmee werd alles daarna
+  genegeerd. In een echte meting leverde dat "Geen onweer verwacht" op
+  terwijl het ensemble op negentig procent stond, de CAPE-piek op 1300 en de
+  schering op 88 km/u.
+- De stabiliteit geldt voor dit uur, de piek voor de hele dag. Die twee door
+  elkaar halen was de fout. Stabiele lucht houdt het oordeel nu alleen tegen
+  als er ook weinig energie is.
+- **Het ensemble weegt nu mee.** Twintig doorrekeningen van hetzelfde model
+  zeggen meer over de dag dan een enkele waarde van dit uur. Bij zestig
+  procent of meer, mits er energie is, komt het oordeel op zijn minst op kans
+  op onweer uit; met zware schering erbij op zwaar onweer.
+- Een hoge kans zonder energie levert nog steeds niets op, en zonder
+  ensemble geldt het oude pad.
+
 ## [0.35.4] — 2026-08-26
 
 ### Gerepareerd
@@ -1617,6 +1678,9 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.36.2]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.36.2
+[0.36.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.36.1
+[0.36.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.36.0
 [0.35.4]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.35.4
 [0.35.3]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.35.3
 [0.35.2]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.35.2

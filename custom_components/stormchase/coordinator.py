@@ -19,7 +19,13 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.util import dt as dt_util
 from homeassistant.util.location import distance as location_distance
 
-from .cel import frequentie, frequentietrend, volg_cel, volg_cellen
+from .cel import (
+    MAX_PASSAGE_MINUTEN,
+    frequentie,
+    frequentietrend,
+    volg_cel,
+    volg_cellen,
+)
 from .spreiding import beoordeel, ensemble as vat_ensemble_samen, samenvatting
 from .tijd import MARGE_KWARTIER, MARGE_UUR, aantal_gevuld, dichtstbijzijnde, op_stempel
 from .validatie import Validatie
@@ -870,11 +876,11 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         eta = None
         if speed is not None and speed > SPEED_DEADZONE and distance:
             eta = int(round(distance / speed * 60))
-            # Alleen vastleggen zolang het nog een voorspelling is. Boven het
-            # uur is het extrapolatie van een afstandstrend over een kwartier;
-            # de eerste meting gaf een aankomst van 86 minuten die er nooit
-            # kwam.
-            if 5 <= eta <= 60 and distance > self.warn_distance:
+            # Alleen vastleggen zolang het nog een voorspelling is. Gemeten
+            # over echte buien: boven de drie kwartier kwam een op de drie
+            # uit, met een afwijking van 47 minuten. Dat is net zo groot als
+            # de voorspelling zelf.
+            if 5 <= eta <= MAX_PASSAGE_MINUTEN and distance > self.warn_distance:
                 self.validatie.voorspel(
                     "aankomst",
                     dt_util.utcnow().timestamp(),
@@ -1371,7 +1377,15 @@ class MeteoCoordinator(VerouderdMixin, LocationMixin, DataUpdateCoordinator[dict
 
         cape_piek = max(cape_window) if cape_window else None
         oordeel, toelichting, rang = onweersverwachting(
-            cape_piek, li, tt, schering_6km, rotatie, hagel, lpi, updraft
+            cape_piek,
+            li,
+            tt,
+            schering_6km,
+            rotatie,
+            hagel,
+            lpi,
+            updraft,
+            kansen.get("kans_onweer"),
         )
         self._controleer_vooruitzicht(oordeel, toelichting, rang)
 

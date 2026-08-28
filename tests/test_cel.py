@@ -72,14 +72,18 @@ class TestBeweging:
         assert cel["snelheid"] == pytest.approx(50, abs=2)
 
     def test_recht_erop_af(self):
-        """Een cel die je middenop raakt passeert op nul kilometer."""
-        cel = spoor_van_beweging(60, 0, 50)
+        """Een cel die je middenop raakt passeert op nul kilometer.
+
+        Op dertig kilometer bij vijftig per uur duurt dat 36 minuten, binnen
+        het venster waarin de voorspelling betrouwbaar is gebleken.
+        """
+        cel = spoor_van_beweging(30, 0, 50)
         assert cel["passage_afstand"] == pytest.approx(0, abs=0.5)
         assert cel["passage_over"] > 0
 
     def test_schampt_erlangs(self):
         """Vijftien kilometer ernaast blijft vijftien kilometer."""
-        cel = spoor_van_beweging(60, 15, 50)
+        cel = spoor_van_beweging(30, 15, 50)
         assert cel["passage_afstand"] == pytest.approx(15, abs=0.5)
 
     def test_trekt_weg(self):
@@ -188,3 +192,39 @@ class TestMeerdereCellen:
         cellen, sporen = volg_cellen([], [], *IK, 0.0)
         assert cellen == []
         assert sporen == []
+
+
+class TestPassagegrens:
+    """Ver vooruit is de passage niet meer betrouwbaar.
+
+    Gemeten over echte buien: tot een kwartier vooruit 0,2 kilometer ernaast,
+    tot drie kwartier 3,8 kilometer, en daarboven 16,9 kilometer met een
+    trefkans van een op drie.
+    """
+
+    def test_binnen_de_grens(self):
+        from cel import passage
+
+        uitkomst = passage((-30, 0), (50, 0))
+        assert uitkomst is not None
+        assert uitkomst[0] == 36
+
+    def test_te_ver_vooruit_geeft_niets(self):
+        from cel import passage
+
+        assert passage((-80, 0), (50, 0)) is None
+
+    def test_grens_is_op_metingen_gebaseerd(self):
+        from cel import MAX_PASSAGE_MINUTEN
+
+        assert MAX_PASSAGE_MINUTEN == 45
+
+    def test_eigen_grens_meegeven(self):
+        from cel import passage
+
+        assert passage((-80, 0), (50, 0), grens=120) is not None
+
+    def test_wegtrekkende_cel_blijft_leeg(self):
+        from cel import passage
+
+        assert passage((30, 0), (50, 0)) is None
