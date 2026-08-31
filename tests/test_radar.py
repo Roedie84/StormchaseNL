@@ -417,3 +417,69 @@ class TestZichtbaarheidInslagen:
             rand = doek.getpixel((30, 23))[:3]
             contrast = sum(abs(a - b) for a, b in zip(rand, achtergrond))
             assert contrast > 200
+
+
+class TestLabelPerBron:
+    """Het label moet de bron beschrijven die je ziet.
+
+    Met de Duitse radar aan bleef het tijdstempel van RainViewer staan, dat
+    op de achtergrond doorloopt. Dan las je "8 minuten oud" bij een beeld dat
+    net was opgehaald.
+    """
+
+    NU = 1788180000
+    UUR = 7200
+
+    def test_duitse_bron_toont_het_ophaalmoment(self):
+        from radar import ophaallabel
+
+        tekst = ophaallabel(self.NU, self.UUR, "DWD-radar")
+        assert "DWD-radar" in tekst
+        assert "opgehaald" in tekst
+
+    def test_rainviewer_toont_de_opnametijd(self):
+        from radar import beeldlabel
+
+        tekst = beeldlabel(self.NU - 420, self.NU, self.UUR)
+        assert "7 minuten oud" in tekst
+
+    def test_de_twee_verschillen(self):
+        """Anders zou de verwarring blijven bestaan."""
+        from radar import beeldlabel, ophaallabel
+
+        assert ophaallabel(self.NU, self.UUR) != beeldlabel(
+            self.NU, self.NU, self.UUR
+        )
+
+
+class TestSpoorsprongen:
+    """Een zwaartepunt kan niet honderd kilometer verspringen.
+
+    Toen een hele buienlijn nog als een cel gold, wandelde het zwaartepunt
+    over die lijn heen en weer. Dat werd als spoor getekend en leverde een
+    lijn van Arnhem tot Venlo op die nergens op sloeg.
+    """
+
+    def test_grens_in_pixels(self):
+        from radar import MAX_SPOORSPRONG_KM, km_naar_pixels, tegelraster
+
+        raster = tegelraster(52.1, 6.64, 7)
+        grens = km_naar_pixels(MAX_SPOORSPRONG_KM, raster)
+
+        # Een normale stap valt er ruim binnen, een onmogelijke ver erbuiten
+        assert km_naar_pixels(2, raster) < grens
+        assert km_naar_pixels(100, raster) > grens
+
+    def test_schaalt_mee_met_het_zoomniveau(self):
+        from radar import km_naar_pixels, tegelraster
+
+        laag = km_naar_pixels(25, tegelraster(52.1, 6.64, 6))
+        hoog = km_naar_pixels(25, tegelraster(52.1, 6.64, 7))
+        assert hoog == pytest.approx(laag * 2)
+
+    def test_grens_is_ruim_boven_een_normale_stap(self):
+        """Bij tien seconden per meting legt zelfs een snelle bui weinig af."""
+        from radar import MAX_SPOORSPRONG_KM
+
+        # 120 km/u gedurende een minuut is 2 km
+        assert MAX_SPOORSPRONG_KM > 2 * 5

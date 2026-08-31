@@ -47,7 +47,10 @@ from .radar import (
     TEGEL_AGENT,
     basiskaart_url,
     pixelpositie,
+    MAX_SPOORSPRONG_KM,
     beeldlabel,
+    km_naar_pixels,
+    ophaallabel,
     radartegel_url,
     rastergrenzen,
     tegelraster,
@@ -280,15 +283,25 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
         if midden is None:
             return
 
-        # Het afgelegde spoor, gedempt zodat het niet met de koers concurreert
-        punten = []
+        # Het afgelegde spoor, gedempt zodat het niet met de koers
+        # concurreert. Sprongen die geen bui kan maken worden overgeslagen:
+        # die komen van een cel die van vorm veranderde, niet van
+        # verplaatsing, en leverden lijnen van honderd kilometer op.
+        grens = km_naar_pixels(MAX_SPOORSPRONG_KM, raster)
+
+        vorige = None
         for lat, lon in cel.get("spoor") or []:
             positie = pixelpositie(lat, lon, raster)
-            if positie is not None:
-                punten.append(positie)
+            if positie is None:
+                vorige = None
+                continue
 
-        if len(punten) >= 2:
-            tekenaar.line(punten, fill=(*kleur, 90), width=2)
+            if vorige is not None:
+                sprong = math.hypot(positie[0] - vorige[0], positie[1] - vorige[1])
+                if sprong <= grens:
+                    tekenaar.line([vorige, positie], fill=(*kleur, 90), width=2)
+
+            vorige = positie
 
         # De ring om de cel, groter naarmate er meer inslagen in zitten
         straal = 8 + min(cel.get("inslagen", 0), 40) / 4
@@ -459,6 +472,22 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
         uitsnede.convert("RGB").save(buffer, format="PNG")
         return buffer.getvalue()
 
+    @staticmethod
+    def _label(frame: dict, via_dwd: bool) -> str:
+        """De tekst linksonder op het beeld.
+
+        Bij de Duitse dienst is de opnametijd onbekend: die levert alleen een
+        plaatje. Het tijdstempel van RainViewer tonen zou dan de verkeerde
+        bron beschrijven.
+        """
+        nu = dt_util.utcnow().timestamp()
+        verschuiving = int(dt_util.now().utcoffset().total_seconds())
+
+        if via_dwd:
+            return ophaallabel(nu, verschuiving, "DWD-radar")
+
+        return beeldlabel(frame.get("tijd"), nu, verschuiving)
+
     async def async_image(self) -> bytes | None:
         """Bouw het radarbeeld met een kaart eronder.
 
@@ -534,11 +563,7 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
             raster,
             inslagen,
             cellen,
-            beeldlabel(
-                frame.get("tijd"),
-                dt_util.utcnow().timestamp(),
-                int(dt_util.now().utcoffset().total_seconds()),
-            ),
+            self._label(frame, dwd_beeld is not None),
         )
 
     def _handle_coordinator_update(self) -> None:

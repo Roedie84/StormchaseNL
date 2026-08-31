@@ -137,6 +137,11 @@ KAART_KLEUR = 0.55
 # om de verplaatsing van een cel te zien zonder dat het een vlek wordt.
 INSLAG_VENSTER = 900
 
+# Een zwaartepunt kan tussen twee metingen niet verder verspringen dan dit.
+# Gebeurt dat toch, dan is het geen verplaatsing maar een cel die van vorm
+# veranderde. Zulke sprongen worden niet als spoor getekend.
+MAX_SPOORSPRONG_KM = 25
+
 # Infrarood toont alle bewolking, ook hoge sluierbewolking. Op volle sterkte
 # legt dat een waas over de hele kaart en zijn plaatsnamen niet meer te lezen.
 WOLKEN_STERKTE = 0.45
@@ -241,6 +246,13 @@ def pixelpositie(
     return (px, py)
 
 
+def km_naar_pixels(km: float, raster: dict) -> float:
+    """Hoeveel pixels een afstand beslaat op dit zoomniveau."""
+    n = 2.0 ** raster["zoom"]
+    km_per_tegel = 40075.0 / n
+    return km / km_per_tegel * TEGELMAAT
+
+
 def naar_pixels_per_uur(snelheid_kmh: float, raster: dict) -> float:
     """Hoeveel pixels een cel in een uur aflegt op dit zoomniveau.
 
@@ -252,6 +264,18 @@ def naar_pixels_per_uur(snelheid_kmh: float, raster: dict) -> float:
     km_per_tegel = 40075.0 / n
 
     return snelheid_kmh / km_per_tegel * TEGELMAAT
+
+
+def ophaallabel(nu: float, verschuiving: int = 0, bron: str = "Radar") -> str:
+    """Tekst voor een bron die geen opnametijd meegeeft.
+
+    De kaartdienst van een weerdienst levert alleen een plaatje, zonder te
+    zeggen wanneer het gemaakt is. Dan is het ophaalmoment het enige eerlijke
+    dat we kunnen tonen, met de bron erbij zodat duidelijk is wat het betekent.
+    """
+    uren = int((nu + verschuiving) // 3600 % 24)
+    minuten = int((nu + verschuiving) // 60 % 60)
+    return f"{bron} {uren:02d}:{minuten:02d} \u00b7 zojuist opgehaald"
 
 
 def beeldlabel(tijd: int | None, nu: float, verschuiving: int = 0) -> str:

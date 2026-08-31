@@ -5,6 +5,36 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.37.3] — 2026-08-31
+
+### Gerepareerd
+
+- **Sporen met onmogelijke sprongen werden getekend.** Het spoor is de reeks
+  zwaartepunten waar een cel geweest is. Toen een hele buienlijn nog als een
+  cel gold, wandelde dat zwaartepunt over honderd kilometer heen en weer, en
+  die geschiedenis bleef als lijn op de kaart staan, van Arnhem tot voorbij
+  Venlo.
+- Verspringt een zwaartepunt meer dan vijfentwintig kilometer tussen twee
+  metingen, dan is dat geen verplaatsing maar een cel die van vorm
+  veranderde. Zulke stukken worden niet meer getekend; de rest van het spoor
+  blijft staan.
+- Bij tien seconden per meting legt zelfs een bui van 120 km/u maar een paar
+  honderd meter af, dus die grens ligt ruim boven wat normaal is.
+
+## [0.37.2] — 2026-08-31
+
+### Gerepareerd
+
+- **Het tijdstempel beschreef de verkeerde bron.** Met de Duitse radar
+  ingesteld bleef het label het opnametijdstip van RainViewer tonen, want dat
+  overzicht loopt op de achtergrond gewoon door. Je las dan "8 minuten oud"
+  bij een beeld dat net was opgehaald.
+- Bij de Duitse dienst staat er nu "DWD-radar 14:40 · zojuist opgehaald".
+  Die dienst levert alleen een plaatje zonder opnametijd, dus het
+  ophaalmoment is het enige dat eerlijk te tonen valt.
+- Bij RainViewer blijft het opnametijdstip met de ouderdom staan, want dat
+  weten we daar wel.
+
 ## [0.37.1] — 2026-08-31
 
 ### Gerepareerd
@@ -1752,6 +1782,8 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.37.3]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.37.3
+[0.37.2]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.37.2
 [0.37.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.37.1
 [0.37.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.37.0
 [0.36.4]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.36.4
