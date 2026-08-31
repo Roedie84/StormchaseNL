@@ -253,8 +253,14 @@ class TestVoorrand:
         return cellen[0]
 
     def test_voorrand_ligt_dichterbij_dan_het_zwaartepunt(self):
+        """Ook binnen een enkele cel scheelt de rand met het midden.
+
+        Sinds buienlijnen worden opgeknipt is dat verschil kleiner, maar het
+        blijft bestaan: een cel van veertig kilometer heeft een rand die
+        merkbaar dichterbij ligt dan zijn zwaartepunt.
+        """
         cel = self.buienlijn()
-        assert cel["rand_afstand"] < cel["afstand"] / 2
+        assert cel["rand_afstand"] < cel["afstand"]
 
     def test_passage_rekent_vanaf_de_voorrand(self):
         """Anders meldt hij een half uur terwijl de bui er al is."""
@@ -290,3 +296,54 @@ class TestVoorrand:
 
         cellen = zoek_cellen(punten, *IK)
         assert cellen[0]["rand_afstand"] < cellen[1]["rand_afstand"]
+
+
+class TestBuienlijnOpknippen:
+    """Een buienlijn is geen cel.
+
+    Het zwaartepunt van een lange lijn schuift heen en weer naarmate er
+    inslagen bijkomen en afvallen, en die verschuiving werd als beweging
+    gelezen. Een lijn van Arnhem tot Duisburg leverde zo een koers pal naar
+    het zuiden op, terwijl de buien naar het oosten trokken.
+    """
+
+    def lijn(self, lengte=50, stap=2):
+        from cel import naar_graden
+
+        return [naar_graden(-40 + i * stap, 60 - i * stap, *IK) for i in range(lengte)]
+
+    def test_lange_lijn_wordt_opgeknipt(self):
+        from cel import zoek_cellen
+
+        assert len(zoek_cellen(self.lijn(), *IK)) > 3
+
+    def test_compacte_bui_blijft_een_cel(self):
+        from cel import naar_graden, zoek_cellen
+
+        compact = [naar_graden(-30 + i * 0.3, 5 + i * 0.3, *IK) for i in range(20)]
+        assert len(zoek_cellen(compact, *IK)) == 1
+
+    def test_omvang_wordt_goed_gemeten(self):
+        from cel import MAX_CELGROOTTE_KM, _omvang
+
+        assert _omvang(self.lijn(), *IK) > MAX_CELGROOTTE_KM
+
+    def test_koers_wijst_de_goede_kant_op(self):
+        """Na het opknippen volgt elk stuk de werkelijke verplaatsing."""
+        from cel import naar_graden, volg_cellen
+
+        sporen = []
+        cellen = []
+        for stap in range(10):
+            t = stap * 60.0
+            punten = [
+                naar_graden(-50 + i * 2 + 60 * t / 3600, 50 - i * 2.5, *IK)
+                for i in range(40)
+            ]
+            cellen, sporen = volg_cellen(punten, sporen, *IK, t)
+
+        richtingen = {c["richting"] for c in cellen if c["richting"]}
+
+        # Oostwaarts, dus geen enkele cel mag naar het zuiden of westen wijzen
+        assert richtingen
+        assert not richtingen & {"Z", "ZW", "W", "ZZW", "WZW"}

@@ -23,6 +23,13 @@ RASTER = 0.25
 # cel; dan is er kennelijk een andere bui dichterbij gekomen.
 CONTINUITEIT_KM = 40.0
 
+# Groter dan dit is het geen cel meer maar een buienlijn. Het zwaartepunt van
+# zo'n lijn schuift heen en weer naarmate er inslagen bijkomen en afvallen,
+# en die verschuiving zou als beweging worden gelezen: een lijn van Arnhem
+# tot Duisburg leverde zo een koers pal naar het zuiden op, terwijl de buien
+# naar het oosten trokken. Zulke groepen worden opgeknipt.
+MAX_CELGROOTTE_KM = 60.0
+
 # Onder deze snelheid noemen we een cel stilstaand en heeft een passagetijd
 # geen betekenis.
 MIN_CELSNELHEID = 5.0
@@ -128,35 +135,64 @@ def zoek_cellen(
                     if buur not in bezocht and buur in vakjes:
                         wachtrij.append(buur)
 
-        gem_lat = sum(p[0] for p in groep) / len(groep)
-        gem_lon = sum(p[1] for p in groep) / len(groep)
-        x, y = naar_km(gem_lat, gem_lon, lat0, lon0)
-
-        # Ook de dichtstbijzijnde inslag van deze cel. Bij een buienlijn ligt
-        # het zwaartepunt tientallen kilometers verderop terwijl de voorrand
-        # al boven je hangt; voor de vraag wanneer het je raakt telt die rand.
-        rand = min(
-            groep,
-            key=lambda p: math.hypot(*naar_km(p[0], p[1], lat0, lon0)),
-        )
-        rand_x, rand_y = naar_km(rand[0], rand[1], lat0, lon0)
-
-        cellen.append(
-            {
-                "latitude": gem_lat,
-                "longitude": gem_lon,
-                "inslagen": len(groep),
-                "afstand": round(math.hypot(x, y), 1),
-                "rand_latitude": rand[0],
-                "rand_longitude": rand[1],
-                "rand_afstand": round(math.hypot(rand_x, rand_y), 1),
-            }
-        )
+        for deel in _knip_op(groep, lat0, lon0):
+            cellen.append(_beschrijf(deel, lat0, lon0))
 
     # Op de voorrand sorteren: een lange bui waarvan de rand vlakbij ligt is
     # dringender dan een compacte bui waarvan het midden even ver weg is.
     cellen.sort(key=lambda c: c["rand_afstand"])
     return cellen
+
+
+def _omvang(groep: list[tuple[float, float]], lat0: float, lon0: float) -> float:
+    """Hoe ver liggen de buitenste inslagen van deze groep uit elkaar?"""
+    punten = [naar_km(lat, lon, lat0, lon0) for lat, lon in groep]
+    breed = max(p[0] for p in punten) - min(p[0] for p in punten)
+    hoog = max(p[1] for p in punten) - min(p[1] for p in punten)
+    return math.hypot(breed, hoog)
+
+
+def _knip_op(
+    groep: list[tuple[float, float]], lat0: float, lon0: float
+) -> list[list[tuple[float, float]]]:
+    """Knip een te grote groep op in losse rastervakjes.
+
+    Buurvakjes samenvoegen werkt goed voor een enkele bui, maar plakt een
+    hele buienlijn tot een cel aan elkaar. Is de groep te groot, dan telt
+    elk vakje weer als eigen cel, zodat het zwaartepunt van elk stuk wel met
+    de bui meebeweegt.
+    """
+    if _omvang(groep, lat0, lon0) <= MAX_CELGROOTTE_KM:
+        return [groep]
+
+    losse: dict[tuple[int, int], list[tuple[float, float]]] = {}
+    for lat, lon in groep:
+        losse.setdefault((int(lat / RASTER), int(lon / RASTER)), []).append((lat, lon))
+
+    return list(losse.values())
+
+
+def _beschrijf(groep: list[tuple[float, float]], lat0: float, lon0: float) -> dict:
+    """Zet een groep inslagen om naar de gegevens van een cel."""
+    gem_lat = sum(p[0] for p in groep) / len(groep)
+    gem_lon = sum(p[1] for p in groep) / len(groep)
+    x, y = naar_km(gem_lat, gem_lon, lat0, lon0)
+
+    # Ook de dichtstbijzijnde inslag van deze cel. Bij een buienlijn ligt het
+    # zwaartepunt tientallen kilometers verderop terwijl de voorrand al boven
+    # je hangt; voor de vraag wanneer het je raakt telt die rand.
+    rand = min(groep, key=lambda p: math.hypot(*naar_km(p[0], p[1], lat0, lon0)))
+    rand_x, rand_y = naar_km(rand[0], rand[1], lat0, lon0)
+
+    return {
+        "latitude": gem_lat,
+        "longitude": gem_lon,
+        "inslagen": len(groep),
+        "afstand": round(math.hypot(x, y), 1),
+        "rand_latitude": rand[0],
+        "rand_longitude": rand[1],
+        "rand_afstand": round(math.hypot(rand_x, rand_y), 1),
+    }
 
 
 def beweging_van_reeks(

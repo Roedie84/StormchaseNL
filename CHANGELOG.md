@@ -5,6 +5,29 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.37.1] — 2026-08-31
+
+### Gerepareerd
+
+- **Een buienlijn werd als een enkele cel behandeld, met een koers de
+  verkeerde kant op.** Buurvakjes werden aan elkaar geplakt, waardoor
+  inslagen van Arnhem tot Duisburg tot een cel van honderdvijftig kilometer
+  samensmolten. Het zwaartepunt daarvan schuift heen en weer naarmate er
+  inslagen bijkomen en afvallen, en die verschuiving werd als beweging
+  gelezen: de koerslijn wees pal naar het zuiden terwijl de buien naar het
+  oosten trokken.
+- Groepen groter dan zestig kilometer worden nu opgeknipt in losse stukken,
+  zodat elk stuk met zijn eigen bui meebeweegt. Een compacte bui blijft een
+  cel.
+- In een nagebouwde lijn die naar het oosten trekt wijzen alle stukken nu
+  naar oost of noordoost, waar het eerder zuid werd.
+
+### Beperking
+
+De snelheden van opgeknipte stukken variëren nog: in dezelfde proef 48 tot 84
+km/u bij een werkelijke 60. Dat komt doordat deelcellen inslagen winnen en
+verliezen op de rastergrenzen. De richting klopt, de snelheid is een schatting.
+
 ## [0.37.0] — 2026-08-28
 
 ### Gerepareerd
@@ -1729,6 +1752,7 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.37.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.37.1
 [0.37.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.37.0
 [0.36.4]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.36.4
 [0.36.3]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.36.3
