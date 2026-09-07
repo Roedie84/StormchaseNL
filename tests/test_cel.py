@@ -347,3 +347,46 @@ class TestBuienlijnOpknippen:
         # Oostwaarts, dus geen enkele cel mag naar het zuiden of westen wijzen
         assert richtingen
         assert not richtingen & {"Z", "ZW", "W", "ZZW", "WZW"}
+
+
+class TestPassageAfstandKlopt:
+    """Tijd en afstand komen van verschillende punten.
+
+    De voorrand is per definitie de inslag die het dichtst bij je ligt. Die
+    projecteren leverde dertien keer op rij "gaat recht over je heen" op,
+    terwijl de bui in werkelijkheid op negentien kilometer bleef. Sindsdien
+    komt de tijd van de voorrand en de afstand van het zwaartepunt.
+    """
+
+    def langslopende_bui(self, zijdelings=20):
+        from cel import naar_graden, volg_cellen
+
+        sporen = []
+        cellen = []
+        for stap in range(10):
+            t = stap * 60.0
+            punten = [
+                naar_graden(-40 + i * 1.5 + 60 * t / 3600, zijdelings + i * 0.5, *IK)
+                for i in range(12)
+            ]
+            cellen, sporen = volg_cellen(punten, sporen, *IK, t)
+        return cellen[0]
+
+    def test_langs_trekkende_bui_meldt_geen_voltreffer(self):
+        cel = self.langslopende_bui(zijdelings=20)
+        assert cel["passage_afstand"] > 10
+
+    def test_afstand_hoort_bij_de_werkelijke_baan(self):
+        cel = self.langslopende_bui(zijdelings=20)
+        assert 15 < cel["passage_afstand"] < 35
+
+    def test_verder_langs_geeft_grotere_afstand(self):
+        dichtbij = self.langslopende_bui(zijdelings=10)
+        verder = self.langslopende_bui(zijdelings=40)
+        assert verder["passage_afstand"] > dichtbij["passage_afstand"]
+
+    def test_tijd_komt_nog_van_de_voorrand(self):
+        """Die vraag is anders: wanneer bereikt het eerste stuk je."""
+        cel = self.langslopende_bui()
+        assert cel["passage_over"] is not None
+        assert cel["passage_over"] < 45

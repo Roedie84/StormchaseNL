@@ -427,15 +427,27 @@ def volg_cellen(
                 gegevens["richting_graden"] = round(graden, 1)
                 gegevens["richting"] = kompasrichting(graden)
 
-                # De beweging komt van het zwaartepunt, want dat is stabiel
-                # over de tijd. De passage rekent vanaf de voorrand, want die
-                # bepaalt wanneer het je raakt.
-                positie = naar_km(
+                # Tijd en afstand komen van verschillende punten, want ze
+                # beantwoorden verschillende vragen.
+                #
+                # Wanneer begint het: bij de voorrand, het eerste stuk dat je
+                # bereikt. Hoe dichtbij komt het: bij het zwaartepunt, want
+                # daar zit de bui. De voorrand is per definitie de inslag die
+                # het dichtst bij je ligt, en die projecteren leverde dertien
+                # keer op rij "gaat recht over je heen" op terwijl de bui in
+                # werkelijkheid op negentien kilometer bleef.
+                rand = naar_km(
                     cel["rand_latitude"], cel["rand_longitude"], lat0, lon0
                 )
-                uitslag = passage(positie, (vx, vy))
-                if uitslag is not None:
-                    gegevens["passage_over"], gegevens["passage_afstand"] = uitslag
+                midden = naar_km(cel["latitude"], cel["longitude"], lat0, lon0)
+
+                wanneer = passage(rand, (vx, vy))
+                hoe_dichtbij = passage(midden, (vx, vy))
+
+                if wanneer is not None:
+                    gegevens["passage_over"] = wanneer[0]
+                if hoe_dichtbij is not None:
+                    gegevens["passage_afstand"] = hoe_dichtbij[1]
 
         uitkomst.append(gegevens)
 

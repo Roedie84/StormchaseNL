@@ -5,6 +5,30 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.38.0] — 2026-08-31
+
+### Gerepareerd
+
+- **De passageafstand had een systematische afwijking, door mijn eigen
+  wijziging van twee versies terug.** Sinds 0.37.0 werd die berekend vanaf de
+  voorrand van een cel, en de voorrand is per definitie de inslag die het
+  dichtst bij je ligt. Die projecteren levert bijna altijd "gaat recht over je
+  heen" op: dertien voorspellingen op rij gaven nul komma iets kilometer,
+  terwijl de bui in werkelijkheid op ongeveer negentien kilometer bleef.
+- Tijd en afstand komen nu van verschillende punten, want het zijn
+  verschillende vragen. Wanneer begint het: bij de voorrand, het eerste stuk
+  dat je bereikt. Hoe dichtbij komt het: bij het zwaartepunt, want daar zit
+  de bui.
+- Een nagebouwde bui die op twintig kilometer langs trekt meldt nu 22,7
+  kilometer in plaats van bijna nul.
+
+### Over de eerdere conclusie
+
+In 0.36.1 stelde ik de grenzen bij op een gemeten afwijking van 0,2 kilometer
+voor voorspellingen tot een kwartier vooruit. Dat was een enkele meting.
+Inmiddels zijn het er dertien en komt hetzelfde getal op 18,5 kilometer uit,
+ook bij de kortste horizon. Die conclusie was dus te vroeg getrokken.
+
 ## [0.37.3] — 2026-08-31
 
 ### Gerepareerd
@@ -1782,6 +1806,7 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.38.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.38.0
 [0.37.3]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.37.3
 [0.37.2]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.37.2
 [0.37.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.37.1
