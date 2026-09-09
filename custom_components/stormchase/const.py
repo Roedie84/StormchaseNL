@@ -121,6 +121,13 @@ DEFAULT_DASHBOARD = "/stormchase"
 # Soorten die door de stille modus heen mogen als critical alert is aangezet
 CRITICAL_SOORTEN = {"nearby", "shelter", "alert", "outlook"}
 
+# Vanaf welke afwijking het meetpunt van Blitzortung ertoe doet. Eerder stond
+# dit op vijf kilometer, wat een melding opleverde zodra dat punt in een
+# buurdorp lag: bij een bui op zestig kilometer verandert dertien kilometer
+# verschil weinig aan de vraag of je moet uitkijken. Onder deze grens valt het
+# binnen de onnauwkeurigheid van de bliksemlokalisatie zelf.
+MAX_AFWIJKING_KM = 25
+
 # Hoe lang gewacht wordt op een meldingsdienst die nog niet bestaat. De
 # diensten van de companion-app verschijnen pas als die integratie geladen is,
 # en dat kan later zijn dan wij. Zestig seconden dekt een gewone start ruim.

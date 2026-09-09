@@ -262,3 +262,18 @@ class TestRadarbeeld:
 
     def test_beeld_wordt_als_png_opgeslagen(self, bron):
         assert 'format="PNG"' in bron
+
+
+def test_afwijkingsdrempel_is_praktisch_gekozen():
+    """De melding over het meetpunt van Blitzortung moet ergens op slaan.
+
+    Op vijf kilometer verscheen hij zodra dat punt in een buurdorp lag: bij
+    een bui op zestig kilometer verandert dertien kilometer verschil weinig
+    aan de vraag of je moet uitkijken.
+    """
+    bron = (BRON / "const.py").read_text(encoding="utf-8")
+    strategie = (BRON / "www" / "stormchase-strategy.js").read_text(encoding="utf-8")
+
+    assert "MAX_AFWIJKING_KM = 25" in bron
+    # Het dashboard hanteert dezelfde grens
+    assert "afwijking > 25" in strategie

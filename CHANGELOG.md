@@ -5,6 +5,27 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.38.1] — 2026-09-08
+
+### Gewijzigd
+
+- **De melding over het meetpunt van Blitzortung was te gevoelig.** Die
+  verscheen vanaf vijf kilometer verschil, wat betekende dat hij thuis
+  permanent aanstond zodra dat punt in een buurdorp lag. Bij een bui op
+  zestig kilometer verandert dertien kilometer verschuiving weinig aan de
+  vraag of je moet uitkijken.
+- De grens ligt nu op vijfentwintig kilometer, zowel in de sensor als op het
+  dashboard. Daaronder valt het binnen de onnauwkeurigheid van de
+  bliksemlokalisatie zelf.
+- De tekst is korter, zodat hij niet meer wordt afgekapt op de tegel.
+
+### Waarom hij juist bij rustig weer verscheen
+
+Zodra er inslagen binnen bereik zijn, worden de afstanden zelf herberekend
+vanaf je eigen positie en is het meetpunt van Blitzortung niet meer van
+belang. De melding kon dus alleen opduiken op momenten dat er niets aan de
+hand was.
+
 ## [0.38.0] — 2026-08-31
 
 ### Gerepareerd
@@ -1806,6 +1827,7 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.38.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.38.1
 [0.38.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.38.0
 [0.37.3]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.37.3
 [0.37.2]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.37.2

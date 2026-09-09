@@ -18,7 +18,7 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN
+from .const import DOMAIN, MAX_AFWIJKING_KM
 from .coordinator import MeteoCoordinator, StormCoordinator, StormData
 from .meting import MetingCoordinator
 from .alerts import AlertCoordinator
@@ -611,15 +611,17 @@ class LocationSensor(CoordinatorEntity[StormCoordinator], SensorEntity):
             uit["afwijking_km"] = data.afwijking_km
 
             # Alleen waarschuwen als we het niet zelf kunnen rechttrekken
+            # Alleen melden als het praktisch uitmaakt: een groot verschil,
+            # en alleen wanneer we niet zelf herberekenen. Bij een bui ver weg
+            # weegt een paar kilometer verschuiving nauwelijks.
             if (
                 data.afwijking_km is not None
-                and data.afwijking_km > 5
+                and data.afwijking_km > MAX_AFWIJKING_KM
                 and data.afstand_bron != "herberekend"
             ):
                 uit["let_op"] = (
-                    f"Blitzortung meet {data.afwijking_km} km verderop. "
-                    "Kies daar dezelfde locatiebron, anders horen de "
-                    "bliksemafstanden niet bij dit weerbeeld."
+                    f"Blitzortung meet {data.afwijking_km:.0f} km verderop; "
+                    "afstanden kloppen dan niet bij dit weerbeeld."
                 )
         else:
             uit["blitzortung_meet_vanaf"] = "niet gevonden"

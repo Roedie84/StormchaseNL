@@ -526,7 +526,7 @@ class StormchaseStrategy {
     const afwijking = Number(locatieState?.attributes?.afwijking_km);
     const herberekend =
       locatieState?.attributes?.afstand_via === "herberekend";
-    if (Number.isFinite(afwijking) && afwijking > 5 && !herberekend) {
+    if (Number.isFinite(afwijking) && afwijking > 25 && !herberekend) {
       cards.push(
         tegel({
           icon: "mdi:map-marker-alert",
