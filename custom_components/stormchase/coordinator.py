@@ -879,8 +879,19 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         speed = self._speed_from_history()
         trend = self._trend_from_speed(speed)
 
+        # Een aankomsttijd hoort alleen te bestaan zolang het onweer nog
+        # onderweg is. Zit het al binnen de waarschuwingsafstand, dan is het
+        # er: de afstand tot de dichtstbijzijnde inslag springt dan heen en
+        # weer en levert een trage naderingssnelheid op, waardoor er "hier
+        # over 45 minuten" stond bij inslagen op zeven kilometer en negen-
+        # entwintig per minuut. Die voorspelling kwam nul van de drie keer uit.
         eta = None
-        if speed is not None and speed > SPEED_DEADZONE and distance:
+        if (
+            speed is not None
+            and speed > SPEED_DEADZONE
+            and distance
+            and distance > self.warn_distance
+        ):
             eta = int(round(distance / speed * 60))
             # Alleen vastleggen zolang het nog een voorspelling is. Gemeten
             # over echte buien: boven de drie kwartier kwam een op de drie

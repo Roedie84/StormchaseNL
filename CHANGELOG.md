@@ -5,6 +5,25 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.39.1] — 2026-09-16
+
+### Gerepareerd
+
+- **Er stond een aankomsttijd terwijl het onweer er al was.** Bij inslagen op
+  7,5 kilometer en negenentwintig per minuut meldde de banner "hier over 45
+  minuten". Dat komt doordat de naderingssnelheid uit een regressie over de
+  afstand tot de dichtstbijzijnde inslag komt: hangt de bui boven je, dan
+  springt die afstand heen en weer tussen zeven en negen kilometer en rolt er
+  een snelheid van tien kilometer per uur uit.
+- Een aankomsttijd bestaat nu alleen zolang het onweer buiten de
+  waarschuwingsafstand zit. Daarbinnen is het er, en dan zegt de frequentie
+  of het aantrekt of uitdooft.
+- De banner meldt in dat geval "nu boven je" met het aantal inslagen per
+  minuut erbij.
+- Dit verklaart ook waarom de aankomstvoorspelling tot een kwartier nul van
+  de drie keer uitkwam: die werd vastgelegd op momenten dat er niets meer te
+  voorspellen was.
+
 ## [0.39.0] — 2026-09-16
 
 De validatie meette niet wat ze beloofde.
@@ -1874,6 +1893,7 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.39.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.39.1
 [0.39.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.39.0
 [0.38.2]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.38.2
 [0.38.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.38.1

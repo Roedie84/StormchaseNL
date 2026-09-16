@@ -307,3 +307,20 @@ def test_passage_wordt_tegen_het_zwaartepunt_afgerekend():
     blok = bron[bron.index("Kleinste afstand van het zwaartepunt") :][:600]
     assert 'midden = (cel or {}).get("afstand")' in blok
     assert "midden < self._min_afstand" in blok
+
+
+def test_geen_aankomsttijd_als_het_onweer_er_al_is():
+    """Een aankomsttijd hoort alleen te bestaan zolang het onderweg is.
+
+    Bij inslagen op 7,5 kilometer en negenentwintig per minuut stond er
+    "hier over 45 minuten": de afstand tot de dichtstbijzijnde inslag springt
+    dan heen en weer en levert een trage naderingssnelheid op. Die
+    voorspelling kwam nul van de drie keer uit.
+    """
+    bron = (BRON / "coordinator.py").read_text(encoding="utf-8")
+
+    blok = bron[bron.index("eta = None") :][:400]
+    assert "distance > self.warn_distance" in blok
+
+    strategie = (BRON / "www" / "stormchase-strategy.js").read_text(encoding="utf-8")
+    assert "nu boven je" in strategie

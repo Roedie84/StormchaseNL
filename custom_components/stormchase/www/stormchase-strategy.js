@@ -390,7 +390,14 @@ class StormchaseStrategy {
         ` in het {% set a = states('${bron.azimut}') | float(0) %}` +
         `{{ ${JSON.stringify(KOMPASROOS)}[((a / 22.5) | round(0) | int) % 16] }}` +
         "{% endif %}" +
-        "{% if has_value('sensor.stormchase_aankomst') %}" +
+        // Schuilt hij al, dan is het onweer er en zegt een aankomsttijd
+        // niets meer; de frequentie zegt dan of het aantrekt of uitdooft.
+        "{% if is_state('binary_sensor.stormchase_schuilen','on') %}" +
+        " \u00b7 nu boven je" +
+        "{% if has_value('sensor.stormchase_inslagfrequentie') %}" +
+        ", {{ states('sensor.stormchase_inslagfrequentie') | round(0) }} " +
+        "inslagen per minuut{% endif %}" +
+        "{% elif has_value('sensor.stormchase_aankomst') %}" +
         " \u00b7 hier over {{ states('sensor.stormchase_aankomst') }} min" +
         "{% elif has_value('sensor.stormchase_trend') %}" +
         " \u00b7 {{ states('sensor.stormchase_trend') }}" +
