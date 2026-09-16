@@ -189,3 +189,33 @@ class TestBewaren:
 
         assert origineel == []
         assert len(val.uitkomsten) == 1
+
+
+class TestGeduldPerSoort:
+    """Een misser die te laat wordt afgerekend is geen treffer.
+
+    Voor de aankomst stond het geduld op een uur, ongeacht hoe kort vooruit
+    de voorspelling ging. Een voorspelling van "binnen tien minuten" telde
+    daardoor als uitgekomen toen het onweer zevenenveertig minuten later
+    arriveerde, met die zevenenveertig minuten als afwijking.
+    """
+
+    def test_ruim_over_tijd_telt_als_misser(self, val):
+        val.voorspel("aankomst", 0.0, 10, {})
+        val.verlopen((10 + 21) * 60)
+
+        assert val.uitkomsten[-1]["uitgekomen"] is False
+
+    def test_op_tijd_telt_als_treffer(self, val):
+        val.voorspel("aankomst", 0.0, 10, {})
+        val.uitgekomen("aankomst", 14 * 60)
+
+        uitkomst = val.uitkomsten[-1]
+        assert uitkomst["uitgekomen"] is True
+        assert uitkomst["afwijking_min"] == 4.0
+
+    def test_aankomst_heeft_korter_geduld_dan_regen(self):
+        """Regen kan zich opbouwen, een naderende cel is er of niet."""
+        from validatie import GEDULD_MINUTEN
+
+        assert GEDULD_MINUTEN["aankomst"] < GEDULD_MINUTEN["regen"]

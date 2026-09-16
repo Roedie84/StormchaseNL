@@ -674,10 +674,16 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         if afstand is not None and afstand <= self.warn_distance:
             val.uitgekomen("aankomst", nu, {"afstand_bij_aankomst": afstand})
 
-        # Kleinste afstand bijhouden voor de passagebeoordeling
-        if afstand is not None:
-            if self._min_afstand is None or afstand < self._min_afstand:
-                self._min_afstand = afstand
+        # Kleinste afstand van het zwaartepunt bijhouden, niet van de
+        # dichtstbijzijnde inslag. De voorspelling gaat over de baan van het
+        # zwaartepunt; een cel is tientallen kilometers breed, dus een losse
+        # inslag komt altijd dichterbij dan het midden. Die twee tegen elkaar
+        # afzetten leverde een afwijking op van twintig kilometer of meer,
+        # ongeacht welke berekening eronder zat.
+        midden = (cel or {}).get("afstand")
+        if midden is not None:
+            if self._min_afstand is None or midden < self._min_afstand:
+                self._min_afstand = midden
 
         # Is er iets afgerond, bewaar het dan. Met vertraging, zodat een reeks
         # afrondingen kort na elkaar tot een schrijfactie leidt.
@@ -704,7 +710,7 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
                     },
                 )
                 if "passage" not in val.open:
-                    self._min_afstand = afstand
+                    self._min_afstand = midden
 
             val.passage_afgerond(nu, self._min_afstand)
 

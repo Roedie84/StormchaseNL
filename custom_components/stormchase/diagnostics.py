@@ -16,6 +16,7 @@ from typing import Any
 from homeassistant.components.diagnostics import async_redact_data
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.loader import async_get_integration
 
 from .const import (
     CONF_MANUAL_LOCATION,
@@ -45,6 +46,12 @@ async def async_get_config_entry_diagnostics(
 ) -> dict[str, Any]:
     """Stel het diagnosebestand samen."""
     gegevens = hass.data.get(DOMAIN, {}).get(entry.entry_id, {})
+
+    # De versie hoort er als eerste in te staan. Zonder dat valt niet na te
+    # gaan welke versie een diagnosebestand geschreven heeft, en dan zeggen
+    # de cijfers eronder weinig: een gemiddelde kan uit een oude berekening
+    # komen die inmiddels gerepareerd is.
+    integratie = await async_get_integration(hass, DOMAIN)
 
     storm = gegevens.get("storm")
     meteo = gegevens.get("meteo")
@@ -84,7 +91,11 @@ async def async_get_config_entry_diagnostics(
     meteo_data = meteo.data if meteo else None
 
     return {
-        "versie": entry.version,
+        # De versie van de integratie zelf, niet het schemanummer van de
+        # configuratie. Die twee door elkaar halen kostte een ronde heen en
+        # weer over de vraag welke versie er nu eigenlijk draaide.
+        "integratieversie": integratie.version and str(integratie.version),
+        "configuratieversie": entry.version,
         "instellingen": async_redact_data(
             {**entry.data, **entry.options}, TE_VERBERGEN
         ),

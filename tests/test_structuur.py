@@ -277,3 +277,33 @@ def test_afwijkingsdrempel_is_praktisch_gekozen():
     assert "MAX_AFWIJKING_KM = 25" in bron
     # Het dashboard hanteert dezelfde grens
     assert "afwijking > 25" in strategie
+
+
+def test_diagnostiek_noemt_de_integratieversie():
+    """Zonder versienummer zeggen de cijfers in een diagnosebestand weinig.
+
+    Een gemiddelde kan uit een berekening komen die inmiddels gerepareerd is,
+    en dan is niet na te gaan of het nog geldt. Het schemanummer van de
+    configuratie is daarvoor geen vervanging: dat wijzigt alleen bij een
+    migratie.
+    """
+    bron = (BRON / "diagnostics.py").read_text(encoding="utf-8")
+
+    assert "integratieversie" in bron
+    assert "async_get_integration" in bron
+
+
+def test_passage_wordt_tegen_het_zwaartepunt_afgerekend():
+    """De voorspelling en de afrekening moeten dezelfde grootheid gebruiken.
+
+    De passage voorspelt de baan van het zwaartepunt van een cel, maar werd
+    afgerekend tegen de kleinste afstand van de dichtstbijzijnde inslag. Een
+    cel is tientallen kilometers breed, dus een losse inslag komt altijd
+    dichterbij dan het midden: dat leverde een afwijking van twintig
+    kilometer of meer op, ongeacht welke berekening eronder zat.
+    """
+    bron = (BRON / "coordinator.py").read_text(encoding="utf-8")
+
+    blok = bron[bron.index("Kleinste afstand van het zwaartepunt") :][:600]
+    assert 'midden = (cel or {}).get("afstand")' in blok
+    assert "midden < self._min_afstand" in blok

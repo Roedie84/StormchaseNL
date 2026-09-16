@@ -5,6 +5,53 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.39.0] — 2026-09-16
+
+De validatie meette niet wat ze beloofde.
+
+### Gerepareerd
+
+- **De passage werd tegen de verkeerde grootheid afgerekend.** De
+  voorspelling gaat over de baan van het zwaartepunt van een cel, maar werd
+  vergeleken met de kleinste afstand van de dichtstbijzijnde inslag. Een cel
+  is tientallen kilometers breed, dus een losse inslag komt altijd
+  dichterbij dan het midden. Daardoor kwam er een afwijking van twintig
+  kilometer of meer uit, ongeacht welke berekening eronder zat: eerst 18,5
+  met de voorrand, daarna 24,3 met het zwaartepunt.
+- Er wordt nu vergeleken met de kleinste afstand van datzelfde zwaartepunt.
+- **Voor de aankomst stond het geduld op een uur**, ongeacht hoe kort
+  vooruit de voorspelling ging. Een voorspelling van "binnen tien minuten"
+  telde daardoor als uitgekomen toen het onweer zevenenveertig minuten later
+  arriveerde, met die zevenenveertig minuten als afwijking. Dat geduld staat
+  nu op twintig minuten.
+
+### Wat dit betekent voor de cijfers
+
+De bestaande passage- en aankomstcijfers zijn onbruikbaar en verdwijnen
+langzaam uit de lijst, die de laatste zestig uitkomsten bewaart. De
+regencijfers zijn niet geraakt; die vergeleken altijd al twee keer hetzelfde:
+een voorspeld tijdstip tegen een waargenomen tijdstip.
+
+### Leerpunt
+
+In 0.36.1 en 0.38.0 heb ik twee keer de voorspelling bijgesteld op cijfers uit
+deze meting. Dat was beide keren op de verkeerde plek gesleuteld: het
+probleem zat in de meetlat, niet in wat er gemeten werd. Een validatielaag
+die de verkeerde dingen vergelijkt is erger dan geen validatielaag, want de
+uitkomsten zien eruit als feiten.
+
+## [0.38.2] — 2026-09-13
+
+### Toegevoegd
+
+- **De diagnostiek noemt nu de versie van de integratie.** Die stond er niet
+  in, waardoor niet na te gaan was welke versie een diagnosebestand had
+  geschreven. Dat maakt de cijfers eronder onbruikbaar: een gemiddelde kan
+  uit een berekening komen die inmiddels gerepareerd is.
+- Het veld heette eerder `versie` maar bevatte het schemanummer van de
+  configuratie, dat alleen bij een migratie wijzigt. Die twee staan nu apart
+  als `integratieversie` en `configuratieversie`.
+
 ## [0.38.1] — 2026-09-08
 
 ### Gewijzigd
@@ -1827,6 +1874,8 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.39.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.39.0
+[0.38.2]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.38.2
 [0.38.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.38.1
 [0.38.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.38.0
 [0.37.3]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.37.3

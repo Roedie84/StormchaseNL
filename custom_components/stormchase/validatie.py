@@ -33,9 +33,13 @@ def horizon(minuten: float) -> str:
 
 # Een voorspelling die zo lang na het verwachte moment nog niet is uitgekomen,
 # geldt als niet uitgekomen.
+# Voor de aankomst was dit een uur, ongeacht hoe kort vooruit de voorspelling
+# ging. Daardoor kon een voorspelling van "binnen tien minuten" nog als
+# uitgekomen tellen toen het onweer zevenenveertig minuten later arriveerde.
+# Dat is geen treffer maar een misser die te laat werd afgerekend.
 GEDULD_MINUTEN = {
     "regen": 45,
-    "aankomst": 60,
+    "aankomst": 20,
     "passage": 30,
 }
 
