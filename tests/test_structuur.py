@@ -293,20 +293,23 @@ def test_diagnostiek_noemt_de_integratieversie():
     assert "async_get_integration" in bron
 
 
-def test_passage_wordt_tegen_het_zwaartepunt_afgerekend():
-    """De voorspelling en de afrekening moeten dezelfde grootheid gebruiken.
+def test_passage_wordt_tegen_dezelfde_cel_afgerekend():
+    """Voorspelling en afrekening moeten over dezelfde cel gaan.
 
-    De passage voorspelt de baan van het zwaartepunt van een cel, maar werd
-    afgerekend tegen de kleinste afstand van de dichtstbijzijnde inslag. Een
-    cel is tientallen kilometers breed, dus een losse inslag komt altijd
-    dichterbij dan het midden: dat leverde een afwijking van twintig
-    kilometer of meer op, ongeacht welke berekening eronder zat.
+    Twee dingen liepen hier mis. Eerst werd een voorspelling over de baan
+    van een zwaartepunt vergeleken met de kleinste afstand van de
+    dichtstbijzijnde inslag, en een cel is tientallen kilometers breed.
+    Daarna bleef de afrekening over de dichtstbijzijnde cel gaan, die sinds
+    het opknippen van buienlijnen een andere kan zijn dan de voorspelde.
     """
     bron = (BRON / "coordinator.py").read_text(encoding="utf-8")
 
-    blok = bron[bron.index("Kleinste afstand van het zwaartepunt") :][:600]
-    assert 'midden = (cel or {}).get("afstand")' in blok
-    assert "midden < self._min_afstand" in blok
+    # Per cel bijhouden, en afrekenen tegen het kenmerk uit de voorspelling
+    assert "_min_per_cel" in bron
+    assert 'val.open.get("passage") or {}).get("cel")' in bron
+
+    cel = (BRON / "cel.py").read_text(encoding="utf-8")
+    assert '"id": kenmerk' in cel
 
 
 def test_geen_aankomsttijd_als_het_onweer_er_al_is():

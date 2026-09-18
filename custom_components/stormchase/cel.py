@@ -365,11 +365,12 @@ def frequentietrend(tijdstempels: list[float], nu: float, venster: int = 300) ->
 
 def volg_cellen(
     punten: list[tuple[float, float]],
-    sporen: list[list[tuple[float, float, float]]],
+    sporen: list[dict],
     lat0: float,
     lon0: float,
     nu: float,
-) -> tuple[list[dict], list[list[tuple[float, float, float]]]]:
+    volgend_kenmerk: int = 1,
+) -> tuple[list[dict], list[dict], int]:
     """Volg alle cellen tegelijk in plaats van alleen de dichtstbijzijnde.
 
     Elke cel houdt een eigen spoor bij. Een nieuw zwaartepunt wordt gekoppeld
@@ -379,35 +380,44 @@ def volg_cellen(
     """
     cellen = zoek_cellen(punten, lat0, lon0)
     if not cellen:
-        return ([], [])
+        return ([], [], volgend_kenmerk)
 
     beschikbaar = list(sporen)
-    nieuwe_sporen: list[list[tuple[float, float, float]]] = []
+    nieuwe_sporen: list[dict] = []
     uitkomst: list[dict] = []
 
     for cel in cellen:
         # Welk bestaand spoor hoort hierbij?
         beste = None
         for index, spoor in enumerate(beschikbaar):
-            if not spoor:
+            if not spoor.get("punten"):
                 continue
-            _, vorige_lat, vorige_lon = spoor[-1]
+            _, vorige_lat, vorige_lon = spoor["punten"][-1]
             x, y = naar_km(cel["latitude"], cel["longitude"], vorige_lat, vorige_lon)
             afstand = math.hypot(x, y)
             if afstand <= CONTINUITEIT_KM and (beste is None or afstand < beste[0]):
                 beste = (afstand, index)
 
+        # Een kenmerk dat de cel door de tijd vasthoudt. Nodig om een
+        # voorspelling later tegen dezelfde cel af te rekenen: sinds
+        # buienlijnen worden opgeknipt kan de dichtstbijzijnde cel een andere
+        # zijn dan die waarover de voorspelling ging.
         if beste is None:
-            spoor = []
+            kenmerk = volgend_kenmerk
+            volgend_kenmerk += 1
+            punten_spoor: list[tuple[float, float, float]] = []
         else:
-            spoor = beschikbaar.pop(beste[1])
+            vorig = beschikbaar.pop(beste[1])
+            kenmerk = vorig["id"]
+            punten_spoor = vorig["punten"]
 
-        spoor = (spoor + [(nu, cel["latitude"], cel["longitude"])])[-40:]
-        nieuwe_sporen.append(spoor)
+        punten_spoor = (punten_spoor + [(nu, cel["latitude"], cel["longitude"])])[-40:]
+        nieuwe_sporen.append({"id": kenmerk, "punten": punten_spoor})
 
         gegevens = {
             **cel,
-            "spoor": [(lat, lon) for _, lat, lon in spoor],
+            "id": kenmerk,
+            "spoor": [(lat, lon) for _, lat, lon in punten_spoor],
             "intensiteit": intensiteit(cel["inslagen"]),
             "richting": None,
             "richting_graden": None,
@@ -416,7 +426,7 @@ def volg_cellen(
             "passage_afstand": None,
         }
 
-        beweging = beweging_van_reeks(spoor, lat0, lon0)
+        beweging = beweging_van_reeks(punten_spoor, lat0, lon0)
         if beweging is not None:
             vx, vy = beweging
             snelheid = math.hypot(vx, vy)
@@ -451,4 +461,4 @@ def volg_cellen(
 
         uitkomst.append(gegevens)
 
-    return (uitkomst, nieuwe_sporen)
+    return (uitkomst, nieuwe_sporen, volgend_kenmerk)

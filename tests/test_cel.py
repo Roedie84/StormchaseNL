@@ -149,7 +149,7 @@ class TestMeerdereCellen:
             for dx, dy, aantal in opzet:
                 lat, lon = naar_graden(dx + snelheid * t / 3600, dy, *IK)
                 punten += [(lat + i * 0.008, lon + i * 0.008) for i in range(aantal)]
-            cellen, sporen = volg_cellen(punten, sporen, *IK, t)
+            cellen, sporen, _ = volg_cellen(punten, sporen, *IK, t)
         return cellen
 
     def test_elke_cel_wordt_gevonden(self):
@@ -189,7 +189,7 @@ class TestMeerdereCellen:
     def test_zonder_inslagen(self):
         from cel import volg_cellen
 
-        cellen, sporen = volg_cellen([], [], *IK, 0.0)
+        cellen, sporen, _ = volg_cellen([], [], *IK, 0.0)
         assert cellen == []
         assert sporen == []
 
@@ -249,7 +249,7 @@ class TestVoorrand:
             for km in range(4, 100, 4):
                 lat, lon = naar_graden(-km + snelheid * t / 3600, (km - 50) * 0.3, *IK)
                 punten.append((lat, lon))
-            cellen, sporen = volg_cellen(punten, sporen, *IK, t)
+            cellen, sporen, _ = volg_cellen(punten, sporen, *IK, t)
         return cellen[0]
 
     def test_voorrand_ligt_dichterbij_dan_het_zwaartepunt(self):
@@ -277,7 +277,7 @@ class TestVoorrand:
             t = stap * 60.0
             lat, lon = naar_graden(-30 + 50 * t / 3600, 0, *IK)
             punten = [(lat + i * 0.01, lon + i * 0.01) for i in range(10)]
-            cellen, sporen = volg_cellen(punten, sporen, *IK, t)
+            cellen, sporen, _ = volg_cellen(punten, sporen, *IK, t)
 
         cel = cellen[0]
         assert abs(cel["afstand"] - cel["rand_afstand"]) < 10
@@ -340,7 +340,7 @@ class TestBuienlijnOpknippen:
                 naar_graden(-50 + i * 2 + 60 * t / 3600, 50 - i * 2.5, *IK)
                 for i in range(40)
             ]
-            cellen, sporen = volg_cellen(punten, sporen, *IK, t)
+            cellen, sporen, _ = volg_cellen(punten, sporen, *IK, t)
 
         richtingen = {c["richting"] for c in cellen if c["richting"]}
 
@@ -369,7 +369,7 @@ class TestPassageAfstandKlopt:
                 naar_graden(-40 + i * 1.5 + 60 * t / 3600, zijdelings + i * 0.5, *IK)
                 for i in range(12)
             ]
-            cellen, sporen = volg_cellen(punten, sporen, *IK, t)
+            cellen, sporen, _ = volg_cellen(punten, sporen, *IK, t)
         return cellen[0]
 
     def test_langs_trekkende_bui_meldt_geen_voltreffer(self):
@@ -390,3 +390,62 @@ class TestPassageAfstandKlopt:
         cel = self.langslopende_bui()
         assert cel["passage_over"] is not None
         assert cel["passage_over"] < 45
+
+
+class TestCelkenmerk:
+    """Een cel moet door de tijd te herkennen zijn.
+
+    Sinds buienlijnen worden opgeknipt kan de dichtstbijzijnde cel een
+    andere zijn dan die waarover een voorspelling ging. Zonder kenmerk werd
+    een voorspelling over cel A afgerekend tegen de latere positie van cel B,
+    en dan meet je niets.
+    """
+
+    def volg(self, stappen=6):
+        from cel import naar_graden, volg_cellen
+
+        sporen = []
+        volgend = 1
+        cellen = []
+        for stap in range(stappen):
+            t = stap * 60.0
+            punten = []
+            for dx, dy, aantal in ((-40, -20, 15), (30, 30, 8)):
+                lat, lon = naar_graden(dx + 50 * t / 3600, dy, *IK)
+                punten += [(lat + i * 0.01, lon + i * 0.01) for i in range(aantal)]
+            cellen, sporen, volgend = volg_cellen(punten, sporen, *IK, t, volgend)
+        return cellen, volgend
+
+    def test_elke_cel_heeft_een_kenmerk(self):
+        cellen, _ = self.volg()
+        assert all(c.get("id") is not None for c in cellen)
+
+    def test_kenmerken_zijn_uniek(self):
+        cellen, _ = self.volg()
+        kenmerken = [c["id"] for c in cellen]
+        assert len(set(kenmerken)) == len(kenmerken)
+
+    def test_kenmerk_blijft_gelijk_over_de_tijd(self):
+        """Na zes rondes mogen er geen nieuwe kenmerken zijn uitgedeeld."""
+        cellen, volgend = self.volg(stappen=6)
+        assert volgend == len(cellen) + 1
+
+    def test_nieuwe_cel_krijgt_een_nieuw_kenmerk(self):
+        from cel import naar_graden, volg_cellen
+
+        sporen = []
+        volgend = 1
+        cellen, sporen, volgend = volg_cellen(
+            [naar_graden(-30, 0, *IK)], sporen, *IK, 0.0, volgend
+        )
+        eerste = cellen[0]["id"]
+
+        # Een bui ver weg hoort niet bij het bestaande spoor
+        cellen, sporen, volgend = volg_cellen(
+            [naar_graden(-30, 0, *IK), naar_graden(80, 80, *IK)],
+            sporen, *IK, 60.0, volgend,
+        )
+        kenmerken = {c["id"] for c in cellen}
+
+        assert eerste in kenmerken
+        assert len(kenmerken) == 2

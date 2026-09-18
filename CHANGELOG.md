@@ -5,6 +5,27 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.40.0] — 2026-09-16
+
+### Gerepareerd
+
+- **De passage werd afgerekend tegen de verkeerde cel.** Sinds buienlijnen
+  worden opgeknipt kan de dichtstbijzijnde cel een andere zijn dan die
+  waarover de voorspelling ging. Een voorspelling over cel A werd zo
+  vergeleken met de latere positie van cel B, en dan meet je niets.
+- Elke cel krijgt nu een kenmerk dat hij door de tijd vasthoudt, gekoppeld
+  aan zijn spoor. De voorspelling legt dat kenmerk vast en wordt afgerekend
+  tegen de kleinste afstand van diezelfde cel.
+- Cellen die verdwijnen worden opgeruimd, zodat de bijgehouden lijst niet
+  eindeloos groeit.
+
+### Wat de vorige meting leerde
+
+Met de correctie uit 0.39.0 kwamen er negentien metingen binnen op 18,1
+kilometer afwijking. Dat is te veel om aan ruis toe te schrijven, maar zolang
+er niet vaststond dat het over dezelfde cel ging, viel er geen conclusie aan
+te verbinden. Die vaststelling is er nu.
+
 ## [0.39.1] — 2026-09-16
 
 ### Gerepareerd
@@ -1893,6 +1914,7 @@ Eerste release.
   event af, zodat je niet bij elke herstart tijdens onweer opnieuw een
   melding krijgt.
 
+[0.40.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.40.0
 [0.39.1]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.39.1
 [0.39.0]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.39.0
 [0.38.2]: https://github.com/Roedie84/StormchaseNL/releases/tag/v0.38.2

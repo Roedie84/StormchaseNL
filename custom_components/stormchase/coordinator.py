@@ -320,7 +320,11 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         self._punten: deque[tuple[float, float, float]] = deque(maxlen=3000)
         self._gezien: dict[str, float] = {}
         self._celspoor: list[tuple[float, float, float]] = []
-        self._celsporen: list[list[tuple[float, float, float]]] = []
+        self._celsporen: list[dict] = []
+        self._volgend_celkenmerk = 1
+        # Kleinste afstand per cel, zodat een voorspelling wordt afgerekend
+        # tegen dezelfde cel en niet tegen wat er later het dichtst bij is.
+        self._min_per_cel: dict[int, float] = {}
         self._laatste_dichtbij: float | None = None
         self._was_schuilen: bool | None = None
         self.validatie = Validatie()
@@ -328,7 +332,6 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         self._bewaarde_uitkomsten = 0
         # Kleinste afstand sinds de laatste passagevoorspelling, om die
         # achteraf tegen de werkelijkheid te kunnen houden.
-        self._min_afstand: float | None = None
 
     @property
     def ring_bounds(self) -> list[int]:
@@ -659,7 +662,12 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         return TREND_STABLE
 
     def _controleer_voorspellingen(
-        self, nu: float, afstand: float | None, eta_vooraf, cel: dict | None
+        self,
+        nu: float,
+        afstand: float | None,
+        eta_vooraf,
+        cel: dict | None,
+        cellen: list | None = None,
     ) -> None:
         """Leg voorspellingen vast en kijk ze na.
 
@@ -674,16 +682,26 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         if afstand is not None and afstand <= self.warn_distance:
             val.uitgekomen("aankomst", nu, {"afstand_bij_aankomst": afstand})
 
-        # Kleinste afstand van het zwaartepunt bijhouden, niet van de
-        # dichtstbijzijnde inslag. De voorspelling gaat over de baan van het
-        # zwaartepunt; een cel is tientallen kilometers breed, dus een losse
-        # inslag komt altijd dichterbij dan het midden. Die twee tegen elkaar
-        # afzetten leverde een afwijking op van twintig kilometer of meer,
-        # ongeacht welke berekening eronder zat.
-        midden = (cel or {}).get("afstand")
-        if midden is not None:
-            if self._min_afstand is None or midden < self._min_afstand:
-                self._min_afstand = midden
+        # Kleinste afstand per cel bijhouden. Niet van de dichtstbijzijnde
+        # inslag, want een cel is tientallen kilometers breed en een losse
+        # inslag komt altijd dichterbij dan het midden. En per cel, want sinds
+        # buienlijnen worden opgeknipt kan de dichtstbijzijnde cel een andere
+        # zijn dan die waarover de voorspelling ging.
+        for gevolgd in cellen or []:
+            kenmerk = gevolgd.get("id")
+            midden = gevolgd.get("afstand")
+            if kenmerk is None or midden is None:
+                continue
+            huidig = self._min_per_cel.get(kenmerk)
+            if huidig is None or midden < huidig:
+                self._min_per_cel[kenmerk] = midden
+
+        # Cellen die verdwenen zijn hoeven we niet te blijven onthouden
+        if len(self._min_per_cel) > 200:
+            actueel = {g.get("id") for g in cellen or []}
+            self._min_per_cel = {
+                k: v for k, v in self._min_per_cel.items() if k in actueel
+            }
 
         # Is er iets afgerond, bewaar het dan. Met vertraging, zodat een reeks
         # afrondingen kort na elkaar tot een schrijfactie leidt.
@@ -707,12 +725,13 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
                     {
                         "verwachte_afstand": passage_afstand,
                         "richting": cel.get("richting"),
+                        "cel": cel.get("id"),
                     },
                 )
-                if "passage" not in val.open:
-                    self._min_afstand = midden
 
-            val.passage_afgerond(nu, self._min_afstand)
+            # Afrekenen tegen de kleinste afstand van dezelfde cel
+            open_cel = (val.open.get("passage") or {}).get("cel")
+            val.passage_afgerond(nu, self._min_per_cel.get(open_cel))
 
     def recente_inslagen(self, venster: int = 900) -> list[tuple[float, float, float]]:
         """Inslagen van de laatste minuten, met hun ouderdom in seconden.
@@ -859,8 +878,17 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
 
             # Alle cellen apart volgen, voor op de kaart. De dichtstbijzijnde
             # blijft de bron voor de sensoren.
-            cellen, self._celsporen = volg_cellen(
-                verse, self._celsporen, latitude, longitude, nu_ts
+            (
+                cellen,
+                self._celsporen,
+                self._volgend_celkenmerk,
+            ) = volg_cellen(
+                verse,
+                self._celsporen,
+                latitude,
+                longitude,
+                nu_ts,
+                self._volgend_celkenmerk,
             )
 
         stempels = [t for t, _, _ in self._punten]
@@ -868,7 +896,9 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         freq_trend = frequentietrend(stempels, nu_ts, FREQUENTIEVENSTER)
 
         schuilen, veilig_over = self._schuilregel(distance, nu_ts)
-        self._controleer_voorspellingen(nu_ts, distance, eta_vooraf=None, cel=cel)
+        self._controleer_voorspellingen(
+            nu_ts, distance, eta_vooraf=None, cel=cel, cellen=cellen
+        )
 
         # Pas nu de reeks bijwerken, met de afstand die we uiteindelijk
         # gebruiken. Anders lopen twee maatstaven door elkaar en springt de
