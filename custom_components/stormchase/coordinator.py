@@ -562,7 +562,9 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
                 grens: sum(1 for d in afstanden if d < grens)
                 for grens in self.ring_bounds
             }
-            return len(afstanden), rings, "geo_location"
+            # 0.42.1: zonder coördinaten is dit de afstand vanaf het punt van
+            # Blitzortung, niet vanaf de actieve locatie.
+            return len(afstanden), rings, "geo_location (vanaf Blitzortung)"
 
         # Terugval: onze eigen reeks, binnen het ingestelde tijdvenster
         venster = int(self._opt(CONF_RING_WINDOW, DEFAULT_RING_WINDOW)) * 60
@@ -575,7 +577,8 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         rings = {
             grens: sum(1 for d in recent if d < grens) for grens in self.ring_bounds
         }
-        return len(recent), rings, "afstandssensor"
+        # De reeks is bij het opvangen al omgerekend naar de actieve locatie.
+        return len(recent), rings, "afstandssensor (herberekend)"
 
     def _speed_from_history(self) -> float | None:
         """Bereken de naderingssnelheid via lineaire regressie.

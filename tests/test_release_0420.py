@@ -89,3 +89,12 @@ def test_de_tracker_valt_eerst_terug_op_de_laatst_bekende_positie():
 def test_de_positie_wordt_bewaard_over_een_herstart():
     init = (BRON / "__init__.py").read_text(encoding="utf-8")
     assert "POSITIE_SLEUTEL" in init and "async_load" in init
+
+
+def test_0421_ringen_zeggen_vanaf_waar_ze_tellen():
+    """Uuranalyse 7 oktober: niet te zien of de ringen vanaf de tracker telden."""
+    coord = (BRON / "coordinator.py").read_text(encoding="utf-8")
+    sensor = (BRON / "sensor.py").read_text(encoding="utf-8")
+    assert '"afstandssensor (herberekend)"' in coord
+    assert '"geo_location (vanaf Blitzortung)"' in coord
+    assert 'uit["ringen_tellen_vanaf"]' in sensor

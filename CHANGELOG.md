@@ -5,6 +5,17 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.42.1] — 2026-10-07
+
+### Verbeterd
+
+- **Zichtbaar vanaf waar de inslagringen tellen.** De uuranalyse kon niet zien
+  of de tellingen 10/25/50 km vanaf de tracker of vanaf het vaste punt van
+  Blitzortung kwamen. De actieve locatie heeft nu `ringen_tellen_vanaf`
+  (actieve locatie / Blitzortung-punt), en `telling_via` zegt
+  "afstandssensor (herberekend)" of "geo_location (vanaf Blitzortung)".
+  Het tellen zelf rekende al sinds 0.41.0 vanaf de actieve locatie.
+
 ## [0.42.0] — 2026-10-07
 
 ### Gerepareerd

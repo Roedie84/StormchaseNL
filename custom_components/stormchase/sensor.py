@@ -604,6 +604,13 @@ class LocationSensor(CoordinatorEntity[StormCoordinator], SensorEntity):
             uit["adres"] = data.adres
 
         uit["afstand_via"] = data.afstand_bron
+        # 0.42.1: of de inslagringen 10/25/50 km vanaf hier tellen. Alleen
+        # geo_location zonder coördinaten telt vanaf het Blitzortung-punt.
+        uit["ringen_tellen_vanaf"] = (
+            "Blitzortung-punt"
+            if "vanaf Blitzortung" in (data.ring_bron or "")
+            else "actieve locatie"
+        )
 
         if data.blitzortung:
             uit["blitzortung_meet_vanaf"] = data.blitzortung.get("bron")
