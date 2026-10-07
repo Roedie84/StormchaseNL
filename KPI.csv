@@ -1,0 +1,13 @@
+datumtijd,type,kpi,waarde,n,opmerking
+2026-10-07 23:30,TUSSEN,sc_gebeurtenis_07-10_dichtstbij_km,68.8,25,"21:15-22:37, inslagen 70-95 km, nooit <50 km"
+2026-10-07 23:30,TUSSEN,sc_nadert_aan_zonder_aankomst,4,4,"07-10: 4x onweer_nadert aan (~49 min), onweer kwam niet binnen 50 km"
+2026-10-07 23:30,TUSSEN,sc_aankomst_min_voorspeld_min,41,1,21:22 voorspelde 41 min; niet uitgekomen
+2026-10-07 23:30,TUSSEN,sc_aankomst_sprong_factor,27,236,aankomst 45->1214 min binnen 12 min zonder nieuwe inslag (22:24-22:36)
+2026-10-07 23:30,TUSSEN,sc_replay_eta_huidig_vs_dedupe,201..300 vs 36,15,replay 15-min regressie met 10-s herhaalde punten reproduceert zaagtand
+2026-09-29,DAG,sc_nadert_aan_zonder_inslag_50km,4,4,"28/29-09 23:51-01:21 4x nadert, max inslagen<50km = 0"
+2026-10-04,DAG,sc_waarschuwing_oranje_uren,5.0,3,meteoalarm oranje 04:37-10:22 met 2 onderbrekingen
+2026-10-07 23:30,TUSSEN,sc_bron_haper_radar_10d,15,15,telkens 1-2 min
+2026-10-07 23:30,TUSSEN,sc_bron_haper_open_meteo_10d,16,16,30-09 22:07 - 01-10 11:12 afwisselend 30 min; 07-10 16:45-17:15
+2026-10-07 23:30,TUSSEN,sc_bron_haper_buienradar_10d,5,5,
+2026-10-07 23:30,TUSSEN,sc_radar_beeldleeftijd_min,2,1,momentopname
+2026-10-07 23:30,TUSSEN,sc_versie,0.43.1,1,geinstalleerd = beschikbaar
