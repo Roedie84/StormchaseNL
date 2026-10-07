@@ -50,6 +50,7 @@ from .indices import (
 
 from .const import (
     CLEARED_FACTOR,
+    DOMAIN,
     CONF_ADDRESS_SENSOR,
     CONF_AZIMUTH_SENSOR,
     CONF_COUNTER_SENSOR,
@@ -137,6 +138,34 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 
+POSITIE_SLEUTEL = f"{DOMAIN}_positie"
+
+
+def onthoud_positie(hass: HomeAssistant, entity_id: str, positie: tuple) -> None:
+    """Bewaar de laatste positie van een tracker, ook over een herstart."""
+    gegevens = hass.data.get(POSITIE_SLEUTEL)
+    if gegevens is None:
+        return
+    nieuw = [positie[0], positie[1], positie[2]]
+    if gegevens["posities"].get(entity_id) == nieuw:
+        return
+    gegevens["posities"][entity_id] = nieuw
+    opslag = gegevens.get("opslag")
+    if opslag is not None:
+        opslag.async_delay_save(lambda: {"posities": gegevens["posities"]}, 60)
+
+
+def laatst_bekende_positie(hass: HomeAssistant, entity_id: str) -> tuple | None:
+    """De laatst bewaarde positie van een tracker, of None."""
+    gegevens = hass.data.get(POSITIE_SLEUTEL)
+    if not gegevens:
+        return None
+    waarde = gegevens["posities"].get(entity_id)
+    if not waarde or len(waarde) < 3:
+        return None
+    return (float(waarde[0]), float(waarde[1]), str(waarde[2]))
+
+
 class LocationMixin:
     """Bepaalt welke coordinaten de integratie moet gebruiken.
 
@@ -179,11 +208,19 @@ class LocationMixin:
             state = self.hass.states.get(entity_id) if entity_id else None
             if state and ATTR_LATITUDE in state.attributes:
                 name = state.attributes.get("friendly_name", entity_id)
-                return (
+                positie = (
                     float(state.attributes[ATTR_LATITUDE]),
                     float(state.attributes[ATTR_LONGITUDE]),
                     f"tracker: {name}",
                 )
+                onthoud_positie(self.hass, entity_id, positie)
+                return positie
+            # 0.42.0: na een herstart bestaat de tracker de eerste seconden
+            # nog niet. Dan de laatst bekende positie, niet thuis: op 7
+            # oktober sprong de locatie bij elke herstart ~10 s naar thuis.
+            bekend = laatst_bekende_positie(self.hass, entity_id)
+            if bekend is not None:
+                return (bekend[0], bekend[1], f"{bekend[2]} (laatst bekend)")
             # Een tracker zonder GPS staat vaak op 'home' of 'not_home'
             _LOGGER.debug("Tracker %s zonder coordinaten, terug naar thuis", entity_id)
 

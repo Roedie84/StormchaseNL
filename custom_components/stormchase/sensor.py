@@ -899,18 +899,10 @@ class BronstatusSensor(CoordinatorEntity[StormCoordinator], SensorEntity):
         self._attr_device_info = _device(entry)
 
     def _haperend(self) -> list[str]:
-        """Bronnen waarvan de laatste ronde mislukte."""
+        """Bronnen die echt haperen (0.42.0: niet bij één gemiste ronde)."""
         if self._stats is None:
             return []
-        return [
-            naam
-            for naam, bron in self._stats.bronnen.items()
-            if bron.laatste_fout is not None
-            and (
-                bron.laatste_succes is None
-                or bron.laatste_fout_op > bron.laatste_succes
-            )
-        ]
+        return [naam for naam, bron in self._stats.bronnen.items() if bron.hapert()]
 
     @property
     def native_value(self) -> str:

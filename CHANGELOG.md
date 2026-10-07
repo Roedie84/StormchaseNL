@@ -5,6 +5,20 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.42.0] — 2026-10-07
+
+### Gerepareerd
+
+- **Locatie sprong bij een herstart even naar thuis.** De tracker bestaat de
+  eerste seconden na een herstart nog niet; dan viel Stormchase ~10 s terug op
+  de thuislocatie (op 7 oktober 7×). De laatst bekende trackerpositie wordt nu
+  bewaard, ook over een herstart, en gebruikt tot de tracker er weer is
+  (bron "tracker: … (laatst bekend)").
+- **Bronstatus "hapert" bij één gemiste ronde.** De radar slaat af en toe één
+  minuut over. Een bron hapert nu pas na 2 mislukte rondes op rij, of als het
+  laatste succes langer dan 15 minuten geleden is. Het attribuut
+  `op_rij_mislukt` per bron laat de teller zien.
+
 ## [0.41.0] — 2026-10-07
 
 ### Gerepareerd

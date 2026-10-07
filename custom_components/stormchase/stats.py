@@ -17,6 +17,14 @@ from homeassistant.util import dt as dt_util
 # Hoeveel meetpunten we bewaren voor de afstandsreeks
 GESCHIEDENIS = 180
 
+# Een bron hapert pas na zoveel mislukte rondes op rij (0.42.0). Een enkele
+# gemiste ronde - de radar slaat af en toe één minuut over - is geen storing.
+HAPERT_NA_POGINGEN = 2
+
+# ... of als het laatste succes langer geleden is dan dit, ook bij één
+# mislukte ronde: een bron die zelden ophaalt, mist er dan echt een.
+HAPERT_NA_MINUTEN = 15
+
 
 @dataclass
 class BronStatus:
@@ -27,17 +35,35 @@ class BronStatus:
     laatste_succes: datetime | None = None
     laatste_fout: str | None = None
     laatste_fout_op: datetime | None = None
+    op_rij_mislukt: int = 0
 
     def succes(self) -> None:
         """Noteer een geslaagde ophaalronde."""
         self.gelukt += 1
+        self.op_rij_mislukt = 0
         self.laatste_succes = dt_util.utcnow()
 
     def fout(self, melding: str) -> None:
         """Noteer een mislukte ophaalronde."""
         self.mislukt += 1
+        self.op_rij_mislukt += 1
         self.laatste_fout = str(melding)[:200]
         self.laatste_fout_op = dt_util.utcnow()
+
+    def hapert(self, nu: datetime | None = None) -> bool:
+        """Of deze bron nu echt hapert (0.42.0).
+
+        Niet bij één gemiste ronde: pas na HAPERT_NA_POGINGEN op rij, of als
+        het laatste succes langer dan HAPERT_NA_MINUTEN geleden is.
+        """
+        if self.op_rij_mislukt == 0:
+            return False
+        if self.op_rij_mislukt >= HAPERT_NA_POGINGEN:
+            return True
+        if self.laatste_succes is None:
+            return True
+        nu = nu or dt_util.utcnow()
+        return (nu - self.laatste_succes).total_seconds() > HAPERT_NA_MINUTEN * 60
 
     def als_dict(self) -> dict[str, Any]:
         """Voor in de diagnostiek."""
@@ -49,6 +75,7 @@ class BronStatus:
             "laatste_succes": _tijd(self.laatste_succes),
             "laatste_fout": self.laatste_fout,
             "laatste_fout_op": _tijd(self.laatste_fout_op),
+            "op_rij_mislukt": self.op_rij_mislukt,
         }
 
 

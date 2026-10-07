@@ -17,7 +17,7 @@ from homeassistant.helpers.storage import Store
 from homeassistant.loader import async_get_integration
 
 from .const import DOMAIN, SERVICE_SEND_BRIEFING, SERVICE_TEST_NOTIFICATION
-from .coordinator import MeteoCoordinator, StormCoordinator
+from .coordinator import POSITIE_SLEUTEL, MeteoCoordinator, StormCoordinator
 from .meting import MetingCoordinator
 from .radarbron import RadarCoordinator
 from .alerts import AlertCoordinator
@@ -82,6 +82,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Uitkomsten van eerdere voorspellingen terughalen. Zonder dit begint de
     # zelfcontrole bij elke herstart opnieuw, en dan verzamelt hij nooit
     # genoeg om iets over de nauwkeurigheid te kunnen zeggen.
+    # 0.42.0: de laatst bekende trackerpositie, zodat de locatie na een
+    # herstart niet even naar thuis springt.
+    if POSITIE_SLEUTEL not in hass.data:
+        positie_opslag = Store(hass, 1, POSITIE_SLEUTEL)
+        bewaarde_posities = await positie_opslag.async_load() or {}
+        hass.data[POSITIE_SLEUTEL] = {
+            "posities": dict(bewaarde_posities.get("posities") or {}),
+            "opslag": positie_opslag,
+        }
+
     opslag = Store(hass, 1, f"{DOMAIN}_validatie")
     bewaard = await opslag.async_load() or {}
     storm.validatie = Validatie(bewaard.get("uitkomsten"))
