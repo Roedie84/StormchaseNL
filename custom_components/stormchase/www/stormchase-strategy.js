@@ -921,7 +921,7 @@ class StormchaseStrategy {
                 "{{ 'red' if l > 20 else 'orange' if l > 5 else 'amber' if l > 1 else 'disabled' }}",
               primary:
                 "{% set d = state_attr('sensor.stormchase_onweersverwachting'," +
-                "'bliksempotentie') | default('onbekend') %}{{ d[0] | upper }}{{ d[1:] }}",
+                "'bliksempotentie') | default('onbekend', true) %}{{ d[0] | upper }}{{ d[1:] }}",
               secondary:
                 "Bliksempotentie \u00b7 " +
                 waarde("sensor.stormchase_bliksempotentie", " J/kg"),
@@ -934,7 +934,7 @@ class StormchaseStrategy {
                 "{{ 'red' if u > 20 else 'orange' if u > 10 else 'amber' if u > 5 else 'disabled' }}",
               primary:
                 "{% set d = state_attr('sensor.stormchase_onweersverwachting'," +
-                "'opwaartse_stroming') | default('onbekend') %}{{ d[0] | upper }}{{ d[1:] }}",
+                "'opwaartse_stroming') | default('onbekend', true) %}{{ d[0] | upper }}{{ d[1:] }}",
               secondary:
                 "Opwaartse stroming \u00b7 " +
                 waarde("sensor.stormchase_opwaartse_stroming", " m/s"),
@@ -947,7 +947,7 @@ class StormchaseStrategy {
                 "{{ 'red' if t > 11000 else 'orange' if t > 8000 else 'amber' if t > 4000 else 'disabled' }}",
               primary:
                 "{% set d = state_attr('sensor.stormchase_onweersverwachting'," +
-                "'wolkentop') | default('onbekend') %}{{ d[0] | upper }}{{ d[1:] }}",
+                "'wolkentop') | default('onbekend', true) %}{{ d[0] | upper }}{{ d[1:] }}",
               secondary:
                 "Wolkentop \u00b7 " + waarde("sensor.stormchase_wolkentop", " m"),
               multiline_secondary: true,
@@ -978,7 +978,7 @@ class StormchaseStrategy {
               "{{ 'red' if s > 72 else 'orange' if s > 50 else 'amber' if s > 30 else 'disabled' }}",
             primary:
               "{% set w = state_attr('sensor.stormchase_onweersverwachting'," +
-              "'windschering') | default('onbekend') %}{{ w[0] | upper }}{{ w[1:] }}",
+              "'windschering') | default('onbekend', true) %}{{ w[0] | upper }}{{ w[1:] }}",
             secondary:
               "Schering 0-6 km \u00b7 " +
               waarde("sensor.stormchase_windschering_0_6_km", " km/u"),
@@ -1006,7 +1006,7 @@ class StormchaseStrategy {
               "{{ 'green' if 2000 <= v <= 3500 else 'disabled' }}",
             primary:
               "{% set v = state_attr('sensor.stormchase_onweersverwachting'," +
-              "'vriesniveau') | default('onbekend') %}{{ v[0] | upper }}{{ v[1:] }}",
+              "'vriesniveau') | default('onbekend', true) %}{{ v[0] | upper }}{{ v[1:] }}",
             secondary:
               "Vriesniveau \u00b7 " + waarde("sensor.stormchase_vriesniveau", " m"),
           }),
@@ -1017,7 +1017,7 @@ class StormchaseStrategy {
               "{{ 'red' if t > 56 else 'orange' if t > 50 else 'amber' if t > 44 else 'disabled' }}",
             primary:
               "{% set t = state_attr('sensor.stormchase_onweersverwachting'," +
-              "'stabiliteit') | default('onbekend') %}{{ t[0] | upper }}{{ t[1:] }}",
+              "'stabiliteit') | default('onbekend', true) %}{{ t[0] | upper }}{{ t[1:] }}",
             secondary:
               "Stabiliteit \u00b7 Total Totals " +
               waarde("sensor.stormchase_total_totals_index"),

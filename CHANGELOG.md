@@ -5,6 +5,17 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.42.2] — 2026-10-07
+
+### Opgelost
+
+- **Geen sjabloonfouten meer na een herstart.** De dashboardstrategie toonde
+  bliksempotentie, opwaartse stroming, wolkentop, windschering, vriesniveau en
+  stabiliteit met `default('onbekend')`. Direct na het opstarten bestaan die
+  attributen al maar zijn ze None, en dan viel het sjabloon om ("NoneType
+  object is not iterable", acht keer bij de herstart van 7 oktober 18:26).
+  Nu `default('onbekend', true)`, dat ook None en lege tekst opvangt.
+
 ## [0.42.1] — 2026-10-07
 
 ### Verbeterd
