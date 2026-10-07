@@ -560,16 +560,18 @@ class StormchaseStrategy {
           icon_color: nietThuis ? "orange" : "blue",
           primary:
             "{% set a = state_attr('sensor.stormchase_actieve_locatie','adres') %}" +
-            "{% if a %}{{ a }}{% else %}" +
-            "{{ state_attr('sensor.stormchase_actieve_locatie','latitude') | round(3) }}, " +
-            "{{ state_attr('sensor.stormchase_actieve_locatie','longitude') | round(3) }}" +
-            "{% endif %}",
+            "{% set la = state_attr('sensor.stormchase_actieve_locatie','latitude') %}" +
+            "{% set lo = state_attr('sensor.stormchase_actieve_locatie','longitude') %}" +
+            "{% if a %}{{ a }}{% elif la is number and lo is number %}" +
+            "{{ la | round(3) }}, {{ lo | round(3) }}" +
+            "{% else %}Locatie wordt bepaald{% endif %}",
           secondary:
             "{{ states('sensor.stormchase_actieve_locatie') }}" +
             "{% set a = state_attr('sensor.stormchase_actieve_locatie','adres') %}" +
-            "{% if a %} \u00b7 " +
-            "{{ state_attr('sensor.stormchase_actieve_locatie','latitude') | round(2) }}, " +
-            "{{ state_attr('sensor.stormchase_actieve_locatie','longitude') | round(2) }}" +
+            "{% set la = state_attr('sensor.stormchase_actieve_locatie','latitude') %}" +
+            "{% set lo = state_attr('sensor.stormchase_actieve_locatie','longitude') %}" +
+            "{% if a and la is number and lo is number %} \u00b7 " +
+            "{{ la | round(2) }}, {{ lo | round(2) }}" +
             "{% endif %}",
           multiline_secondary: true,
         })

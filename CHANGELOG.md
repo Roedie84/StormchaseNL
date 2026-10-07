@@ -5,6 +5,14 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.43.1] — 2026-10-07
+
+### Opgelost
+
+- **Locatietegel in het dashboard gaf bij het opstarten een fout.** Zolang de
+  actieve locatie nog geen coördinaten had, rondde het sjabloon `None` af en
+  logde HA een TypeError. Nu toont de tegel dan "Locatie wordt bepaald".
+
 ## [0.43.0] — 2026-10-07
 
 ### Verbeterd
