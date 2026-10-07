@@ -19,3 +19,12 @@ laatste ronde: 07-10 23:15, gemeten t/m 07-10 23:10
 - Sinds 23:15 geen nieuwe gebeurtenis om te meten; geen release.
 
 laatste ronde: 07-10 23:40, gemeten t/m 07-10 23:40
+
+## 07-10 23:45 · tussenronde
+- Validatie-tellers van de integratie uitgelezen (diagnostics, sinds ~31-08): aankomst ≤15 min 0/3 uitgekomen, aankomst >45 min 1/3 (afwijking 47 min) → aankomst samen 1/6 (17%). Passage ≤15 min 13/13 en 15-45 min 8/8 uitgekomen, maar afstandsfout gem. 18,5-18,8 km. Regen ≤15 min 4/4 (7,7 min), 15-45 min 6/11 (12,8 min), >45 min 11/15 (16,9 min).
+- Steunt H-SC-1/L-SC-001: de aankomsttijd is de zwakste voorspelling (1/6); de zaagtand uit de 10-s herhalingen is een plausibele oorzaak. Na bouw meten met deze zelfde tellers.
+- Bronnen sinds herstart 21:04 UTC (0,7 u): alle 100% (radar 39/39, buienradar 8/8, open_meteo 2/2). Meetbaarheid: bronstatistiek begint bij elke herstart opnieuw (10 releases/herstarts vandaag) → betrouwbaarheid per bron over dagen alleen uit de recorder (bronstatus). Kandidaat: tellers bewaren over herstarts (zelf bouwen, meetbaarheid).
+- Nu: regen 1,9 mm/u (buienradar), geen onweer (CAPE 70, ensemble 0%), geen waarschuwing. Geen nieuwe onweersgebeurtenis sinds 22:37.
+- Geen release.
+
+laatste ronde: 07-10 23:45, gemeten t/m 07-10 23:44

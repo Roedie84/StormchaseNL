@@ -11,3 +11,8 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-07 23:15,TUSSEN,sc_bron_haper_buienradar_10d,5,5,
 2026-10-07 23:15,TUSSEN,sc_radar_beeldleeftijd_min,2,1,momentopname
 2026-10-07 23:15,TUSSEN,sc_versie,0.43.1,1,geinstalleerd = beschikbaar
+2026-10-07 23:45,TUSSEN,sc_validatie_aankomst_hit,0.17,6,"integratietellers sinds ~31-08: <=15 min 0/3, >45 min 1/3"
+2026-10-07 23:45,TUSSEN,sc_validatie_passage_hit,1.0,21,"<=45 min 21/21; afstandsfout gem 18.5-18.8 km"
+2026-10-07 23:45,TUSSEN,sc_validatie_passage_afstandsfout_km,18.6,21,gemiddelde absolute afwijking
+2026-10-07 23:45,TUSSEN,sc_validatie_regen_hit,0.70,30,"<=15 4/4, 15-45 6/11, >45 11/15"
+2026-10-07 23:45,TUSSEN,sc_bronnen_slaag_pct,100,59,sinds herstart 21:04 UTC (0.7 u)
