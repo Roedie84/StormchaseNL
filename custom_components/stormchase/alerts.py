@@ -37,6 +37,7 @@ from .const import (
     METEOALARM_URL,
 )
 from .coordinator import LocationMixin
+from .herpoging import HerpogingMixin
 from .verouderd import VerouderdMixin
 from .taal import vertaal_soort
 
@@ -76,8 +77,11 @@ def _tijd(waarde: str | None) -> datetime | None:
     return dt_util.parse_datetime(waarde)
 
 
-class AlertCoordinator(VerouderdMixin, LocationMixin, DataUpdateCoordinator[dict]):
+class AlertCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdateCoordinator[dict]):
     """Haalt de actieve waarschuwingen op voor het ingestelde land."""
+
+    # Bronnen die na een storing een herkansing krijgen (0.43.0)
+    _herpoging_bronnen = ("meteoalarm", "geocodering")
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
         """Initialiseer de coordinator."""
@@ -242,7 +246,7 @@ class AlertCoordinator(VerouderdMixin, LocationMixin, DataUpdateCoordinator[dict
 
         return any(naam in gebied for naam in self._gebiedsnamen)
 
-    async def _async_update_data(self) -> dict:
+    async def _haal_op(self) -> dict:
         """Haal de feed op en filter de actieve waarschuwingen."""
         if self.instelling == "uit":
             return {"actief": [], "aantal": 0, "niveau": None, "rang": 0, "land": "uit"}

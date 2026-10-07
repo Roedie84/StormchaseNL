@@ -5,6 +5,24 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.43.0] — 2026-10-07
+
+### Verbeterd
+
+- **Herkansing na een mislukte bron.** Na een storing wachtte een bron het
+  hele interval af; bij Open-Meteo een half uur. Tijdens de DNS-storing van
+  7 oktober om 16:45 bleven CAPE, Lifted Index en windschering daardoor een
+  uur oud. Nu volgt na een mislukte ronde een nieuwe poging na 2 minuten,
+  dan na 5 minuten, en daarna weer het gewone interval tot de bron slaagt.
+  Geldt voor Open-Meteo (met ICON-D2, Lifted Index en ensemble), Meteoalarm,
+  de meting (Bright Sky) en Buienradar. De laatst bekende waarden blijven
+  intussen staan.
+- **Geen extra verzoeken bij afremming.** Meldt een bron "te veel
+  verzoeken" (HTTP 429), dan komt er geen vervroegde poging: het gewone
+  interval, of langer als de bron dat via Retry-After vraagt (hooguit 2 uur).
+- De bronstatus toont per bron `volgende_poging`, `herkansing` (vervroegde
+  poging gepland) en `afgeremd` (laatste fout was een 429).
+
 ## [0.42.2] — 2026-10-07
 
 ### Opgelost

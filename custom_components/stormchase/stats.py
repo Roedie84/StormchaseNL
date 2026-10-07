@@ -9,10 +9,15 @@ from __future__ import annotations
 
 from collections import deque
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
 
 from homeassistant.util import dt as dt_util
+
+try:
+    from .herpoging import is_beperkt, retry_after
+except ImportError:  # in de tests zonder pakketstructuur
+    from herpoging import is_beperkt, retry_after
 
 # Hoeveel meetpunten we bewaren voor de afstandsreeks
 GESCHIEDENIS = 180
@@ -36,15 +41,28 @@ class BronStatus:
     laatste_fout: str | None = None
     laatste_fout_op: datetime | None = None
     op_rij_mislukt: int = 0
+    # 0.43.0: herkansing na een storing
+    beperkt: bool = False
+    retry_after: timedelta | None = None
+    volgende_poging: datetime | None = None
+    herkansing: bool = False
 
     def succes(self) -> None:
         """Noteer een geslaagde ophaalronde."""
         self.gelukt += 1
         self.op_rij_mislukt = 0
         self.laatste_succes = dt_util.utcnow()
+        self.beperkt = False
+        self.retry_after = None
 
-    def fout(self, melding: str) -> None:
-        """Noteer een mislukte ophaalronde."""
+    def fout(self, melding) -> None:
+        """Noteer een mislukte ophaalronde.
+
+        Is de melding een HTTP 429, dan onthouden we dat de bron ons afremt,
+        zodat er geen vervroegde herkansing komt (0.43.0).
+        """
+        self.beperkt = is_beperkt(melding)
+        self.retry_after = retry_after(melding) if self.beperkt else None
         self.mislukt += 1
         self.op_rij_mislukt += 1
         self.laatste_fout = str(melding)[:200]
@@ -76,6 +94,9 @@ class BronStatus:
             "laatste_fout": self.laatste_fout,
             "laatste_fout_op": _tijd(self.laatste_fout_op),
             "op_rij_mislukt": self.op_rij_mislukt,
+            "volgende_poging": _tijd(self.volgende_poging),
+            "herkansing": self.herkansing,
+            "afgeremd": self.beperkt,
         }
 
 

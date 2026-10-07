@@ -23,13 +23,17 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import BRIGHTSKY_URL, METING_INTERVAL
 from .coordinator import LocationMixin
+from .herpoging import HerpogingMixin
 from .verouderd import VerouderdMixin
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class MetingCoordinator(VerouderdMixin, LocationMixin, DataUpdateCoordinator[dict]):
+class MetingCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdateCoordinator[dict]):
     """Haalt de meting van het dichtstbijzijnde station op."""
+
+    # Bronnen die na een storing een herkansing krijgen (0.43.0)
+    _herpoging_bronnen = ("meting",)
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
         """Initialiseer de coordinator."""
@@ -43,7 +47,7 @@ class MetingCoordinator(VerouderdMixin, LocationMixin, DataUpdateCoordinator[dic
         self._session = async_get_clientsession(hass)
         self.stats = None
 
-    async def _async_update_data(self) -> dict:
+    async def _haal_op(self) -> dict:
         """Vraag de laatste waarneming op."""
         latitude, longitude, _ = self.resolve_location()
 

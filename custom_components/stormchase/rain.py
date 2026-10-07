@@ -33,6 +33,7 @@ from .const import (
     RAIN_INTERVAL,
 )
 from .coordinator import LocationMixin
+from .herpoging import HerpogingMixin
 from .verouderd import VerouderdMixin
 
 _LOGGER = logging.getLogger(__name__)
@@ -49,8 +50,11 @@ def _naar_mmu(waarde: int) -> float:
     return round(10 ** ((waarde - 109) / 32), 2)
 
 
-class RainCoordinator(VerouderdMixin, LocationMixin, DataUpdateCoordinator[dict]):
+class RainCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdateCoordinator[dict]):
     """Haalt de neerslagverwachting op en bepaalt wanneer het gaat regenen."""
+
+    # Bronnen die na een storing een herkansing krijgen (0.43.0)
+    _herpoging_bronnen = ("buienradar",)
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
         """Initialiseer de coordinator."""
@@ -157,7 +161,7 @@ class RainCoordinator(VerouderdMixin, LocationMixin, DataUpdateCoordinator[dict]
 
         return sorted(reeks)
 
-    async def _async_update_data(self) -> dict:
+    async def _haal_op(self) -> dict:
         """Bepaal of en wanneer het gaat regenen."""
         latitude, longitude, _ = self.resolve_location()
 

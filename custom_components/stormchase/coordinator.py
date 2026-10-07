@@ -29,6 +29,7 @@ from .cel import (
 from .spreiding import beoordeel, ensemble as vat_ensemble_samen, samenvatting
 from .tijd import MARGE_KWARTIER, MARGE_UUR, aantal_gevuld, dichtstbijzijnde, op_stempel
 from .validatie import Validatie
+from .herpoging import HerpogingMixin
 from .verouderd import VerouderdMixin
 from .indices import (
     draairichting,
@@ -1079,12 +1080,15 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         return data
 
 
-class MeteoCoordinator(VerouderdMixin, LocationMixin, DataUpdateCoordinator[dict]):
+class MeteoCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdateCoordinator[dict]):
     """Haalt onweersparameters op bij Open-Meteo.
 
     De coordinaten komen uit de locatie-instelling van de integratie, dus
     op vakantie krijg je de parameters van waar je dan bent.
     """
+
+    # Bronnen die na een storing een herkansing krijgen (0.43.0)
+    _herpoging_bronnen = ("open_meteo", "icon_d2", "lifted_index", "ensemble", "ensemble_leden")
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
         """Initialiseer de coordinator."""
@@ -1343,7 +1347,7 @@ class MeteoCoordinator(VerouderdMixin, LocationMixin, DataUpdateCoordinator[dict
             self._fetched_at = None
             self.hass.async_create_task(self.async_request_refresh())
 
-    async def _async_update_data(self) -> dict:
+    async def _haal_op(self) -> dict:
         """Haal de laatste modelwaarden op."""
         latitude, longitude, source_name = self.resolve_location()
 

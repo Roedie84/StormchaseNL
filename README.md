@@ -93,6 +93,11 @@ erbij, tot drie uur. Daarboven wordt de sensor alsnog onbeschikbaar, want dan
 is leeg eerlijker dan verkeerd. `sensor.stormchase_bronstatus` laat zien welke
 bron hapert, en op het dashboard verschijnt een tegel zodra dat gebeurt.
 
+Een mislukte bron wordt niet pas na het hele interval opnieuw geprobeerd,
+maar na 2 en daarna 5 minuten; lukt dat niet, dan weer volgens het gewone
+interval. Meldt een bron "te veel verzoeken" (429), dan komt er geen
+vervroegde poging. Per bron staat `volgende_poging` in de bronstatus.
+
 Elke bron staat los van de andere: valt Buienradar weg, dan werken de
 onweersparameters en de waarschuwingen gewoon door.
 
