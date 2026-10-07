@@ -5,6 +5,24 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.41.0] — 2026-10-07
+
+### Gerepareerd
+
+- **Onweer nabij en onweer nadert stonden op unknown.** Zolang er geen inslag
+  of snelheid bekend was, gaven beide binaire sensoren geen waarde. Een
+  automatisering of kaart die op `off` (veilig) let, zag dat dan nooit. Geen
+  inslag betekent nu `off`.
+- **Inslagen vanaf het verkeerde punt gemeten.** Zonder
+  geo_location-entiteiten nam Stormchase de afstand van de
+  Blitzortung-sensor over, en die meet vanaf het vaste punt van Blitzortung.
+  Met een tracker als actieve locatie zat dat er 13,6 km naast. De inslag
+  wordt nu uit afstand en richting teruggerekend en vanaf de actieve locatie
+  opnieuw gemeten, ook voor de ringen (10/25/50 km). `afstand_via` zegt dan
+  `herberekend (sensor)`, en zonder inslagen `geen inslagen`.
+- De melding "Blitzortung meet ... km verderop" verschijnt alleen nog als er
+  echt niet omgerekend kon worden.
+
 ## [0.40.0] — 2026-09-16
 
 ### Gerepareerd

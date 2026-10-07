@@ -127,6 +127,8 @@ CRITICAL_SOORTEN = {"nearby", "shelter", "alert", "outlook"}
 # verschil weinig aan de vraag of je moet uitkijken. Onder deze grens valt het
 # binnen de onnauwkeurigheid van de bliksemlokalisatie zelf.
 MAX_AFWIJKING_KM = 25
+# Onder deze afstand meten Blitzortung en Stormchase vanaf hetzelfde punt
+ZELFDE_PUNT_M = 500
 
 # Hoe lang gewacht wordt op een meldingsdienst die nog niet bestaat. De
 # diensten van de companion-app verschijnen pas als die integratie geladen is,

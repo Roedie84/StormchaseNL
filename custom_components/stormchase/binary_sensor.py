@@ -82,8 +82,12 @@ class StormNearbyBinarySensor(CoordinatorEntity[StormCoordinator], BinarySensorE
     @property
     def is_on(self) -> bool | None:
         """True bij onweer binnen de drempel."""
-        if not self.coordinator.data or self.coordinator.data.distance is None:
+        if not self.coordinator.data:
             return None
+        # Geen inslag bekend betekent niets binnen bereik: veilig, niet
+        # onbekend. Anders zien automatiseringen die op 'off' letten dat nooit.
+        if self.coordinator.data.distance is None:
+            return False
         return self.coordinator.data.distance < self._threshold
 
     @property
@@ -118,8 +122,11 @@ class StormApproachingBinarySensor(
     @property
     def is_on(self) -> bool | None:
         """True als het onweer dichterbij komt."""
-        if not self.coordinator.data or self.coordinator.data.speed is None:
+        if not self.coordinator.data:
             return None
+        # Zonder snelheid (geen of te weinig inslagen) nadert er niets.
+        if self.coordinator.data.speed is None:
+            return False
         return self.coordinator.data.speed > SPEED_DEADZONE
 
     @property

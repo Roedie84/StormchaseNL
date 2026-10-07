@@ -617,7 +617,7 @@ class LocationSensor(CoordinatorEntity[StormCoordinator], SensorEntity):
             if (
                 data.afwijking_km is not None
                 and data.afwijking_km > MAX_AFWIJKING_KM
-                and data.afstand_bron != "herberekend"
+                and data.afstand_bron == "sensor"
             ):
                 uit["let_op"] = (
                     f"Blitzortung meet {data.afwijking_km:.0f} km verderop; "

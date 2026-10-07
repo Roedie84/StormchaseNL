@@ -40,6 +40,7 @@ from .indices import (
     duiding_stabiliteit,
     duiding_vriesniveau,
     hagelkans,
+    herbereken_vanaf,
     onweersverwachting,
     peiling,
     rotatiekans,
@@ -118,6 +119,7 @@ from .const import (
     MODEL_D2,
     MIN_SAMPLES,
     MODE_HOME,
+    ZELFDE_PUNT_M,
     MODE_MANUAL,
     MODE_TRACKER,
     MODE_ZONE,
@@ -363,7 +365,46 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         except (TypeError, ValueError):
             return
 
+        # De sensor meet vanaf het vaste punt van Blitzortung; omrekenen naar
+        # de actieve locatie, anders tellen de ringen vanaf de verkeerde plek.
+        latitude, longitude, _ = self.resolve_location()
+        afstand, _, _ = self._naar_hier(
+            afstand,
+            self._read_float(self._opt(CONF_AZIMUTH_SENSOR)),
+            latitude,
+            longitude,
+            blitzortung_locatie(self.hass),
+        )
         self._inslagen.append((dt_util.utcnow().timestamp(), afstand))
+
+    @staticmethod
+    def _naar_hier(
+        afstand: float | None,
+        azimut: float | None,
+        latitude: float,
+        longitude: float,
+        bz: dict | None,
+    ) -> tuple[float | None, float | None, bool]:
+        """Reken een afstand van de Blitzortung-sensor om naar de eigen plek.
+
+        Geeft (afstand, azimut, omgerekend) terug. Zonder richting, zonder
+        bekend meetpunt of als dat punt praktisch samenvalt met de actieve
+        locatie, blijft de waarde van de bron staan.
+        """
+        if afstand is None or azimut is None or bz is None:
+            return afstand, azimut, False
+        meters = location_distance(
+            latitude, longitude, bz["latitude"], bz["longitude"]
+        )
+        if meters is None or meters < ZELFDE_PUNT_M:
+            return afstand, azimut, False
+        km, richting = herbereken_vanaf(
+            (bz["latitude"], bz["longitude"]),
+            (latitude, longitude),
+            afstand,
+            azimut,
+        )
+        return km, richting, True
 
     def volg_bronsensor(self):
         """Begin met luisteren naar de afstandssensor."""
@@ -842,6 +883,7 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         punten, gewijzigd = self._uit_geo_location(pattern, latitude, longitude)
         afstand_bron = "sensor"
         last_strike = None
+        bz = blitzortung_locatie(self.hass)
 
         if punten:
             punten.sort()
@@ -860,6 +902,16 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
             bron_state = self.hass.states.get(self._opt(CONF_DISTANCE_SENSOR, ""))
             if bron_state is not None and distance is not None:
                 last_strike = bron_state.last_changed
+            # Alleen de afstandssensor: die meet vanaf het vaste punt van
+            # Blitzortung. Met de richting erbij is de inslag terug te
+            # rekenen naar de actieve locatie.
+            distance, azimuth, omgerekend = self._naar_hier(
+                distance, azimuth, latitude, longitude, bz
+            )
+            if omgerekend:
+                afstand_bron = "herberekend (sensor)"
+            elif distance is None:
+                afstand_bron = "geen inslagen"
 
         # Celtracking, frequentie en de schuilregel
         nu_ts = dt_util.utcnow().timestamp()
@@ -936,7 +988,6 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
                 )
 
         # Meet Blitzortung vanaf hetzelfde punt als wij?
-        bz = blitzortung_locatie(self.hass)
         afwijking = None
         if bz is not None:
             meters = location_distance(

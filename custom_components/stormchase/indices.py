@@ -58,6 +58,53 @@ def peiling(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     return round((math.degrees(math.atan2(x, y)) + 360) % 360, 1)
 
 
+AARDSTRAAL_KM = 6371.0088
+
+
+def verplaats(
+    lat: float, lon: float, richting: float, km: float
+) -> tuple[float, float]:
+    """Het punt op `km` kilometer van (lat, lon) in `richting` graden.
+
+    Het omgekeerde van peiling: uit afstand en richting zoals de bron die
+    meet, volgt waar de inslag lag.
+    """
+    hoek = km / AARDSTRAAL_KM
+    f1, l1, th = math.radians(lat), math.radians(lon), math.radians(richting)
+    f2 = math.asin(
+        math.sin(f1) * math.cos(hoek) + math.cos(f1) * math.sin(hoek) * math.cos(th)
+    )
+    l2 = l1 + math.atan2(
+        math.sin(th) * math.sin(hoek) * math.cos(f1),
+        math.cos(hoek) - math.sin(f1) * math.sin(f2),
+    )
+    return math.degrees(f2), (math.degrees(l2) + 540) % 360 - 180
+
+
+def herbereken_vanaf(
+    bron: tuple[float, float],
+    hier: tuple[float, float],
+    afstand: float,
+    richting: float,
+) -> tuple[float, float]:
+    """Afstand (km) en richting van een inslag, gezien vanaf `hier`.
+
+    `afstand` en `richting` zijn gemeten vanaf `bron`, zoals de
+    Blitzortung-sensoren dat doen vanaf hun vaste punt. Zonder
+    geo_location-entiteiten is dit de enige manier om de inslag vanaf de
+    actieve locatie te bekijken.
+    """
+    inslag = verplaats(bron[0], bron[1], richting, afstand)
+    f1, f2 = math.radians(hier[0]), math.radians(inslag[0])
+    dl = math.radians(inslag[1] - hier[1])
+    a = (
+        math.sin((f2 - f1) / 2) ** 2
+        + math.cos(f1) * math.cos(f2) * math.sin(dl / 2) ** 2
+    )
+    km = 2 * AARDSTRAAL_KM * math.asin(min(1.0, math.sqrt(a)))
+    return round(km, 1), peiling(hier[0], hier[1], inslag[0], inslag[1])
+
+
 def _componenten(snelheid: float, richting: float) -> tuple[float, float]:
     """Zet windsnelheid en -richting om naar oost- en noordcomponent.
 
