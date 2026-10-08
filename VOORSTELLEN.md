@@ -3,7 +3,10 @@
 Status: open / akkoord / afgewezen / gebouwd vX / geverifieerd / teruggedraaid. Ruud keurt goed via de chat ("akkoord L-SC-00x").
 
 ## L-SC-001 · naderingssnelheid alleen uit nieuwe inslagafstanden (geen 10-s herhalingen)
-- Status: **open** (raakt `onweer_nadert`, trend en de aankomsttijd in de melding → Ruud beslist)
+- Status: **akkoord 08-10 → gebouwd 0.45.0** (08-10; release v0.45.0, workflow groen, HACS ververst) — verifiëren na installatie en ≥1 onweersgebeurtenis
+- Bouw: nieuwe module `nadering.py` (`Naderingstrend`): punt alleen bij nieuwe inslagtijd (of ≥0,5 km afstandsverschil, verplaatsing); snelheid alleen bij een nieuw punt berekend en vastgehouden; vervalt zodra <3 metingen (MIN_SAMPLES 4 → 3) in het venster van 15 min liggen. 16 tests in `tests/test_nadering.py` (suite 392 groen).
+- Replay 07-10 met recorderreeksen (oude code reproduceert HA exact: 201, 111, 81 … 41 min; perioden 15,0/15,0/4,2/15,0 min): nieuw → nadert 2× (4,2 + 7,7 = 11,8 min i.p.v. 49,2), 0 aankomstwijzigingen zonder nieuwe inslag (was 244), aankomst 159 → 122 → 41 min (bereik oud 41-4925), geen periode meer van ~15 min.
+- Effect meten: per onweersgebeurtenis aantal nadert-wissels en duur (geen perioden van precies 15 min), aankomstwijzigingen zonder nieuwe inslag (= 0 verwacht), validatieteller aankomst (basis 1/6, ≤15 min 0/3) en voorspelde tegen werkelijke aankomst; vergelijken met de replay-cijfers hierboven.
 - Onderbouwing: 07-10 21:15-22:37 (n=236 aankomstwaarden): aankomst sprong 45 → 1214 min en 4168 → 167 min zonder nieuwe inslag; 4× nadert-aan voor een onweer dat nooit binnen 50 km kwam. Replay van `_speed_from_history` op de echte reeks reproduceert de zaagtand exact; met alleen nieuwe afstanden blijft de schatting stabiel (36 min bij 83 km, 24,8 km/u).
 - Voorstel: in `coordinator.py` een punt aan `_history` alleen toevoegen als de afstand (of de nieuwste inslagtijd) veranderd is; MIN_SAMPLES dan op aantal echte metingen (bv. 3). Plus test met de reeks van 07-10.
 - Verwacht effect: geen zaagtand meer; minder korte nadert-pulsen; aankomsttijd in meldingen stabiel.
