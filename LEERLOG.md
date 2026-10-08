@@ -87,3 +87,13 @@ laatste ronde: 08-10 15:40, gemeten t/m 08-10 15:44
 - Geen release (tussenronde, niets acuut).
 
 laatste ronde: 08-10 19:40, gemeten t/m 08-10 19:44
+
+## 08-10 23:40 · tussenronde
+- Geïnstalleerd: 0.48.1 (app-icoon, chatsessie). **0.49.0** (officiële KNMI-bronnen; chatsessie 23:26) staat klaar in HACS, nog niet geïnstalleerd → geen eigen release erbovenop. Na installatie meten: bronstatus van de nieuwe KNMI-bronnen (slaag%, latentie) naast radar/buienradar.
+- Geen onweer (0 inslagen <50 km, ensemble 0%, CAPE 0, LI 14,6), niveau groen → onweer: alleen beschikbaarheid gemeten.
+- Bronnen sinds herstart 22:02: alle 10 bronnen 100% (radar 677, buienradar 142, meteoalarm 68, open-meteo 31), 0× haperend. Locatie: tracker iPhone.
+- Regen: 2 nieuwe valse regenvoorspellingen (18:36 regen over 43 min, 20:44 over 60 min, beide licht; niet uitgekomen). Validatie nu 24/34 (≤15 min 5/5, 15-45 6/11, >45 13/18): korte horizon blijft betrouwbaar, lange horizon geeft ~1 op 3 vals. Open: regen over 57 min (piek 1,07 mm/u); live 23:41 droog, `regen_verwacht` off.
+- H-SC-3 ongewijzigd (geen nieuwe afgeronde regenstart); L-SC-005 afgewezen door Ruud (21:13), meting loopt als KPI door.
+- Geen release.
+
+laatste ronde: 08-10 23:40, gemeten t/m 08-10 23:44

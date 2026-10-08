@@ -70,3 +70,8 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-08 19:40,TUSSEN,sc_bronnen_slaag_pct,100,1257,"per_dag 08-10 over 9 herstarts (L-SC-002)"
 2026-10-08 19:40,TUSSEN,sc_regen_validatie_uitgekomen,0.758,33,"25/33; <=15 5/5, 15-45 7/11, >45 13/17"
 2026-10-08 19:40,TUSSEN,sc_regen_afwijking_mediaan_min,-10.6,10,"9 van 10 negatief, tekentoets p 0.02; <=15 min: -7.9, -8, -8 (H-SC-3)"
+2026-10-08 23:40,TUSSEN,sc_versie_geinstalleerd,0.48.1,1,"0.49.0 klaar in HACS (KNMI-bronnen)"
+2026-10-08 23:40,TUSSEN,sc_onweer_sinds_1944,0,1,"geen inslagen <50 km; ensemble 0%; CAPE 0"
+2026-10-08 23:40,TUSSEN,sc_bronnen_slaag_pct,100,1045,"sinds herstart 22:02, 10 bronnen"
+2026-10-08 23:40,TUSSEN,sc_regen_validatie_uitgekomen,0.706,34,"24/34; <=15 5/5, 15-45 6/11, >45 13/18"
+2026-10-08 23:40,TUSSEN,sc_regen_vals_avond,2,2,"18:36 (+43 min) en 20:44 (+60 min), licht"
