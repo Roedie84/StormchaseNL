@@ -5,6 +5,93 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.49.0] — 2026-10-08
+
+Officiële KNMI-bronnen, aanvullend in Nederland: waarschuwingen,
+neerslagverwachting, waarnemingen, pushmeldingen, radar en weersverwachting.
+Buiten Nederland (Duitsland, België), zonder sleutel of bij een storing valt
+alles automatisch terug op de bestaande bronnen. Drempels, meldgedrag en het
+regen-"nu"-venster zijn ongewijzigd; alleen de bron van de waarschuwingen
+verandert in Nederland.
+
+### Wat je moet doen
+
+- **Niets, voor het deel zonder sleutel.** Waarschuwingen, de neerslag per
+  vijf minuten en de weersverwachting van het KNMI werken meteen na de update.
+- **Optioneel: drie gratis sleutels** van het KNMI Data Platform
+  (dataplatform.knmi.nl → Developer Portal → API Catalog: EDR API, Web Map
+  Service, Notification Service). Invullen via Instellingen → Apparaten &
+  diensten → StormchaseNL → Configureren; de laatste stap heet
+  **KNMI (optioneel)** met de velden *KNMI WMS-sleutel (radarkaart)*,
+  *KNMI Notification Service-sleutel*, *KNMI EDR-sleutel (waarnemingen)* en
+  *Radarstijl KNMI*. Een leeg veld zet die functie uit.
+
+### Nieuw
+
+- **Waarschuwingen van het KNMI** (KNMI-app, geen sleutel). Code
+  geel/oranje/rood met tekst, per waarschuwingsregio (1-15). De regio volgt de
+  actieve locatie via de bestaande omgekeerde geocodering: provincie,
+  Waddeneilanden als eigen regio, IJsselmeer/Waddenzee op het water, anders
+  de dichtstbijzijnde regio; een regiofilter dat een KNMI-regio noemt gaat
+  voor. In Nederland nu de eerste bron voor `sensor.stormchase_waarschuwingsniveau`
+  en `binary_sensor.stormchase_weerwaarschuwing`; MeteoAlarm blijft terugval
+  en buiten Nederland. Nieuwe attributen `bron`, `regio` en `niveau_per_uur`
+  (komende 24 uur). Begin en einde van een waarschuwing komen uit het niveau
+  per uur. In en rond Nederland wordt per ~10 km opnieuw gegeocodeerd (was
+  ~50 km), zodat de regio meeloopt.
+- **Neerslagverwachting van het KNMI** als eerste regenbron in Nederland
+  (per radarcel van 1 km², exacte UTC-tijdstempels), Buienradar als terugval
+  en Open-Meteo als laatste. Zelfde reeksvorm, dus `regen_begint_over`,
+  `regen_verwacht`, meldingen en de weerentiteit werken ongewijzigd. Het
+  attribuut `bron` is dan `knmi`.
+- **Waarnemingen van de KNMI-stations** (EDR-sleutel): alle automatische
+  stations in een keer, per grootheid het dichtstbijzijnde station met een
+  waarde (bij Eibergen Hupsel). Vervangt in Nederland Bright Sky voor
+  `sensor.stormchase_meting`, met o.a. dauwpunt, windrichting, zicht,
+  bewolking, wolkenbasis, weercode en `stations` (welk station wat leverde).
+  Elke tien minuten in plaats van elk kwartier.
+- Nieuwe sensoren: `sensor.stormchase_windstoten_gemeten` (km/u, met m/s en
+  Beaufort), `sensor.stormchase_luchtdruk_gemeten`,
+  `sensor.stormchase_luchtdrukverandering_per_uur` en `..._per_3_uur` (zelf
+  bijgehouden per station, herstartbestendig, ook met Bright Sky).
+- Nieuwe binary sensors: `binary_sensor.stormchase_onweer_gemeten_bij_station`
+  en `binary_sensor.stormchase_hagel_gemeten_bij_station`, uit de weercode
+  (WMO 4680) van het dichtstbijzijnde station met weersensor.
+- **Pushmeldingen** van de KNMI Notification Service (Notification
+  Service-sleutel): MQTT over websockets naar mqtt.dataplatform.knmi.nl.
+  Na een melding worden waarnemingen, radar en (als die van het KNMI komt) de
+  neerslag na 15-25 seconden opgehaald. Herverbinden met oplopende wachttijd
+  (5 s tot 10 min); een geweigerde sleutel geeft één waarschuwing en daarna
+  gewoon pollen.
+- **KNMI-radar** (WMS-sleutel) op `image.stormchase_radar` in Nederland, met
+  RainViewer of DWD als terugval; attribuut `radarbron`. Nieuw:
+  `image.stormchase_radar_vooruitblik`, een geanimeerde reeks van een uur
+  terug tot twee uur vooruit per tien minuten (actueel composiet +
+  radarverwachting). Alleen bijgewerkt als er de afgelopen kwartier iemand
+  keek; frames worden bewaard, hooguit vijf verzoeken per seconde. Optie
+  radarstijl donker of licht.
+- **Weersverwachting van het KNMI** voor `weather.stormchase` in Nederland:
+  conditie (KNMI-weercodes naar HA-condities), temperatuur, wind,
+  windstoten, uur- en dagverwachting met neerslagkans. Luchtvochtigheid,
+  luchtdruk en bewolking, en buiten Nederland alles, blijven van Open-Meteo;
+  "regen op de radar wint" (0.48.0) blijft. Attribuut `verwachting_bron`.
+- `sensor.stormchase_bronstatus`: de bronnen `knmi_waarschuwingen`,
+  `knmi_verwachting`, `knmi_nowcast`, `knmi_edr` en `knmi_wms` (zelfde
+  statistiek en dagtellers als de rest, herstartbestendig), en onder `knmi`
+  de sleutels (ja/nee), de pushverbinding en tijdelijke afremming.
+
+### Betrouwbaarheid en privacy
+
+- Timeouts op elk verzoek; na een storing wacht een KNMI-bron 2 tot 30
+  minuten, na 429 minstens 10 minuten of de Retry-After, na 401/403 een uur.
+  Intussen werkt de terugvalbron, zonder herhaalde foutmeldingen in het log.
+- De sleutels gaan alleen in de Authorization-header mee: nooit in een
+  logregel, foutmelding of attribuut, en ze worden weggelaten uit het
+  diagnosebestand.
+- Geen zware nieuwe afhankelijkheden: de radarcel (polaire stereografische
+  projectie, raster 351×263) wordt in gewoon Python berekend. Nieuwe
+  requirement alleen `paho-mqtt` (zit al in Home Assistant).
+
 ## [0.48.1] — 2026-10-08
 
 Alleen het app-icoon. Sensoren, drempels en meldingen zijn ongewijzigd.

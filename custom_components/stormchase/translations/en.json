@@ -81,10 +81,27 @@
           "briefing_morning": "Morning briefing at",
           "briefing_afternoon": "Afternoon briefing at"
         }
+      },
+      "knmi": {
+        "title": "KNMI (optional)",
+        "description": "Official KNMI sources, used in addition within the Netherlands. Warnings, the 5-minute precipitation nowcast and the KNMI forecast work without a key. The radar map, station observations and faster updates via push notifications need free keys from the KNMI Data Platform (dataplatform.knmi.nl → Developer Portal → API Catalog). Leave a field empty to turn that feature off; outside the Netherlands and during outages Stormchase uses its existing sources.",
+        "data": {
+          "knmi_wms_sleutel": "KNMI WMS key (radar map)",
+          "knmi_notificatie_sleutel": "KNMI Notification Service key",
+          "knmi_edr_sleutel": "KNMI EDR key (observations)",
+          "knmi_radarstijl": "KNMI radar style"
+        },
+        "data_description": {
+          "knmi_wms_sleutel": "Web Map Service: KNMI radar on the radar image and the radar outlook (−1 to +2 hours).",
+          "knmi_notificatie_sleutel": "Notification Service (MQTT): fetches observations and radar as soon as KNMI announces new data.",
+          "knmi_edr_sleutel": "EDR API: observations from KNMI weather stations instead of Bright Sky.",
+          "knmi_radarstijl": "Colours of the KNMI radar and the map below it."
+        }
       }
     },
     "error": {
-      "rings_not_ascending": "Rings must be ascending and distinct."
+      "rings_not_ascending": "Rings must be ascending and distinct.",
+      "knmi_sleutel_ongeldig": "This does not look like a valid KNMI Data Platform key (one long string without spaces)."
     },
     "abort": {
       "already_configured": "Stormchase is already configured."
@@ -171,10 +188,27 @@
           "briefing_morning": "Morning briefing at",
           "briefing_afternoon": "Afternoon briefing at"
         }
+      },
+      "knmi": {
+        "title": "KNMI (optional)",
+        "description": "Official KNMI sources, used in addition within the Netherlands. Warnings, the 5-minute precipitation nowcast and the KNMI forecast work without a key. The radar map, station observations and faster updates via push notifications need free keys from the KNMI Data Platform (dataplatform.knmi.nl → Developer Portal → API Catalog). Leave a field empty to turn that feature off; outside the Netherlands and during outages Stormchase uses its existing sources.",
+        "data": {
+          "knmi_wms_sleutel": "KNMI WMS key (radar map)",
+          "knmi_notificatie_sleutel": "KNMI Notification Service key",
+          "knmi_edr_sleutel": "KNMI EDR key (observations)",
+          "knmi_radarstijl": "KNMI radar style"
+        },
+        "data_description": {
+          "knmi_wms_sleutel": "Web Map Service: KNMI radar on the radar image and the radar outlook (−1 to +2 hours).",
+          "knmi_notificatie_sleutel": "Notification Service (MQTT): fetches observations and radar as soon as KNMI announces new data.",
+          "knmi_edr_sleutel": "EDR API: observations from KNMI weather stations instead of Bright Sky.",
+          "knmi_radarstijl": "Colours of the KNMI radar and the map below it."
+        }
       }
     },
     "error": {
-      "rings_not_ascending": "Rings must be ascending and distinct."
+      "rings_not_ascending": "Rings must be ascending and distinct.",
+      "knmi_sleutel_ongeldig": "This does not look like a valid KNMI Data Platform key (one long string without spaces)."
     }
   },
   "entity": {
@@ -295,6 +329,18 @@
       },
       "ensemble": {
         "name": "Ensemble storm chance"
+      },
+      "meting_windstoten": {
+        "name": "Measured wind gusts"
+      },
+      "meting_luchtdruk": {
+        "name": "Measured pressure"
+      },
+      "meting_druk_1u": {
+        "name": "Pressure change per hour"
+      },
+      "meting_druk_3u": {
+        "name": "Pressure change per 3 hours"
       }
     },
     "binary_sensor": {
@@ -315,6 +361,12 @@
       },
       "shelter": {
         "name": "Take shelter"
+      },
+      "meting_onweer": {
+        "name": "Thunder observed at station"
+      },
+      "meting_hagel": {
+        "name": "Hail observed at station"
       }
     },
     "switch": {
@@ -325,6 +377,9 @@
     "image": {
       "radar": {
         "name": "Radar"
+      },
+      "radar_vooruitblik": {
+        "name": "Radar outlook"
       }
     }
   },
@@ -387,6 +442,12 @@
       "options": {
         "rainviewer": "RainViewer (worldwide)",
         "dwd": "German weather service (fresher, limited area)"
+      }
+    },
+    "knmi_radarstijl": {
+      "options": {
+        "donker": "Dark",
+        "licht": "Light"
       }
     }
   },

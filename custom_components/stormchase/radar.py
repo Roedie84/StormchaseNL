@@ -67,6 +67,8 @@ def beeldkenmerk(data: dict | None, aantal_inslagen: int, positie: tuple) -> tup
         satelliet.get("path"),
         aantal_inslagen,
         *(round(w, 3) for w in positie),
+        # 0.49.0: een nieuw KNMI-radarbeeld is ook een nieuw beeld
+        (data.get("knmi") or {}).get("tijd"),
     )
 
 
@@ -300,7 +302,9 @@ def ophaallabel(nu: float, verschuiving: int = 0, bron: str = "Radar") -> str:
     return f"{bron} {uren:02d}:{minuten:02d} \u00b7 zojuist opgehaald"
 
 
-def beeldlabel(tijd: int | None, nu: float, verschuiving: int = 0) -> str:
+def beeldlabel(
+    tijd: int | None, nu: float, verschuiving: int = 0, bron: str = "Radar"
+) -> str:
     """Tekst met het tijdstip van het beeld en hoe oud het is.
 
     Het tijdstip van de opname zegt meer dan het moment waarop wij het
@@ -317,10 +321,10 @@ def beeldlabel(tijd: int | None, nu: float, verschuiving: int = 0) -> str:
     ouderdom = max(int((nu - tijd) // 60), 0)
 
     if ouderdom == 0:
-        return f"Radar {uren:02d}:{minuten:02d} \u00b7 zojuist"
+        return f"{bron} {uren:02d}:{minuten:02d} \u00b7 zojuist"
     if ouderdom == 1:
-        return f"Radar {uren:02d}:{minuten:02d} \u00b7 1 minuut oud"
-    return f"Radar {uren:02d}:{minuten:02d} \u00b7 {ouderdom} minuten oud"
+        return f"{bron} {uren:02d}:{minuten:02d} \u00b7 1 minuut oud"
+    return f"{bron} {uren:02d}:{minuten:02d} \u00b7 {ouderdom} minuten oud"
 
 
 def coordinaat_van_tegel(x: float, y: float, zoom: int) -> tuple[float, float]:

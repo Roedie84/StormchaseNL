@@ -16,6 +16,10 @@ from homeassistant.core import callback
 from homeassistant.helpers import selector
 
 from .const import (
+    CONF_KNMI_RADARSTIJL,
+    DEFAULT_KNMI_RADARSTIJL,
+    KNMI_RADARSTIJLEN,
+    KNMI_SLEUTELS,
     ALERT_COUNTRIES,
     CONF_BRIEFING,
     CONF_BRIEFING_AFTERNOON,
@@ -497,6 +501,57 @@ def _briefing_schema(defaults: dict[str, Any]) -> vol.Schema:
     )
 
 
+def _knmi_schema(defaults: dict[str, Any]) -> vol.Schema:
+    """De drie optionele KNMI-sleutels en de radarstijl (0.49.0).
+
+    Als voorgestelde waarde en niet als standaard: met een standaard zet
+    Home Assistant een leeggemaakt veld stilletjes terug, en dan kun je een
+    sleutel nooit meer weghalen.
+    """
+    wachtwoord = selector.TextSelector(
+        selector.TextSelectorConfig(type=selector.TextSelectorType.PASSWORD)
+    )
+    velden: dict = {}
+    for sleutel in KNMI_SLEUTELS:
+        velden[
+            vol.Optional(
+                sleutel, description={"suggested_value": defaults.get(sleutel) or ""}
+            )
+        ] = wachtwoord
+    velden[
+        vol.Required(
+            CONF_KNMI_RADARSTIJL,
+            default=defaults.get(CONF_KNMI_RADARSTIJL, DEFAULT_KNMI_RADARSTIJL),
+        )
+    ] = selector.SelectSelector(
+        selector.SelectSelectorConfig(
+            options=KNMI_RADARSTIJLEN,
+            translation_key="knmi_radarstijl",
+            mode=selector.SelectSelectorMode.DROPDOWN,
+        )
+    )
+    return vol.Schema(velden)
+
+
+def _knmi_invoer(user_input: dict[str, Any]) -> tuple[dict[str, Any], dict[str, str]]:
+    """Sleutels opschonen en grof controleren; leeg betekent 'geen sleutel'.
+
+    Een sleutel van het KNMI Data Platform is één lange reeks zonder spaties.
+    Meer controleren kan niet zonder verbinding met het KNMI.
+    """
+    schoon: dict[str, Any] = {}
+    fouten: dict[str, str] = {}
+    for sleutel in KNMI_SLEUTELS:
+        waarde = str(user_input.get(sleutel) or "").strip()
+        if waarde and (len(waarde) < 20 or any(teken.isspace() for teken in waarde)):
+            fouten[sleutel] = "knmi_sleutel_ongeldig"
+        schoon[sleutel] = waarde
+    schoon[CONF_KNMI_RADARSTIJL] = user_input.get(
+        CONF_KNMI_RADARSTIJL, DEFAULT_KNMI_RADARSTIJL
+    )
+    return schoon, fouten
+
+
 def _validate_rings(user_input: dict[str, Any]) -> str | None:
     """Controleer of de ringen oplopend en verschillend zijn."""
     rings = [
@@ -594,10 +649,27 @@ class StormchaseConfigFlow(ConfigFlow, domain=DOMAIN):
         """Vraag wanneer het dagelijkse weerbericht moet komen."""
         if user_input is not None:
             self._data.update(user_input)
-            return self.async_create_entry(title="Stormchase", data=self._data)
+            return await self.async_step_knmi()
 
         return self.async_show_form(
             step_id="briefing", data_schema=_briefing_schema(self._data)
+        )
+
+    async def async_step_knmi(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Vraag de optionele sleutels van het KNMI Data Platform."""
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            schoon, errors = _knmi_invoer(user_input)
+            if not errors:
+                self._data.update(schoon)
+                return self.async_create_entry(title="Stormchase", data=self._data)
+
+        return self.async_show_form(
+            step_id="knmi",
+            data_schema=_knmi_schema({**self._data, **(user_input or {})}),
+            errors=errors,
         )
 
     @staticmethod
@@ -692,8 +764,27 @@ class StormchaseOptionsFlow(OptionsFlow):
         """Vraag wanneer het dagelijkse weerbericht moet komen."""
         if user_input is not None:
             self._data.update(user_input)
-            return self.async_create_entry(title="", data=self._data)
+            return await self.async_step_knmi()
 
         return self.async_show_form(
             step_id="briefing", data_schema=_briefing_schema(self._data)
+        )
+
+    async def async_step_knmi(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Vraag de optionele sleutels van het KNMI Data Platform."""
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            # Een leeggemaakt veld ontbreekt in user_input; daarom expliciet
+            # per sleutel, anders bleef de oude sleutel staan.
+            schoon, errors = _knmi_invoer(user_input)
+            if not errors:
+                self._data.update(schoon)
+                return self.async_create_entry(title="", data=self._data)
+
+        return self.async_show_form(
+            step_id="knmi",
+            data_schema=_knmi_schema({**self._data, **(user_input or {})}),
+            errors=errors,
         )

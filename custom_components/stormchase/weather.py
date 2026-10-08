@@ -2,6 +2,11 @@
 
 Toont het weer op de locatie die de integratie gebruikt. Reist die mee met een
 device_tracker, dan doet het weerbericht dat ook.
+
+0.49.0: in Nederland komen de huidige conditie, temperatuur, wind en de uur-
+en dagverwachting van het KNMI (de API achter de KNMI-app). Luchtvochtigheid,
+luchtdruk en bewolking blijven van Open-Meteo, net als alles buiten
+Nederland. Regent het volgens de radar, dan wint de radar (0.48.0).
 """
 
 from __future__ import annotations
@@ -29,6 +34,9 @@ from .const import DOMAIN, WMO_CONDITIES
 from .coordinator import MeteoCoordinator, StormCoordinator
 from .rain import RainCoordinator
 
+# Een KNMI-verwachting ouder dan dit (storing) maakt plaats voor Open-Meteo
+KNMI_MAX_VEROUDERD_MIN = 60
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -39,7 +47,15 @@ async def async_setup_entry(
     gegevens = hass.data[DOMAIN][entry.entry_id]
     meteo: MeteoCoordinator = gegevens["meteo"]
     async_add_entities(
-        [StormchaseWeather(meteo, entry, gegevens.get("rain"), gegevens.get("storm"))]
+        [
+            StormchaseWeather(
+                meteo,
+                entry,
+                gegevens.get("rain"),
+                gegevens.get("storm"),
+                gegevens.get("alerts"),
+            )
+        ]
     )
 
 
@@ -67,12 +83,15 @@ class StormchaseWeather(CoordinatorEntity[MeteoCoordinator], WeatherEntity):
         entry: ConfigEntry,
         regen: RainCoordinator | None = None,
         storm: StormCoordinator | None = None,
+        waarschuwingen=None,
     ) -> None:
         """Initialiseer de entiteit."""
         super().__init__(coordinator)
         # 0.48.0: de radar stuurt de huidige conditie bij als het nu regent.
         self._regen = regen
         self._storm = storm
+        # 0.49.0: de KNMI-verwachting komt mee met de waarschuwingen
+        self._waarschuwingen = waarschuwingen
         self._attr_unique_id = f"{entry.entry_id}_weather"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
@@ -84,7 +103,7 @@ class StormchaseWeather(CoordinatorEntity[MeteoCoordinator], WeatherEntity):
     async def async_added_to_hass(self) -> None:
         """Ook bijwerken als de regen- of onweersgegevens veranderen."""
         await super().async_added_to_hass()
-        for bron in (self._regen, self._storm):
+        for bron in (self._regen, self._storm, self._waarschuwingen):
             if bron is not None:
                 self.async_on_remove(
                     bron.async_add_listener(self._handle_coordinator_update)
@@ -119,9 +138,46 @@ class StormchaseWeather(CoordinatorEntity[MeteoCoordinator], WeatherEntity):
         return (self.coordinator.data or {}).get("current") or {}
 
     @property
+    def _knmi(self) -> dict | None:
+        """De KNMI-verwachting, alleen als die actueel is (in Nederland)."""
+        bron = self._waarschuwingen
+        data = getattr(bron, "data", None) if bron is not None else None
+        if not isinstance(data, dict) or data.get("bron") != "knmi":
+            return None
+        if (data.get("verouderd_minuten") or 0) > KNMI_MAX_VEROUDERD_MIN:
+            return None
+        weer = data.get("knmi_weer") or {}
+        return weer if weer.get("uren") else None
+
+    def _knmi_uren(self) -> list[dict]:
+        """De KNMI-uren vanaf het lopende uur (opgehaald kan tot een kwartier oud zijn)."""
+        weer = self._knmi
+        if not weer:
+            return []
+        begin = dt_util.utcnow().replace(minute=0, second=0, microsecond=0)
+        uit = []
+        for uur in weer.get("uren") or []:
+            moment = dt_util.parse_datetime(str(uur.get("datetime")))
+            if moment is not None and moment >= begin:
+                uit.append(uur)
+        return uit
+
+    @property
+    def _knmi_uur(self) -> dict:
+        """Het lopende uur uit de KNMI-verwachting, of leeg."""
+        uren = self._knmi_uren()
+        return uren[0] if uren else {}
+
+    def _knmi_of(self, sleutel: str, terugval):
+        waarde = self._knmi_uur.get(sleutel)
+        return waarde if waarde is not None else terugval
+
+    @property
     def condition(self) -> str | None:
-        """Huidige weersgesteldheid: Open-Meteo, maar regen op de radar wint."""
-        model = _conditie(self._nu.get("weather_code"), bool(self._nu.get("is_day", 1)))
+        """Huidige weersgesteldheid: KNMI of Open-Meteo, maar regen op de radar wint."""
+        model = self._knmi_uur.get("condition") or _conditie(
+            self._nu.get("weather_code"), bool(self._nu.get("is_day", 1))
+        )
         mm = self._radar_mm()
         if mm is None:
             return model
@@ -130,7 +186,7 @@ class StormchaseWeather(CoordinatorEntity[MeteoCoordinator], WeatherEntity):
     @property
     def native_temperature(self) -> float | None:
         """Temperatuur."""
-        return self._nu.get("temperature_2m")
+        return self._knmi_of("native_temperature", self._nu.get("temperature_2m"))
 
     @property
     def native_apparent_temperature(self) -> float | None:
@@ -150,17 +206,17 @@ class StormchaseWeather(CoordinatorEntity[MeteoCoordinator], WeatherEntity):
     @property
     def native_wind_speed(self) -> float | None:
         """Windsnelheid."""
-        return self._nu.get("wind_speed_10m")
+        return self._knmi_of("native_wind_speed", self._nu.get("wind_speed_10m"))
 
     @property
     def wind_bearing(self) -> float | None:
         """Windrichting."""
-        return self._nu.get("wind_direction_10m")
+        return self._knmi_of("wind_bearing", self._nu.get("wind_direction_10m"))
 
     @property
     def native_wind_gust_speed(self) -> float | None:
         """Windstoten."""
-        return self._nu.get("wind_gusts_10m")
+        return self._knmi_of("native_wind_gust_speed", self._nu.get("wind_gusts_10m"))
 
     @property
     def cloud_coverage(self) -> float | None:
@@ -170,10 +226,28 @@ class StormchaseWeather(CoordinatorEntity[MeteoCoordinator], WeatherEntity):
     @property
     def attribution(self) -> str:
         """Bronvermelding."""
+        if self._knmi is not None:
+            return "Weergegevens van het KNMI (CC BY 4.0) en Open-Meteo"
         return "Weergegevens van Open-Meteo"
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        """Waar de verwachting vandaan komt."""
+        return {"verwachting_bron": "knmi" if self._knmi is not None else "open-meteo"}
+
+    @staticmethod
+    def _als_forecast(items: list[dict]) -> list[Forecast] | None:
+        """KNMI-items naar Forecast, zonder de eigen hulpvelden."""
+        uit = [
+            Forecast(**{k: v for k, v in item.items() if k != "weercode"})
+            for item in items
+        ]
+        return uit or None
 
     async def async_forecast_hourly(self) -> list[Forecast] | None:
         """Verwachting per uur, vanaf nu."""
+        if self._knmi is not None:
+            return self._als_forecast(self._knmi_uren())
         data = self.coordinator.data or {}
         uurlijks = data.get("hourly") or {}
         start = data.get("hourly_index") or 0
@@ -214,6 +288,18 @@ class StormchaseWeather(CoordinatorEntity[MeteoCoordinator], WeatherEntity):
 
     async def async_forecast_daily(self) -> list[Forecast] | None:
         """Verwachting per dag."""
+        knmi = self._knmi
+        if knmi is not None and knmi.get("dagen"):
+            dagen = []
+            for dag in knmi["dagen"]:
+                # Zelfde vorm als bij Open-Meteo: de dag om 12:00 lokale tijd
+                moment = dt_util.parse_datetime(f"{dag.get('datetime')}T12:00:00")
+                if moment is None:
+                    continue
+                if moment.tzinfo is None:
+                    moment = moment.replace(tzinfo=dt_util.now().tzinfo)
+                dagen.append({**dag, "datetime": moment.isoformat()})
+            return self._als_forecast(dagen)
         dagelijks = (self.coordinator.data or {}).get("daily") or {}
         tijden = dagelijks.get("time") or []
 

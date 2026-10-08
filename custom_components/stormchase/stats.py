@@ -170,12 +170,19 @@ class Statistieken:
             "meting": BronStatus(),
             "ensemble_leden": BronStatus(),
             "radar": BronStatus(),
+            # 0.49.0: officiële KNMI-bronnen (alleen in Nederland)
+            "knmi_waarschuwingen": BronStatus(),
+            "knmi_verwachting": BronStatus(),
+            "knmi_nowcast": BronStatus(),
+            "knmi_edr": BronStatus(),
+            "knmi_wms": BronStatus(),
         }
     )
 
     # Welke neerslagbron er daadwerkelijk gebruikt is
     regen_via_buienradar: int = 0
     regen_via_open_meteo: int = 0
+    regen_via_knmi: int = 0
 
     # Events die de integratie heeft afgevuurd
     events: dict[str, int] = field(
@@ -281,6 +288,7 @@ class Statistieken:
             },
             "regen_via_buienradar": self.regen_via_buienradar,
             "regen_via_open_meteo": self.regen_via_open_meteo,
+            "regen_via_knmi": self.regen_via_knmi,
             "events": dict(self.events),
             "meldingen_verstuurd": dict(self.meldingen_verstuurd),
             "meldingen_mislukt": self.meldingen_mislukt,
@@ -303,6 +311,7 @@ class Statistieken:
             bron.laatste_fout_op = _moment(waarden.get("laatste_fout_op"))
         self.regen_via_buienradar = _telling(bewaard.get("regen_via_buienradar"))
         self.regen_via_open_meteo = _telling(bewaard.get("regen_via_open_meteo"))
+        self.regen_via_knmi = _telling(bewaard.get("regen_via_knmi"))
         for soort, aantal in (bewaard.get("events") or {}).items():
             if soort in self.events:
                 self.events[soort] = _telling(aantal)
@@ -334,6 +343,7 @@ class Statistieken:
             "regenbron_gebruikt": {
                 "buienradar": self.regen_via_buienradar,
                 "open_meteo": self.regen_via_open_meteo,
+                "knmi": self.regen_via_knmi,
             },
             "events_afgevuurd": dict(self.events),
             "meldingen_verstuurd": dict(self.meldingen_verstuurd),

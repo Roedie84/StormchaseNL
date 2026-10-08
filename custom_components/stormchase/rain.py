@@ -6,6 +6,12 @@ Dat is nauwkeurig genoeg voor een melding als "over tien minuten regen".
 
 Buiten het radarbereik van Buienradar valt hij terug op de kwartierwaarden
 van Open-Meteo. Grover, maar wereldwijd beschikbaar.
+
+0.49.0: in Nederland eerst de neerslagverwachting van het KNMI zelf (de API
+achter de KNMI-app, per radarcel van een vierkante kilometer, met exacte
+UTC-tijdstempels). Buienradar is dan de terugval, Open-Meteo de laatste.
+De reeks heeft dezelfde vorm, dus buienreeks, conditie en weerentiteit
+werken ongewijzigd.
 """
 
 from __future__ import annotations
@@ -33,6 +39,9 @@ from .const import (
     RAIN_INTERVAL,
 )
 from .buienreeks import lees_reeks
+from .knmi_api import NietGevonden, poging, vijf_minuten_slot
+from .knmi_grid import radarcel
+from .knmi_verwerk import nowcast_reeks
 from .coordinator import LocationMixin
 from .herpoging import HerpogingMixin
 from .verouderd import VerouderdMixin
@@ -69,6 +78,7 @@ class RainCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdateC
         self._session = async_get_clientsession(hass)
         self._was_verwacht: bool | None = None
         self.validatie = None  # wordt na het aanmaken gezet
+        self.knmi = None  # KnmiBronnen, wordt na het aanmaken gezet
 
     @property
     def drempel(self) -> float:
@@ -162,13 +172,56 @@ class RainCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdateC
 
         return sorted(reeks)
 
+    async def _knmi_nowcast(self, latitude: float, longitude: float):
+        """KNMI-neerslagverwachting, of None buiten Nederland of bij een fout."""
+        knmi = self.knmi
+        if knmi is None or not knmi.land.in_nederland(latitude, longitude):
+            return None
+        cel = radarcel(latitude, longitude)
+        if cel is None:
+            return None
+
+        async def ophalen():
+            slot = vijf_minuten_slot(dt_util.utcnow())
+            try:
+                grafiek = await knmi.app.neerslaggrafiek(cel, slot)
+            except NietGevonden:
+                # Het nieuwste vak staat er nog niet: het vorige dan
+                grafiek = await knmi.app.neerslaggrafiek(
+                    cel, slot - timedelta(minutes=5)
+                )
+            return nowcast_reeks(grafiek, dt_util.utcnow())
+
+        stats = getattr(self, "stats", None)
+        reeks, _ = await poging(
+            knmi.afremming["nowcast"],
+            stats.bronnen["knmi_nowcast"] if stats is not None else None,
+            "neerslagverwachting",
+            ophalen,
+        )
+        return reeks
+
     async def _haal_op(self) -> dict:
         """Bepaal of en wanneer het gaat regenen."""
         latitude, longitude, _ = self.resolve_location()
 
         stats = getattr(self, "stats", None)
-        bron = "buienradar"
 
+        reeks = await self._knmi_nowcast(latitude, longitude)
+        if reeks is not None:
+            bron = "knmi"
+            if stats is not None:
+                stats.regen_via_knmi += 1
+        else:
+            reeks, bron = await self._buienradar_of_open_meteo(
+                latitude, longitude, stats
+            )
+
+        return self._verwerk(reeks, bron)
+
+    async def _buienradar_of_open_meteo(self, latitude, longitude, stats):
+        """De bestaande route: Buienradar, en anders Open-Meteo."""
+        bron = "buienradar"
         try:
             reeks = await self._buienradar(latitude, longitude)
             if stats is not None:
@@ -184,7 +237,14 @@ class RainCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdateC
                 if stats is not None:
                     stats.regen_via_open_meteo += 1
             except (aiohttp.ClientError, TimeoutError, ValueError) as err2:
-                return self.val_terug(err2)
+                return self.val_terug(err2), None
+        return reeks, bron
+
+    def _verwerk(self, reeks, bron) -> dict:
+        """Lees de reeks en stel de gegevens samen."""
+        if bron is None:
+            # Alle bronnen faalden: val_terug gaf de vorige gegevens al terug
+            return reeks
 
         drempel = self.drempel
 

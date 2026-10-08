@@ -21,6 +21,7 @@ from .const import (
 from .coordinator import StormCoordinator
 from .alerts import AlertCoordinator
 from .rain import RainCoordinator
+from .meting import MetingCoordinator
 
 
 async def async_setup_entry(
@@ -41,6 +42,13 @@ async def async_setup_entry(
             ),
             MovingBinarySensor(storm, entry),
             ShelterBinarySensor(storm, entry),
+            # 0.49.0: weercode van het dichtstbijzijnde KNMI-station
+            GemetenWeerBinarySensor(
+                hass.data[DOMAIN][entry.entry_id]["meting"], entry, "meting_onweer", "onweer"
+            ),
+            GemetenWeerBinarySensor(
+                hass.data[DOMAIN][entry.entry_id]["meting"], entry, "meting_hagel", "hagel"
+            ),
         ]
     )
 
@@ -290,3 +298,48 @@ class ShelterBinarySensor(CoordinatorEntity[StormCoordinator], BinarySensorEntit
             "afstand": data.distance,
             "drempel_km": 10,
         }
+
+
+class GemetenWeerBinarySensor(CoordinatorEntity[MetingCoordinator], BinarySensorEntity):
+    """Onweer of hagel volgens de weercode van een KNMI-station (0.49.0).
+
+    Gemeten, niet voorspeld: de weersensor van het station ziet onweer of
+    hagel ter plaatse (WMO-code 4680). Alleen stations met zo'n sensor tellen;
+    welk station en hoe ver weg staat in de attributen. Zonder KNMI-metingen
+    (buiten Nederland of zonder EDR-sleutel) blijft de toestand onbekend.
+    """
+
+    _attr_has_entity_name = True
+
+    def __init__(
+        self, coordinator: MetingCoordinator, entry: ConfigEntry, sleutel: str, veld: str
+    ) -> None:
+        """Initialiseer de sensor."""
+        super().__init__(coordinator)
+        self._veld = veld
+        self._attr_translation_key = sleutel
+        self._attr_unique_id = f"{entry.entry_id}_{sleutel}"
+        self._attr_device_info = _device(entry)
+
+    @property
+    def is_on(self) -> bool | None:
+        data = self.coordinator.data
+        if not data or data.get(self._veld) is None:
+            return None
+        return bool(data.get(self._veld))
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        data = self.coordinator.data
+        if not data:
+            return {}
+        uit = {
+            "weercode": data.get("weercode"),
+            "station": data.get("weer_station"),
+            "station_afstand_km": data.get("weer_station_afstand_km"),
+            "waargenomen_op": data.get("waargenomen_op"),
+            "bron": data.get("bron"),
+        }
+        if self._veld == "onweer":
+            uit["onweer_afgelopen_uur"] = data.get("onweer_afgelopen_uur")
+        return uit

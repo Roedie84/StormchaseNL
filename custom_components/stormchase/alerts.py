@@ -1,8 +1,14 @@
-"""Officiele weerwaarschuwingen via MeteoAlarm.
+"""Officiele weerwaarschuwingen via MeteoAlarm, in Nederland via het KNMI.
 
 MeteoAlarm is de Europese koepel waar nationale weerdiensten hun
 waarschuwingen aan leveren, waaronder het KNMI. Dat maakt het bruikbaar in
 heel Europa, in plaats van alleen in Nederland.
+
+0.49.0: in Nederland komen de waarschuwingen eerst rechtstreeks van het KNMI
+(de API achter de KNMI-app, geen sleutel nodig): per waarschuwingsregio, met
+het niveau per uur vooruit. Hetzelfde antwoord levert de weersverwachting
+voor de weerentiteit. Lukt dat niet, of ben je buiten Nederland, dan gewoon
+MeteoAlarm zoals altijd.
 """
 
 from __future__ import annotations
@@ -41,6 +47,11 @@ from .herpoging import HerpogingMixin
 from .verouderd import VerouderdMixin
 from .taal import vertaal_soort
 from .herstart import gemeld_naar_opslag, gemeld_uit_opslag
+from .knmi_api import poging
+from .knmi_grid import KNMI_REGIOS, in_nederland_grof, regio_uit_geocode, verwachtingscel
+from .knmi_verwerk import verwachting as knmi_verwachting
+from .knmi_verwerk import waarschuwingen as knmi_waarschuwingen
+from .const import KNMI_DETAIL_INTERVAL
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -107,6 +118,13 @@ class AlertCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
         # Daarmee filteren we de landelijke feed terug naar jouw omgeving.
         self._gebiedsnamen: list[str] = []
         self._wacht_op_land = False
+        # 0.49.0: KNMI-bronnen (wordt na het aanmaken gezet) en het laatste
+        # geocodeerantwoord, voor de waarschuwingsregio
+        self.knmi = None
+        self._geocode: dict | None = None
+        self._details: dict[str, dict] = {}
+        self._details_voor: tuple[str, int] | None = None
+        self._details_op = None
 
     @property
     def instelling(self) -> str:
@@ -127,7 +145,7 @@ class AlertCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
                 abs(self._land_voor[0] - latitude),
                 abs(self._land_voor[1] - longitude),
             )
-            if verschil < 0.5:
+            if verschil < self._geocodeer_drempel(latitude, longitude):
                 return self._gevonden_land
 
         params = {
@@ -152,6 +170,11 @@ class AlertCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
 
         code = (payload.get("countryCode") or "").upper()
         land = LANDCODES.get(code)
+        # 0.49.0: provincie en gemeente voor de KNMI-regio, en het land voor
+        # de andere KNMI-bronnen
+        self._geocode = payload
+        if self.knmi is not None:
+            self.knmi.land.noteer(latitude, longitude, code)
 
         # Verzamel de bestuurlijke namen rond deze coordinaten. MeteoAlarm
         # beschrijft gebieden met namen als "Kreis und Stadt Augsburg", dus
@@ -181,6 +204,20 @@ class AlertCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
             self._land_voor = (latitude, longitude)
             self._gevonden_land = land
         return land
+
+    def _geocodeer_drempel(self, latitude: float, longitude: float) -> float:
+        """Hoe ver je mag verschuiven voor een nieuwe geocodering (graden).
+
+        Een land verandert niet om de paar kilometer, een KNMI-regio wel:
+        Eibergen ligt in Gelderland, tien kilometer verderop is het
+        Overijssel. In en rond Nederland daarom een fijnere stap.
+        """
+        if self.knmi is not None and (
+            self._gevonden_land == "netherlands"
+            or in_nederland_grof(latitude, longitude)
+        ):
+            return 0.1
+        return 0.5
 
     @property
     def regio(self) -> str:
@@ -222,7 +259,7 @@ class AlertCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
             abs(self._land_voor[0] - latitude),
             abs(self._land_voor[1] - longitude),
         )
-        if verschil >= 0.5:
+        if verschil >= self._geocodeer_drempel(latitude, longitude):
             _LOGGER.debug("Locatie flink verschoven, land opnieuw bepalen")
             self.hass.async_create_task(self.async_request_refresh())
 
@@ -276,6 +313,18 @@ class AlertCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
                 }
         else:
             land = self.instelling
+            latitude, longitude, _ = self.resolve_location()
+
+        # 0.49.0: in Nederland eerst het KNMI zelf; MeteoAlarm is de terugval
+        if land == "netherlands" and self.knmi is not None:
+            if self.instelling != "auto":
+                # Alleen voor de regio; het land staat vast
+                await self._bepaal_land(latitude, longitude)
+            knmi = await self._knmi(latitude, longitude)
+            if knmi is not None:
+                self.onthoud(knmi)
+                self._vuur_events(knmi["actief"])
+                return knmi
 
         url = f"{METEOALARM_URL}{land}"
 
@@ -363,11 +412,100 @@ class AlertCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
             "gebieden_in_land": sorted(
                 {w.get("gebied") for w in alles if w.get("gebied")}
             )[:25],
+            "bron": "meteoalarm",
+            "regio": None,
+            "niveau_per_uur": None,
         }
 
         self.onthoud(data)
         self._vuur_events(actief)
         return data
+
+    def _knmi_regio(self, latitude: float, longitude: float) -> tuple[int, str]:
+        """De KNMI-waarschuwingsregio voor deze positie.
+
+        Een handmatig regiofilter dat een KNMI-regio noemt, gaat voor.
+        Anders uit de geocodering (provincie, Waddeneiland, water), en als
+        laatste de regio met het dichtstbijzijnde middelpunt.
+        """
+        if self.regio:
+            for nummer, naam in KNMI_REGIOS.items():
+                if naam.lower() == self.regio or self.regio in naam.lower():
+                    return nummer, "instelling"
+        return regio_uit_geocode(self._geocode, latitude, longitude)
+
+    async def _knmi(self, latitude: float, longitude: float) -> dict | None:
+        """Waarschuwingen en verwachting van het KNMI, of None (terugval)."""
+        cel = verwachtingscel(latitude, longitude)
+        if cel is None:
+            return None
+        regio, via = self._knmi_regio(latitude, longitude)
+        stats = self.stats
+
+        async def ophalen():
+            payload = await self.knmi.app.weer(cel, regio)
+            if not isinstance(payload, dict) or (
+                "alerts" not in payload and "hourly" not in payload
+            ):
+                raise ValueError("onverwacht antwoord van de KNMI-app")
+            return payload
+
+        payload, _ = await poging(
+            self.knmi.afremming["waarschuwingen"],
+            stats.bronnen["knmi_waarschuwingen"] if stats is not None else None,
+            "waarschuwingen",
+            ophalen,
+        )
+        if payload is None:
+            return None
+
+        nu = dt_util.utcnow()
+        data = knmi_waarschuwingen(payload, regio, KNMI_REGIOS[regio], nu)
+        data["regio_bepaald_via"] = via
+        data["knmi_cel"] = cel
+        data["knmi_weer"] = knmi_verwachting(
+            payload, await self._knmi_details(cel, regio, payload), nu
+        )
+        if stats is not None:
+            stats.alert_laatste_in_land = None
+            stats.alert_laatste_na_filter = data["aantal"]
+            stats.alert_filternamen = [KNMI_REGIOS[regio]]
+        return data
+
+    async def _knmi_details(self, cel: str, regio: int, payload: dict) -> dict:
+        """Dagdetails (neerslagkans, wind), hooguit elk uur opnieuw."""
+        nu = dt_util.utcnow()
+        if (
+            self._details_voor == (cel, regio)
+            and self._details_op is not None
+            and nu - self._details_op < KNMI_DETAIL_INTERVAL
+        ):
+            return self._details
+
+        data = [
+            dag.get("date")
+            for dag in ((payload.get("daily") or {}).get("forecast") or [])
+            if isinstance(dag, dict) and dag.get("date")
+        ]
+
+        async def ophalen():
+            details = {}
+            for datum in data:
+                details[datum] = await self.knmi.app.weer_detail(cel, regio, datum)
+            return details
+
+        stats = self.stats
+        details, _ = await poging(
+            self.knmi.afremming["verwachting"],
+            stats.bronnen["knmi_verwachting"] if stats is not None else None,
+            "verwachting",
+            ophalen,
+        )
+        if details is not None:
+            self._details = details
+            self._details_voor = (cel, regio)
+            self._details_op = nu
+        return self._details if self._details_voor == (cel, regio) else {}
 
     def herstel_gemeld(self, bewaard) -> None:
         """Al gemelde waarschuwingen terugzetten; verlopen vallen weg."""

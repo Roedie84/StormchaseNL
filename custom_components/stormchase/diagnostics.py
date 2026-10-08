@@ -23,10 +23,12 @@ from .const import (
     CONF_NOTIFY_SERVICES,
     CONF_TRACKER_ENTITY,
     DOMAIN,
+    KNMI_SLEUTELS,
 )
 
-# Deze velden zeggen iets over wie je bent, niet over hoe de integratie werkt
-TE_VERBERGEN = {CONF_MANUAL_LOCATION, CONF_TRACKER_ENTITY, CONF_NOTIFY_SERVICES}
+# Deze velden zeggen iets over wie je bent, niet over hoe de integratie werkt.
+# 0.49.0: de KNMI-sleutels gaan er ook uit.
+TE_VERBERGEN = {CONF_MANUAL_LOCATION, CONF_TRACKER_ENTITY, CONF_NOTIFY_SERVICES, *KNMI_SLEUTELS}
 
 
 def _grof(waarde: float | None) -> float | None:
@@ -170,7 +172,17 @@ async def async_get_config_entry_diagnostics(
                 w.get("gebied") for w in ((alert_data or {}).get("actief") or [])
             ][:20],
             "gebieden_in_land": (alert_data or {}).get("gebieden_in_land"),
+            # 0.49.0
+            "bron": (alert_data or {}).get("bron"),
+            "regio": (alert_data or {}).get("regio"),
+            "regio_bepaald_via": (alert_data or {}).get("regio_bepaald_via"),
+            "niveau_per_uur": (alert_data or {}).get("niveau_per_uur"),
+            "knmi_verwachting_uren": len(
+                ((alert_data or {}).get("knmi_weer") or {}).get("uren") or []
+            ),
         },
+        # 0.49.0: sleutels aanwezig (ja/nee), pushverbinding, afremming
+        "knmi": gegevens.get("knmi").als_dict() if gegevens.get("knmi") else None,
         "meting": (gegevens.get("meting").data if gegevens.get("meting") else None),
         "radar": (gegevens.get("radar").data if gegevens.get("radar") else None),
         "statistieken": stats.als_dict() if stats else None,

@@ -81,7 +81,9 @@ Kaart van OpenStreetMap, bewolking van EUMETSAT.
 
 `sensor.stormchase_meting` geeft de waarneming van het dichtstbijzijnde
 weerstation via Bright Sky, de open API op de data van de Duitse weerdienst.
-Gratis en zonder sleutel, met de stationsnaam en afstand als attribuut.
+Gratis en zonder sleutel, met de stationsnaam en afstand als attribuut. In
+Nederland, met een EDR-sleutel, komen de metingen van de KNMI-stations (zie
+[KNMI-bronnen](#knmi-bronnen-nederland)).
 
 Alles wat de integratie verder toont is voorspeld. Deze waarde is gemeten, en
 het verschil ertussen zegt of je de verwachting van vandaag kunt vertrouwen.
@@ -153,7 +155,9 @@ gebruikte drempels met uitleg erbij.
 ### Weer
 
 `weather.stormchase` geeft de actuele omstandigheden en een verwachting per
-uur en per dag op de actieve locatie, via Open-Meteo. Bruikbaar in elke
+uur en per dag op de actieve locatie, via Open-Meteo; in Nederland sinds
+0.49.0 conditie, temperatuur, wind en verwachting van het KNMI (attribuut
+`verwachting_bron`). Bruikbaar in elke
 standaard weerkaart van Home Assistant.
 
 Sinds 0.48.0 volgt de huidige conditie de radar als het nu regent: vanaf
@@ -166,9 +170,10 @@ verwachting per uur en per dag komt onveranderd van Open-Meteo.
 ### Waarschuwingen
 
 `sensor.stormchase_waarschuwingsniveau` staat op groen, geel, oranje of rood.
-De bron is MeteoAlarm, de Europese koepel waar nationale weerdiensten hun
-waarschuwingen aan leveren, waaronder het KNMI. Daardoor werkt het ook buiten
-Nederland.
+In Nederland komen de waarschuwingen sinds 0.49.0 rechtstreeks van het KNMI
+(zie [KNMI-bronnen](#knmi-bronnen-nederland)). Daarbuiten, en als terugval, is
+de bron MeteoAlarm, de Europese koepel waar nationale weerdiensten hun
+waarschuwingen aan leveren. Daardoor werkt het ook buiten Nederland.
 
 Waarschuwingen worden gefilterd op je eigen omgeving. Bij de landbepaling
 haalt de integratie ook de namen van je stad, streek en provincie op, en houdt
@@ -217,6 +222,101 @@ Een hulpmiddel, geen verwachting. De opbouw staat in de attributen:
 Een hoge score betekent dat de ingrediënten aanwezig zijn, niet dat er
 daadwerkelijk iets gebeurt. Convectieve remming kan alles tegenhouden.
 Gebruik het als eerste signaal, niet als beslissing.
+
+## KNMI-bronnen (Nederland)
+
+Sinds 0.49.0 gebruikt Stormchase in Nederland de officiële bronnen van het
+KNMI, aanvullend op wat er al was. Buiten Nederland (Duitsland, België),
+zonder sleutel of bij een storing valt alles automatisch terug op de
+bestaande bronnen; er verandert dan niets.
+
+| Onderdeel | In Nederland | Terugval / buiten NL | Sleutel |
+|---|---|---|---|
+| Waarschuwingen | KNMI-app: code geel/oranje/rood per waarschuwingsregio, met niveau per uur | MeteoAlarm | geen |
+| Neerslag per 5 minuten | KNMI-app, per radarcel van 1 km² | Buienradar, daarna Open-Meteo | geen |
+| Weersverwachting (`weather.stormchase`) | KNMI-app: conditie, uur- en dagverwachting, windstoten, neerslagkans | Open-Meteo | geen |
+| Waarnemingen | KNMI-stations (EDR), per grootheid het dichtstbijzijnde station | Bright Sky | EDR-sleutel |
+| Radarkaart en vooruitblik | KNMI-radar (WMS): actueel en tot twee uur vooruit | RainViewer of DWD | WMS-sleutel |
+| Snellere verversing | Pushmeldingen (MQTT) bij nieuwe waarnemingen en radar | elke 10 minuten (waarnemingen) en 5 minuten (radar) pollen | Notification Service-sleutel |
+
+CAPE, Lifted Index, windschering en het ensemble blijven van Open-Meteo.
+
+### Sleutels aanmaken
+
+De drie sleutels zijn gratis bij het
+[KNMI Data Platform](https://dataplatform.knmi.nl):
+
+1. Maak een account aan via het
+   [Developer Portal](https://developer.dataplatform.knmi.nl/register).
+2. Vraag in de [API Catalog](https://developer.dataplatform.knmi.nl/apis) een
+   sleutel aan voor de **EDR API**, de **Web Map Service (WMS)** en de
+   **Notification Service**.
+3. Vul ze in via Instellingen → Apparaten & diensten → StormchaseNL →
+   Configureren, laatste stap **KNMI (optioneel)**:
+   - *KNMI WMS-sleutel (radarkaart)*
+   - *KNMI Notification Service-sleutel*
+   - *KNMI EDR-sleutel (waarnemingen)*
+   - *Radarstijl KNMI* (donker of licht)
+
+Elke sleutel is los te gebruiken; laat een veld leeg om die functie uit te
+zetten. De sleutels worden niet gelogd, staan niet in attributen en worden
+weggelaten uit het diagnosebestand.
+
+### Waarschuwingsregio
+
+De regio (1 tot 15, zoals in de KNMI-app) volgt de actieve locatie, dus ook
+de live tracker. Hij komt uit de omgekeerde geocodering die de integratie al
+deed: de provincie, de Waddeneilanden (Texel, Vlieland, Terschelling, Ameland,
+Schiermonnikoog) als eigen regio, en IJsselmeer of Waddenzee op het water.
+Lukt dat niet, dan geldt de regio met het dichtstbijzijnde middelpunt. Een
+ingevuld regiofilter dat een KNMI-regio noemt (bijvoorbeeld `Gelderland`),
+gaat voor. De attributen `bron`, `regio` en `niveau_per_uur` (komende 24 uur)
+staan op `sensor.stormchase_waarschuwingsniveau`.
+
+### Nieuwe entiteiten
+
+| Entiteit | Beschrijving |
+|---|---|
+| `sensor.stormchase_windstoten_gemeten` | Gemeten windstoot in km/u, met m/s, Beaufort, station en afstand als attribuut. |
+| `sensor.stormchase_luchtdruk_gemeten` | Gemeten luchtdruk (hPa). |
+| `sensor.stormchase_luchtdrukverandering_per_uur` | Druk nu min druk een uur geleden (hPa, negatief is dalend), met `druk_tendens_1u`. |
+| `sensor.stormchase_luchtdrukverandering_per_3_uur` | Idem over drie uur. |
+| `binary_sensor.stormchase_onweer_gemeten_bij_station` | Onweer volgens de weercode van het dichtstbijzijnde KNMI-station met weersensor (WMO 4680: 12, 90-96), met `onweer_afgelopen_uur` (26). |
+| `binary_sensor.stormchase_hagel_gemeten_bij_station` | Hagel volgens de weercode (89, 93, 96). |
+| `image.stormchase_radar_vooruitblik` | Geanimeerde KNMI-radar van een uur terug tot twee uur vooruit, per tien minuten (alleen met WMS-sleutel). |
+
+De drukverandering houdt de integratie zelf bij, per station, en overleeft
+een herstart; ze werkt ook met Bright Sky. Onweer en hagel bij het station
+blijven onbekend zonder KNMI-waarnemingen.
+
+`sensor.stormchase_bronstatus` toont de nieuwe bronnen (`knmi_waarschuwingen`,
+`knmi_verwachting`, `knmi_nowcast`, `knmi_edr`, `knmi_wms`) en onder `knmi`
+welke sleutels er zijn, de status van de pushverbinding en welke KNMI-bron
+tijdelijk is afgeremd na een fout. Na een storing wacht een KNMI-bron 2 tot
+30 minuten, na een 429 minstens 10 minuten (of de Retry-After), na een
+geweigerde sleutel een uur; intussen werkt de terugval.
+
+### Radar
+
+Met een WMS-sleutel staat in Nederland de KNMI-radar op
+`image.stormchase_radar`: één kaartverzoek voor het hele beeld, rechtstreeks in
+webmercator, over dezelfde kaart, wolken, cellen en inslagen. Lukt dat niet,
+dan de ingestelde radarbron (RainViewer of DWD). Het attribuut `radarbron`
+zegt welke er op het beeld staat.
+
+De vooruitblik wordt alleen bijgewerkt als iemand er de afgelopen kwartier
+naar keek. Frames worden bewaard; bij een nieuwe radarronde komen alleen het
+nieuwe beeld en de verwachting erbij (13 verzoeken), nooit meer dan vijf per
+seconde.
+
+### Bronvermelding
+
+Gegevens van het KNMI vallen onder [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/);
+de weerentiteit noemt het KNMI in de bronvermelding. De opbouw van de
+verzoeken aan de KNMI-API's is gebaseerd op
+[ha-nl-weather](https://github.com/PaulVanSchayck/ha-nl-weather) van Paul van
+Schayck (Apache-2.0); de code in Stormchase is eigen werk. De rasterdefinities
+komen uit de open source KNMI-app (KNMI-OSS).
 
 ## Installatie
 
@@ -373,8 +473,10 @@ door: die gaan over gevaar.
 
 ### Neerslag
 
-De verwachting komt van de neerslagtekst van Buienradar: per vijf minuten,
-twee uur vooruit, op exacte coordinaten. Dat is nauwkeuriger dan een
+In Nederland komt de verwachting sinds 0.49.0 eerst van het KNMI (per
+radarcel van een vierkante kilometer, met exacte UTC-tijdstempels); daarna van
+de neerslagtekst van Buienradar: per vijf minuten, twee uur vooruit, op
+exacte coordinaten. Dat is nauwkeuriger dan een
 uurverwachting en precies wat je nodig hebt voor "over tien minuten regen".
 
 Buiten het radarbereik van Buienradar, dus in de praktijk buiten Nederland en
@@ -610,7 +712,7 @@ kapot.
 
 ## Licentie
 
-MIT
+MIT. KNMI-gegevens: CC BY 4.0, zie [Bronvermelding](#bronvermelding).
 
 ## Iconen en logo
 

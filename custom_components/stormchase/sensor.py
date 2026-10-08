@@ -265,6 +265,59 @@ RAIN_SENSORS: tuple[MeteoSensorDescription, ...] = (
 )
 
 
+# 0.49.0: extra metingen (KNMI-stations in Nederland, anders Bright Sky)
+METING_SENSORS: tuple[MeteoSensorDescription, ...] = (
+    MeteoSensorDescription(
+        key="meting_windstoten",
+        translation_key="meting_windstoten",
+        native_unit_of_measurement="km/h",
+        device_class=SensorDeviceClass.WIND_SPEED,
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=0,
+        value=lambda data: data.get("windstoten"),
+    ),
+    MeteoSensorDescription(
+        key="meting_luchtdruk",
+        translation_key="meting_luchtdruk",
+        native_unit_of_measurement="hPa",
+        device_class=SensorDeviceClass.ATMOSPHERIC_PRESSURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=1,
+        value=lambda data: data.get("luchtdruk"),
+    ),
+    MeteoSensorDescription(
+        key="meting_druk_1u",
+        translation_key="meting_druk_1u",
+        native_unit_of_measurement="hPa",
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=1,
+        value=lambda data: data.get("druk_verandering_1u"),
+    ),
+    MeteoSensorDescription(
+        key="meting_druk_3u",
+        translation_key="meting_druk_3u",
+        native_unit_of_measurement="hPa",
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=1,
+        value=lambda data: data.get("druk_verandering_3u"),
+    ),
+)
+
+# Welke attributen bij welke extra meting horen
+METING_ATTRIBUTEN: dict[str, tuple[str, ...]] = {
+    "meting_windstoten": (
+        "windstoten_ms", "windstoten_bft", "windstoten_station",
+        "windstoten_station_afstand_km", "waargenomen_op", "bron",
+    ),
+    "meting_luchtdruk": (
+        "luchtdruk_station", "druk_tendens_1u", "druk_tendens_3u",
+        "waargenomen_op", "bron",
+    ),
+    "meting_druk_1u": ("druk_tendens_1u", "luchtdruk_station", "bron"),
+    "meting_druk_3u": ("druk_tendens_3u", "luchtdruk_station", "bron"),
+}
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
@@ -290,7 +343,13 @@ async def async_setup_entry(
     entities.append(SpreadSensor(meteo, entry))
     entities.append(EnsembleSensor(meteo, entry))
     entities.append(MetingSensor(data["meting"], entry))
-    entities.append(BronstatusSensor(storm, entry, data.get("stats")))
+    entities += [
+        MetingExtraSensor(data["meting"], entry, beschrijving)
+        for beschrijving in METING_SENSORS
+    ]
+    entities.append(
+        BronstatusSensor(storm, entry, data.get("stats"), data.get("knmi"))
+    )
 
     waarschuwingen: AlertCoordinator = data["alerts"]
     entities.append(AlertSensor(waarschuwingen, entry))
@@ -719,6 +778,10 @@ class AlertSensor(CoordinatorEntity[AlertCoordinator], SensorEntity):
             "aantal_in_land": data.get("aantal_in_land"),
             "gefilterd_op": data.get("gefilterd_op"),
             "waarschuwingen": data.get("actief"),
+            # 0.49.0: KNMI in Nederland, anders MeteoAlarm
+            "bron": data.get("bron"),
+            "regio": data.get("regio"),
+            "niveau_per_uur": data.get("niveau_per_uur"),
         }
 
 
@@ -889,6 +952,41 @@ class MetingSensor(CoordinatorEntity[MetingCoordinator], SensorEntity):
         return {k: v for k, v in data.items() if k != "temperatuur"}
 
 
+class MetingExtraSensor(CoordinatorEntity[MetingCoordinator], SensorEntity):
+    """Windstoten, luchtdruk en drukverloop van het dichtstbijzijnde station."""
+
+    _attr_has_entity_name = True
+    entity_description: MeteoSensorDescription
+
+    def __init__(
+        self,
+        coordinator: MetingCoordinator,
+        entry: ConfigEntry,
+        description: MeteoSensorDescription,
+    ) -> None:
+        """Initialiseer de sensor."""
+        super().__init__(coordinator)
+        self.entity_description = description
+        self._attr_unique_id = f"{entry.entry_id}_{description.key}"
+        self._attr_device_info = _device(entry)
+
+    @property
+    def native_value(self):
+        if self.coordinator.data is None:
+            return None
+        return self.entity_description.value(self.coordinator.data)
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        data = self.coordinator.data
+        if not data:
+            return {}
+        return {
+            sleutel: data.get(sleutel)
+            for sleutel in METING_ATTRIBUTEN.get(self.entity_description.key, ())
+        }
+
+
 class BronstatusSensor(CoordinatorEntity[StormCoordinator], SensorEntity):
     """Welke bronnen het doen en welke haperen.
 
@@ -901,10 +999,13 @@ class BronstatusSensor(CoordinatorEntity[StormCoordinator], SensorEntity):
     _attr_translation_key = "bronstatus"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 
-    def __init__(self, coordinator: StormCoordinator, entry: ConfigEntry, stats) -> None:
+    def __init__(
+        self, coordinator: StormCoordinator, entry: ConfigEntry, stats, knmi=None
+    ) -> None:
         """Initialiseer de sensor."""
         super().__init__(coordinator)
         self._stats = stats
+        self._knmi = knmi
         self._attr_unique_id = f"{entry.entry_id}_bronstatus"
         self._attr_device_info = _device(entry)
 
@@ -934,6 +1035,9 @@ class BronstatusSensor(CoordinatorEntity[StormCoordinator], SensorEntity):
             "bronnen": {
                 naam: bron.als_dict() for naam, bron in self._stats.bronnen.items()
             },
+            # 0.49.0: welke KNMI-sleutels er zijn, de pushverbinding en
+            # welke KNMI-bron tijdelijk afgeremd is (nooit de sleutels zelf)
+            "knmi": self._knmi.als_dict() if self._knmi is not None else None,
         }
 
 

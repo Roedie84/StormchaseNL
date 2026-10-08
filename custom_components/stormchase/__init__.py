@@ -7,23 +7,34 @@ Open-Meteo. De coordinaten komen uit de Home Assistant configuratie.
 
 from __future__ import annotations
 
+import asyncio
 import logging
+import random
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EVENT_HOMEASSISTANT_STOP, Platform
 from homeassistant.core import Event, HomeAssistant, ServiceCall
 
 from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.restore_state import async_get as async_get_restore_state
 from homeassistant.helpers.storage import Store
 from homeassistant.loader import async_get_integration
 
 from .const import (
+    CONF_KNMI_EDR_SLEUTEL,
+    CONF_KNMI_NOTIFICATIE_SLEUTEL,
+    CONF_KNMI_WMS_SLEUTEL,
     DATA_NOTIFY_ENABLED,
     DOMAIN,
+    KNMI_PUSH_WACHT_MAX,
+    KNMI_PUSH_WACHT_MIN,
     SERVICE_SEND_BRIEFING,
     SERVICE_TEST_NOTIFICATION,
 )
+from .knmi_api import KnmiBronnen
+from .knmi_push import DATASET_RADARVERWACHTING, DATASET_WAARNEMINGEN, KnmiPush
+from .knmi_verwerk import tijd_uit_bestandsnaam
 from .coordinator import POSITIE_SLEUTEL, MeteoCoordinator, StormCoordinator
 from .meting import MetingCoordinator
 from .radarbron import RadarCoordinator
@@ -128,6 +139,27 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     storm.meteo = meteo
     storm.alerts = waarschuwingen
 
+    # 0.49.0: officiële KNMI-bronnen, aanvullend en alleen in Nederland.
+    # Zonder sleutel bestaat die verbinding niet en werkt alles zoals voorheen.
+    knmi = KnmiBronnen(
+        async_get_clientsession(hass),
+        wms_sleutel=_sleutel(entry, CONF_KNMI_WMS_SLEUTEL),
+        edr_sleutel=_sleutel(entry, CONF_KNMI_EDR_SLEUTEL),
+        notificatie_sleutel=_sleutel(entry, CONF_KNMI_NOTIFICATIE_SLEUTEL),
+    )
+    ontbreekt = knmi.ontbrekende_functies()
+    if ontbreekt:
+        _LOGGER.info(
+            "KNMI zonder sleutel uit: %s. Waarschuwingen, neerslag en "
+            "verwachting van het KNMI werken zonder sleutel",
+            ", ".join(ontbreekt),
+        )
+    waarschuwingen.knmi = knmi
+    regen.knmi = knmi
+    meting.zet_knmi(knmi)
+    radar.knmi = knmi
+    radar.storm = storm
+
     # Uitkomsten van eerdere voorspellingen terughalen. Zonder dit begint de
     # zelfcontrole bij elke herstart opnieuw, en dan verzamelt hij nooit
     # genoeg om iets over de nauwkeurigheid te kunnen zeggen.
@@ -165,6 +197,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             "storm": storm.naar_opslag(),
             "gemeld": waarschuwingen.gemeld_naar_opslag(),
             "notifier": notifier.naar_opslag(),
+            # 0.49.0: luchtdrukverloop, voor de drukverandering over 1 en 3 uur
+            "meting_druk": meting.druk_naar_opslag(),
         }
 
     staatplan.plannen = lambda: staat_opslag.async_delay_save(
@@ -173,6 +207,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     storm.herstel(staat.get("storm"))
     waarschuwingen.herstel_gemeld(staat.get("gemeld"))
     notifier.herstel(staat.get("notifier"))
+    meting.herstel_druk(staat.get("meting_druk"))
+    meting.bewaarplan = staatplan
     storm.bewaarplan = staatplan
     waarschuwingen.bewaarplan = staatplan
     notifier.bewaarplan = staatplan
@@ -237,6 +273,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             "radar": radar,
             "notifier": notifier,
             "stats": stats,
+            "knmi": knmi,
             "bron_opslag": bron_opslag,
             # 0.47.0: alles wat bij ontladen en afsluiten meteen weg moet
             "opslagen": [
@@ -248,6 +285,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             "plannen": [staatplan, laatsteplan],
         }
     )
+
+    # 0.49.0: meldingen van de KNMI Notification Service. Alleen sneller:
+    # zonder verbinding wordt alles gewoon gepold.
+    if knmi.notificatie_sleutel:
+        await _async_start_push(hass, entry, knmi, meting, radar, regen)
 
     async def _bij_stoppen(_event: Event) -> None:
         """Bij het afsluiten alles meteen wegschrijven (0.47.0)."""
@@ -269,6 +311,70 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
 
     return True
+
+
+def _sleutel(entry: ConfigEntry, naam: str) -> str | None:
+    """Een KNMI-sleutel uit de opties of de data; leeg telt als geen."""
+    waarde = entry.options.get(naam, entry.data.get(naam))
+    if not isinstance(waarde, str) or not waarde.strip():
+        return None
+    return waarde.strip()
+
+
+async def _async_start_push(hass, entry, knmi, meting, radar, regen) -> None:
+    """Verbind met de Notification Service en koppel de meldingen."""
+    from homeassistant.util.ssl import get_default_context
+
+    wachtend: set[str] = set()
+
+    def na_wacht(naam: str, actie) -> None:
+        """Na 15-25 s de bron verversen; een tweede melding intussen telt niet."""
+        if naam in wachtend:
+            return
+        wachtend.add(naam)
+
+        async def later() -> None:
+            try:
+                await asyncio.sleep(random.uniform(KNMI_PUSH_WACHT_MIN, KNMI_PUSH_WACHT_MAX))
+                await actie()
+            finally:
+                wachtend.discard(naam)
+
+        entry.async_create_background_task(hass, later(), f"{DOMAIN} knmi {naam}")
+
+    def bij_melding(dataset: str, bestand: str | None) -> None:
+        if (
+            dataset == DATASET_WAARNEMINGEN
+            and knmi.edr is not None
+            and (meting.data or {}).get("bron") == "knmi_edr"
+        ):
+            na_wacht("waarnemingen", meting.async_request_refresh)
+        elif dataset == DATASET_RADARVERWACHTING:
+            if knmi.wms is not None:
+                radar.knmi_melding(tijd_uit_bestandsnaam(bestand))
+                na_wacht("radar", radar.async_request_refresh)
+            if (regen.data or {}).get("bron") == "knmi":
+                na_wacht("neerslag", regen.async_request_refresh)
+
+    push = KnmiPush(
+        knmi.notificatie_sleutel,
+        hass.loop,
+        get_default_context(),
+        bij_melding,
+    )
+    knmi.push = push
+    try:
+        # paho importeren en de draad starten buiten de event loop
+        await hass.async_add_executor_job(push.start)
+    except Exception:  # noqa: BLE001 - zonder push gewoon pollen
+        _LOGGER.warning("KNMI Notification Service niet gestart; er wordt gepold", exc_info=True)
+        knmi.push = None
+        return
+
+    async def _stop() -> None:
+        await hass.async_add_executor_job(push.stop)
+
+    entry.async_on_unload(_stop)
 
 
 def _bewaarde_meldingenstand(hass: HomeAssistant, entry: ConfigEntry) -> bool | None:

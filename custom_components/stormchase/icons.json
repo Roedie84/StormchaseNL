@@ -117,6 +117,18 @@
       },
       "ensemble": {
         "default": "mdi:chart-scatter-plot"
+      },
+      "meting_windstoten": {
+        "default": "mdi:weather-windy"
+      },
+      "meting_luchtdruk": {
+        "default": "mdi:gauge"
+      },
+      "meting_druk_1u": {
+        "default": "mdi:trending-down"
+      },
+      "meting_druk_3u": {
+        "default": "mdi:trending-down"
       }
     },
     "binary_sensor": {
@@ -155,6 +167,18 @@
         "state": {
           "on": "mdi:home-alert"
         }
+      },
+      "meting_onweer": {
+        "default": "mdi:weather-lightning",
+        "state": {
+          "off": "mdi:weather-cloudy"
+        }
+      },
+      "meting_hagel": {
+        "default": "mdi:weather-hail",
+        "state": {
+          "off": "mdi:weather-cloudy"
+        }
       }
     },
     "switch": {
@@ -167,6 +191,9 @@
     },
     "image": {
       "radar": {
+        "default": "mdi:radar"
+      },
+      "radar_vooruitblik": {
         "default": "mdi:radar"
       }
     }

@@ -81,10 +81,27 @@
           "briefing_morning": "Ochtendbericht om",
           "briefing_afternoon": "Middagbericht om"
         }
+      },
+      "knmi": {
+        "title": "KNMI (optioneel)",
+        "description": "Officiële KNMI-bronnen, aanvullend in Nederland. Waarschuwingen, de neerslagverwachting per vijf minuten en de weersverwachting van het KNMI werken zonder sleutel. Voor de radarkaart, de stationswaarnemingen en snellere verversing via pushmeldingen zijn gratis sleutels nodig van het KNMI Data Platform (dataplatform.knmi.nl → Developer Portal → API Catalog). Laat een veld leeg om die functie uit te zetten; buiten Nederland en bij een storing gebruikt Stormchase gewoon de bestaande bronnen.",
+        "data": {
+          "knmi_wms_sleutel": "KNMI WMS-sleutel (radarkaart)",
+          "knmi_notificatie_sleutel": "KNMI Notification Service-sleutel",
+          "knmi_edr_sleutel": "KNMI EDR-sleutel (waarnemingen)",
+          "knmi_radarstijl": "Radarstijl KNMI"
+        },
+        "data_description": {
+          "knmi_wms_sleutel": "Web Map Service: KNMI-radar op het radarbeeld en de radarvooruitblik (−1 tot +2 uur).",
+          "knmi_notificatie_sleutel": "Notification Service (MQTT): haalt waarnemingen en radar op zodra het KNMI iets nieuws meldt.",
+          "knmi_edr_sleutel": "EDR API: metingen van de KNMI-weerstations in plaats van Bright Sky.",
+          "knmi_radarstijl": "Kleuren van de KNMI-radar en de kaart eronder."
+        }
       }
     },
     "error": {
-      "rings_not_ascending": "De ringen moeten oplopend zijn en van elkaar verschillen."
+      "rings_not_ascending": "De ringen moeten oplopend zijn en van elkaar verschillen.",
+      "knmi_sleutel_ongeldig": "Dit lijkt geen geldige sleutel van het KNMI Data Platform (één lange reeks tekens zonder spaties)."
     },
     "abort": {
       "already_configured": "Stormchase is al ingesteld."
@@ -171,10 +188,27 @@
           "briefing_morning": "Ochtendbericht om",
           "briefing_afternoon": "Middagbericht om"
         }
+      },
+      "knmi": {
+        "title": "KNMI (optioneel)",
+        "description": "Officiële KNMI-bronnen, aanvullend in Nederland. Waarschuwingen, de neerslagverwachting per vijf minuten en de weersverwachting van het KNMI werken zonder sleutel. Voor de radarkaart, de stationswaarnemingen en snellere verversing via pushmeldingen zijn gratis sleutels nodig van het KNMI Data Platform (dataplatform.knmi.nl → Developer Portal → API Catalog). Laat een veld leeg om die functie uit te zetten; buiten Nederland en bij een storing gebruikt Stormchase gewoon de bestaande bronnen.",
+        "data": {
+          "knmi_wms_sleutel": "KNMI WMS-sleutel (radarkaart)",
+          "knmi_notificatie_sleutel": "KNMI Notification Service-sleutel",
+          "knmi_edr_sleutel": "KNMI EDR-sleutel (waarnemingen)",
+          "knmi_radarstijl": "Radarstijl KNMI"
+        },
+        "data_description": {
+          "knmi_wms_sleutel": "Web Map Service: KNMI-radar op het radarbeeld en de radarvooruitblik (−1 tot +2 uur).",
+          "knmi_notificatie_sleutel": "Notification Service (MQTT): haalt waarnemingen en radar op zodra het KNMI iets nieuws meldt.",
+          "knmi_edr_sleutel": "EDR API: metingen van de KNMI-weerstations in plaats van Bright Sky.",
+          "knmi_radarstijl": "Kleuren van de KNMI-radar en de kaart eronder."
+        }
       }
     },
     "error": {
-      "rings_not_ascending": "De ringen moeten oplopend zijn en van elkaar verschillen."
+      "rings_not_ascending": "De ringen moeten oplopend zijn en van elkaar verschillen.",
+      "knmi_sleutel_ongeldig": "Dit lijkt geen geldige sleutel van het KNMI Data Platform (één lange reeks tekens zonder spaties)."
     }
   },
   "entity": {
@@ -295,6 +329,18 @@
       },
       "ensemble": {
         "name": "Onweerskans ensemble"
+      },
+      "meting_windstoten": {
+        "name": "Windstoten gemeten"
+      },
+      "meting_luchtdruk": {
+        "name": "Luchtdruk gemeten"
+      },
+      "meting_druk_1u": {
+        "name": "Luchtdrukverandering per uur"
+      },
+      "meting_druk_3u": {
+        "name": "Luchtdrukverandering per 3 uur"
       }
     },
     "binary_sensor": {
@@ -315,6 +361,12 @@
       },
       "shelter": {
         "name": "Schuilen"
+      },
+      "meting_onweer": {
+        "name": "Onweer gemeten bij station"
+      },
+      "meting_hagel": {
+        "name": "Hagel gemeten bij station"
       }
     },
     "switch": {
@@ -325,6 +377,9 @@
     "image": {
       "radar": {
         "name": "Radar"
+      },
+      "radar_vooruitblik": {
+        "name": "Radar vooruitblik"
       }
     }
   },
@@ -387,6 +442,12 @@
       "options": {
         "rainviewer": "RainViewer (wereldwijd)",
         "dwd": "Duitse weerdienst (actueler, beperkt gebied)"
+      }
+    },
+    "knmi_radarstijl": {
+      "options": {
+        "donker": "Donker",
+        "licht": "Licht"
       }
     }
   },

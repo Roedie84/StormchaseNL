@@ -362,3 +362,45 @@ TREND_STABLE = "stabiel"
 TREND_RECEDE = "trekt weg"
 TREND_FAST_RECEDE = "trekt snel weg"
 TREND_UNKNOWN = "onbekend"
+
+# ---------------------------------------------------------------------
+# KNMI (0.49.0): officiële bronnen in Nederland, aanvullend op de rest
+# ---------------------------------------------------------------------
+
+# Drie optionele sleutels van het KNMI Data Platform. Zonder sleutel staat
+# die functie uit en blijven de bestaande bronnen gewoon werken.
+CONF_KNMI_WMS_SLEUTEL = "knmi_wms_sleutel"
+CONF_KNMI_NOTIFICATIE_SLEUTEL = "knmi_notificatie_sleutel"
+CONF_KNMI_EDR_SLEUTEL = "knmi_edr_sleutel"
+KNMI_SLEUTELS = (CONF_KNMI_WMS_SLEUTEL, CONF_KNMI_NOTIFICATIE_SLEUTEL, CONF_KNMI_EDR_SLEUTEL)
+
+# Kleurstijl van de KNMI-radar
+CONF_KNMI_RADARSTIJL = "knmi_radarstijl"
+KNMI_RADARSTIJLEN = ["donker", "licht"]
+DEFAULT_KNMI_RADARSTIJL = "donker"
+# WMS-stijl per keuze, en hoe helder de kaart eronder blijft
+KNMI_WMS_STIJL = {
+    "donker": "radar/nearest",
+    "licht": "rainrate-blue-to-purple/nearest",
+}
+KNMI_KAART_HELDERHEID = {"donker": 0.45, "licht": 0.95}
+
+# Waarnemingen: elke tien minuten een nieuwe meting
+METING_INTERVAL_KNMI = timedelta(minutes=10)
+# Nieuwste radartijd opvragen als er geen melding binnenkomt
+KNMI_RADAR_INTERVAL = timedelta(minutes=5)
+# Dagdetails van de verwachting (een verzoek per dag): hooguit elk uur
+KNMI_DETAIL_INTERVAL = timedelta(hours=1)
+# Wachten na een melding voordat de bron opgehaald wordt (s): het bestand
+# moet eerst in EDR of WMS staan, en met wat spreiding vallen niet alle
+# gebruikers tegelijk binnen.
+KNMI_PUSH_WACHT_MIN = 15
+KNMI_PUSH_WACHT_MAX = 25
+
+# Radarvooruitblik: van een uur terug tot twee uur vooruit, per tien minuten
+VOORUITBLIK_TERUG = 60
+VOORUITBLIK_VOORUIT = 120
+VOORUITBLIK_STAP = 10
+VOORUITBLIK_FRAME_MS = 400
+
+KNMI_BRONVERMELDING = "Bron: KNMI (CC BY 4.0)"
