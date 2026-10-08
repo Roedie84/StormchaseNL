@@ -40,3 +40,14 @@ laatste ronde: 07-10 23:45, gemeten t/m 07-10 23:44
 - Meetbaarheid: Blitzortung elke nacht ~02:00 onbeschikbaar (21 en 11 min) — blinde vlek, externe bron. Stormchase-logs van vóór 22:48 weg door herstarts.
 
 laatste ronde: 08-10 04:40, gemeten t/m 08-10 03:46
+
+## 08-10 07:40 · tussenronde
+- Geïnstalleerd: 0.44.0 (06:23) en 0.45.0 (07:03). Geen onweer (ensemble 0%, CAPE 10), niveau groen → alleen beschikbaarheid gemeten.
+- **0.44.0 radarfix geverifieerd:** sinds 06:23 16 beeldwissels, grootste gat 10 min (was 4,7 u stil).
+- **L-SC-002 eerste bewijs:** `bronnen_per_dag` 08-10 radar 80 gelukt tegen 40 sinds de herstart van 07:03 → tellers lopen over de herstart door. Alle bronnen 100% (n=130). Verifiëren over een dag­grens.
+- Locatie bij 2 herstarts: 10-13 s "laatst bekend", 0× "thuis".
+- **H-SC-2 (nieuw):** de validatie telt een passage als "uitgekomen" zodra er een afstand gemeten is (`validatie.py` `passage_afgerond`: `uitgekomen = werkelijke_afstand is not None`). Daardoor is "passage 21/21" geen trefkans. Uit de 12 bewaarde passage-uitkomsten: binnen 10 km 5/12 (42%), binnen 20 km 7/12; uitschieters −56, −31, −31, −25 km. Kandidaat L-SC-003 (zelf bouwen, rapportage).
+- L-SC-001 (0.45.0) actief; wacht op onweer.
+- Geen release (tussenronde, niets acuut).
+
+laatste ronde: 08-10 07:40, gemeten t/m 08-10 07:43

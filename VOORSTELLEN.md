@@ -3,7 +3,7 @@
 Status: open / akkoord / afgewezen / gebouwd vX / geverifieerd / teruggedraaid. Ruud keurt goed via de chat ("akkoord L-SC-00x").
 
 ## L-SC-001 · naderingssnelheid alleen uit nieuwe inslagafstanden (geen 10-s herhalingen)
-- Status: **akkoord 08-10 → gebouwd 0.45.0** (08-10; release v0.45.0, workflow groen, HACS ververst) — verifiëren na installatie en ≥1 onweersgebeurtenis
+- Status: **akkoord 08-10 → gebouwd 0.45.0** (08-10; release v0.45.0, workflow groen, HACS ververst), geïnstalleerd 07:03 — verifiëren bij ≥1 onweersgebeurtenis
 - Bouw: nieuwe module `nadering.py` (`Naderingstrend`): punt alleen bij nieuwe inslagtijd (of ≥0,5 km afstandsverschil, verplaatsing); snelheid alleen bij een nieuw punt berekend en vastgehouden; vervalt zodra <3 metingen (MIN_SAMPLES 4 → 3) in het venster van 15 min liggen. 16 tests in `tests/test_nadering.py` (suite 392 groen).
 - Replay 07-10 met recorderreeksen (oude code reproduceert HA exact: 201, 111, 81 … 41 min; perioden 15,0/15,0/4,2/15,0 min): nieuw → nadert 2× (4,2 + 7,7 = 11,8 min i.p.v. 49,2), 0 aankomstwijzigingen zonder nieuwe inslag (was 244), aankomst 159 → 122 → 41 min (bereik oud 41-4925), geen periode meer van ~15 min.
 - Effect meten: per onweersgebeurtenis aantal nadert-wissels en duur (geen perioden van precies 15 min), aankomstwijzigingen zonder nieuwe inslag (= 0 verwacht), validatieteller aankomst (basis 1/6, ≤15 min 0/3) en voorspelde tegen werkelijke aankomst; vergelijken met de replay-cijfers hierboven.
@@ -15,8 +15,14 @@ Status: open / akkoord / afgewezen / gebouwd vX / geverifieerd / teruggedraaid. 
 - Meten na bouw: validatieteller aankomst (nu 1/6) en per onweersgebeurtenis het aantal nadert-wissels, spreiding van aankomst zonder nieuwe inslag, en voorspelde tegen werkelijke aankomst (validatie).
 
 ## L-SC-002 · bronstatistiek bewaren over herstarts
-- Status: **gebouwd 0.44.0** (08-10 04:36) — verifiëren na installatie en ≥2 dagen met een herstart ertussen
+- Status: **gebouwd 0.44.0** (08-10 04:36), geïnstalleerd 06:23 — eerste bewijs 07:40: per dag radar 80 tegen 40 sinds herstart 07:03 (telt over herstart door). Nog: over een daggrens (≥2 dagen).
 - (eerder: gepland, zelf bouwen: meetbaarheid; de code bewaarde het nog niet)
 - Onderbouwing: 07-10 23:45: `statistieken.gestart_op` 21:04 UTC, draaitijd 0,7 u; na elke herstart (vandaag ~10) begint gelukt/mislukt per bron opnieuw. Betrouwbaarheid per bron over dagen is zo niet uit de integratie te halen.
 - Bouw: tellers per bron per dag in de Store bewaren (rollend 30 d), in diagnostics tonen; test.
 - Meten na bouw: diagnostics toont slaagpercentage per bron over ≥2 dagen na een herstart.
+
+## L-SC-003 · passage-validatie: trefkans op afstand, niet "er was een afstand"
+- Status: **gepland (zelf bouwen: rapportage/classificatie; raakt geen drempels of meldgedrag)** — dagafsluiting
+- Onderbouwing: `validatie.py` `passage_afgerond` zet `uitgekomen = werkelijke_afstand is not None` → passage altijd 100% (21/21). Bewaarde uitkomsten (n=12): |afwijking| ≤10 km 5/12, ≤20 km 7/12, max 56 km.
+- Bouw: in de samenvatting per horizon `binnen_10_km`, `binnen_20_km` en mediane afwijking toevoegen (bestaande `uitgekomen` blijft bestaan voor vergelijkbaarheid, met toelichting "afstand gemeten"). Test.
+- Meten na bouw: diagnostics toont per passagehorizon het aandeel binnen 10/20 km; baseline 5/12 en 7/12.

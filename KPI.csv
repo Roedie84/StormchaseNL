@@ -42,3 +42,11 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-08 03:40,TUSSEN,sc_blitzortung_onbeschikbaar_min,11.1,1,02:00-02:11
 2026-10-08 03:40,TUSSEN,sc_logfouten,0,1,error_log 22:48-03:46
 2026-10-08 03:40,TUSSEN,sc_versie,0.44.0,1,"gereleased 04:36; geinstalleerd 0.43.1"
+2026-10-08 07:40,TUSSEN,sc_versie_geinstalleerd,0.45.0,1,"0.44.0 actief 06:23, 0.45.0 07:03"
+2026-10-08 07:40,TUSSEN,sc_onweer_sinds_0346,0,1,"geen inslagen <50 km; ensemble 0%; CAPE 10"
+2026-10-08 07:40,TUSSEN,sc_radar_updates_na_0440,16,80,"06:23-07:43; grootste gat 10 min (was 4.7 u stil)"
+2026-10-08 07:40,TUSSEN,sc_bronnen_slaag_pct,100,130,"per_dag 08-10 (over herstart 07:03: radar 80 per dag tegen 40 sinds start)"
+2026-10-08 07:40,TUSSEN,sc_locatie_sprong_naar_thuis,0,2,"herstarts 06:23 en 07:03: 10-13 s 'laatst bekend'"
+2026-10-08 07:40,TUSSEN,sc_passage_binnen_10km,0.42,12,"5/12 uit de bewaarde uitkomsten; 'uitgekomen' telt elke gemeten afstand (21/21)"
+2026-10-08 07:40,TUSSEN,sc_passage_binnen_20km,0.58,12,"7/12; grootste afwijking -56.2 km"
+2026-10-08 07:40,TUSSEN,sc_logfouten,0,1,"system_log sinds 07:03"
