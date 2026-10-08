@@ -5,6 +5,60 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.50.0] — 2026-10-08
+
+Het dashboard is een storm-chase-commandocentrum: één scherm over de volle
+breedte met alle relevante gegevens, in plaats van een lange lijst tegels.
+Geen wijzigingen aan entiteiten of attributen.
+
+### Wat je moet doen
+
+- **Ververs je browser na de update** (Ctrl+Shift+R; in de companion-app de
+  frontendcache wissen via de instellingen van de app).
+  De script-URL bevat het versienummer en de starttijd
+  (`/stormchase/stormchase-strategy.js?v=0.50.0&t=…`), dus na de herstart
+  haalt een browser normaal vanzelf het nieuwe script op. Onderaan het
+  dashboard staat welke versie je browser draait.
+- Verder niets: een dashboard met `strategy: type: custom:stormchase` krijgt
+  de nieuwe indeling vanzelf.
+
+### Nieuw
+
+- **Eigen kaart `custom:stormchase-hud-card`** in hetzelfde script: Shadow
+  DOM, eigen opmaak, geen HACS-kaarten (card-mod, mushroom, apexcharts,
+  compass-card zijn niet meer nodig) en geen externe bestanden. Tekent live
+  bij, maar alleen het paneel waarvan een relevante waarde veranderde.
+- **Achtergrond**: donkere stormnacht in CSS/SVG met wolkenstructuur,
+  radarraster en een zwakke bliksemgloed bij naderend of nabij onweer (uit
+  bij *verminder beweging*). Glazen panelen, cijfers met vaste breedte en
+  overal dezelfde kleuren groen/geel/oranje/rood.
+- **Indeling**: statusbalk (locatie, onderweg, meldingen, bronbolletjes,
+  KNMI push, klok), situatie, waarschuwingscode, onweersverwachting en
+  chase-potentie; daaronder bliksem (kompas met ringen, inslag en
+  trekrichting, nadering, aankomst, ringen, cel), radar groot met knop
+  *Vooruitblik* als `image.stormchase_radar_vooruitblik` bestaat, convectie
+  (CAPE, piek, LI, schering, ensemble, modelovereenstemming met bandbreedte),
+  KNMI-waarschuwingen met tijdlijn van `niveau_per_uur`, waarnemingen
+  (windstoten met Beaufort, luchtdruk met drukval per uur en per 3 uur,
+  temperatuur/dauwpunt, zicht, wolkenbasis, onweer/hagel gemeten),
+  neerslag per vijf minuten voor twee uur, uurverwachting via
+  `weather/subscribe_forecast` en de bronstatus per bron.
+- Responsive: één kolom op een telefoon, twee op een tablet, drie op een
+  breed scherm, zonder horizontaal scrollen.
+- Entiteiten worden gezocht via het entiteitenregister (translation_key),
+  met de nette entity-id's als terugval: werkt ook met Engelse id's of een
+  ruimtenaam ervoor. Ontbrekende entiteiten verdwijnen, onbekende waarden
+  worden een streepje, onbeschikbare worden gedimd.
+
+### Gewijzigd
+
+- De dashboardstrategie levert drie tabbladen: *Stormchase* (het
+  commandocentrum), *Kaarten* (iRadar, Buienradar, Windy als ingebouwde
+  iframe-kaarten) en *Alle waarden*. De oude tegelindeling is vervangen;
+  `dashboards/stormchase.yaml` bevat die nog als statische YAML.
+- De optie `radar_boven` doet niets meer; `maps: false` laat de tab Kaarten
+  weg en `alle_waarden: false` de tab Alle waarden.
+
 ## [0.49.0] — 2026-10-08
 
 Officiële KNMI-bronnen, aanvullend in Nederland: waarschuwingen,

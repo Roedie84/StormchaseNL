@@ -519,14 +519,13 @@ met eigen voorwaarden. Alleen nodig als de ingebouwde variant tekortschiet.
 
 ## Dashboard
 
-Vereist via HACS: `card-mod`, `mushroom`, `apexcharts-card`, `compass-card`.
+Sinds 0.50.0 is het dashboard een storm-chase-commandocentrum: één scherm
+over de volle breedte met alles wat je tijdens een jacht wilt zien, op een
+donkere stormnacht-achtergrond met glazen panelen. Geen HACS-kaarten nodig:
+de integratie levert de kaart (`custom:stormchase-hud-card`) zelf mee, zonder
+externe bestanden.
 
 ### Aanbevolen: de strategie
-
-De integratie levert een dashboardstrategie mee die de view bij elke
-paginalading opnieuw opbouwt uit de entiteiten die op dat moment bestaan.
-Komt er bij een update een sensor bij, dan verschijnt de tegel vanzelf — je
-hoeft niets over te typen.
 
 Maak een nieuw dashboard aan, open de onbewerkte configuratie-editor en zet
 er dit in:
@@ -537,23 +536,66 @@ strategy:
 ```
 
 Dat is alles — de integratie registreert het benodigde script zelf als
-Lovelace-bron.
+Lovelace-bron. Je krijgt drie tabbladen:
 
-Controleren welk script je browser draait: open de console met F12 en zoek
-naar de regel `STORMCHASE strategie geladen`. Daar staat het versienummer
-achter.
+1. **Stormchase** — het commandocentrum (panel-view):
+   - **Statusbalk**: locatie (adres of coördinaten), onderweg/ter plaatse,
+     meldingen aan/uit, bronbolletjes per bron, *KNMI push live*, klok en
+     laatste update. Daaronder de situatie (rustig / actief / nadert /
+     nabij, met afstand, richting en aankomsttijd), de waarschuwingscode
+     groot in de kleur van het niveau, de onweersverwachting en de
+     chase-potentie als meter met opbouw. Bij schuilen een rode balk
+     *Blijf binnen*.
+   - **Radar** groot (`image.stormchase_radar`) met radarbron en beeldleeftijd;
+     met een KNMI WMS-sleutel een knop *Vooruitblik*
+     (`image.stormchase_radar_vooruitblik`).
+   - **Bliksem**: kompas met de afstandsringen, de dichtstbijzijnde inslag en
+     de trekrichting van de cel; afstand, nadering, aankomst, inslagen per
+     ring, frequentie, celpassage en de vlaggen nabij/nadert/schuilen.
+   - **Convectie**: CAPE nu en piek 12 uur, Lifted Index, windschering,
+     ensemble-onweerskans en modelovereenstemming als balken met drempels,
+     plus rotatie, hagel, Total Totals, LPI, wolkentop en de duiding in
+     gewone taal.
+   - **Waarschuwingen**: actuele code met tekst en periode, en een tijdlijn
+     van het niveau per uur voor de komende 24 uur (KNMI).
+   - **Waarnemingen** van het dichtstbijzijnde station (KNMI EDR of
+     Bright Sky): windstoten met Beaufort, luchtdruk met verandering per uur
+     en per 3 uur, temperatuur/dauwpunt, zicht, wolkenbasis, wind, en
+     *onweer/hagel gemeten*.
+   - **Neerslag komende 2 uur** per vijf minuten, met *regen over …*, piek
+     en totaal.
+   - **Verwachting per uur** (temperatuur, neerslagkans, windstoten,
+     weersymbool) uit `weather.stormchase`.
+   - **Bronstatus** per bron met slaagpercentage, en de versie van het script.
+2. **Kaarten** — iRadar, Buienradar en Windy (CAPE) als ingebouwde
+   iframe-kaarten, gecentreerd op je actieve locatie.
+3. **Alle waarden** — vangnet met elke entiteit van de integratie.
 
-De URL van het script bevat het versienummer en de starttijd van Home
-Assistant, zodat je browser na elke herstart gedwongen wordt het opnieuw op te
-halen. Zie je na een update toch het oude dashboard, herstart dan Home
-Assistant of ververs hard met Ctrl+Shift+R.
+Wat ontbreekt blijft weg: geen KNMI-sleutel betekent geen vooruitblikknop,
+geen weerstation betekent geen waarnemingenpaneel. Onbekende waarden worden
+een streepje, onbeschikbare worden gedimd. Bij naderend of nabij onweer
+licht de achtergrond zwak op als bliksem (uit bij *verminder beweging*).
+Op een telefoon staat alles in één kolom, op een tablet in twee, op een
+breed scherm in drie.
+
+De kaart zoekt de entiteiten zelf op via het entiteitenregister, dus het
+werkt ook met Engelse entity-id's of met een ruimtenaam ervoor.
+
+**Na een update: ververs je browser.** De URL van het script bevat het
+versienummer en de starttijd van Home Assistant (`?v=0.50.0&t=…`), zodat je
+browser na een herstart het nieuwe script ophaalt. Zie je toch het oude
+dashboard, ververs dan hard met Ctrl+Shift+R (in de companion-app: de
+frontendcache wissen via de instellingen van de app). Onderaan het
+dashboard en in de console (F12, regel `STORMCHASE commandocentrum geladen`)
+staat welke versie je browser draait.
 
 Krijg je toch *Timeout waiting for strategy element*, dan draait Lovelace
 waarschijnlijk in YAML-modus en moet je de bron handmatig toevoegen onder
 Instellingen → Dashboards → Bronnen: URL `/stormchase/stormchase-strategy.js`,
 type JavaScript-module. Ververs daarna één keer hard met Ctrl+Shift+R.
 
-Wil je alleen een losse view binnen een bestaand dashboard:
+Wil je alleen het commandocentrum als losse view binnen een bestaand
+dashboard:
 
 ```yaml
 views:
@@ -562,29 +604,28 @@ views:
     title: Stormchase
 ```
 
-De strategie past zich aan je installatie aan: ringtegels verschijnen voor
-elke ring die je hebt ingesteld, hoeveel het er ook zijn. Ontbreken de
-Open-Meteo-waarden, dan blijft die sectie weg in plaats van lege tegels te
-tonen. De locatietegel verschijnt alleen als je niet thuis bent, en de
-kaarten centreren op je actieve locatie in plaats van op je thuisadres.
+Of de kaart los, in een eigen view (bij voorkeur een panel-view):
+
+```yaml
+type: custom:stormchase-hud-card
+```
 
 Opties, allemaal optioneel:
 
 ```yaml
 strategy:
   type: custom:stormchase
-  title: Onweer                      # kop van de view
+  title: Onweer                      # titel van de view en ondertitel in de kop
   distance_entity: sensor.x          # anders automatisch gedetecteerd
   azimuth_entity: sensor.y
   counter_entity: sensor.z
-  latitude: 52.10                    # anders de actieve locatie
+  latitude: 52.10                    # kaarten-tab; anders de actieve locatie
   longitude: 6.63
   iradar_url: https://iradar.app/... # je eigen embed-URL
-  radar_boven: false                 # radar terug in de rechterkolom
-  radar_ratio: "70%"                 # verhouding van de radar bovenaan
+  radar_ratio: "70%"                 # verhouding van iRadar in de kaarten-tab
   map_ratio: "120%"                  # anders automatisch per schermbreedte
-  alle_waarden: false                # laat het vangnet-blok weg
-  maps:
+  alle_waarden: false                # laat de tab Alle waarden weg
+  maps:                              # false laat de hele kaarten-tab weg
     iradar: true
     blitzortung: true
     buienradar: true
@@ -592,17 +633,14 @@ strategy:
     windy: false
 ```
 
-De radar staat standaard bovenaan over de volle breedte, want in een halve
-kolom wordt hij te laag om cellen op te kunnen beoordelen. De overige kaarten
-blijven in de rechterkolom.
-
-De kaarten passen hun verhouding aan de schermbreedte aan: op een telefoon
-staand, op een breed scherm liggend. Met `map_ratio` zet je dat vast.
+De optie `radar_boven` uit eerdere versies doet niets meer: de eigen radar
+staat altijd in het midden van het commandocentrum.
 
 ### Alternatief: statische YAML
 
-`dashboards/stormchase.yaml` bevat dezelfde view als gewone YAML, voor als je
-liever zelf aan de kaarten sleutelt. Nadeel: die moet je bij elke update van
+`dashboards/stormchase.yaml` bevat de klassieke tegelindeling als gewone YAML,
+voor als je liever zelf aan de kaarten sleutelt. Die gebruikt wel HACS-kaarten
+(`card-mod`, `mushroom`, `apexcharts-card`, `compass-card`). Nadeel: die moet je bij elke update van
 de integratie handmatig bijwerken.
 
 De iframes staan daar op vaste coördinaten die je moet aanpassen. Voor iRadar

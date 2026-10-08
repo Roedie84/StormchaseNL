@@ -25,6 +25,7 @@ scheiding.
 | `test_release_0470.py` | Herstartbestendigheid: validatie, schuilregel, cellen, nadering, waarschuwingen, wachttijden en tellers over een herstart |
 | `test_release_0480.py` | Huidige weerconditie volgt de radar bij regen: rainy, pouring, lightning-rainy, nacht en verouderde radarwaarden |
 | `test_release_0490.py` | KNMI-bronnen: rastercellen tegen pyproj-referentiewaarden, NL-grens en waarschuwingsregio, waarschuwingen, nowcast, EDR-metingen, drukverloop, verwachting, fouten/429/403 en afremmen, pushmeldingen, radarvooruitblik, terugval en privacy van de sleutels |
+| `test_release_0500.py` | Dashboard als commandocentrum: eigen element geregistreerd, geen externe bestanden of HACS-kaarten, alle entiteiten bekend, zuinig hertekenen, cachebust met versie, en (met Node.js) de uitvoer van de strategie |
 | `test_structuur.py` | Controles op de code zelf |
 
 ## Waarom er structuurtests zijn
