@@ -52,6 +52,27 @@ PASSAGE_RAAK_KM = 10.0
 PASSAGE_RUIM_KM = 20.0
 
 
+def _open_uit_opslag(bewaard) -> dict[str, dict]:
+    """Open voorspellingen uit de opslag; wat niet compleet is valt weg.
+
+    Verlopen voorspellingen blijven staan: die rekent verlopen() bij de
+    eerste ronde af, net zoals zonder herstart was gebeurd.
+    """
+    uit: dict[str, dict] = {}
+    if not isinstance(bewaard, dict):
+        return uit
+    for soort, v in bewaard.items():
+        if not isinstance(soort, str) or not isinstance(v, dict):
+            continue
+        if not all(
+            isinstance(v.get(k), (int, float)) and not isinstance(v.get(k), bool)
+            for k in ("gemaakt_op", "verwacht_op", "verwacht_over")
+        ):
+            continue
+        uit[soort] = dict(v)
+    return uit
+
+
 def _mediaan(waarden: list[float]) -> float:
     rij = sorted(waarden)
     midden = len(rij) // 2
@@ -63,10 +84,24 @@ def _mediaan(waarden: list[float]) -> float:
 class Validatie:
     """Houdt open voorspellingen bij en rekent ze af."""
 
-    def __init__(self, uitkomsten: list | None = None) -> None:
-        """Begin met eventueel bewaarde uitkomsten."""
-        self.open: dict[str, dict] = {}
+    def __init__(
+        self,
+        uitkomsten: list | None = None,
+        open_voorspellingen: dict | None = None,
+        afgerond: int | None = None,
+    ) -> None:
+        """Begin met eventueel bewaarde uitkomsten en open voorspellingen."""
+        self.open: dict[str, dict] = _open_uit_opslag(open_voorspellingen)
         self.uitkomsten: list[dict] = list(uitkomsten or [])
+        # 0.47.0: telt elke afgeronde voorspelling, ook als de lijst vol is.
+        # De lengte van de lijst blijft na MAX_UITKOMSTEN gelijk, en daarop
+        # wachten om op te slaan betekende dat er niets meer bewaard werd.
+        if isinstance(afgerond, bool) or not isinstance(afgerond, int) or afgerond < 0:
+            afgerond = len(self.uitkomsten)
+        self.afgerond = afgerond
+        # Telt elke wijziging (vastleggen en afronden): de aanleiding om op
+        # te slaan, zodat ook open voorspellingen een herstart overleven.
+        self.wijzigingen = 0
 
     # ---- Vastleggen ----
 
@@ -85,6 +120,7 @@ class Validatie:
             "verwacht_over": round(over_minuten),
             **extra,
         }
+        self.wijzigingen += 1
 
     def _rond_af(self, soort: str, nu: float, uitkomst: dict) -> None:
         """Sluit een voorspelling af en bewaar het resultaat."""
@@ -101,6 +137,8 @@ class Validatie:
         }
         self.uitkomsten.append(regel)
         del self.uitkomsten[:-MAX_UITKOMSTEN]
+        self.afgerond += 1
+        self.wijzigingen += 1
 
     # ---- Nakijken ----
 
@@ -239,6 +277,14 @@ class Validatie:
             uit["mediane_afwijking_km"] = round(_mediaan(km), 1)
             uit["grootste_afwijking_km"] = round(max(km), 1)
         return uit
+
+    def naar_opslag(self) -> dict:
+        """Wat er in de Store komt: uitkomsten, open voorspellingen, teller."""
+        return {
+            "uitkomsten": self.uitkomsten,
+            "open": {soort: dict(v) for soort, v in self.open.items()},
+            "afgerond": self.afgerond,
+        }
 
     def als_dict(self) -> dict:
         """Alles voor in de diagnostiek en om te bewaren."""

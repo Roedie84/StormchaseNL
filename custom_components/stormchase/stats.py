@@ -127,6 +127,24 @@ def _tijd(moment: datetime | None) -> str | None:
     return moment.isoformat() if moment else None
 
 
+def _telling(waarde) -> int:
+    """Alleen gehele, niet-negatieve tellingen uit de opslag overnemen."""
+    if isinstance(waarde, bool) or not isinstance(waarde, int) or waarde < 0:
+        return 0
+    return waarde
+
+
+def _moment(waarde) -> datetime | None:
+    """Een ISO-tijdstip uit de opslag, alleen met tijdzone."""
+    if not isinstance(waarde, str):
+        return None
+    try:
+        moment = datetime.fromisoformat(waarde)
+    except ValueError:
+        return None
+    return moment if moment.tzinfo is not None else None
+
+
 def _vandaag() -> date:
     """De kalenderdag in de tijdzone van Home Assistant."""
     nu = getattr(dt_util, "now", None)
@@ -224,10 +242,75 @@ class Statistieken:
         """Tel een afgevuurd event."""
         if soort in self.events:
             self.events[soort] += 1
+            self._wijziging()
 
     def noteer_melding(self, soort: str) -> None:
         """Tel een verstuurde melding."""
         self.meldingen_verstuurd[soort] = self.meldingen_verstuurd.get(soort, 0) + 1
+        self._wijziging()
+
+    def _wijziging(self) -> None:
+        """Plan het wegschrijven; nooit ten koste van wat er geteld werd."""
+        if self._bij_wijziging is None:
+            return
+        try:
+            self._bij_wijziging()
+        except Exception:  # noqa: BLE001 - statistiek mag niets breken
+            _LOGGER.debug("Tellers niet ingepland voor opslag", exc_info=True)
+
+    # ---- 0.47.0: tellers over een herstart ----
+
+    def tellers_naar_opslag(self) -> dict[str, Any]:
+        """De tellers die een herstart moeten overleven.
+
+        Alleen tellingen en tijdstippen, net als de dagtellers. De
+        herkansingsplanning (volgende_poging) hoort bij een lopende sessie
+        en blijft erbuiten.
+        """
+        return {
+            "bronnen": {
+                naam: {
+                    "gelukt": bron.gelukt,
+                    "mislukt": bron.mislukt,
+                    "op_rij_mislukt": bron.op_rij_mislukt,
+                    "laatste_succes": _tijd(bron.laatste_succes),
+                    "laatste_fout": bron.laatste_fout,
+                    "laatste_fout_op": _tijd(bron.laatste_fout_op),
+                }
+                for naam, bron in self.bronnen.items()
+            },
+            "regen_via_buienradar": self.regen_via_buienradar,
+            "regen_via_open_meteo": self.regen_via_open_meteo,
+            "events": dict(self.events),
+            "meldingen_verstuurd": dict(self.meldingen_verstuurd),
+            "meldingen_mislukt": self.meldingen_mislukt,
+        }
+
+    def herstel_tellers(self, bewaard) -> None:
+        """Neem bewaarde tellers over; alles wat raar is wordt overgeslagen."""
+        if not isinstance(bewaard, dict):
+            return
+        for naam, waarden in (bewaard.get("bronnen") or {}).items():
+            bron = self.bronnen.get(naam)
+            if bron is None or not isinstance(waarden, dict):
+                continue
+            bron.gelukt = _telling(waarden.get("gelukt"))
+            bron.mislukt = _telling(waarden.get("mislukt"))
+            bron.op_rij_mislukt = _telling(waarden.get("op_rij_mislukt"))
+            bron.laatste_succes = _moment(waarden.get("laatste_succes"))
+            fout = waarden.get("laatste_fout")
+            bron.laatste_fout = fout[:200] if isinstance(fout, str) else None
+            bron.laatste_fout_op = _moment(waarden.get("laatste_fout_op"))
+        self.regen_via_buienradar = _telling(bewaard.get("regen_via_buienradar"))
+        self.regen_via_open_meteo = _telling(bewaard.get("regen_via_open_meteo"))
+        for soort, aantal in (bewaard.get("events") or {}).items():
+            if soort in self.events:
+                self.events[soort] = _telling(aantal)
+        self.meldingen_verstuurd = {
+            str(soort): _telling(aantal)
+            for soort, aantal in (bewaard.get("meldingen_verstuurd") or {}).items()
+        }
+        self.meldingen_mislukt = _telling(bewaard.get("meldingen_mislukt"))
 
     def noteer_meting(self, afstand: float | None, snelheid: float | None) -> None:
         """Bewaar een meetpunt, maar alleen als er iets te meten viel."""

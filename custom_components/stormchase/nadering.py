@@ -40,6 +40,21 @@ def regressiesnelheid(punten: list[tuple[float, float]]) -> float | None:
     return round(-teller / noemer * 3600, 1) + 0.0
 
 
+def _sleutel(inslag):
+    """Een inslagtijd als getal, zodat hij een herstart ongewijzigd overleeft."""
+    stempel = getattr(inslag, "timestamp", None)
+    if callable(stempel):
+        try:
+            return stempel()
+        except (TypeError, ValueError, OverflowError):
+            return inslag
+    return inslag
+
+
+def _is_getal(waarde) -> bool:
+    return isinstance(waarde, (int, float)) and not isinstance(waarde, bool)
+
+
 class Naderingstrend:
     """Houdt de nieuwe afstandsmetingen bij en de daaruit berekende snelheid."""
 
@@ -68,13 +83,13 @@ class Naderingstrend:
                 nieuw = afstand != vorige
             else:
                 nieuw = (
-                    inslag != self._sleutel
+                    _sleutel(inslag) != self._sleutel
                     or abs(afstand - vorige) >= VERPLAATSING_KM
                 )
         else:
             nieuw = True
 
-        self._sleutel = inslag
+        self._sleutel = _sleutel(inslag)
         if not nieuw:
             return False
 
@@ -97,6 +112,45 @@ class Naderingstrend:
         if nu > self._geldig_tot:
             return None
         return self._snelheid
+
+    def naar_opslag(self) -> dict:
+        """De reeks en de vastgehouden snelheid, voor over een herstart (0.47.0)."""
+        return {
+            "metingen": [[t, d] for t, d in self.metingen],
+            "sleutel": self._sleutel,
+            "snelheid": self._snelheid,
+            "geldig_tot": self._geldig_tot,
+        }
+
+    def herstel(self, bewaard: dict | None, nu: float) -> None:
+        """Neem een bewaarde reeks over; punten buiten het venster vallen weg.
+
+        De vastgehouden snelheid komt alleen terug als ze nog geldig is, zodat
+        er na de herstart dezelfde waarde staat als ervoor.
+        """
+        if not isinstance(bewaard, dict):
+            return
+        punten = []
+        for rij in bewaard.get("metingen") or []:
+            if not isinstance(rij, (list, tuple)) or len(rij) != 2:
+                continue
+            t, d = rij
+            if not _is_getal(t) or not _is_getal(d):
+                continue
+            if nu - self.venster_s <= t <= nu + 60:
+                punten.append((float(t), float(d)))
+        self.metingen.clear()
+        self.metingen.extend(sorted(punten))
+        sleutel = bewaard.get("sleutel")
+        self._sleutel = sleutel if sleutel is None or _is_getal(sleutel) or isinstance(sleutel, str) else None
+        snelheid = bewaard.get("snelheid")
+        geldig_tot = bewaard.get("geldig_tot")
+        if _is_getal(snelheid) and _is_getal(geldig_tot) and nu <= geldig_tot:
+            self._snelheid = float(snelheid)
+            self._geldig_tot = float(geldig_tot)
+        else:
+            self._snelheid = None
+            self._geldig_tot = None
 
     def wis(self) -> None:
         self.metingen.clear()

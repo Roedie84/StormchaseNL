@@ -30,6 +30,7 @@ from .spreiding import beoordeel, ensemble as vat_ensemble_samen, samenvatting
 from .tijd import MARGE_KWARTIER, MARGE_UUR, aantal_gevuld, dichtstbijzijnde, op_stempel
 from .validatie import Validatie
 from .nadering import Naderingstrend
+from .herstart import OPSLAG_VERSIE, inslagtijd, puntsleutel, snoei_storm
 from .herpoging import HerpogingMixin
 from .verouderd import VerouderdMixin
 from .indices import (
@@ -371,7 +372,15 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         self._was_schuilen: bool | None = None
         self.validatie = Validatie()
         self.opslag = None  # wordt na het aanmaken gezet
-        self._bewaarde_uitkomsten = 0
+        # 0.47.0: opslaan bij elke wijziging in de validatie, niet bij een
+        # andere lengte van de lijst (die blijft na 60 uitkomsten gelijk).
+        self._bewaarde_wijzigingen = 0
+        # 0.47.0: toestand over een herstart (zie herstart.py). Het plan
+        # wordt na het aanmaken gezet; de sleutels van teruggezette punten
+        # voorkomen dat een herlaadbeurt dezelfde inslag dubbel telt.
+        self.bewaarplan = None
+        self._herstelde_punten: set[tuple] = set()
+        self._staat_kenmerk = None
         # Kleinste afstand sinds de laatste passagevoorspelling, om die
         # achteraf tegen de werkelijkheid te kunnen houden.
 
@@ -522,11 +531,22 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
                 laatste = state.last_changed
 
             # Elke inslag eenmalig vastleggen met positie en tijd, voor de
-            # celtracking en de frequentie.
+            # celtracking en de frequentie. 0.47.0: met de tijd van de inslag
+            # zelf, niet die van het eerste zien; anders telt een herlaadbeurt
+            # alle bestaande inslagen opnieuw als nieuw.
             if state.entity_id not in self._gezien:
-                stempel = dt_util.utcnow().timestamp()
+                stempel = inslagtijd(
+                    state.attributes,
+                    state.last_changed.timestamp(),
+                    dt_util.utcnow().timestamp(),
+                )
                 self._gezien[state.entity_id] = stempel
-                self._punten.append((stempel, float(breedte), float(lengte)))
+                sleutel = puntsleutel(stempel, float(breedte), float(lengte))
+                if sleutel in self._herstelde_punten:
+                    # Al teruggezet uit de opslag
+                    self._herstelde_punten.discard(sleutel)
+                else:
+                    self._punten.append((stempel, float(breedte), float(lengte)))
 
         # Entiteiten die verdwenen zijn hoeven we niet te blijven onthouden
         if len(self._gezien) > 5000:
@@ -757,16 +777,12 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
                 k: v for k, v in self._min_per_cel.items() if k in actueel
             }
 
-        # Is er iets afgerond, bewaar het dan. Met vertraging, zodat een reeks
-        # afrondingen kort na elkaar tot een schrijfactie leidt.
-        if (
-            self.opslag is not None
-            and len(val.uitkomsten) != self._bewaarde_uitkomsten
-        ):
-            self._bewaarde_uitkomsten = len(val.uitkomsten)
-            self.opslag.async_delay_save(
-                lambda: {"uitkomsten": self.validatie.uitkomsten}, 60
-            )
+        # Is er iets afgerond of vastgelegd, bewaar het dan. Met vertraging,
+        # zodat een reeks afrondingen kort na elkaar tot een schrijfactie
+        # leidt. 0.47.0: op de wijzigingsteller, niet op de lengte van de
+        # lijst; die bleef na MAX_UITKOMSTEN gelijk en dan werd er niets
+        # meer bewaard.
+        self.plan_validatie_opslag()
 
         if cel:
             passage_over = cel.get("passage_over")
@@ -786,6 +802,81 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
             # Afrekenen tegen de kleinste afstand van dezelfde cel
             open_cel = (val.open.get("passage") or {}).get("cel")
             val.passage_afgerond(nu, self._min_per_cel.get(open_cel))
+
+    def plan_validatie_opslag(self) -> None:
+        """Plan het wegschrijven van de validatie als er iets veranderd is."""
+        if (
+            self.opslag is not None
+            and self.validatie.wijzigingen != self._bewaarde_wijzigingen
+        ):
+            self._bewaarde_wijzigingen = self.validatie.wijzigingen
+            self.opslag.async_delay_save(self.validatie.naar_opslag, 60)
+
+    def naar_opslag(self) -> dict:
+        """De toestand die een herstart moet overleven (0.47.0)."""
+        nu = dt_util.utcnow().timestamp()
+        open_cel = (self.validatie.open.get("passage") or {}).get("cel")
+        return {
+            "versie": OPSLAG_VERSIE,
+            "opgeslagen_op": nu,
+            "punten": [list(p) for p in self._punten if p[0] >= nu - CELVENSTER * 2],
+            "inslagen": [list(p) for p in self._inslagen],
+            "celspoor": [list(p) for p in self._celspoor],
+            "celsporen": [
+                {"id": s["id"], "punten": [list(p) for p in s["punten"]]}
+                for s in self._celsporen
+            ],
+            "volgend_celkenmerk": self._volgend_celkenmerk,
+            "min_per_cel": {str(k): v for k, v in self._min_per_cel.items()},
+            "behoud_cellen": [open_cel] if isinstance(open_cel, int) else [],
+            "nadering": self._nadering.naar_opslag(),
+            "laatste_dichtbij": self._laatste_dichtbij,
+            "was_schuilen": self._was_schuilen,
+            "was_nearby": self._was_nearby,
+            "was_approaching": self._was_approaching,
+        }
+
+    def herstel(self, bewaard: dict | None) -> None:
+        """Zet de bewaarde toestand terug, voor de eerste ronde (0.47.0).
+
+        Te oude cellen, punten en vlaggen vallen weg (zie snoei_storm).
+        """
+        nu = dt_util.utcnow().timestamp()
+        venster = int(self._opt(CONF_RING_WINDOW, DEFAULT_RING_WINDOW)) * 60
+        schoon = snoei_storm(bewaard, nu, inslag_leeftijd=max(venster, CELVENSTER))
+        self._punten.extend(schoon["punten"])
+        self._herstelde_punten = {puntsleutel(*p) for p in schoon["punten"]}
+        self._inslagen.extend(schoon["inslagen"])
+        self._celspoor = schoon["celspoor"]
+        self._celsporen = schoon["celsporen"]
+        self._volgend_celkenmerk = schoon["volgend_celkenmerk"]
+        self._min_per_cel = schoon["min_per_cel"]
+        self._nadering.herstel(schoon["nadering"], nu)
+        self._laatste_dichtbij = schoon["laatste_dichtbij"]
+        self._was_schuilen = schoon["was_schuilen"]
+        self._was_nearby = schoon["was_nearby"]
+        self._was_approaching = schoon["was_approaching"]
+
+    def _plan_staat_opslag(self) -> None:
+        """Plan het wegschrijven als de toestand sinds de vorige keer veranderde."""
+        if self.bewaarplan is None:
+            return
+        kenmerk = (
+            len(self._punten),
+            self._punten[-1][0] if self._punten else None,
+            len(self._inslagen),
+            self._inslagen[-1][0] if self._inslagen else None,
+            tuple((s["id"], len(s["punten"])) for s in self._celsporen),
+            self._volgend_celkenmerk,
+            self._laatste_dichtbij,
+            len(self._nadering.metingen),
+            self._was_schuilen,
+            self._was_nearby,
+            self._was_approaching,
+        )
+        if kenmerk != self._staat_kenmerk:
+            self._staat_kenmerk = kenmerk
+            self.bewaarplan.plan()
 
     def recente_inslagen(self, venster: int = 900) -> list[tuple[float, float, float]]:
         """Inslagen van de laatste minuten, met hun ouderdom in seconden.
@@ -1051,6 +1142,7 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
             self.stats.noteer_meting(distance, speed)
 
         self._fire_events(data)
+        self._plan_staat_opslag()
         return data
 
 

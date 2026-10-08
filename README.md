@@ -557,6 +557,20 @@ Coordinaten staan afgerond tot ongeveer een kilometer. De gevolgde
 device_tracker, handmatige coordinaten en de namen van je meldingsdiensten
 worden weggelaten.
 
+### Herstarten verandert niets
+
+Sinds 0.47.0 overleeft alles wat de integratie leert of bijhoudt een herstart
+of herlaadbeurt: de uitkomsten én de nog open voorspellingen, de tellers per
+bron, events en meldingen, de wachttijden tussen meldingen, de al gemelde
+officiële waarschuwingen, de 30/30-schuilregel, de celsporen en de
+naderingsreeks. Een lopende waarschuwing of schuilperiode wordt na een
+herstart dus niet opnieuw gemeld, en "veilig" komt gewoon. Bij ontladen en
+afsluiten wordt alles meteen weggeschreven. Cellen, inslagen en
+overgangsvlaggen die ouder zijn dan een half uur vallen bij het laden weg.
+Mislukt de eerste ophaalronde na een herstart, dan tonen Open-Meteo, regen,
+waarschuwingen en metingen de bewaarde waarde (hooguit drie uur oud) in
+plaats van onbeschikbaar.
+
 ## Beperkingen
 
 - De naderingssnelheid is gebaseerd op de *laatste* inslag, niet op een

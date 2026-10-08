@@ -10,13 +10,20 @@ from __future__ import annotations
 import logging
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import Platform
-from homeassistant.core import HomeAssistant, ServiceCall
+from homeassistant.const import EVENT_HOMEASSISTANT_STOP, Platform
+from homeassistant.core import Event, HomeAssistant, ServiceCall
 
+from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers.restore_state import async_get as async_get_restore_state
 from homeassistant.helpers.storage import Store
 from homeassistant.loader import async_get_integration
 
-from .const import DOMAIN, SERVICE_SEND_BRIEFING, SERVICE_TEST_NOTIFICATION
+from .const import (
+    DATA_NOTIFY_ENABLED,
+    DOMAIN,
+    SERVICE_SEND_BRIEFING,
+    SERVICE_TEST_NOTIFICATION,
+)
 from .coordinator import POSITIE_SLEUTEL, MeteoCoordinator, StormCoordinator
 from .meting import MetingCoordinator
 from .radarbron import RadarCoordinator
@@ -28,6 +35,7 @@ from .notifier import StormNotifier
 from .rain import RainCoordinator
 from .stats import Statistieken
 from .validatie import Validatie
+from .herstart import OPSLAG_VERSIE, Bewaarplan
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -36,6 +44,17 @@ _LOGGER = logging.getLogger(__name__)
 # openstaande wijziging zelf weg; bij het ontladen doen we dat hieronder.
 BRONSTATISTIEK_SLEUTEL = "stormchase_bronstatistiek"
 BRONSTATISTIEK_VERTRAGING = 300
+
+# 0.47.0: toestand die een herstart moet overleven (open voorspellingen staan
+# in de validatie-opslag; schuilregel, cellen, nadering, gemelde
+# waarschuwingen en wachttijden hier). Per config entry een eigen bestand.
+STAAT_SLEUTEL = f"{DOMAIN}_staat"
+STAAT_VERTRAGING = 120
+
+# 0.47.0: de laatst geslaagde gegevens per bron, zodat de sensoren na een
+# herstart niet onbeschikbaar zijn als de eerste ophaalronde mislukt.
+LAATSTE_SLEUTEL = f"{DOMAIN}_laatste"
+LAATSTE_VERTRAGING = 60
 
 PLATFORMS: list[Platform] = [
     Platform.SENSOR,
@@ -59,12 +78,21 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # betrouwbaarheid van een bron over dagen te volgen is en niet bij elke
     # herstart opnieuw begint. Koppelen voor de eerste ophaalronde.
     bron_opslag = Store(hass, 1, BRONSTATISTIEK_SLEUTEL)
-    bronhistorie = BronHistorie(await bron_opslag.async_load())
+    bewaarde_bron = await bron_opslag.async_load()
+    bronhistorie = BronHistorie(bewaarde_bron)
+    # 0.47.0: de totaaltellers (bronnen, events, meldingen) staan naast de
+    # dagtellers, zodat ook die een herstart overleven.
+    if isinstance(bewaarde_bron, dict):
+        stats.herstel_tellers(bewaarde_bron.get("tellers"))
+
+    def _bron_data() -> dict:
+        return {**bronhistorie.naar_opslag(), "tellers": stats.tellers_naar_opslag()}
+
     stats.koppel_historie(
         bronhistorie,
         lambda: bronhistorie.plan_opslag(
             lambda: bron_opslag.async_delay_save(
-                bronhistorie.naar_opslag, BRONSTATISTIEK_VERTRAGING
+                _bron_data, BRONSTATISTIEK_VERTRAGING
             )
         ),
     )
@@ -115,10 +143,72 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     opslag = Store(hass, 1, f"{DOMAIN}_validatie")
     bewaard = await opslag.async_load() or {}
-    storm.validatie = Validatie(bewaard.get("uitkomsten"))
+    # 0.47.0: ook de open voorspellingen en de teller van afgeronde
+    storm.validatie = Validatie(
+        bewaard.get("uitkomsten"), bewaard.get("open"), bewaard.get("afgerond")
+    )
     storm.opslag = opslag
     # Regen en onweer delen dezelfde lijst met voorspellingen
     regen.validatie = storm.validatie
+
+    # 0.47.0: de toestand van voor de herstart terugzetten, voor de eerste
+    # ophaalronde en voordat de notifier luistert, zodat er niets dubbel gemeld
+    # wordt en de schuilregel gewoon doorloopt.
+    staat_opslag = Store(hass, 1, f"{STAAT_SLEUTEL}_{entry.entry_id}")
+    staat = await staat_opslag.async_load() or {}
+    staatplan = Bewaarplan()
+
+    def _staat_data() -> dict:
+        staatplan.geschreven()
+        return {
+            "versie": OPSLAG_VERSIE,
+            "storm": storm.naar_opslag(),
+            "gemeld": waarschuwingen.gemeld_naar_opslag(),
+            "notifier": notifier.naar_opslag(),
+        }
+
+    staatplan.plannen = lambda: staat_opslag.async_delay_save(
+        _staat_data, STAAT_VERTRAGING
+    )
+    storm.herstel(staat.get("storm"))
+    waarschuwingen.herstel_gemeld(staat.get("gemeld"))
+    notifier.herstel(staat.get("notifier"))
+    storm.bewaarplan = staatplan
+    waarschuwingen.bewaarplan = staatplan
+    notifier.bewaarplan = staatplan
+
+    laatste_opslag = Store(hass, 1, f"{LAATSTE_SLEUTEL}_{entry.entry_id}")
+    laatste = await laatste_opslag.async_load() or {}
+    laatsteplan = Bewaarplan()
+    terugvallers = {
+        "meteo": meteo,
+        "rain": regen,
+        "alerts": waarschuwingen,
+        "meting": meting,
+    }
+
+    def _laatste_data() -> dict:
+        laatsteplan.geschreven()
+        return {
+            naam: onderdeel.laatste_naar_opslag()
+            for naam, onderdeel in terugvallers.items()
+        }
+
+    laatsteplan.plannen = lambda: laatste_opslag.async_delay_save(
+        _laatste_data, LAATSTE_VERTRAGING
+    )
+    for naam, onderdeel in terugvallers.items():
+        onderdeel.herstel_laatste(laatste.get(naam))
+        onderdeel.bij_onthoud = laatsteplan.plan
+
+    # 0.47.0: de stand van de meldingenschakelaar voordat de notifier luistert. De
+    # schakelaar zelf herstelt pas bij het aanmaken van de platformen, na de
+    # eerste ophaalrondes; tot dan gold "aan" en gingen er meldingen uit
+    # terwijl de schakelaar uit stond.
+    gegevens = hass.data.setdefault(DOMAIN, {}).setdefault(entry.entry_id, {})
+    stand = _bewaarde_meldingenstand(hass, entry)
+    if stand is not None:
+        gegevens[DATA_NOTIFY_ENABLED] = stand
 
     # Luisteraars aanzetten voor de eerste ophaalronde. Anders vuren de
     # gebeurtenissen uit die ronde in het niets: bij een herstart midden in
@@ -148,7 +238,23 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             "notifier": notifier,
             "stats": stats,
             "bron_opslag": bron_opslag,
+            # 0.47.0: alles wat bij ontladen en afsluiten meteen weg moet
+            "opslagen": [
+                ("validatie", opslag, storm.validatie.naar_opslag),
+                ("staat", staat_opslag, _staat_data),
+                ("laatste", laatste_opslag, _laatste_data),
+                ("bronstatistiek", bron_opslag, _bron_data),
+            ],
+            "plannen": [staatplan, laatsteplan],
         }
+    )
+
+    async def _bij_stoppen(_event: Event) -> None:
+        """Bij het afsluiten alles meteen wegschrijven (0.47.0)."""
+        await _async_bewaar_alles(hass, gegevens)
+
+    entry.async_on_unload(
+        hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, _bij_stoppen)
     )
 
     # Het dagelijkse weerbericht plannen. Pas hierna, want het leest de
@@ -163,6 +269,43 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
 
     return True
+
+
+def _bewaarde_meldingenstand(hass: HomeAssistant, entry: ConfigEntry) -> bool | None:
+    """De laatst bekende stand van de meldingenschakelaar, of None."""
+    entity_id = er.async_get(hass).async_get_entity_id(
+        "switch", DOMAIN, f"{entry.entry_id}_notifications"
+    )
+    if entity_id is None:
+        return None
+    try:
+        opgeslagen = async_get_restore_state(hass).last_states.get(entity_id)
+    except Exception:  # noqa: BLE001 - zonder herstelgegevens geldt de standaard
+        opgeslagen = None
+    staat = opgeslagen.state if opgeslagen is not None else hass.states.get(entity_id)
+    if staat is None or staat.state not in ("on", "off"):
+        return None
+    return staat.state == "on"
+
+
+async def _async_bewaar_alles(hass: HomeAssistant, gegevens: dict) -> None:
+    """Schrijf alle opslag meteen weg, zonder te wachten op de vertraging.
+
+    Bij een herlaadbeurt maakt de nieuwe instantie eigen Store-objecten aan;
+    een uitgestelde schrijfactie van de oude kon daarna nog oude gegevens
+    over de nieuwe heen zetten. async_save annuleert die uitgestelde actie.
+    """
+    for naam, opslag, data in gegevens.get("opslagen", []):
+        try:
+            await opslag.async_save(data())
+        except Exception:  # noqa: BLE001 - ontladen mag hier niet op stuklopen
+            _LOGGER.warning("Opslag %s niet weggeschreven", naam, exc_info=True)
+    posities = hass.data.get(POSITIE_SLEUTEL)
+    if posities and posities.get("opslag") is not None:
+        try:
+            await posities["opslag"].async_save({"posities": posities["posities"]})
+        except Exception:  # noqa: BLE001
+            _LOGGER.warning("Trackerposities niet weggeschreven", exc_info=True)
 
 
 async def _async_register_services(hass: HomeAssistant) -> None:
@@ -200,15 +343,20 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         briefing = gegevens.get("briefing")
         if briefing is not None:
             briefing.stop()
-        # L-SC-002: een nog uitgestelde schrijfactie meteen doen, anders mist
-        # een herlaadbeurt (opties gewijzigd) de laatste minuten.
+        # L-SC-002 / 0.47.0: alle nog uitgestelde schrijfacties meteen doen
+        # (validatie, toestand, laatste gegevens, bronstatistiek, posities),
+        # anders mist een herlaadbeurt (opties gewijzigd) de laatste minuut.
+        await _async_bewaar_alles(hass, gegevens)
+        # Daarna mag de oude instantie niets meer plannen: anders kan een
+        # late ronde alsnog oude gegevens over die van de nieuwe zetten.
+        for plan in gegevens.get("plannen", []):
+            plan.plannen = None
+        storm = gegevens.get("storm")
+        if storm is not None:
+            storm.opslag = None
         stats = gegevens.get("stats")
-        bron_opslag = gegevens.get("bron_opslag")
-        if stats is not None and stats.historie is not None and bron_opslag is not None:
-            try:
-                await bron_opslag.async_save(stats.historie.naar_opslag())
-            except Exception:  # noqa: BLE001 - ontladen mag hier niet op stuklopen
-                _LOGGER.warning("Bronstatistiek per dag niet weggeschreven", exc_info=True)
+        if stats is not None:
+            stats._bij_wijziging = None
         if not hass.data[DOMAIN]:
             hass.data.pop(DOMAIN)
             hass.services.async_remove(DOMAIN, SERVICE_TEST_NOTIFICATION)

@@ -40,6 +40,7 @@ from .coordinator import LocationMixin
 from .herpoging import HerpogingMixin
 from .verouderd import VerouderdMixin
 from .taal import vertaal_soort
+from .herstart import gemeld_naar_opslag, gemeld_uit_opslag
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -93,7 +94,11 @@ class AlertCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
         )
         self.entry = entry
         self._session = async_get_clientsession(hass)
-        self._gemeld: set[str] = set()
+        # 0.47.0: sleutel -> {"tot", "gemeld_op"} (epoch-seconden), bewaard
+        # over een herstart zodat een lopende waarschuwing niet opnieuw wordt
+        # gemeld. Wordt voor de eerste ophaalronde uit de opslag gevuld.
+        self._gemeld: dict[str, dict] = {}
+        self.bewaarplan = None  # wordt na het aanmaken gezet
         # Onthoud waar we het land voor hebben opgezocht, zodat we niet bij
         # elke ronde opnieuw hoeven te geocoderen.
         self._land_voor: tuple[float, float] | None = None
@@ -364,9 +369,18 @@ class AlertCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
         self._vuur_events(actief)
         return data
 
+    def herstel_gemeld(self, bewaard) -> None:
+        """Al gemelde waarschuwingen terugzetten; verlopen vallen weg."""
+        self._gemeld = gemeld_uit_opslag(bewaard, dt_util.utcnow().timestamp())
+
+    def gemeld_naar_opslag(self) -> dict:
+        """De al gemelde waarschuwingen, voor de Store."""
+        return gemeld_naar_opslag(self._gemeld)
+
     def _vuur_events(self, actief: list[dict]) -> None:
         """Meld nieuwe waarschuwingen, elk hoogstens een keer."""
         huidige_ids = set()
+        voor = set(self._gemeld)
 
         for waarschuwing in actief:
             sleutel = waarschuwing.get("id") or (
@@ -380,11 +394,19 @@ class AlertCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
             if waarschuwing["rang"] < self.drempel:
                 continue
 
-            self._gemeld.add(sleutel)
+            tot = _tijd(waarschuwing.get("tot"))
+            self._gemeld[sleutel] = {
+                "tot": tot.timestamp() if tot is not None else None,
+                "gemeld_op": dt_util.utcnow().timestamp(),
+            }
             if self.stats is not None:
                 self.stats.noteer_event("alert")
             self.hass.bus.async_fire(EVENT_ALERT, waarschuwing)
 
         # Verlopen waarschuwingen vergeten, zodat een herhaling later opnieuw
         # gemeld mag worden.
-        self._gemeld &= huidige_ids
+        self._gemeld = {
+            k: v for k, v in self._gemeld.items() if k in huidige_ids
+        }
+        if set(self._gemeld) != voor and self.bewaarplan is not None:
+            self.bewaarplan.plan()

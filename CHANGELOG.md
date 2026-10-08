@@ -5,6 +5,47 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.47.0] — 2026-10-08
+
+Alleen herstartbestendigheid: een herstart of herlaadbeurt van Home Assistant
+verandert niets meer aan geleerde gegevens, scores, tellers of gedrag, en
+verstuurt geen meldingen opnieuw. Drempels, standaardinstellingen en
+meldingsteksten zijn ongewijzigd. Bestaande opslag blijft leesbaar.
+
+### Opgelost
+
+- **Validatie werd na 60 uitkomsten niet meer bewaard.** Opslaan gebeurde
+  alleen als de lengte van de lijst veranderde, en die blijft na
+  `MAX_UITKOMSTEN` gelijk. Nu op een teller die bij elke afgeronde of
+  vastgelegde voorspelling oploopt (`afgerond` komt mee in de opslag).
+- **Herladen verloor tot een minuut.** Bij ontladen worden de validatie, de
+  trackerposities, de bronstatistiek en de nieuwe toestandsopslag meteen
+  weggeschreven, en daarna kan de oude instantie niets meer over de nieuwe
+  heen schrijven. Bij het afsluiten van Home Assistant ook meteen.
+- **Officiële waarschuwingen werden na elke herstart opnieuw gemeld.** De
+  al gemelde waarschuwingen staan nu met hun einddatum in de opslag en worden
+  voor de eerste ophaalronde geladen; verlopen exemplaren vallen weg.
+- **Meldingen terwijl de schakelaar uit stond.** De schakelaar herstelde
+  zijn stand pas na de eerste ophaalrondes. De bewaarde stand wordt nu
+  gelezen voordat de notifier gaat luisteren.
+- **Open voorspellingen gingen verloren.** Ze worden nu bewaard en na de
+  herstart gewoon afgerekend.
+- **De 30/30-schuilregel begon opnieuw.** De tijd van de laatste inslag
+  binnen 10 km blijft bewaard; geen tweede "ga naar binnen" na een herstart,
+  en "veilig" komt nog.
+- **Oude inslagen telden na herladen als nieuw.** Een inslag krijgt de tijd
+  uit zijn eigen attribuut (`publication_date`), anders `last_changed`, in
+  plaats van het moment van eerste zien; teruggezette inslagen worden niet
+  dubbel geteld.
+- **Celsporen, celkenmerken en de naderingsreeks** overleven een herstart;
+  wat ouder is dan een half uur valt bij het laden weg.
+- **Tellers en wachttijden.** Gelukt/mislukt per bron, events, meldingen en
+  de wachttijden tussen meldingen (als wandkloktijd) staan in de opslag.
+- **Sensoren onbeschikbaar na een herstart.** Mislukte de eerste ophaalronde
+  van Open-Meteo, regen, waarschuwingen of metingen, dan bleven de sensoren
+  leeg. Nu dient de bewaarde laatste waarde als terugval, met dezelfde
+  maximale ouderdom van drie uur.
+
 ## [0.46.0] — 2026-10-08
 
 ### Opgelost

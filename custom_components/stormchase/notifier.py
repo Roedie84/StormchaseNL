@@ -4,13 +4,14 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import datetime, time
+from datetime import datetime, time, timezone
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.util import dt as dt_util
 
 from .taal import hoofdletter
+from .herstart import tijden_naar_opslag, tijden_uit_opslag
 
 from .const import (
     CONF_NOTIFY_COOLDOWN,
@@ -91,6 +92,45 @@ class StormNotifier:
         # vorstmelding kan tegenhouden.
         self._laatste_weer: dict[str, datetime] = {}
         self._unsubs: list[callable] = []
+        # 0.47.0: de wachttijden overleven een herstart (wandkloktijd)
+        self.bewaarplan = None  # wordt na het aanmaken gezet
+
+    def _plan_opslag(self) -> None:
+        if self.bewaarplan is not None:
+            self.bewaarplan.plan()
+
+    def naar_opslag(self) -> dict:
+        """De wachttijden als epoch-seconden, voor de Store."""
+        return {
+            "laatste": tijden_naar_opslag(
+                {
+                    "onweer": self._laatste,
+                    "regen": self._laatste_regen,
+                    "wind": self._laatste_wind,
+                }
+            ),
+            "weer": tijden_naar_opslag(dict(self._laatste_weer)),
+        }
+
+    def herstel(self, bewaard) -> None:
+        """Zet de bewaarde wachttijden terug, voor start()."""
+        if not isinstance(bewaard, dict):
+            return
+        nu = dt_util.utcnow().timestamp()
+
+        def als_moment(stempel: float | None):
+            if stempel is None:
+                return None
+            return datetime.fromtimestamp(stempel, tz=timezone.utc)
+
+        laatste = tijden_uit_opslag(bewaard.get("laatste"), nu)
+        self._laatste = als_moment(laatste.get("onweer"))
+        self._laatste_regen = als_moment(laatste.get("regen"))
+        self._laatste_wind = als_moment(laatste.get("wind"))
+        self._laatste_weer = {
+            soort: als_moment(stempel)
+            for soort, stempel in tijden_uit_opslag(bewaard.get("weer"), nu).items()
+        }
 
     def _opt(self, key: str, default=None):
         """Haal een optie op, met de config-entry data als fallback."""
@@ -314,6 +354,7 @@ class StormNotifier:
         # weersituaties hebben hun eigen wachttijd.
         if soort in ("nearby", "approaching", "cleared"):
             self._laatste = dt_util.utcnow()
+            self._plan_opslag()
 
     def _extras(self, soort: str) -> dict:
         """De extra velden bij een melding.
@@ -430,6 +471,7 @@ class StormNotifier:
 
         await self._stuur(bericht, "rain", titel="Regen op komst")
         self._laatste_regen = dt_util.utcnow()
+        self._plan_opslag()
 
     @callback
     async def _handle_alert(self, event: Event) -> None:
@@ -490,6 +532,7 @@ class StormNotifier:
 
         await self._stuur(bericht, "wind", titel="Harde wind")
         self._laatste_wind = dt_util.utcnow()
+        self._plan_opslag()
 
     @staticmethod
     def _weerbericht(soort: str, data: dict) -> tuple[str, str]:
@@ -570,6 +613,7 @@ class StormNotifier:
         titel, bericht = self._weerbericht(soort, event.data)
         await self._stuur(bericht, f"weather_{soort}", titel=titel)
         self._laatste_weer[soort] = dt_util.utcnow()
+        self._plan_opslag()
 
     @callback
     async def _handle_outlook(self, event: Event) -> None:

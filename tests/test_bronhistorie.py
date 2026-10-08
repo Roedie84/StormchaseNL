@@ -250,4 +250,7 @@ class TestOpzet:
 
     def test_wegschrijven_bij_ontladen(self, bron):
         ontladen = bron[bron.index("async def async_unload_entry") :]
-        assert "async_save(stats.historie.naar_opslag())" in ontladen
+        # 0.47.0: via _async_bewaar_alles, samen met de andere opslag
+        assert "await _async_bewaar_alles(hass, gegevens)" in ontladen
+        assert '("bronstatistiek", bron_opslag, _bron_data)' in bron
+        assert "bronhistorie.naar_opslag()" in bron
