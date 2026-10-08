@@ -77,3 +77,13 @@ laatste ronde: 08-10 11:45, gemeten t/m 08-10 11:44
 - Geen release (tussenronde, niets acuut).
 
 laatste ronde: 08-10 15:40, gemeten t/m 08-10 15:44
+
+## 08-10 19:40 · tussenronde
+- Geïnstalleerd: 0.48.0 (herstarts 16:31, 17:41, 18:36). Geen onweer (0 inslagen <50 km, ensemble 0%, CAPE 0-10), niveau groen → onweer: alleen beschikbaarheid gemeten.
+- Bronnen 08-10: 100% (n=1257; radar 791, buienradar 164, meteoalarm 76). **L-SC-002:** dagteller over 9 herstarts door (radar 791 per dag tegen 441 sinds 18:36). Daggrens in de dagafsluiting.
+- Regen: validatie 25/33 (was 23/31); 3 nieuwe afgeronde uitkomsten −17,7 (>45 min), −8 (≤15) en −8,1 min (>45). Alle 10 bekende afwijkingen: 9 negatief, 1 positief; mediaan −10,6 min (tekentoets p 0,02, n=10).
+- **H-SC-3 sterker:** de drie uitkomsten op ≤15 min zijn −7,9, −8 en −8 min — precies wat het vooruitkijken (−10..+10 min, reeks per 5 min) voorspelt: "regent" slaat aan zodra er over ~10 min regen in de reeks staat. Bij langere horizons komt daar de gewone voorspelfout bij. Ondersteunt L-SC-005 (open, Ruud beslist); offline replay nog niet mogelijk (radarreeksen niet in de recorder).
+- Open voorspelling in de validatie: regen over 43 min (0,21 mm/u) van eerder; live 19:41 droog, `regen_begint_over` 113 (0,1 mm/u), `regen_verwacht` off → toetsen.
+- Geen release (tussenronde, niets acuut).
+
+laatste ronde: 08-10 19:40, gemeten t/m 08-10 19:44

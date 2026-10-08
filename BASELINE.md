@@ -18,3 +18,4 @@
 | Passage binnen 10 / 20 km | 5/12 · 7/12 (alleen laatste 20 uitkomsten; vervangen) | bewaarde uitkomsten t/m 08-10 | 08-10 07:40 |
 | Passage binnen 10 / 20 km (alle bewaarde) | 9/24 (38%) · 12/24 (50%) | ≤15 min 6/13, 15-45 3/8, >45 0/3 | 08-10 11:45 |
 | Radarbeeld-wissels na fix | max gat 10 min | 08-10 06:23-07:43, n=16 | 08-10 07:40 |
+| Regenvalidatie afwijking (mediaan) | −10,6 min, 9/10 negatief; ≤15 min ≈ −8 | 10 uitkomsten t/m 08-10 | 08-10 19:40 |

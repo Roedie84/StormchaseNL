@@ -65,3 +65,8 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-08 15:40,TUSSEN,sc_weer_conditie_volgt_radar,1,3,"0.48.0: rainy 14:19 en 15:23 bij >=0.1, model terug 14:24 bij 0.0"
 2026-10-08 15:40,TUSSEN,sc_intensiteit_vs_minuut0,6.04 vs 1.33,1,"15:39: max -10..+10 min geeft pouring terwijl nu 1.33 mm/u (H-SC-3)"
 2026-10-08 15:40,TUSSEN,sc_volgende_bui_min,105,1,"L-SC-004: regent, stopt over 20, volgende bui true"
+2026-10-08 19:40,TUSSEN,sc_versie_geinstalleerd,0.48.0,1,"herstarts 16:31, 17:41, 18:36"
+2026-10-08 19:40,TUSSEN,sc_onweer_sinds_1544,0,1,"geen inslagen <50 km; ensemble 0%; CAPE 0-10"
+2026-10-08 19:40,TUSSEN,sc_bronnen_slaag_pct,100,1257,"per_dag 08-10 over 9 herstarts (L-SC-002)"
+2026-10-08 19:40,TUSSEN,sc_regen_validatie_uitgekomen,0.758,33,"25/33; <=15 5/5, 15-45 7/11, >45 13/17"
+2026-10-08 19:40,TUSSEN,sc_regen_afwijking_mediaan_min,-10.6,10,"9 van 10 negatief, tekentoets p 0.02; <=15 min: -7.9, -8, -8 (H-SC-3)"
