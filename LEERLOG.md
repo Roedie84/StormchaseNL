@@ -73,7 +73,7 @@ laatste ronde: 08-10 11:45, gemeten t/m 08-10 11:44
 - Regen: 3 buien (11:50-12:21, 13:51-14:24, vanaf 15:23). Regenvalidatie 23/31 (was 21/30); 2 nieuwe: −13 min (15-45) en −25,7 min (>45). Bekende uitkomsten: afwijking −22, −18,9, −7,9, +7, −8, −13, −25,7 → mediaan −13 min: regen "begint" structureel eerder dan voorspeld.
 - **L-SC-004 eerste meetpunt gehaald:** 15:39 regent, `stopt_over` 20, `volgende_bui` true, sensor 105 min (bui op +105/+110 in de reeks).
 - **0.48.0 (weerentiteit volgt radar):** sinds 14:19 rainy bij elke radarwaarde ≥0,1 (14:19, 15:23), terug naar model bij 0,0 (14:24) → werkt. Maar 15:39: `pouring` en neerslagintensiteit 6,04 terwijl de reeks op minuut 0 1,33 mm/u geeft; 6,04 is minuut +10.
-- **H-SC-3 (nieuw):** `lees_reeks` neemt als intensiteit "nu" het maximum over −10..+10 min (bewust, tegen dipjes). Dat verklaart (a) `pouring` tot 10 min te vroeg en (b) waarschijnlijk een deel van de vroege regenstart in de validatie (regent = max tot +10 min, voorspelling = eerste minuut > 0). Toets: regenuitkomsten herrekenen met alleen −10..0 → → voorstel L-SC-005 (raakt `regent` en daarmee regenmeldingen: Ruud beslist).
+- **H-SC-3 (nieuw):** `lees_reeks` neemt als intensiteit "nu" het maximum over −10..+10 min (bewust, tegen dipjes). Dat verklaart (a) `pouring` tot 10 min te vroeg en (b) waarschijnlijk een deel van de vroege regenstart in de validatie (regent = max tot +10 min, voorspelling = eerste minuut > 0). Toets: regenuitkomsten herrekenen met alleen −10..0 → voorstel L-SC-005 (raakt `regent` en daarmee regenmeldingen: Ruud beslist).
 - Geen release (tussenronde, niets acuut).
 
 laatste ronde: 08-10 15:40, gemeten t/m 08-10 15:44
