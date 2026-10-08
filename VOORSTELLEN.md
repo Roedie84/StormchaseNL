@@ -22,7 +22,7 @@ Status: open / akkoord / afgewezen / gebouwd vX / geverifieerd / teruggedraaid. 
 - Meten na bouw: diagnostics toont slaagpercentage per bron over ≥2 dagen na een herstart.
 
 ## L-SC-003 · passage-validatie: trefkans op afstand, niet "er was een afstand"
-- Status: **gebouwd 0.46.0 (08-10, chatsessie)** — release v0.46.0, workflow groen, HACS ververst; verifiëren na installatie (diagnostics)
+- Status: **geverifieerd 08-10 11:45** (gebouwd 0.46.0, geïnstalleerd 10:55): diagnostics toont raak/binnen 10/20 km per horizon; over alle 24 bewaarde passages 9/24 · 12/24 (baseline 5/12 · 7/12 telde alleen de laatste 20)
 - Bouw: per passage-uitkomst `raak` (≤10 km), `binnen_10_km`, `binnen_20_km` naast `afwijking_km`; samenvatting per horizon `binnen_10_km`, `binnen_20_km`, `trefkans_10_km_pct`, `trefkans_20_km_pct`, `mediane_afwijking_km`, `grootste_afwijking_km`, berekend uit `afwijking_km` (dus ook over bewaarde uitkomsten). `uitgekomen` blijft = afstand gemeten. Aankomst ongewijzigd (was al: raak bij onweer binnen waarschuwingsafstand). Tests `tests/test_release_0460.py`.
 - (eerder: gepland, zelf bouwen: rapportage/classificatie; raakt geen drempels of meldgedrag — dagafsluiting)
 - Onderbouwing: `validatie.py` `passage_afgerond` zet `uitgekomen = werkelijke_afstand is not None` → passage altijd 100% (21/21). Bewaarde uitkomsten (n=12): |afwijking| ≤10 km 5/12, ≤20 km 7/12, max 56 km.
@@ -30,7 +30,7 @@ Status: open / akkoord / afgewezen / gebouwd vX / geverifieerd / teruggedraaid. 
 - Meten na bouw: diagnostics toont per passagehorizon het aandeel binnen 10/20 km; baseline 5/12 en 7/12.
 
 ## L-SC-004 · `regen_begint_over` toont de volgende bui terwijl het regent
-- Status: **gebouwd 0.46.0 (08-10, chatsessie)** — verifiëren na installatie bij een regenperiode met een droog gat
+- Status: **gebouwd 0.46.0**, geïnstalleerd 10:55 — 11:41 droog: `volgende_bui` false, `begint_over` 19 (ongewijzigd gedrag); wacht op regen met droog gat
 - Onderbouwing: 08-10 08:10: regen stopt over 16 min, nieuwe bui vanaf +91 min in de reeks, maar `sensor.stormchase_regen_begint_over` bleef unknown (begint_over alleen bij droog).
 - Bouw: nieuwe module `buienreeks.py` (`lees_reeks`, `begin_weergave`); veld `volgende_bui_over` = eerste minuut na `stopt_over` boven de drempel. Sensor toont dat als het regent; attributen `volgende_bui` (true/false) en `volgende_bui_over`. `begint_over` zelf ongewijzigd → meldingen, `regen_verwacht`, briefing en regenvalidatie gedragen zich als voorheen. Tests in `tests/test_release_0460.py`.
 - Meten na bouw: bij regen met droog gat toont de sensor een waarde met `volgende_bui: true`; geen extra regenmeldingen (aantal regen-events per dag gelijk aan baseline).

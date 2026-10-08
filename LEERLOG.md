@@ -56,3 +56,13 @@ laatste ronde: 08-10 07:40, gemeten t/m 08-10 07:43
 - Gebouwd **0.46.0**: L-SC-003 (passage-trefkans op afstand: raak ≤10 km, apart ≤20 km, mediane/grootste afwijking; baseline uit bewaarde uitkomsten 5/12 en 7/12) + L-SC-004 (nieuw: `regen_begint_over` toont tijdens regen het begin van de volgende bui, gezien 08:10 stopt +16, nieuwe bui +91). Geen drempels of meldgedrag gewijzigd. 413 tests groen, workflow groen, HACS ververst.
 
 laatste ronde: 08-10 07:40, gemeten t/m 08-10 07:43
+
+## 08-10 11:45 · tussenronde
+- Geïnstalleerd: 0.46.0 (herstart 10:55). Geen onweer sinds 07:43 (0 inslagen <50 km, nadert 0×, ensemble 0%, CAPE 110) → alleen beschikbaarheid gemeten.
+- Bronnen 08-10 (over herstarts 08:55 en 10:55): 100% (n=508; radar 319, buienradar 66, meteoalarm 29). **L-SC-002:** `bronnen_per_dag` telt over 3 herstarts door; daggrens nog toetsen.
+- Locatie bij 2 herstarts: 10-11 s "laatst bekend", 0× "thuis".
+- **L-SC-003 eerste meetpunt gehaald:** diagnostics toont per passagehorizon raak/binnen 10/20 km. Over alle bewaarde uitkomsten (n=24, niet alleen de 20 zichtbare): binnen 10 km 9/24 (38%), binnen 20 km 12/24 (50%); ≤15 min 6/13, 15-45 min 3/8, >45 min 0/3. De baseline 5/12 · 7/12 van 07:40 telde alleen de laatste 20 uitkomsten → baseline herzien.
+- Regen: nu droog; `regen_begint_over` 19 min (0,21-0,93 mm/u), `volgende_bui` false (terecht: het regent niet). L-SC-004 wacht op regen met droog gat. `regen_verwacht` off bij 19 min (aanloop 10 min) → verwacht.
+- Geen release.
+
+laatste ronde: 08-10 11:45, gemeten t/m 08-10 11:44
