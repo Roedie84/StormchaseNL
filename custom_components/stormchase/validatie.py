@@ -44,6 +44,22 @@ GEDULD_MINUTEN = {
 }
 
 
+# Een passage is pas raak als de cel ook echt op ongeveer de voorspelde
+# afstand langskwam. Tot 0.46.0 telde elke gemeten afstand als uitgekomen,
+# waardoor passage 21/21 haalde terwijl maar 5 van de 12 bewaarde uitkomsten
+# binnen 10 km zaten (uitschieters tot 56 km).
+PASSAGE_RAAK_KM = 10.0
+PASSAGE_RUIM_KM = 20.0
+
+
+def _mediaan(waarden: list[float]) -> float:
+    rij = sorted(waarden)
+    midden = len(rij) // 2
+    if len(rij) % 2:
+        return rij[midden]
+    return (rij[midden - 1] + rij[midden]) / 2
+
+
 class Validatie:
     """Houdt open voorspellingen bij en rekent ze af."""
 
@@ -126,11 +142,19 @@ class Validatie:
         if verwacht is not None and werkelijke_afstand is not None:
             verschil = round(werkelijke_afstand - verwacht, 1)
 
+        # `uitgekomen` blijft "er is een afstand gemeten", zodat oude en
+        # nieuwe tellingen vergelijkbaar zijn. Of de voorspelling raak was,
+        # staat in `raak` / `binnen_10_km` / `binnen_20_km`.
+        binnen_10 = verschil is not None and abs(verschil) <= PASSAGE_RAAK_KM
+        binnen_20 = verschil is not None and abs(verschil) <= PASSAGE_RUIM_KM
         self._rond_af(
             "passage",
             nu,
             {
                 "uitgekomen": werkelijke_afstand is not None,
+                "raak": binnen_10,
+                "binnen_10_km": binnen_10,
+                "binnen_20_km": binnen_20,
                 "verwachte_afstand_km": verwacht,
                 "werkelijke_afstand_km": werkelijke_afstand,
                 "afwijking_km": verschil,
@@ -180,10 +204,41 @@ class Validatie:
             if km:
                 samenvatting["gemiddelde_afwijking_km"] = round(sum(km) / len(km), 1)
 
+            if soort == "passage":
+                samenvatting.update(self._passage_trefkans(regels))
+
             naam = f"{soort} ({groep})" if per_horizon and groep else soort
             uit[naam] = samenvatting
 
         return dict(sorted(uit.items()))
+
+    @staticmethod
+    def _passage_trefkans(regels: list[dict]) -> dict:
+        """Trefkans op afstand: raak binnen 10 km, ruim raak binnen 20 km.
+
+        Berekend uit `afwijking_km`, zodat ook uitkomsten van voor 0.46.0
+        meetellen. Een passage zonder gemeten afstand telt als mis.
+        """
+        aantal = len(regels)
+        km = [
+            abs(r["afwijking_km"])
+            for r in regels
+            if r.get("afwijking_km") is not None
+        ]
+        binnen_10 = sum(1 for a in km if a <= PASSAGE_RAAK_KM)
+        binnen_20 = sum(1 for a in km if a <= PASSAGE_RUIM_KM)
+        uit = {
+            "uitgekomen_betekent": "afstand gemeten",
+            "raak": binnen_10,
+            "binnen_10_km": binnen_10,
+            "binnen_20_km": binnen_20,
+            "trefkans_10_km_pct": round(100 * binnen_10 / aantal) if aantal else None,
+            "trefkans_20_km_pct": round(100 * binnen_20 / aantal) if aantal else None,
+        }
+        if km:
+            uit["mediane_afwijking_km"] = round(_mediaan(km), 1)
+            uit["grootste_afwijking_km"] = round(max(km), 1)
+        return uit
 
     def als_dict(self) -> dict:
         """Alles voor in de diagnostiek en om te bewaren."""

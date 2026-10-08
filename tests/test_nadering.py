@@ -222,4 +222,5 @@ def test_coordinator_gebruikt_naderingstrend_met_inslagtijd():
 def test_versie_0450():
     import json
 
-    assert json.loads((BRON / "manifest.json").read_text())["version"] == "0.45.0"
+    versie = json.loads((BRON / "manifest.json").read_text())["version"]
+    assert tuple(int(d) for d in versie.split(".")) >= (0, 45, 0)

@@ -5,6 +5,29 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.46.0] — 2026-10-08
+
+### Opgelost
+
+- **Passagevalidatie telt raak op afstand (L-SC-003).** `passage_afgerond`
+  rekende elke gemeten afstand als uitgekomen, waardoor passage 21/21 haalde.
+  Van de 12 bewaarde uitkomsten lagen er maar 5 binnen 10 km en 7 binnen
+  20 km (uitschieters tot 56 km). Elke passage-uitkomst krijgt nu `raak`
+  (≤10 km), `binnen_10_km` en `binnen_20_km` naast `afwijking_km`; de
+  samenvatting in de diagnostiek toont per horizon `binnen_10_km`,
+  `binnen_20_km`, `trefkans_10_km_pct`, `trefkans_20_km_pct`, de mediane en
+  grootste afwijking. Ook bewaarde uitkomsten van vóór 0.46.0 tellen mee.
+  `uitgekomen` blijft bestaan met de betekenis "afstand gemeten". De
+  aankomstvalidatie was al afstandsbewust (raak bij onweer binnen de
+  waarschuwingsafstand) en is ongewijzigd.
+- **`regen_begint_over` toont de volgende bui terwijl het regent.** Op 8
+  oktober 08:10 stopte de regen over 16 minuten en kwam er vanaf +91 minuten
+  een nieuwe bui, maar de sensor bleef onbekend. Regent het nu en zit er na
+  `stopt_over` een volgende bui in de reeks, dan toont de sensor het begin
+  daarvan, met attribuut `volgende_bui: true` en `volgende_bui_over`.
+  Meldingen, `regen_verwacht`, de briefing en de regenvalidatie kijken nog
+  steeds alleen naar `begint_over` en gedragen zich ongewijzigd.
+
 ## [0.45.0] — 2026-10-08
 
 ### Opgelost

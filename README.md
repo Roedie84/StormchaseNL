@@ -33,7 +33,7 @@ sensoren uit en rekent daar bovenop.
 | `sensor.stormchase_lifted_index` | Stabiliteit; negatief is onstabiel. |
 | `sensor.stormchase_convectieve_remming` | CIN, de deksel op de atmosfeer. |
 | `sensor.stormchase_chase_potentie` | Score 0-100. Zie hieronder. |
-| `sensor.stormchase_regen_begint_over` | Minuten tot de eerste regen. Draagt de volledige verwachting per 5 minuten als attribuut. |
+| `sensor.stormchase_regen_begint_over` | Minuten tot de eerste regen. Regent het al, dan het begin van de volgende bui na het droge stuk (attribuut `volgende_bui: true`), anders onbekend. Draagt de volledige verwachting per 5 minuten als attribuut. |
 | `sensor.stormchase_neerslagintensiteit` | Wat er nu valt, in mm/u. |
 | `sensor.stormchase_neerslagpiek_2_uur` | Zwaarste bui in de komende twee uur. |
 | `sensor.stormchase_actieve_locatie` | Welke locatie in gebruik is. Attributen: coordinaten, adres, en of Blitzortung vanaf hetzelfde punt meet. |
@@ -541,6 +541,12 @@ Sinds 0.24.0 zit er ook een overzicht in van hoe goed de voorspellingen
 uitkwamen: begon het regenen wanneer we dachten, kwam het onweer op tijd aan,
 en klopte de afstand waarop een cel passeerde. Per soort met de gemiddelde en
 grootste afwijking.
+
+Sinds 0.46.0 telt een passage pas als raak wanneer de cel binnen 10 km van de
+voorspelde afstand langskwam (`binnen_10_km`, met `binnen_20_km` als ruime
+maat, `trefkans_10_km_pct`/`trefkans_20_km_pct` en de mediane afwijking).
+`uitgekomen` betekent bij passages alleen "afstand gemeten" en blijft voor
+vergelijkbaarheid bestaan. Elke uitkomst draagt de gemeten afwijking in km.
 
 Wat erin zit: de instellingen, de actuele waarden, per bron het aantal
 geslaagde en mislukte ophaalrondes met de laatste foutmelding, welke

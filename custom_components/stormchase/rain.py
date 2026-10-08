@@ -32,6 +32,7 @@ from .const import (
     METEO_URL,
     RAIN_INTERVAL,
 )
+from .buienreeks import lees_reeks
 from .coordinator import LocationMixin
 from .herpoging import HerpogingMixin
 from .verouderd import VerouderdMixin
@@ -187,28 +188,11 @@ class RainCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdateC
 
         drempel = self.drempel
 
-        # Wat valt er nu? Neem het zwaarste tijdvak rond dit moment in plaats
-        # van een enkel vakje van vijf minuten. Een bui met een dipje erin zou
-        # anders als droog gelden terwijl je nat wordt.
-        rondom = [mm for minuten, mm in reeks if -10 <= minuten <= 10]
-        nu_intensiteit = max(rondom) if rondom else 0.0
-        regent = nu_intensiteit >= drempel
-
-        # Wanneer begint het? Alleen relevant als het nu droog is.
-        begint_over = None
-        if not regent:
-            begint_over = next(
-                (minuten for minuten, mm in reeks if minuten > 0 and mm >= drempel),
-                None,
-            )
-
-        # Wanneer stopt het? Alleen relevant als het nu regent.
-        stopt_over = None
-        if regent:
-            stopt_over = next(
-                (minuten for minuten, mm in reeks if minuten > 0 and mm < drempel),
-                None,
-            )
+        gelezen = lees_reeks(reeks, drempel)
+        nu_intensiteit = gelezen["intensiteit"]
+        regent = gelezen["regent"]
+        begint_over = gelezen["begint_over"]
+        stopt_over = gelezen["stopt_over"]
 
         toekomst = [mm for minuten, mm in reeks if 0 <= minuten <= 120]
         piek = max(toekomst) if toekomst else 0.0
@@ -220,6 +204,7 @@ class RainCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdateC
             "regent": regent,
             "begint_over": begint_over,
             "stopt_over": stopt_over,
+            "volgende_bui_over": gelezen["volgende_bui_over"],
             "piek": piek,
             "totaal": totaal,
             "verwachting": [

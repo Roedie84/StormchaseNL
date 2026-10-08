@@ -18,6 +18,7 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
+from .buienreeks import begin_weergave, gaat_om_volgende_bui
 from .const import DOMAIN, MAX_AFWIJKING_KM
 from .coordinator import MeteoCoordinator, StormCoordinator, StormData
 from .meting import MetingCoordinator
@@ -243,7 +244,7 @@ RAIN_SENSORS: tuple[MeteoSensorDescription, ...] = (
         translation_key="rain_starts",
         native_unit_of_measurement="min",
         suggested_display_precision=0,
-        value=lambda data: data.get("begint_over"),
+        value=begin_weergave,
     ),
     MeteoSensorDescription(
         key="rain_intensity",
@@ -674,6 +675,8 @@ class RainSensor(CoordinatorEntity[RainCoordinator], SensorEntity):
         return {
             "regent": data.get("regent"),
             "stopt_over": data.get("stopt_over"),
+            "volgende_bui": gaat_om_volgende_bui(data),
+            "volgende_bui_over": data.get("volgende_bui_over"),
             "totaal_mm_2u": data.get("totaal"),
             "bron": data.get("bron"),
             "verwachting": data.get("verwachting"),
