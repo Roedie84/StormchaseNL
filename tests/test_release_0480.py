@@ -150,4 +150,4 @@ class TestAansluiting:
 
 def test_versie_0480():
     versie = json.loads((BRON / "manifest.json").read_text())["version"]
-    assert versie == "0.48.0"
+    assert tuple(int(d) for d in versie.split(".")) >= (0, 48, 0)

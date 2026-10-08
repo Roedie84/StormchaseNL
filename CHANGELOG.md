@@ -5,6 +5,21 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.48.1] — 2026-10-08
+
+Alleen het app-icoon. Sensoren, drempels en meldingen zijn ongewijzigd.
+
+### Opgelost
+
+- **Integratie toonde geen icoon in Home Assistant.** De icoonbestanden
+  stonden alleen in de root-map `brands/`, die HA niet leest. Sinds HA 2026.3
+  levert een custom integratie het icoon zelf via een `brand/`-map; daarom
+  staan `icon.png`, `icon@2x.png`, `logo.png` en `logo@2x.png` nu ook in
+  `custom_components/stormchase/brand/`. Het icoon verschijnt in
+  Instellingen → Apparaten & diensten na een herstart van Home Assistant.
+  Het HACS-updatescherm toont het mogelijk nog niet; dat is een HACS-bug
+  (hacs/integration#5171).
+
 ## [0.48.0] — 2026-10-08
 
 Alleen de huidige conditie van `weather.stormchase`. Drempels,
