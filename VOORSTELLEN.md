@@ -36,7 +36,7 @@ Status: open / akkoord / afgewezen / gebouwd vX / geverifieerd / teruggedraaid. 
 - Meten na bouw: bij regen met droog gat toont de sensor een waarde met `volgende_bui: true`; geen extra regenmeldingen (aantal regen-events per dag gelijk aan baseline).
 
 ## L-SC-005 · regen "nu": niet vooruitkijken (−10..0 in plaats van −10..+10 min)
-- Status: **open** (raakt `regent` en daarmee regen_verwacht/regenmeldingen en de weerconditie → Ruud beslist)
+- Status: **afgewezen 08-10 21:13 (Ruud)** — niet opnieuw voorstellen; de meting mag als KPI doorlopen.
 - 08-10 19:40: onderbouwing sterker — 10 bekende regenuitkomsten, 9 negatief (mediaan −10,6 min, tekentoets p 0,02); op ≤15 min alle drie −7,9/−8/−8 min = het vooruitkijkvenster.
 - Onderbouwing: `buienreeks.lees_reeks` neemt als intensiteit van nu het maximum over −10..+10 min (bewust: een bui met een dipje mag niet droog heten). 08-10 15:39: reeks minuut 0 = 1,33 mm/u, minuut +10 = 6,04 → neerslagintensiteit 6,04 en (sinds 0.48.0) `weather.stormchase` `pouring`, tot 10 min te vroeg. Regenvalidatie: bekende uitkomsten −22, −18,9, −7,9, +7, −8, −13, −25,7 min (mediaan −13, n=7): regen "begint" vrijwel altijd eerder dan voorspeld; de +10 min vooruitkijken in `regent` telt mee, de voorspelling `begint_over` (eerste minuut > 0) niet.
 - Voorstel: venster terugkijkend maken (−10..0) voor `regent`/intensiteit, of alleen voor de weerconditie en de validatie (dan blijft meldgedrag gelijk). Eerst offline toetsen: de bewaarde regenuitkomsten en een replay van de buienradar-reeksen van 08-10 (recorder) met beide vensters.
