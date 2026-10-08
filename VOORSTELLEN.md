@@ -30,7 +30,15 @@ Status: open / akkoord / afgewezen / gebouwd vX / geverifieerd / teruggedraaid. 
 - Meten na bouw: diagnostics toont per passagehorizon het aandeel binnen 10/20 km; baseline 5/12 en 7/12.
 
 ## L-SC-004 · `regen_begint_over` toont de volgende bui terwijl het regent
-- Status: **gebouwd 0.46.0**, geïnstalleerd 10:55 — 11:41 droog: `volgende_bui` false, `begint_over` 19 (ongewijzigd gedrag); wacht op regen met droog gat
+- Status: **gebouwd 0.46.0**, geïnstalleerd 10:55 — eerste meetpunt 08-10 15:39: regent, `stopt_over` 20, `volgende_bui` true, sensor 105 min. Nog: aantal regenmeldingen per dag gelijk aan baseline (dagafsluiting)
 - Onderbouwing: 08-10 08:10: regen stopt over 16 min, nieuwe bui vanaf +91 min in de reeks, maar `sensor.stormchase_regen_begint_over` bleef unknown (begint_over alleen bij droog).
 - Bouw: nieuwe module `buienreeks.py` (`lees_reeks`, `begin_weergave`); veld `volgende_bui_over` = eerste minuut na `stopt_over` boven de drempel. Sensor toont dat als het regent; attributen `volgende_bui` (true/false) en `volgende_bui_over`. `begint_over` zelf ongewijzigd → meldingen, `regen_verwacht`, briefing en regenvalidatie gedragen zich als voorheen. Tests in `tests/test_release_0460.py`.
 - Meten na bouw: bij regen met droog gat toont de sensor een waarde met `volgende_bui: true`; geen extra regenmeldingen (aantal regen-events per dag gelijk aan baseline).
+
+## L-SC-005 · regen "nu": niet vooruitkijken (−10..0 in plaats van −10..+10 min)
+- Status: **open** (raakt `regent` en daarmee regen_verwacht/regenmeldingen en de weerconditie → Ruud beslist)
+- Onderbouwing: `buienreeks.lees_reeks` neemt als intensiteit van nu het maximum over −10..+10 min (bewust: een bui met een dipje mag niet droog heten). 08-10 15:39: reeks minuut 0 = 1,33 mm/u, minuut +10 = 6,04 → neerslagintensiteit 6,04 en (sinds 0.48.0) `weather.stormchase` `pouring`, tot 10 min te vroeg. Regenvalidatie: bekende uitkomsten −22, −18,9, −7,9, +7, −8, −13, −25,7 min (mediaan −13, n=7): regen "begint" vrijwel altijd eerder dan voorspeld; de +10 min vooruitkijken in `regent` telt mee, de voorspelling `begint_over` (eerste minuut > 0) niet.
+- Voorstel: venster terugkijkend maken (−10..0) voor `regent`/intensiteit, of alleen voor de weerconditie en de validatie (dan blijft meldgedrag gelijk). Eerst offline toetsen: de bewaarde regenuitkomsten en een replay van de buienradar-reeksen van 08-10 (recorder) met beide vensters.
+- Verwacht effect: weerconditie `pouring`/`rainy` niet meer tot 10 min te vroeg; regenafwijking in de validatie ~5-10 min dichter bij 0.
+- Meten na bouw: mediaan afwijking regenvalidatie (basis −13 min, n=7) en aantal `pouring`-perioden waarbij minuut 0 < 4 mm/u (basis: 1 op 08-10).
+
