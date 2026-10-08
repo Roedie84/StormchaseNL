@@ -90,8 +90,9 @@ METEO_INTERVAL = timedelta(minutes=30)
 
 # Venster waarover de naderingssnelheid wordt berekend
 TREND_WINDOW = timedelta(minutes=15)
-# Minimaal aantal metingen voordat een snelheid betekenis heeft
-MIN_SAMPLES = 4
+# Minimaal aantal NIEUWE afstandsmetingen (inslagen) in het venster voordat
+# een snelheid betekenis heeft. Herhalingen per ronde tellen niet mee.
+MIN_SAMPLES = 3
 # Onder deze snelheid (km/u) noemen we het stabiel in plaats van nadering
 SPEED_DEADZONE = 1.0
 # Verplaats je verder dan dit, dan worden de weerparameters direct opnieuw

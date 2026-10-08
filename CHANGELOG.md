@@ -5,6 +5,23 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.45.0] — 2026-10-08
+
+### Opgelost
+
+- **Naderingssnelheid, `onweer_nadert` en aankomsttijd alleen uit nieuwe
+  inslagen (L-SC-001).** De regressie kreeg elke ronde van tien seconden een
+  punt, ook zonder nieuwe inslag. Eén nieuwe afstand tussen herhalingen gaf
+  een zaagtand: op 7 oktober sprong de aankomsttijd van 45 naar 1214 minuten
+  zonder nieuwe inslag, en 3 van de 4 nadert-perioden duurden precies het
+  trendvenster van 15 minuten. Nu telt een punt alleen bij een nieuwe inslag
+  (of een afstandsverschil van minstens 0,5 km, bijvoorbeeld onderweg). De
+  snelheid wordt alleen bij een nieuw punt berekend, blijft daarna staan en
+  vervalt zodra er minder dan 3 metingen in het venster liggen; een oud punt
+  dat uit het venster valt verandert de waarde niet meer. Replay van 7
+  oktober: nadert 4× / 49 min → 2× / 12 min, 0 aankomstsprongen zonder
+  nieuwe inslag (was 244), geen periode meer van precies 15 minuten.
+
 ## [0.44.0] — 2026-10-08
 
 ### Opgelost

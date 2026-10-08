@@ -29,6 +29,7 @@ from .cel import (
 from .spreiding import beoordeel, ensemble as vat_ensemble_samen, samenvatting
 from .tijd import MARGE_KWARTIER, MARGE_UUR, aantal_gevuld, dichtstbijzijnde, op_stempel
 from .validatie import Validatie
+from .nadering import Naderingstrend
 from .herpoging import HerpogingMixin
 from .verouderd import VerouderdMixin
 from .indices import (
@@ -342,7 +343,8 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         self.entry = entry
         self.meteo: MeteoCoordinator | None = None
         self.alerts = None  # AlertCoordinator, wordt na het aanmaken gezet
-        self._history: deque[tuple[float, float]] = deque(maxlen=240)
+        # Alleen nieuwe inslagafstanden, niet elke ronde van tien seconden
+        self._nadering = Naderingstrend(TREND_WINDOW.total_seconds(), MIN_SAMPLES)
         self._was_nearby: bool | None = None
         self._was_approaching: bool | None = None
         # Locatiepunten om te bepalen of je onderweg bent of ergens staat
@@ -580,36 +582,6 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         }
         # De reeks is bij het opvangen al omgerekend naar de actieve locatie.
         return len(recent), rings, "afstandssensor (herberekend)"
-
-    def _speed_from_history(self) -> float | None:
-        """Bereken de naderingssnelheid via lineaire regressie.
-
-        Positief betekent dat de afstand afneemt, dus dat het onweer
-        dichterbij komt. Regressie in plaats van eerste-tegen-laatste,
-        omdat losse inslagen flink kunnen springen.
-        """
-        now = dt_util.utcnow().timestamp()
-        cutoff = now - TREND_WINDOW.total_seconds()
-        samples = [(t, d) for t, d in self._history if t >= cutoff]
-
-        if len(samples) < MIN_SAMPLES:
-            return None
-
-        n = len(samples)
-        mean_t = sum(t for t, _ in samples) / n
-        mean_d = sum(d for _, d in samples) / n
-
-        numerator = sum((t - mean_t) * (d - mean_d) for t, d in samples)
-        denominator = sum((t - mean_t) ** 2 for t, _ in samples)
-
-        if denominator == 0:
-            return None
-
-        # slope in km per seconde -> km per uur, omgedraaid van teken
-        slope = numerator / denominator
-        # Plus nul, anders levert een vlakke reeks -0.0 op en staat er
-        # "-0,0 km/u" op het dashboard.
-        return round(-slope * 3600, 1) + 0.0
 
     def _beweging(
         self, latitude: float, longitude: float, bron: str
@@ -996,10 +968,12 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         # Pas nu de reeks bijwerken, met de afstand die we uiteindelijk
         # gebruiken. Anders lopen twee maatstaven door elkaar en springt de
         # berekende snelheid bij het omschakelen.
-        if distance is not None:
-            self._history.append((dt_util.utcnow().timestamp(), distance))
-
-        speed = self._speed_from_history()
+        # Een punt telt alleen bij een nieuwe inslag (of echte verplaatsing);
+        # de snelheid verandert dus niet doordat oude punten uit het venster
+        # vallen (L-SC-001).
+        nu_trend = dt_util.utcnow().timestamp()
+        self._nadering.bij(nu_trend, distance, last_strike)
+        speed = self._nadering.snelheid(nu_trend)
         trend = self._trend_from_speed(speed)
 
         # Een aankomsttijd hoort alleen te bestaan zolang het onweer nog
