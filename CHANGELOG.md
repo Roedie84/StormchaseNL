@@ -5,6 +5,29 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.44.0] — 2026-10-08
+
+### Opgelost
+
+- **Het radarbeeld ververste niet bij een nieuw frame.** Home Assistant haalt
+  het plaatje pas opnieuw op als de tijdstempel van de afbeelding wijzigt.
+  Het kenmerk daarvoor las het pad op het verkeerde niveau (`data["path"]`
+  in plaats van `data["radar"]`), dus het bleef `None` en het beeld
+  ververste alleen bij een andere inslagtelling of positie. Live op
+  8 oktober: 4,7 uur dezelfde tijdstempel, terwijl er elke 10 minuten een
+  nieuw frame was. Nu tellen het radarframe en het wolkenbeeld mee.
+
+### Toegevoegd
+
+- **Bronstatistiek per dag, bewaard over herstarts.** Gelukt en mislukt per
+  bron per dag (rollend 30 dagen) in een eigen opslag
+  (`stormchase_bronstatistiek`), zichtbaar in de diagnostics onder
+  `statistieken.bronnen_per_dag`. Tot nu toe begonnen de tellers bij elke
+  herstart opnieuw (op 7 oktober 16 keer), dus was de betrouwbaarheid van
+  een bron over dagen niet uit de integratie te halen. Wegschrijven hooguit
+  eens per 5 minuten en bij het ontladen. Meldgedrag en drempels zijn
+  ongewijzigd.
+
 ## [0.43.1] — 2026-10-07
 
 ### Opgelost

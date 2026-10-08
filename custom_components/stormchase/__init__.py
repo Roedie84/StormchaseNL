@@ -22,6 +22,7 @@ from .meting import MetingCoordinator
 from .radarbron import RadarCoordinator
 from .alerts import AlertCoordinator
 from .briefing import Briefing
+from .bronhistorie import BronHistorie
 from .frontend import async_register_frontend
 from .notifier import StormNotifier
 from .rain import RainCoordinator
@@ -29,6 +30,12 @@ from .stats import Statistieken
 from .validatie import Validatie
 
 _LOGGER = logging.getLogger(__name__)
+
+# L-SC-002: de dagtellers per bron gaan hooguit eens per zoveel seconden naar
+# schijf. Bij het afsluiten van Home Assistant schrijft de Store een nog
+# openstaande wijziging zelf weg; bij het ontladen doen we dat hieronder.
+BRONSTATISTIEK_SLEUTEL = "stormchase_bronstatistiek"
+BRONSTATISTIEK_VERTRAGING = 300
 
 PLATFORMS: list[Platform] = [
     Platform.SENSOR,
@@ -47,6 +54,20 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # De statistieken worden door alle onderdelen gevuld en komen terug in
     # het diagnosebestand.
     stats = Statistieken()
+
+    # L-SC-002: gelukt/mislukt per bron per dag terughalen, zodat de
+    # betrouwbaarheid van een bron over dagen te volgen is en niet bij elke
+    # herstart opnieuw begint. Koppelen voor de eerste ophaalronde.
+    bron_opslag = Store(hass, 1, BRONSTATISTIEK_SLEUTEL)
+    bronhistorie = BronHistorie(await bron_opslag.async_load())
+    stats.koppel_historie(
+        bronhistorie,
+        lambda: bronhistorie.plan_opslag(
+            lambda: bron_opslag.async_delay_save(
+                bronhistorie.naar_opslag, BRONSTATISTIEK_VERTRAGING
+            )
+        ),
+    )
 
     storm = StormCoordinator(hass, entry)
     meteo = MeteoCoordinator(hass, entry)
@@ -126,6 +147,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             "radar": radar,
             "notifier": notifier,
             "stats": stats,
+            "bron_opslag": bron_opslag,
         }
     )
 
@@ -178,6 +200,15 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         briefing = gegevens.get("briefing")
         if briefing is not None:
             briefing.stop()
+        # L-SC-002: een nog uitgestelde schrijfactie meteen doen, anders mist
+        # een herlaadbeurt (opties gewijzigd) de laatste minuten.
+        stats = gegevens.get("stats")
+        bron_opslag = gegevens.get("bron_opslag")
+        if stats is not None and stats.historie is not None and bron_opslag is not None:
+            try:
+                await bron_opslag.async_save(stats.historie.naar_opslag())
+            except Exception:  # noqa: BLE001 - ontladen mag hier niet op stuklopen
+                _LOGGER.warning("Bronstatistiek per dag niet weggeschreven", exc_info=True)
         if not hass.data[DOMAIN]:
             hass.data.pop(DOMAIN)
             hass.services.async_remove(DOMAIN, SERVICE_TEST_NOTIFICATION)

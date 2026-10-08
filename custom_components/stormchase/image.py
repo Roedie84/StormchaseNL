@@ -46,6 +46,7 @@ from .radar import (
     KAART_KLEUR,
     TEGEL_AGENT,
     basiskaart_url,
+    beeldkenmerk,
     pixelpositie,
     MAX_SPOORSPRONG_KM,
     beeldlabel,
@@ -573,9 +574,8 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
         dus die moet mee wanneer de URL verandert.
         """
         # Een nieuw frame of een verschoven positie betekent een nieuw beeld
-        frame = self.coordinator.data or {}
         aantal = len(self._storm.recente_inslagen(INSLAG_VENSTER)) if self._storm else 0
-        kenmerk = (frame.get("path"), aantal, *(round(w, 3) for w in self._positie))
+        kenmerk = beeldkenmerk(self.coordinator.data, aantal, self._positie)
         if kenmerk != self._vorige_url:
             self._vorige_url = kenmerk
             self._attr_image_last_updated = dt_util.utcnow()

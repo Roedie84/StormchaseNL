@@ -48,6 +48,28 @@ def laatste_frame(payload: dict | None) -> dict | None:
     }
 
 
+def beeldkenmerk(data: dict | None, aantal_inslagen: int, positie: tuple) -> tuple:
+    """Wat er verandert als het radarbeeld verandert (0.44.0).
+
+    Home Assistant haalt het plaatje pas opnieuw op als `image_last_updated`
+    wijzigt. Tot 0.44.0 las het kenmerk `data["path"]`, maar het frame staat
+    onder `data["radar"]` (en de wolken onder `data["satelliet"]`): het pad
+    was altijd None, dus ververste het beeld alleen bij een andere
+    inslagtelling of positie. Live op 8 oktober: 4,7 uur dezelfde tijdstempel
+    terwijl het frame elke 10 minuten nieuw was.
+    """
+    data = data or {}
+    radar = data.get("radar") or {}
+    satelliet = data.get("satelliet") or {}
+    return (
+        radar.get("path"),
+        radar.get("tijd"),
+        satelliet.get("path"),
+        aantal_inslagen,
+        *(round(w, 3) for w in positie),
+    )
+
+
 def laatste_satelliet(payload: dict | None) -> dict | None:
     """Pak het nieuwste infraroodbeeld uit het overzicht.
 

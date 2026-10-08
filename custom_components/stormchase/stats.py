@@ -7,17 +7,23 @@ welke bron er gebruikt is, hoeveel meldingen er uit zijn gegaan.
 
 from __future__ import annotations
 
+import logging
 from collections import deque
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from typing import Any
 
 from homeassistant.util import dt as dt_util
 
 try:
+    from .bronhistorie import BronHistorie
     from .herpoging import is_beperkt, retry_after
 except ImportError:  # in de tests zonder pakketstructuur
+    from bronhistorie import BronHistorie
     from herpoging import is_beperkt, retry_after
+
+_LOGGER = logging.getLogger(__name__)
 
 # Hoeveel meetpunten we bewaren voor de afstandsreeks
 GESCHIEDENIS = 180
@@ -46,6 +52,20 @@ class BronStatus:
     retry_after: timedelta | None = None
     volgende_poging: datetime | None = None
     herkansing: bool = False
+    # L-SC-002: wordt na elke ronde aangeroepen met True (gelukt) of False,
+    # zodat de tellers per dag over herstarts bewaard kunnen worden
+    bij_uitkomst: Callable[[bool], None] | None = field(
+        default=None, repr=False, compare=False
+    )
+
+    def _meld(self, gelukt: bool) -> None:
+        """Geef de uitkomst door aan de dagtellers; nooit ten koste van de bron."""
+        if self.bij_uitkomst is None:
+            return
+        try:
+            self.bij_uitkomst(gelukt)
+        except Exception:  # noqa: BLE001 - statistiek mag het ophalen niet breken
+            _LOGGER.debug("Bronstatistiek per dag niet bijgewerkt", exc_info=True)
 
     def succes(self) -> None:
         """Noteer een geslaagde ophaalronde."""
@@ -54,6 +74,7 @@ class BronStatus:
         self.laatste_succes = dt_util.utcnow()
         self.beperkt = False
         self.retry_after = None
+        self._meld(True)
 
     def fout(self, melding) -> None:
         """Noteer een mislukte ophaalronde.
@@ -67,6 +88,7 @@ class BronStatus:
         self.op_rij_mislukt += 1
         self.laatste_fout = str(melding)[:200]
         self.laatste_fout_op = dt_util.utcnow()
+        self._meld(False)
 
     def hapert(self, nu: datetime | None = None) -> bool:
         """Of deze bron nu echt hapert (0.42.0).
@@ -103,6 +125,12 @@ class BronStatus:
 def _tijd(moment: datetime | None) -> str | None:
     """Tijdstip als leesbare tekst."""
     return moment.isoformat() if moment else None
+
+
+def _vandaag() -> date:
+    """De kalenderdag in de tijdzone van Home Assistant."""
+    nu = getattr(dt_util, "now", None)
+    return (nu() if nu is not None else dt_util.utcnow()).date()
 
 
 @dataclass
@@ -161,6 +189,37 @@ class Statistieken:
         default_factory=lambda: deque(maxlen=GESCHIEDENIS)
     )
 
+    # L-SC-002: gelukt/mislukt per bron per dag, bewaard over herstarts
+    historie: BronHistorie | None = None
+    _bij_wijziging: Callable[[], None] | None = field(
+        default=None, repr=False, compare=False
+    )
+
+    def koppel_historie(
+        self,
+        historie: BronHistorie,
+        bij_wijziging: Callable[[], None] | None = None,
+        vandaag: Callable[[], date] = _vandaag,
+    ) -> None:
+        """Laat elke ophaalronde ook in de dagtellers meetellen.
+
+        `bij_wijziging` plant het wegschrijven naar de opslag; dat gebeurt
+        vertraagd, niet bij elke ronde.
+        """
+        self.historie = historie
+        self._bij_wijziging = bij_wijziging
+
+        def maak(naam: str) -> Callable[[bool], None]:
+            def noteer(gelukt: bool) -> None:
+                historie.noteer(naam, gelukt, vandaag())
+                if self._bij_wijziging is not None:
+                    self._bij_wijziging()
+
+            return noteer
+
+        for naam, bron in self.bronnen.items():
+            bron.bij_uitkomst = maak(naam)
+
     def noteer_event(self, soort: str) -> None:
         """Tel een afgevuurd event."""
         if soort in self.events:
@@ -202,4 +261,6 @@ class Statistieken:
                 "filternamen": self.alert_filternamen,
             },
             "afstandsreeks": list(self.afstandsreeks),
+            # L-SC-002: per dag, over herstarts heen (rollend venster)
+            "bronnen_per_dag": self.historie.als_dict() if self.historie else None,
         }
