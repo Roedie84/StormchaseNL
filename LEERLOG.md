@@ -51,3 +51,8 @@ laatste ronde: 08-10 04:40, gemeten t/m 08-10 03:46
 - Geen release (tussenronde, niets acuut).
 
 laatste ronde: 08-10 07:40, gemeten t/m 08-10 07:43
+
+## 08-10 10:05 · bouw (chatsessie)
+- Gebouwd **0.46.0**: L-SC-003 (passage-trefkans op afstand: raak ≤10 km, apart ≤20 km, mediane/grootste afwijking; baseline uit bewaarde uitkomsten 5/12 en 7/12) + L-SC-004 (nieuw: `regen_begint_over` toont tijdens regen het begin van de volgende bui, gezien 08:10 stopt +16, nieuwe bui +91). Geen drempels of meldgedrag gewijzigd. 413 tests groen, workflow groen, HACS ververst.
+
+laatste ronde: 08-10 07:40, gemeten t/m 08-10 07:43
