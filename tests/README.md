@@ -23,6 +23,7 @@ scheiding.
 | `test_wolken.py` | Kaartdienstverzoek en herprojectie van de wolkenlaag |
 | `test_bronhistorie.py` | Gelukt/mislukt per bron per dag, bewaard over herstarts (L-SC-002) |
 | `test_release_0470.py` | Herstartbestendigheid: validatie, schuilregel, cellen, nadering, waarschuwingen, wachttijden en tellers over een herstart |
+| `test_release_0480.py` | Huidige weerconditie volgt de radar bij regen: rainy, pouring, lightning-rainy, nacht en verouderde radarwaarden |
 | `test_structuur.py` | Controles op de code zelf |
 
 ## Waarom er structuurtests zijn

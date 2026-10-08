@@ -24,8 +24,10 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import dt as dt_util
 
+from .conditie import huidige_conditie, radar_intensiteit, wmo_conditie
 from .const import DOMAIN, WMO_CONDITIES
-from .coordinator import MeteoCoordinator
+from .coordinator import MeteoCoordinator, StormCoordinator
+from .rain import RainCoordinator
 
 
 async def async_setup_entry(
@@ -34,19 +36,16 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Zet de weerentiteit op."""
-    meteo: MeteoCoordinator = hass.data[DOMAIN][entry.entry_id]["meteo"]
-    async_add_entities([StormchaseWeather(meteo, entry)])
+    gegevens = hass.data[DOMAIN][entry.entry_id]
+    meteo: MeteoCoordinator = gegevens["meteo"]
+    async_add_entities(
+        [StormchaseWeather(meteo, entry, gegevens.get("rain"), gegevens.get("storm"))]
+    )
 
 
 def _conditie(code: int | None, is_dag: bool = True) -> str | None:
     """Vertaal een WMO-weercode naar een Home Assistant conditie."""
-    if code is None:
-        return None
-    conditie = WMO_CONDITIES.get(int(code))
-    # Een heldere nacht is geen zon.
-    if conditie == "sunny" and not is_dag:
-        return "clear-night"
-    return conditie
+    return wmo_conditie(code, WMO_CONDITIES, is_dag)
 
 
 class StormchaseWeather(CoordinatorEntity[MeteoCoordinator], WeatherEntity):
@@ -62,9 +61,18 @@ class StormchaseWeather(CoordinatorEntity[MeteoCoordinator], WeatherEntity):
         WeatherEntityFeature.FORECAST_DAILY | WeatherEntityFeature.FORECAST_HOURLY
     )
 
-    def __init__(self, coordinator: MeteoCoordinator, entry: ConfigEntry) -> None:
+    def __init__(
+        self,
+        coordinator: MeteoCoordinator,
+        entry: ConfigEntry,
+        regen: RainCoordinator | None = None,
+        storm: StormCoordinator | None = None,
+    ) -> None:
         """Initialiseer de entiteit."""
         super().__init__(coordinator)
+        # 0.48.0: de radar stuurt de huidige conditie bij als het nu regent.
+        self._regen = regen
+        self._storm = storm
         self._attr_unique_id = f"{entry.entry_id}_weather"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
@@ -73,6 +81,38 @@ class StormchaseWeather(CoordinatorEntity[MeteoCoordinator], WeatherEntity):
             model="Onweersmonitor",
         )
 
+    async def async_added_to_hass(self) -> None:
+        """Ook bijwerken als de regen- of onweersgegevens veranderen."""
+        await super().async_added_to_hass()
+        for bron in (self._regen, self._storm):
+            if bron is not None:
+                self.async_on_remove(
+                    bron.async_add_listener(self._handle_coordinator_update)
+                )
+
+    def _radar_mm(self) -> float | None:
+        """Radarintensiteit van nu (mm/u), None als die ontbreekt of oud is."""
+        regen = self._regen
+        if regen is None:
+            return None
+        gelukt = getattr(regen, "_laatst_gelukt", None)
+        leeftijd = (
+            (dt_util.utcnow() - gelukt).total_seconds() if gelukt is not None else None
+        )
+        return radar_intensiteit(regen.data, leeftijd)
+
+    def _onweer_dichtbij(self) -> bool:
+        """Zelfde regel als binary_sensor 'onweer dichtbij'."""
+        storm = self._storm
+        data = getattr(storm, "data", None) if storm is not None else None
+        afstand = getattr(data, "distance", None)
+        if afstand is None:
+            return False
+        try:
+            return afstand < storm.warn_distance
+        except (TypeError, ValueError):
+            return False
+
     @property
     def _nu(self) -> dict:
         """De huidige waarden."""
@@ -80,8 +120,12 @@ class StormchaseWeather(CoordinatorEntity[MeteoCoordinator], WeatherEntity):
 
     @property
     def condition(self) -> str | None:
-        """Huidige weersgesteldheid."""
-        return _conditie(self._nu.get("weather_code"), bool(self._nu.get("is_day", 1)))
+        """Huidige weersgesteldheid: Open-Meteo, maar regen op de radar wint."""
+        model = _conditie(self._nu.get("weather_code"), bool(self._nu.get("is_day", 1)))
+        mm = self._radar_mm()
+        if mm is None:
+            return model
+        return huidige_conditie(model, mm, self._onweer_dichtbij())
 
     @property
     def native_temperature(self) -> float | None:

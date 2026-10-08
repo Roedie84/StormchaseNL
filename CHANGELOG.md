@@ -5,6 +5,27 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.48.0] — 2026-10-08
+
+Alleen de huidige conditie van `weather.stormchase`. Drempels,
+standaardinstellingen en meldingen zijn ongewijzigd.
+
+### Opgelost
+
+- **Weerentiteit bleef "sunny" tijdens een bui.** Op 8 oktober regende het
+  van 11:50 tot 12:21 (Buienradar tot 1,0 mm/u, `regen_verwacht` aan), maar
+  de conditie kwam alleen uit de weercode van Open-Meteo en bleef op zon
+  staan; pas om 12:46, toen het droog was, werd het "cloudy". Nu wint de
+  actuele radarintensiteit van de regencoordinator (Buienradar, anders de
+  kwartierwaarden van Open-Meteo): vanaf 0,1 mm/u `rainy`, vanaf 4 mm/u
+  `pouring`, met onweer binnen de waarschuwingsafstand of een onweerscode
+  `lightning-rainy`. Droog volgens de radar: de conditie van Open-Meteo,
+  inclusief `clear-night`. Sneeuw of hagel van het model blijft staan.
+- Een radarwaarde ouder dan een kwartier (terugval bij een storing) stuurt
+  de conditie niet. De weerentiteit werkt nu ook bij nieuwe regen- en
+  onweersgegevens bij, niet alleen bij een nieuwe Open-Meteo-ronde.
+- De logica staat in `conditie.py`, zonder Home Assistant-imports.
+
 ## [0.47.0] — 2026-10-08
 
 Alleen herstartbestendigheid: een herstart of herlaadbeurt van Home Assistant

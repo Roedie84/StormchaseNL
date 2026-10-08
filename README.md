@@ -156,6 +156,13 @@ gebruikte drempels met uitleg erbij.
 uur en per dag op de actieve locatie, via Open-Meteo. Bruikbaar in elke
 standaard weerkaart van Home Assistant.
 
+Sinds 0.48.0 volgt de huidige conditie de radar als het nu regent: vanaf
+0,1 mm/u wordt het `rainy`, vanaf 4 mm/u `pouring`, en met onweer binnen de
+waarschuwingsafstand `lightning-rainy`. Droog volgens de radar, of is de
+radarwaarde ouder dan een kwartier, dan blijft de conditie van Open-Meteo
+staan (ook `clear-night`). Sneeuw of hagel van het model blijft staan. De
+verwachting per uur en per dag komt onveranderd van Open-Meteo.
+
 ### Waarschuwingen
 
 `sensor.stormchase_waarschuwingsniveau` staat op groen, geel, oranje of rood.
