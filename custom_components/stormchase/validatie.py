@@ -14,7 +14,11 @@ Bewust zonder Home Assistant erin, zodat het los te testen is.
 
 from __future__ import annotations
 
-# Hoeveel afgeronde voorspellingen we bewaren
+# Hoeveel afgeronde voorspellingen we bewaren, PER SOORT (0.50.2).
+# Tot 0.50.1 gold 60 voor alle soorten samen. Regen rondt 8-10 voorspellingen
+# per regendag af en duwde zo de zeldzame onweersuitkomsten (passage,
+# aankomst) uit de lijst: op 09-10 gingen er drie verloren in een halve dag.
+# Nu heeft elke soort een eigen venster; regen verdringt geen onweer meer.
 MAX_UITKOMSTEN = 60
 
 # Voorspellingen worden per horizon gegroepeerd. Een nowcast tien minuten
@@ -135,10 +139,57 @@ class Validatie:
             "gemaakt_op": voorspelling["gemaakt_op"],
             **uitkomst,
         }
+        # 0.50.2: de bron van de voorspelling (regen: knmi / buienradar /
+        # open-meteo), zodat uitkomsten van verschillende bronnen niet door
+        # elkaar lopen.
+        if voorspelling.get("bron") is not None:
+            regel["bron"] = voorspelling["bron"]
         self.uitkomsten.append(regel)
-        del self.uitkomsten[:-MAX_UITKOMSTEN]
+        self._begrens(soort)
         self.afgerond += 1
         self.wijzigingen += 1
+
+    def _begrens(self, soort: str) -> None:
+        """Houd per soort hoogstens MAX_UITKOMSTEN; de oudste van díe soort valt weg."""
+        van_soort = [i for i, r in enumerate(self.uitkomsten) if r.get("soort") == soort]
+        teveel = len(van_soort) - MAX_UITKOMSTEN
+        if teveel <= 0:
+            return
+        weg = set(van_soort[:teveel])
+        self.uitkomsten = [r for i, r in enumerate(self.uitkomsten) if i not in weg]
+
+    def aantal_per_soort(self) -> dict[str, int]:
+        """Hoeveel uitkomsten er per soort bewaard zijn (voor de diagnostiek)."""
+        uit: dict[str, int] = {}
+        for r in self.uitkomsten:
+            soort = r.get("soort")
+            if isinstance(soort, str):
+                uit[soort] = uit.get(soort, 0) + 1
+        return dict(sorted(uit.items()))
+
+    def regen_per_bron(self) -> dict[str, dict]:
+        """Regenuitkomsten per bron. Zonder vastgelegde bron: 'onbekend'.
+
+        Uitkomsten van vóór 0.50.2 hebben geen bron (tot 0.49.0 vooral
+        Buienradar, daarna vooral de KNMI-nowcast) en staan apart.
+        """
+        groepen: dict[str, list[dict]] = {}
+        for r in self.uitkomsten:
+            if r.get("soort") != "regen":
+                continue
+            groepen.setdefault(r.get("bron") or "onbekend", []).append(r)
+        uit: dict[str, dict] = {}
+        for bron, regels in sorted(groepen.items()):
+            raak = [r for r in regels if r.get("uitgekomen")]
+            afw = [r["afwijking_min"] for r in raak if isinstance(r.get("afwijking_min"), (int, float))]
+            samen = {"aantal": len(regels), "uitgekomen": len(raak)}
+            if afw:
+                samen["gemiddelde_afwijking_min"] = round(sum(abs(a) for a in afw) / len(afw), 1)
+                samen["mediane_afwijking_min"] = round(_mediaan(afw), 1)
+                samen["te_vroeg"] = sum(1 for a in afw if a < 0)
+                samen["te_laat"] = sum(1 for a in afw if a > 0)
+            uit[bron] = samen
+        return uit
 
     # ---- Nakijken ----
 
@@ -298,5 +349,8 @@ class Validatie:
                 for soort, v in self.open.items()
             },
             "samenvatting": self.samenvatting(),
+            "aantal_per_soort": self.aantal_per_soort(),
+            "max_per_soort": MAX_UITKOMSTEN,
+            "regen_per_bron": self.regen_per_bron(),
             "uitkomsten": self.uitkomsten[-20:],
         }

@@ -287,7 +287,7 @@ class RainCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdateC
                 )
             elif begint_over is not None and begint_over <= 60:
                 self.validatie.voorspel(
-                    "regen", nu, begint_over, {"verwachte_piek": piek}
+                    "regen", nu, begint_over, {"verwachte_piek": piek, "bron": bron}
                 )
 
         return data

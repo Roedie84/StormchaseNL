@@ -5,6 +5,29 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.50.2] — 2026-10-09
+
+### Hersteld
+
+- **Validatie: bewaarvenster per soort** (leerronde L-SC-006). Tot nu toe
+  bewaarde de validatie 60 afgeronde voorspellingen voor alle soorten samen.
+  Regen rondt op een regendag 8-10 voorspellingen af en duwde zo de zeldzame
+  onweersuitkomsten (passage, aankomst) uit de lijst: op 9 oktober gingen er
+  drie verloren (passage 21 → 20, aankomst 5 → 3). Nu heeft elke soort een
+  eigen venster van 60; regen verdringt geen onweer meer. Wat al weg was,
+  komt niet terug.
+
+### Nieuw
+
+- **Bron per regenvoorspelling**: sinds 0.49.0 is de KNMI-nowcast de eerste
+  regenbron (Buienradar en Open-Meteo zijn terugval). Elke regenvoorspelling
+  legt nu vast van welke bron hij kwam, zodat uitkomsten niet door elkaar
+  lopen. De diagnostiek toont `regen_per_bron` (aantal, uitgekomen, gemiddelde
+  en mediane afwijking, te vroeg/te laat; uitkomsten van vóór 0.50.2 staan
+  onder "onbekend"), `aantal_per_soort` en `max_per_soort`.
+
+Geen wijzigingen aan drempels, meldingen of entiteiten.
+
 ## [0.50.1] — 2026-10-09
 
 ### Gewijzigd
