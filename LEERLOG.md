@@ -119,3 +119,12 @@ laatste ronde: 09-10 03:40, gemeten t/m 09-10 03:47
 - Geen release (tussenronde).
 
 laatste ronde: 09-10 07:40, gemeten t/m 09-10 07:45
+
+## 09-10 11:40 · tussenronde
+- Geïnstalleerd: 0.50.1 (geen nieuwe release). HA-herstarts sinds 07:45: 2 (10:09, 10:40). Locatie: tracker iPhone. Geen onweer (0 inslagen <50 km, CAPE 0, LI 4, ensemble 0 %), niveau groen → onweer: alleen beschikbaarheid gemeten.
+- Bronnen 09-10 t/m 11:44: 15 bronnen, 0 mislukt (radar 740, KNMI-nowcast 107, EDR 71, waarschuwingen 38, WMS 25); push verbonden (34 meldingen). Buienradar sinds 06:02 alleen terugval, niet nodig geweest.
+- Regen: het regent licht (0,12 mm/u, `stopt_over` 1, volgende bui +16 → sensor 16). **Eerste afgeronde uitkomst met KNMI-nowcast als bron:** 08:53 "over 41 min", kwam na 19 min (−21,6). Bekende afwijkingen nu 12, 11 negatief → het vroege patroon blijft ook met de nieuwe bron (n=1 KNMI, geen conclusie). Validatie 24/34; venster: regen 34, passage 21, aankomst 5 — dit keer verdrong regen geen onweersuitkomst.
+- Radarvooruitblik (0.49.0): beeld alleen ververst bij herstarts (07:42, 10:09, 10:41). Code: bouwt bewust alleen als iemand in de laatste 15 min keek (`KIJKER_GELDIG`) → geen versheids-KPI voor dit beeld; het gewone radarbeeld is vers (KNMI 11:40).
+- H-SC-3 loopt als KPI (L-SC-005 afgewezen). L-SC-006 (venster per soort + bron per voorspelling) bouwen in de dagafsluiting van 10-10. Geen release.
+
+laatste ronde: 09-10 11:40, gemeten t/m 09-10 11:45

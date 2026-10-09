@@ -92,3 +92,8 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-09 07:40,TUSSEN,sc_regen_afwijking_min,-32,1,"04:52 over 57 min, kwam na 25 min (Buienradar)"
 2026-10-09 07:40,TUSSEN,sc_regen_validatie_uitgekomen,0.706,34,"24/34 rollend venster"
 2026-10-09 07:40,TUSSEN,sc_onweer_inslagen_50km,0,1,"geen onweer"
+2026-10-09 11:40,TUSSEN,sc_onweer_inslagen_50km,0,1,"geen onweer; CAPE 0, LI 4, ensemble 0%"
+2026-10-09 11:40,TUSSEN,sc_bronnen_slaag_pct,100,1279,"per_dag 09-10 15 bronnen 0 mislukt; radar 740, knmi_nowcast 107, edr 71"
+2026-10-09 11:40,TUSSEN,sc_regen_afwijking_min,-21.6,1,"08:53 over 41 min, kwam na 19 min; eerste afgeronde uitkomst met KNMI-nowcast als bron"
+2026-10-09 11:40,TUSSEN,sc_regen_validatie_uitgekomen,0.706,34,"24/34 rollend; venster 60: regen 34, passage 21, aankomst 5 (gelijk)"
+2026-10-09 11:40,TUSSEN,sc_herstarts,2,2,"10:09 10:40"
