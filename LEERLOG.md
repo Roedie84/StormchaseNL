@@ -145,3 +145,12 @@ laatste ronde: 09-10 15:40, gemeten t/m 09-10 15:45
 - Geen release (tussenronde).
 
 laatste ronde: 09-10 19:40, gemeten t/m 09-10 19:45
+
+## 09-10 23:40 · tussenronde
+- Geïnstalleerd: **0.51.0** (windstoten bijgesteld met de stationsmeting, regenbeeld, regen stopt over; chatsessie 22:40). HA-herstarts sinds 19:45: 3 (19:48, 20:53, 22:43). Locatie: tracker iPhone. Geen onweer (0 inslagen <50 km, CAPE 100 / piek 12 u 180, LI 2,2, ensemble 0 %), niveau groen → onweer: alleen beschikbaarheid.
+- Bronnen sinds 22:43: 15 bronnen 0 mislukt (radar 2218, KNMI-nowcast 325, EDR 216); dag 09-10 2 mislukt (503 Open-Meteo 18:03). Push verbonden. Buienradar/meteoalarm alleen terugval.
+- Regen KNMI-nowcast: 4 nieuwe uitkomsten −1,9 / +2,9 / −14,8 / −6,9 min. Alle KNMI sinds 0.49.0 **n=11: mediaan +2,8 min, gem. +1,7, gem. absolute fout 11,6 min, 6 te laat / 5 te vroeg**; Buienradar-tijdperk mediaan −8 (21/27 te vroeg). **H-SC-3 bijgesteld:** KNMI heeft vrijwel geen bias maar wel ±12 min spreiding → een vaste correctie helpt niet; het voordeel zit in de bronwissel zelf. Volgen tot n ≥ 20.
+- 0.51.0 windstoten: verwacht 28,6 km/u tegen gemeten 16,1 (Hupsel, 3,4 km) — 1 meetpunt; effect van de bijstelling meten in de dagafsluiting (verwacht − gemeten per uur).
+- Validatie: aankomst 3 / passage 20 / regen 44 (L-SC-006 houdt: geen verdringing). L-SC-001 wacht op onweer. Geen release.
+
+laatste ronde: 09-10 23:40, gemeten t/m 09-10 23:50
