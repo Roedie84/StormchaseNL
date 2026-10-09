@@ -136,3 +136,12 @@ laatste ronde: 09-10 11:40, gemeten t/m 09-10 11:45
 - **L-SC-006 acuut gebouwd (0.50.2):** venster nu regen 37 / passage 20 / aankomst 3 — sinds 11:45 nog eens 3 onweersuitkomsten verdrongen (passage 21→20, aankomst 5→3), onherstelbaar. Daarom in een tussenronde: venster 60 per soort + bron per regenvoorspelling + `regen_per_bron`/`aantal_per_soort` in de diagnostiek. 10 tests, 691 groen, workflow groen, HACS ververst. Wacht op installatie.
 
 laatste ronde: 09-10 15:40, gemeten t/m 09-10 15:45
+
+## 09-10 19:40 · tussenronde
+- Geïnstalleerd: **0.50.2** (L-SC-006). HA-herstarts sinds 15:45: 7 (16:16-19:29). Locatie: tracker iPhone. Geen onweer (0 inslagen <50 km, CAPE 0 / piek 12 u 140, LI 2,3, ensemble 0 %; windschering 0-6 km 73 km/u, stoten verwacht 47 / gemeten 32 km/u), niveau groen → onweer: alleen beschikbaarheid.
+- Bronnen: alles in orde; 1× 503 bij Open-Meteo (icon_d2 + ensemble, 18:03, volgende ronde weer gelukt) → 99 %; radar 1949, KNMI-nowcast 251, EDR 170 zonder fout; push verbonden.
+- **L-SC-006 geverifieerd:** `aantal_per_soort` aankomst 3 / passage 20 / regen 40 (samen 63 > 60): onweersuitkomsten niet meer verdrongen sinds 15:45; nieuwe regenuitkomsten dragen `bron` (knmi 2×).
+- Regen KNMI-nowcast: 2 nieuwe uitkomsten +25,6 min (57 min, kwam na 83) en +2,8 min. Alle KNMI-uitkomsten sinds 0.49.0 (n=7): mediaan +8 min, 5 van 7 te laat (Buienradar-tijdperk: 21 van 27 bekende te vroeg). H-SC-3: bron bepaalt het teken; n te klein voor een correctievoorstel (≥ 20 KNMI-uitkomsten).
+- Geen release (tussenronde).
+
+laatste ronde: 09-10 19:40, gemeten t/m 09-10 19:45
