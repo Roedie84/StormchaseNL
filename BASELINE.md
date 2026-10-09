@@ -19,3 +19,5 @@
 | Passage binnen 10 / 20 km (alle bewaarde) | 9/24 (38%) · 12/24 (50%) | ≤15 min 6/13, 15-45 3/8, >45 0/3 | 08-10 11:45 |
 | Radarbeeld-wissels na fix | max gat 10 min | 08-10 06:23-07:43, n=16 | 08-10 07:40 |
 | Regenvalidatie afwijking (mediaan) | −10,6 min, 9/10 negatief; ≤15 min ≈ −8 | 10 uitkomsten t/m 08-10 | 08-10 19:40 |
+| Slaagpercentage bronnen per dag | 100 % (n=1686, 20 herstarts) | 08-10 | 09-10 03:40 |
+| Validatievenster (alle soorten samen) | 60/60 vol: regen 34, passage 21, aankomst 5 | 09-10 03:47 | 09-10 03:40 |

@@ -75,3 +75,15 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-08 23:40,TUSSEN,sc_bronnen_slaag_pct,100,1045,"sinds herstart 22:02, 10 bronnen"
 2026-10-08 23:40,TUSSEN,sc_regen_validatie_uitgekomen,0.706,34,"24/34; <=15 5/5, 15-45 6/11, >45 13/18"
 2026-10-08 23:40,TUSSEN,sc_regen_vals_avond,2,2,"18:36 (+43 min) en 20:44 (+60 min), licht"
+2026-10-08,DAG,sc_inslagen_binnen_50km,0,1,"hele dag; ensemble 0%, CAPE <=110"
+2026-10-08,DAG,sc_waarschuwing_niveau,groen,1,hele dag
+2026-10-08,DAG,sc_nadert_aan_perioden,0,0,"geen onweer: hits/misses/valse alarmen n.v.t."
+2026-10-08,DAG,sc_herstarts,20,20,"HA-herstarts 06:23-22:02"
+2026-10-08,DAG,sc_bronnen_slaag_pct,100,1686,"per_dag 08-10 (lokale dag) over 20 herstarts; radar 1044, buienradar 217, meteoalarm 100, meting 80"
+2026-10-08,DAG,sc_bron_haperingen,0,1686,
+2026-10-08,DAG,sc_radar_max_gat_min,11,26,"22:00-03:41 beeld elke 10-11 min"
+2026-10-08,DAG,sc_regen_vals,3,3,"18:36 +43, 20:44 +60, 22:52 +57 (allen licht)"
+2026-10-09 03:40,TUSSEN,sc_regen_vals,1,1,"00:37 +42 min, niet uitgekomen"
+2026-10-09 03:40,TUSSEN,sc_regen_validatie_uitgekomen,0.706,34,"24/34 (rollend venster); <=15 5/5, 15-45 6/11, >45 13/18"
+2026-10-09 03:40,TUSSEN,sc_validatie_venster_vol,60,60,"MAX_UITKOMSTEN 60 over alle soorten: passage 21 (was 24), aankomst 5 (was 6) -> regen verdringt onweer"
+2026-10-09 03:40,TUSSEN,sc_bronnen_daggrens,2,2,"L-SC-002: per_dag 08-10 en 09-10 apart, totaal over 2 dagen"

@@ -97,3 +97,14 @@ laatste ronde: 08-10 19:40, gemeten t/m 08-10 19:44
 - Geen release.
 
 laatste ronde: 08-10 23:40, gemeten t/m 08-10 23:44
+
+## 09-10 03:40 · dagafsluiting 08-10
+- Onweer 08-10: 0 inslagen <50 km, niveau groen, nadert 0×, ensemble 0% → hits/misses/lead-time niet meetbaar (geen gebeurtenis). Alleen beschikbaarheid gemeten.
+- Bronnen 08-10 (lokale dag, over 20 herstarts): 1686/1686 = 100% (radar 1044, buienradar 217, meteoalarm 100, meting 80, overige 45). Radarbeeld 22:00-03:41 elke 10-11 min. Locatie: tracker iPhone.
+- **L-SC-002 geverifieerd:** `bronnen_per_dag` heeft 08-10 en 09-10 apart (2 dagen, totaal opgeteld) → telt over herstarts én daggrens door.
+- Regen: avond/nacht 4 valse lichte regenvoorspellingen (18:36 +43, 20:44 +60, 22:52 +57, 00:37 +42 min); korte horizon blijft 5/5. Validatie 24/34.
+- **Meetfout gevonden:** `validatie.py` bewaart MAX_UITKOMSTEN = 60 uitkomsten over álle soorten samen; het venster is vol (34 regen + 21 passage + 5 aankomst). Elke afgeronde regenvoorspelling (8-10 per regendag) duwt de oudste uitkomst eruit — nu onweersuitkomsten uit augustus: passage 24 → 21, aankomst 6 → 5 sinds 08-10. De zeldzame onweersvalidatie (het lange geheugen voor L-SC-001) slijt zo weg. Voorstel L-SC-006 (zelf bouwen: venster per soort). Niet nu uitgebracht: 0.49.0 en 0.50.0 staan nog niet geïnstalleerd (0.48.1 draait) → niet erbovenop stapelen; bouwen in de eerste dagafsluiting na installatie.
+- H-SC-3 ongewijzigd (geen nieuwe afgeronde regenstart met bekende afwijking). L-SC-001 wacht op onweer.
+- Geen release.
+
+laatste ronde: 09-10 03:40, gemeten t/m 09-10 03:47

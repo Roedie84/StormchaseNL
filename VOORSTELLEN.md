@@ -15,7 +15,7 @@ Status: open / akkoord / afgewezen / gebouwd vX / geverifieerd / teruggedraaid. 
 - Meten na bouw: validatieteller aankomst (nu 1/6) en per onweersgebeurtenis het aantal nadert-wissels, spreiding van aankomst zonder nieuwe inslag, en voorspelde tegen werkelijke aankomst (validatie).
 
 ## L-SC-002 · bronstatistiek bewaren over herstarts
-- Status: **gebouwd 0.44.0** (08-10 04:36), geïnstalleerd 06:23 — eerste bewijs 07:40: per dag radar 80 tegen 40 sinds herstart 07:03 (telt over herstart door). Nog: over een daggrens (≥2 dagen).
+- Status: **geverifieerd 09-10 03:40** (gebouwd 0.44.0, geïnstalleerd 08-10 06:23): `per_dag` 08-10 (1686 rondes over 20 herstarts) en 09-10 apart, `aantal_dagen` 2.
 - (eerder: gepland, zelf bouwen: meetbaarheid; de code bewaarde het nog niet)
 - Onderbouwing: 07-10 23:45: `statistieken.gestart_op` 21:04 UTC, draaitijd 0,7 u; na elke herstart (vandaag ~10) begint gelukt/mislukt per bron opnieuw. Betrouwbaarheid per bron over dagen is zo niet uit de integratie te halen.
 - Bouw: tellers per bron per dag in de Store bewaren (rollend 30 d), in diagnostics tonen; test.
@@ -43,3 +43,9 @@ Status: open / akkoord / afgewezen / gebouwd vX / geverifieerd / teruggedraaid. 
 - Verwacht effect: weerconditie `pouring`/`rainy` niet meer tot 10 min te vroeg; regenafwijking in de validatie ~5-10 min dichter bij 0.
 - Meten na bouw: mediaan afwijking regenvalidatie (basis −13 min, n=7) en aantal `pouring`-perioden waarbij minuut 0 < 4 mm/u (basis: 1 op 08-10).
 
+
+## L-SC-006 · validatie: bewaarvenster per soort in plaats van 60 over alles
+- Status: **gepland (zelf bouwen: meetfout; raakt geen drempels of meldgedrag)** — bouwen in de eerste dagafsluiting nadat 0.50.0 geïnstalleerd is (nu 0.48.1, twee releases wachten)
+- Onderbouwing: `validatie.py` `MAX_UITKOMSTEN = 60` geldt voor alle soorten samen (`del self.uitkomsten[:-60]`). 09-10 03:40: venster vol met 34 regen, 21 passage, 5 aankomst; passage was 24 (08-10 11:45), aankomst 6 (07-10). Regenuitkomsten (8-10 per regendag) verdringen zo de zeldzame onweersuitkomsten waarmee L-SC-001 en L-SC-003 getoetst worden.
+- Bouw: per soort de laatste 60 bewaren (regen, aankomst, passage elk eigen venster); `afgerond` blijft het totaal; diagnostics toont per soort het aantal en de oudste datum. Test: 100 regenuitkomsten na 5 aankomst-uitkomsten → aankomst blijft 5.
+- Meten na bouw: aantal aankomst/passage-uitkomsten daalt nooit meer door regen; na een regendag passage/aankomst gelijk.
