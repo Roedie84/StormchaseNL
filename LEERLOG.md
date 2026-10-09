@@ -128,3 +128,11 @@ laatste ronde: 09-10 07:40, gemeten t/m 09-10 07:45
 - H-SC-3 loopt als KPI (L-SC-005 afgewezen). L-SC-006 (venster per soort + bron per voorspelling) bouwen in de dagafsluiting van 10-10. Geen release.
 
 laatste ronde: 09-10 11:40, gemeten t/m 09-10 11:45
+
+## 09-10 15:40 · tussenronde
+- Geïnstalleerd: 0.50.1. HA-herstarts sinds 11:45: 6 (12:11-14:43). Locatie: tracker iPhone. Geen onweer (0 inslagen <50 km, CAPE 0 / piek 12 u 140, LI 2,8, ensemble 0 %; wel windschering ~62 km/u, stoten 52 km/u verwacht), niveau groen → onweer: alleen beschikbaarheid.
+- Bronnen: 15 bronnen 0 mislukt (radar 1693, KNMI-nowcast 178, EDR 118, waarschuwingen 61); push verbonden. Buienradar en Bright Sky (`meting`) alleen terugval (laatste succes 06:02/06:18) — zo ontworpen.
+- Regen (KNMI-nowcast): 4 nieuwe afgeronde uitkomsten 12:40-14:12: −9,6 / **+13,1 / +20,6 / +8,0 min** → met KNMI nu vaker te LAAT (3 van 5 KNMI-uitkomsten), tot 0.49.0 bijna altijd te vroeg (11/12). H-SC-3 bijgesteld: patroon is bronafhankelijk; goed scheiden kan pas met de bron per uitkomst.
+- **L-SC-006 acuut gebouwd (0.50.2):** venster nu regen 37 / passage 20 / aankomst 3 — sinds 11:45 nog eens 3 onweersuitkomsten verdrongen (passage 21→20, aankomst 5→3), onherstelbaar. Daarom in een tussenronde: venster 60 per soort + bron per regenvoorspelling + `regen_per_bron`/`aantal_per_soort` in de diagnostiek. 10 tests, 691 groen, workflow groen, HACS ververst. Wacht op installatie.
+
+laatste ronde: 09-10 15:40, gemeten t/m 09-10 15:45

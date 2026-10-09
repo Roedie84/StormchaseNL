@@ -97,3 +97,7 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-09 11:40,TUSSEN,sc_regen_afwijking_min,-21.6,1,"08:53 over 41 min, kwam na 19 min; eerste afgeronde uitkomst met KNMI-nowcast als bron"
 2026-10-09 11:40,TUSSEN,sc_regen_validatie_uitgekomen,0.706,34,"24/34 rollend; venster 60: regen 34, passage 21, aankomst 5 (gelijk)"
 2026-10-09 11:40,TUSSEN,sc_herstarts,2,2,"10:09 10:40"
+2026-10-09 15:40,TUSSEN,sc_onweer_inslagen_50km,0,1,"geen onweer; CAPE 0 (piek 12u 140), LI 2.8"
+2026-10-09 15:40,TUSSEN,sc_bronnen_slaag_pct,100,2400,"15 bronnen 0 mislukt; radar 1693, knmi_nowcast 178"
+2026-10-09 15:40,TUSSEN,sc_regen_afwijking_min,8.0,4,"KNMI 12:40 -9.6, 13:03 +13.1, 13:32 +20.6, 14:12 +8.0 (mediaan +10.6)"
+2026-10-09 15:40,TUSSEN,sc_validatie_venster_onweer,23,1,"passage 20 + aankomst 3 (was 21+5 om 11:40): 3 verdrongen door regen -> L-SC-006 0.50.2"
