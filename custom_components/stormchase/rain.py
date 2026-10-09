@@ -267,6 +267,8 @@ class RainCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdateC
             "volgende_bui_over": gelezen["volgende_bui_over"],
             "piek": piek,
             "totaal": totaal,
+            # 0.51.0: nodig om in het regenbeeld de piek per bui te bepalen
+            "drempel": drempel,
             "verwachting": [
                 {"minuten": minuten, "mm_per_uur": mm} for minuten, mm in reeks
             ],

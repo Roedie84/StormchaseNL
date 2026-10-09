@@ -18,7 +18,7 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .buienreeks import begin_weergave, gaat_om_volgende_bui
+from .buienreeks import begin_weergave, gaat_om_volgende_bui, regenbeeld
 from .const import DOMAIN, MAX_AFWIJKING_KM
 from .coordinator import MeteoCoordinator, StormCoordinator, StormData
 from .meting import MetingCoordinator
@@ -245,6 +245,19 @@ RAIN_SENSORS: tuple[MeteoSensorDescription, ...] = (
         native_unit_of_measurement="min",
         suggested_display_precision=0,
         value=begin_weergave,
+    ),
+    # 0.51.0: wanneer de bui van nu ophoudt, en het hele beeld in één zin
+    MeteoSensorDescription(
+        key="rain_stops",
+        translation_key="rain_stops",
+        native_unit_of_measurement="min",
+        suggested_display_precision=0,
+        value=lambda data: data.get("stopt_over") if data.get("regent") else None,
+    ),
+    MeteoSensorDescription(
+        key="rain_summary",
+        translation_key="rain_summary",
+        value=regenbeeld,
     ),
     MeteoSensorDescription(
         key="rain_intensity",
@@ -528,6 +541,27 @@ class MeteoSensor(CoordinatorEntity[MeteoCoordinator], SensorEntity):
         if self.coordinator.data is None:
             return None
         return self.entity_description.value(self.coordinator.data)
+
+    @property
+    def extra_state_attributes(self) -> dict | None:
+        """Bij de windstoten: de kale modelwaarde en de correctie (0.51.0)."""
+        data = self.coordinator.data
+        if not data or self.entity_description.key != "wind_gusts":
+            return None
+        wind = data.get("windcorrectie") or {}
+        return {
+            "model": data.get("windstoten_model"),
+            "correctiefactor": wind.get("factor"),
+            "gecorrigeerd": bool(wind.get("toegepast")),
+            "paren_24u": wind.get("paren"),
+            "uitleg": (
+                "Modelwaarde x mediane verhouding gemeten/model van het "
+                "dichtstbijzijnde station over 24 uur"
+                if wind.get("toegepast")
+                else "Modelwaarde; correctie volgt zodra er een uur aan "
+                "stationsmetingen is"
+            ),
+        }
 
 
 class ChasePotentialSensor(CoordinatorEntity[MeteoCoordinator], SensorEntity):

@@ -13,7 +13,7 @@ import random
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EVENT_HOMEASSISTANT_STOP, Platform
-from homeassistant.core import Event, HomeAssistant, ServiceCall
+from homeassistant.core import Event, HomeAssistant, ServiceCall, callback
 
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
@@ -36,7 +36,7 @@ from .knmi_api import KnmiBronnen
 from .knmi_push import DATASET_RADARVERWACHTING, DATASET_WAARNEMINGEN, KnmiPush
 from .knmi_verwerk import tijd_uit_bestandsnaam
 from .coordinator import POSITIE_SLEUTEL, MeteoCoordinator, StormCoordinator
-from .meting import MetingCoordinator
+from .meting import MetingCoordinator, _stempel as _epoch
 from .radarbron import RadarCoordinator
 from .alerts import AlertCoordinator
 from .briefing import Briefing
@@ -47,6 +47,7 @@ from .rain import RainCoordinator
 from .stats import Statistieken
 from .validatie import Validatie
 from .herstart import OPSLAG_VERSIE, Bewaarplan
+from .windcorrectie import Windcorrectie
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -199,6 +200,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             "notifier": notifier.naar_opslag(),
             # 0.49.0: luchtdrukverloop, voor de drukverandering over 1 en 3 uur
             "meting_druk": meting.druk_naar_opslag(),
+            # 0.51.0: paren modelwindstoot/stationsmeting
+            "windcorrectie": windcorrectie.naar_opslag(),
         }
 
     staatplan.plannen = lambda: staat_opslag.async_delay_save(
@@ -208,6 +211,26 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     waarschuwingen.herstel_gemeld(staat.get("gemeld"))
     notifier.herstel(staat.get("notifier"))
     meting.herstel_druk(staat.get("meting_druk"))
+
+    # 0.51.0: modelwindstoten bijstellen met wat het station meet. Elke
+    # nieuwe stationsmeting wordt gekoppeld aan de modelwaarde van dat moment.
+    windcorrectie = Windcorrectie(staat.get("windcorrectie"))
+    meteo.windcorrectie = windcorrectie
+
+    @callback
+    def _koppel_wind() -> None:
+        gemeten = meting.data or {}
+        model = meteo.data or {}
+        if windcorrectie.bij(
+            _epoch(gemeten.get("waargenomen_op")),
+            gemeten.get("windstoten"),
+            model.get("windstoten_model"),
+            model.get("model_tijd"),
+        ):
+            staatplan.plan()
+            meteo.herbereken_wind()
+
+    entry.async_on_unload(meting.async_add_listener(_koppel_wind))
     meting.bewaarplan = staatplan
     storm.bewaarplan = staatplan
     waarschuwingen.bewaarplan = staatplan

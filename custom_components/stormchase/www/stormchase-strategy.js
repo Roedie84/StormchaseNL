@@ -98,6 +98,8 @@ const ENTITEITEN = {
   vriesniveau: ["sensor", "freezing_level", "stormchase_vriesniveau"],
   tt: ["sensor", "total_totals", "stormchase_total_totals_index"],
   regenStart: ["sensor", "rain_starts", "stormchase_regen_begint_over"],
+  regenStopt: ["sensor", "rain_stops", "stormchase_regen_stopt_over"],
+  regenBeeld: ["sensor", "rain_summary", "stormchase_regenbeeld"],
   regenIntensiteit: ["sensor", "rain_intensity", "stormchase_neerslagintensiteit"],
   regenPiek: ["sensor", "rain_peak", "stormchase_neerslagpiek_2_uur"],
   stoten: ["sensor", "meting_windstoten", "stormchase_windstoten_gemeten"],
@@ -2189,7 +2191,9 @@ class StormchaseHudCard extends HTMLElement {
     let kop;
     let kleur = "var(--tekst)";
     if (regent) {
-      kop = `Het regent${stopt != null ? ", nog ~" + fmt(stopt) + " min" : ""}`;
+      const volgende = attr(start, "volgende_bui_over");
+      kop = `Het regent${stopt != null ? ", nog ~" + fmt(stopt) + " min" : ""}` +
+        (volgende != null ? `${PUNT}volgende bui over ${fmt(volgende)} min` : "");
       kleur = "var(--blauw)";
     } else if (over != null) {
       kop = `Regen over ${fmt(over)} min`;

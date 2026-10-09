@@ -5,6 +5,38 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.51.0] — 2026-10-09
+
+### Nieuw
+
+- **Windstoten bijgesteld met de stationsmeting.** Open-Meteo zat op 9
+  oktober uren achter elkaar 15-20 km/u boven wat het KNMI-station Hupsel
+  (3,4 km) mat: 44-55 km/u verwacht tegen 28-40 km/u gemeten.
+  `sensor.stormchase_windstoten` toont nu de modelwaarde maal de mediane
+  verhouding gemeten/model van de laatste 24 uur. Elke stationsmeting wordt
+  gekoppeld aan de modelwaarde van dat moment (hooguit 45 minuten verschil);
+  paren bij minder dan 10 km/u model tellen niet mee. De factor telt pas
+  vanaf 6 paren over minstens een uur en blijft tussen 0,5 en 1,3. Met de
+  gegevens van 9 oktober wordt 55 km/u zo 38 km/u (factor 0,70).
+  Attributen: `model` (kale modelwaarde), `correctiefactor`, `gecorrigeerd`,
+  `paren_24u`, `uitleg`. De paren overleven een herstart.
+- **`sensor.stormchase_regenbeeld`**: het regenbeeld in één zin, bijvoorbeeld
+  "Regent nu, zwaar (13,7 mm/u), droog over 47 min; volgende bui over 82 min
+  (licht, tot 1,6 mm/u)." Licht onder 2,5 mm/u, matig tot 10, daarboven zwaar.
+- **`sensor.stormchase_regen_stopt_over`**: minuten tot de bui van nu
+  ophoudt (onbekend als het droog is).
+- Het dashboard noemt bij regen nu ook de volgende bui
+  ("Het regent, nog ~47 min · volgende bui over 82 min").
+
+### Gewijzigd
+
+- **De windmelding** (drempel standaard 60 km/u) gaat nu op de bijgestelde
+  windstoot. Zolang er nog geen factor is, blijft het de modelwaarde.
+
+Niet gewijzigd: `sensor.stormchase_regen_begint_over` werkt als voorheen,
+de uurverwachting van `weather.stormchase`, het dagelijkse weerbericht en
+de drempels.
+
 ## [0.50.2] — 2026-10-09
 
 ### Hersteld

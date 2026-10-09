@@ -246,6 +246,12 @@
       "rain_starts": {
         "name": "Regen begint over"
       },
+      "rain_stops": {
+        "name": "Rain stops in"
+      },
+      "rain_summary": {
+        "name": "Rain outlook"
+      },
       "rain_intensity": {
         "name": "Neerslagintensiteit"
       },

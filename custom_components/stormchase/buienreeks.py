@@ -83,3 +83,75 @@ def gaat_om_volgende_bui(data: dict) -> bool:
         and bool(data.get("regent"))
         and data.get("volgende_bui_over") is not None
     )
+
+
+# ---- 0.51.0: het regenbeeld in één zin ----
+
+def sterkte(mm_per_uur: float | None) -> str:
+    """Licht, matig of zwaar (grenzen 2,5 en 10 mm/u)."""
+    if mm_per_uur is None:
+        return "onbekend"
+    if mm_per_uur < 2.5:
+        return "licht"
+    if mm_per_uur < 10:
+        return "matig"
+    return "zwaar"
+
+
+def _getal(waarde: float) -> str:
+    return f"{waarde:.1f}".replace(".", ",")
+
+
+def bui_piek(data: dict, vanaf: int | None) -> float | None:
+    """Hoogste intensiteit van de bui die op `vanaf` minuten begint."""
+    if vanaf is None:
+        return None
+    drempel = data.get("drempel") or 0.1
+    piek = None
+    for punt in data.get("verwachting") or []:
+        minuten, mm = punt.get("minuten"), punt.get("mm_per_uur")
+        if minuten is None or mm is None or minuten < vanaf:
+            continue
+        if mm < drempel:
+            break
+        piek = mm if piek is None else max(piek, mm)
+    return piek
+
+
+def _met_piek(data: dict, vanaf: int | None) -> str:
+    piek = bui_piek(data, vanaf)
+    if piek is None:
+        return ""
+    return f" ({sterkte(piek)}, tot {_getal(piek)} mm/u)"
+
+
+def regenbeeld(data: dict | None) -> str | None:
+    """Nu, wanneer het stopt en wanneer de volgende bui komt, in één zin.
+
+    Op 9 oktober 22:26 viel er een korte, zware bui (14-16 mm/u). De sensor
+    'regen begint over' stond toen op 82: dat was de volgende bui, maar zo
+    las het niet. Deze zin zegt het allemaal.
+    """
+    if not data:
+        return None
+    if data.get("regent"):
+        nu = data.get("intensiteit")
+        zin = f"Regent nu, {sterkte(nu)}"
+        if nu is not None:
+            zin += f" ({_getal(nu)} mm/u)"
+        stopt = data.get("stopt_over")
+        zin += (
+            ", houdt de komende 2 uur aan"
+            if stopt is None
+            else f", droog over {stopt} min"
+        )
+        volgende = data.get("volgende_bui_over")
+        if volgende is not None:
+            zin += f"; volgende bui over {volgende} min" + _met_piek(data, volgende)
+        return zin + "."
+    begint = data.get("begint_over")
+    if begint is not None:
+        return f"Droog, over {begint} min een bui" + _met_piek(data, begint) + "."
+    if data.get("verwachting") is not None:
+        return "Droog, komende 2 uur geen regen."
+    return None

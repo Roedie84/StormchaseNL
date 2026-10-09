@@ -1170,6 +1170,27 @@ class MeteoCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
         self._was_winderig: bool | None = None
         self._vorige_condities: set[str] | None = None
         self._vorige_rang: int | None = None
+        # 0.51.0: modelwindstoten bijstellen met de stationsmeting
+        self.windcorrectie = None
+
+    def _wind(self, model) -> dict:
+        """Windstoten na correctie met de stationsmeting (0.51.0)."""
+        if self.windcorrectie is None:
+            return {"waarde": model, "model": model, "factor": None,
+                    "paren": 0, "toegepast": False}
+        return self.windcorrectie.corrigeer(model, dt_util.utcnow().timestamp())
+
+    def herbereken_wind(self) -> None:
+        """Na een nieuwe stationsmeting de bijgestelde stoten bijwerken."""
+        data = self.data
+        if not isinstance(data, dict) or "windstoten_model" not in data:
+            return
+        wind = self._wind(data.get("windstoten_model"))
+        if wind == data.get("windcorrectie"):
+            return
+        data["windstoten"] = wind["waarde"]
+        data["windcorrectie"] = wind
+        self.async_update_listeners()
 
     @staticmethod
     def _uur_waarde(payload: dict | None, veld: str, stempel: str, nu=None):
@@ -1487,7 +1508,8 @@ class MeteoCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
             self.stats.bronnen["open_meteo"].succes()
 
         huidig = payload.get("current") or {}
-        self._controleer_wind(huidig.get("wind_gusts_10m"))
+        wind = self._wind(huidig.get("wind_gusts_10m"))
+        self._controleer_wind(wind["waarde"])
         self._controleer_weer(huidig)
 
         # Velden uit de losse verzoeken
@@ -1641,7 +1663,12 @@ class MeteoCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
             "latitude": latitude,
             "longitude": longitude,
             "location_source": source_name,
-            "windstoten": (payload.get("current") or {}).get("wind_gusts_10m"),
+            # 0.51.0: bijgesteld met de stationsmeting; de kale modelwaarde
+            # staat ernaast
+            "windstoten": wind["waarde"],
+            "windstoten_model": huidig.get("wind_gusts_10m"),
+            "windcorrectie": wind,
+            "model_tijd": dt_util.utcnow().timestamp(),
             "current": payload.get("current") or {},
             "hourly": hourly,
             "hourly_index": index,
