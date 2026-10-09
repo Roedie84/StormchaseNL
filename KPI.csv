@@ -87,3 +87,8 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-09 03:40,TUSSEN,sc_regen_validatie_uitgekomen,0.706,34,"24/34 (rollend venster); <=15 5/5, 15-45 6/11, >45 13/18"
 2026-10-09 03:40,TUSSEN,sc_validatie_venster_vol,60,60,"MAX_UITKOMSTEN 60 over alle soorten: passage 21 (was 24), aankomst 5 (was 6) -> regen verdringt onweer"
 2026-10-09 03:40,TUSSEN,sc_bronnen_daggrens,2,2,"L-SC-002: per_dag 08-10 en 09-10 apart, totaal over 2 dagen"
+2026-10-09 07:40,TUSSEN,sc_bronnen_slaag_pct,100,15,"15 bronnen 0 haperend; KNMI nowcast 34, edr 22, waarschuwingen 19, wms 15, verwachting 8 (sinds 06:03)"
+2026-10-09 07:40,TUSSEN,sc_knmi_push,verbonden,1,"0.50.1"
+2026-10-09 07:40,TUSSEN,sc_regen_afwijking_min,-32,1,"04:52 over 57 min, kwam na 25 min (Buienradar)"
+2026-10-09 07:40,TUSSEN,sc_regen_validatie_uitgekomen,0.706,34,"24/34 rollend venster"
+2026-10-09 07:40,TUSSEN,sc_onweer_inslagen_50km,0,1,"geen onweer"

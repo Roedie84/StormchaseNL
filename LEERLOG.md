@@ -108,3 +108,14 @@ laatste ronde: 08-10 23:40, gemeten t/m 08-10 23:44
 - Geen release.
 
 laatste ronde: 09-10 03:40, gemeten t/m 09-10 03:47
+
+## 09-10 07:40 · tussenronde
+- Geïnstalleerd: **0.50.0** om 06:02 en **0.50.1** om 06:57 (0.49.0 KNMI-bronnen zit erin). Herstarts sinds 03:47: 4 (06:03, 06:57, 07:02, 07:42). Locatie: tracker iPhone.
+- Geen onweer (0 inslagen <50 km, ensemble 0%, CAPE 0, LI 9,3), niveau groen → onweer: alleen beschikbaarheid gemeten. Het regent licht (1,2 mm/u, `regen_verwacht` aan).
+- Bronnen: "alles in orde", 0 haperend, 15 bronnen 100% (radar 1168 vandaag). Nieuwe KNMI-bronnen sinds 06:03 alle 100%: nowcast 34, edr 22, waarschuwingen 19, wms 15, verwachting 8; push verbonden.
+- **Bronwissel regen:** sinds 0.49.0 is de KNMI-nowcast de eerste bron; Buienradar alleen terugval (daarom Buienradar laatste succes 06:02). De regenvalidatie legt de bron niet vast → uitkomsten van vóór en na 06:03 lopen door elkaar. Scheiden op `gemaakt_op` ≥ 09-10 06:03 kan nog; daarna nodig: bron per voorspelling → toegevoegd aan L-SC-006.
+- Regen: 1 nieuwe afgeronde uitkomst (04:52, nog Buienradar): "over 57 min", kwam na 25 min (−32 min). Afwijkingen nu 11 bekend, 10 negatief (regen eerder dan voorspeld); validatie 24/34. H-SC-3 ongewijzigd; KNMI-nowcast los meten vanaf nu.
+- L-SC-006 (venster per soort): 0.50.x geïnstalleerd → bouwen in de dagafsluiting van 10-10; onweer nog 21 passage / 5 aankomst in het venster.
+- Geen release (tussenronde).
+
+laatste ronde: 09-10 07:40, gemeten t/m 09-10 07:45
