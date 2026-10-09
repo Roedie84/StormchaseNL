@@ -378,9 +378,11 @@ KNMI_SLEUTELS = (CONF_KNMI_WMS_SLEUTEL, CONF_KNMI_NOTIFICATIE_SLEUTEL, CONF_KNMI
 CONF_KNMI_RADARSTIJL = "knmi_radarstijl"
 KNMI_RADARSTIJLEN = ["donker", "licht"]
 DEFAULT_KNMI_RADARSTIJL = "donker"
-# WMS-stijl per keuze, en hoe helder de kaart eronder blijft
+# WMS-stijl per keuze, en hoe helder de kaart eronder blijft.
+# 0.50.1: ook "donker" toont de neerslag in kleur (blauw-geel-paars) op de
+# donkere kaart; de grijs-rode KNMI-stijl was op donker slecht leesbaar.
 KNMI_WMS_STIJL = {
-    "donker": "radar/nearest",
+    "donker": "rainrate-blue-to-purple/nearest",
     "licht": "rainrate-blue-to-purple/nearest",
 }
 KNMI_KAART_HELDERHEID = {"donker": 0.45, "licht": 0.95}

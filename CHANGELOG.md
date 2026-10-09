@@ -5,6 +5,15 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.50.1] — 2026-10-09
+
+### Gewijzigd
+
+- KNMI-radar in kleur: de stijl "donker" gebruikt nu de KNMI-kleurschaal
+  blauw → geel → paars (`rainrate-blue-to-purple`) op de donkere kaart, in
+  plaats van de grijs-rode stijl. Geldt voor `image.stormchase_radar` en de
+  vooruitblik. De stijl "licht" blijft gelijk (zelfde kleuren, lichte kaart).
+
 ## [0.50.0] — 2026-10-08
 
 Het dashboard is een storm-chase-commandocentrum: één scherm over de volle
