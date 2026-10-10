@@ -197,3 +197,13 @@ laatste ronde: 10-10 15:40, gemeten t/m 10-10 15:45
 - Regen: droog, bui over 102 min (licht). Geen nieuwe KNMI-uitkomst; H-SC-3 loopt (≥ 20 nodig). Geen release.
 
 laatste ronde: 10-10 19:40, gemeten t/m 10-10 19:45
+
+## 10-10 23:40 · tussenronde
+- Geïnstalleerd 0.52.0. HA-herstarts 19:48, 20:26 (EMS-releases). Locatie tracker iPhone. Bronstatus "alles in orde" heel de periode; logboek 0 Stormchase-fouten.
+- **Onweer op afstand (gebeurtenis):** 20:34-20:59 cel op 93 → 74 km (markers tot 59), weg om 22:59; **0 inslagen binnen 50 km**, niveau groen → geen vals alarm, geen miss. `onweer_nadert` aan 20:38-21:06, aankomst eerst 62 → 44 min (20:41), daarna 68 → 142; validatie: aankomst (44 min) en passage (7 min, 88 km) niet uitgekomen.
+- **Naderingssnelheid (L-SC-001, derde meetpunt):** wijzigde alleen bij nieuwe inslagen (alle 14 wijzigingen vallen samen met markerwijzigingen) → werkt zoals gebouwd. Wel: eerste schatting 83-108 km/u (20:38-20:41) tegen werkelijk ~57 km/u (93 → 74 km in 20 min), daalde naar 31 om 20:59. Samen met 16:28 (9,5 tegen ~32) → **H-SC-6 (nieuw):** de naderingssnelheid uit de eerste minuten van een cel is onbetrouwbaar in beide richtingen (n=2); volgen bij de volgende cellen, nog geen voorstel.
+- **Windstoten (0.52.0):** 19:54-23:33 n=23: bias **−2,3 km/u**, MAE 5,0 (mediaan −3,6). Gemeten ≥ 28 km/u (n=4, 19:54-20:14) **−8,6**; < 28 (n=19) −1,0 → H-SC-5 (verhouding stijgt bij harde stoten) opnieuw gesteund; L-SC-008 blijft open.
+- **Regen KNMI (H-SC-3):** `regen_per_bron.knmi` 19 voorspellingen, 16 uitgekomen, **mediaan −7 min, 12 te vroeg / 4 te laat** (vorige ronde 11 / mediaan −2,4). Deze periode −7,3 (20:12), +3,1 (21:02), −10,0 (22:12, voorspeld 12, kwam na 2). De bui komt stelselmatig eerder dan KNMI zegt; met `rain_lead` 10 min blijft er dan ~3 min over. Bij n ≥ 20 uitgekomen (dagafsluiting) toetsen per horizon → mogelijk voorstel (meldgedrag = Ruud).
+- Hypotheses: H-SC-3 (KNMI regen te laat voorspeld), H-SC-5 (windverhouding bij harde stoten), H-SC-6 (vroege naderingsschatting). Geen release.
+
+laatste ronde: 10-10 23:40, gemeten t/m 10-10 23:45
