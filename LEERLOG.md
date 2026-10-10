@@ -171,3 +171,11 @@ laatste ronde: 10-10 03:40, gemeten t/m 10-10 03:46
 - Lopend: L-SC-001 wacht op onweer; L-SC-007 open (Ruud). Geen release.
 
 laatste ronde: 10-10 07:40, gemeten t/m 10-10 07:44
+
+## 10-10 11:40 · tussenronde
+- Geïnstalleerd **0.51.1** (cockpit-scroll); 0.52.0 (L-SC-007, chatsessie 11:12) nog niet. HA-herstarts 08:20, 08:44, 09:18, 10:52. Locatie tracker iPhone. Geen onweer (0 inslagen < 50 km, CAPE 100, LI 3,1, ensemble 0 %), niveau groen → onweer: alleen beschikbaarheid.
+- Bronnen 07:44-11:44: 15 bronnen 0 mislukt (radar 3008, KNMI-nowcast 540, EDR 351); push verbonden sinds 10:52. Regen: droog, bui over 92 min (licht) — uitkomst in de volgende ronde.
+- **Windstoten (H-SC-4 → H-SC-5):** wind trok aan (Hupsel 14 → 39 km/u). Bijgesteld −4,8 km/u (MAE 4,9, n=24) tegen kaal model +7,7. Gesplitst: model < 28 km/u −2,2 (verhouding gemeten/model 0,59), model ≥ 31 km/u **−8,6** (verhouding 0,84; laatste: model 37, bijgesteld 23, gemeten 39). De 24-uursfactor (0,63) volgt een hogere windklasse niet → **L-SC-008** (factor per windklasse; Ruud beslist). L-SC-007 is gebouwd in 0.52.0 maar dekt dit niet.
+- Hypotheses: H-SC-3 (KNMI regenaankomst, n ≥ 20 nodig), H-SC-5 (verhouding stijgt met windsterkte; n=1 dag). L-SC-001 wacht op onweer. Geen release (geen acute bug; windmelding = meldgedrag).
+
+laatste ronde: 10-10 11:40, gemeten t/m 10-10 11:50
