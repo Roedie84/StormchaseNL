@@ -228,6 +228,35 @@ const esc = (tekst) =>
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
 
+/* ---- rustig scrollen (0.51.1) ----
+   Op mobiel (vooral iOS, dat geen scroll anchoring kent) verspringt de pagina
+   als een paneel tijdens het scrollen opnieuw wordt opgebouwd en daarbij een
+   fractie van hoogte verandert. Daarom: tijdens aanraken en scrollen niets
+   tekenen, en pas kort na het loslaten bijwerken. */
+const SCROLL = { tot: 0, aan: false, klaar: false };
+const volgScroll = () => {
+  if (SCROLL.klaar || typeof window === "undefined") return;
+  SCROLL.klaar = true;
+  const opt = { passive: true, capture: true };
+  const rust = (ms) => () => {
+    SCROLL.tot = Math.max(SCROLL.tot, Date.now() + ms);
+  };
+  window.addEventListener("scroll", rust(400), opt);
+  window.addEventListener("wheel", rust(400), opt);
+  window.addEventListener("touchmove", rust(400), opt);
+  window.addEventListener("touchstart", () => {
+    SCROLL.aan = true;
+    rust(400)();
+  }, opt);
+  const los = () => {
+    SCROLL.aan = false;
+    rust(500)();
+  };
+  window.addEventListener("touchend", los, opt);
+  window.addEventListener("touchcancel", los, opt);
+};
+const scrolltNog = () => SCROLL.aan || Date.now() < SCROLL.tot;
+
 const MIN = "\u2212";
 const STREEP = "\u2014";
 const PUNT = " \u00b7 ";
@@ -1307,6 +1336,8 @@ class StormchaseHudCard extends HTMLElement {
 
   _bouw() {
     this._gebouwd = true;
+    this._html = {};
+    volgScroll();
     this.shadowRoot.innerHTML =
       `<style>${STIJL}</style>` +
       `<div class="root">${ACHTERGROND}<div class="wrap">` +
@@ -1355,6 +1386,11 @@ class StormchaseHudCard extends HTMLElement {
     if (this._gepland || !this._hass || !this._gebouwd) return;
     this._gepland = true;
     const doe = () => {
+      if (scrolltNog()) {
+        // Pas tekenen als de gebruiker klaar is met scrollen
+        setTimeout(doe, 250);
+        return;
+      }
       this._gepland = false;
       this._teken();
     };
@@ -1377,12 +1413,17 @@ class StormchaseHudCard extends HTMLElement {
         const methode = this[`_${paneel}`];
         const html = methode.call(this, el);
         if (html === undefined) continue; // tekent zelf
+        // Vergelijken met de vorige opbouw, niet met innerHTML: de browser
+        // schrijft HTML anders terug, waardoor elk paneel bij elke update
+        // opnieuw werd opgebouwd.
+        if (this._html[paneel] === html) continue;
+        this._html[paneel] = html;
         if (html === null) {
           el.hidden = true;
           el.innerHTML = "";
         } else {
           el.hidden = false;
-          if (el.innerHTML !== html) el.innerHTML = html;
+          el.innerHTML = html;
         }
       } catch (err) {
         // Een fout in een paneel mag de rest niet meenemen
@@ -1680,12 +1721,18 @@ class StormchaseHudCard extends HTMLElement {
       : "";
     const kop = paneelKop("radar", modus === "vooruit" ? "Radar vooruitblik" : "Radar", chips + wissel);
     const kopEl = el.querySelector(".radarkop");
-    if (kopEl.innerHTML !== kop) kopEl.innerHTML = kop;
+    if (this._html.radarkop !== kop) {
+      this._html.radarkop = kop;
+      kopEl.innerHTML = kop;
+    }
 
     const hoek = el.querySelector(".radar-hoek");
     const tijd = modus === "nu" ? klokTijd(beeldTijd) : klokTijd(attr(vooruit, "referentietijd"));
     const hoekHtml = tijd ? chip(`${modus === "nu" ? "Beeld" : "Referentie"} ${tijd}`) : "";
-    if (hoek.innerHTML !== hoekHtml) hoek.innerHTML = hoekHtml;
+    if (this._html.radarhoek !== hoekHtml) {
+      this._html.radarhoek = hoekHtml;
+      hoek.innerHTML = hoekHtml;
+    }
 
     // Het beeld zelf: alleen wisselen als de URL echt verandert, en pas
     // als het nieuwe beeld binnen is, zodat er niets knippert.

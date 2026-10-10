@@ -5,6 +5,18 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.51.1] — 2026-10-10
+
+### Opgelost
+
+- **Dashboard verspringt niet meer tijdens scrollen op mobiel.** Een paneel
+  werd bij elke update opnieuw opgebouwd, ook als er niets veranderde (de
+  vergelijking liep via `innerHTML`, dat de browser anders terugschrijft).
+  Op een telefoon, vooral iOS, schoof de pagina dan tijdens het scrollen.
+  Panelen worden nu alleen nog vervangen als de inhoud echt anders is, en
+  tijdens aanraken of scrollen wacht het dashboard met bijwerken tot kort na
+  het loslaten.
+
 ## [0.51.0] — 2026-10-09
 
 ### Nieuw
