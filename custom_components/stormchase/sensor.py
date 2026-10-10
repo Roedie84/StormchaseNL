@@ -554,12 +554,16 @@ class MeteoSensor(CoordinatorEntity[MeteoCoordinator], SensorEntity):
             "correctiefactor": wind.get("factor"),
             "gecorrigeerd": bool(wind.get("toegepast")),
             "paren_24u": wind.get("paren"),
+            # 0.52.0: paren tijdens een front leren niet mee
+            "paren_front": wind.get("paren_front"),
+            "front": bool(wind.get("front")),
+            "uren_metingen": wind.get("uren"),
             "uitleg": (
                 "Modelwaarde x mediane verhouding gemeten/model van het "
-                "dichtstbijzijnde station over 24 uur"
+                "dichtstbijzijnde station over 24 uur, zonder fronten"
                 if wind.get("toegepast")
-                else "Modelwaarde; correctie volgt zodra er een uur aan "
-                "stationsmetingen is"
+                else "Modelwaarde; correctie volgt zodra er zes uur aan "
+                "stationsmetingen buiten een front is"
             ),
         }
 

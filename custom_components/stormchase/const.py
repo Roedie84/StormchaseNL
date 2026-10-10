@@ -406,3 +406,24 @@ VOORUITBLIK_STAP = 10
 VOORUITBLIK_FRAME_MS = 400
 
 KNMI_BRONVERMELDING = "Bron: KNMI (CC BY 4.0)"
+
+# 0.52.0 (L-SC-007): frontdetectie voor de windstootcorrectie.
+# Op 9 oktober trok om 22:33 een koufront over Hupsel: de gemeten stoot
+# sprong van 35 naar 55 km/u en de luchtdruk binnen tien minuten 1,5 hPa
+# omhoog. Daarna zakte de wind snel terwijl het model nog hoog zat; de
+# verhouding gemeten/model van die uren (factor 0,50) zei niets over rustig
+# weer. Een meetpaar telt daarom als "front" (en leert de factor niet) als:
+# - het station onweer meldt (nu of in het afgelopen uur), of
+# - de luchtdruk over een uur meer dan FRONT_DRUK_1U_HPA veranderde (een
+#   gewone tendens is een paar tienden per uur), of
+# - de gemeten stoot meer dan FRONT_STOOT_SPRONG_KMH afwijkt van de mediaan
+#   van het uur ervoor (normaal schommelt dat binnen ~10 km/u).
+# Ook de paren tot FRONT_NALOOP_S na een frontpaar tellen niet mee: achter
+# het front zakt de wind sneller dan het model.
+FRONT_DRUK_1U_HPA = 1.0
+FRONT_STOOT_SPRONG_KMH = 15.0
+FRONT_STOOT_VENSTER_S = 3600
+FRONT_NALOOP_S = 3600
+# De correctie telt pas als de bruikbare paren samen minstens zes uur beslaan;
+# tot dan het kale model (één front van een paar uur is te weinig).
+WINDCORRECTIE_MIN_SPANNE_S = 6 * 3600

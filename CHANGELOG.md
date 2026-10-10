@@ -5,6 +5,24 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.52.0] — 2026-10-10
+
+### Gewijzigd
+
+- **Windstootcorrectie pas na zes uur en zonder fronten (L-SC-007).** In de
+  nacht van 9 op 10 oktober leerde de correctie factor 0,50 van één koufront
+  en zat daarna 01:00-04:00 te laag; bij rustig weer klopt 0,55. Nu:
+  - de bijstelling telt pas als de bruikbare meetparen samen zes uur beslaan
+    (was een uur); tot dan het kale model;
+  - paren tijdens een front leren de factor niet: onweer bij het station,
+    luchtdruk 1 hPa of meer veranderd over een uur, of een gemeten stoot
+    15 km/u of meer naast de mediaan van het uur ervoor; plus een uur
+    naloop. De drempels staan in `const.py`;
+  - nieuwe attributen `paren_front`, `front` en `uren_metingen` op
+    `sensor.stormchase_windstoten`.
+  Bewaarde paren uit 0.51.x worden gewoon overgenomen; zonder frontvlag
+  krijgen ze alsnog de stootsprongtoets.
+
 ## [0.51.1] — 2026-10-10
 
 ### Opgelost

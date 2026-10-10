@@ -33,7 +33,7 @@ sensoren uit en rekent daar bovenop.
 | `sensor.stormchase_lifted_index` | Stabiliteit; negatief is onstabiel. |
 | `sensor.stormchase_convectieve_remming` | CIN, de deksel op de atmosfeer. |
 | `sensor.stormchase_chase_potentie` | Score 0-100. Zie hieronder. |
-| `sensor.stormchase_windstoten` | Verwachte windstoot in km/u (Open-Meteo), bijgesteld met de mediane verhouding gemeten/model van het dichtstbijzijnde station over 24 uur (factor 0,5-1,3; vanaf 6 metingen over een uur). Attributen `model`, `correctiefactor`, `gecorrigeerd`, `paren_24u`. De windmelding gebruikt de bijgestelde waarde. |
+| `sensor.stormchase_windstoten` | Verwachte windstoot in km/u (Open-Meteo), bijgesteld met de mediane verhouding gemeten/model van het dichtstbijzijnde station over 24 uur (factor 0,5-1,3; pas na zes uur aan metingen, tot dan het kale model). Metingen tijdens een front (onweer bij het station, drukverandering van 1 hPa of meer per uur, of een stootsprong van 15 km/u tegen het uur ervoor, plus een uur naloop) leren de factor niet. Attributen `model`, `correctiefactor`, `gecorrigeerd`, `paren_24u`, `paren_front`, `front`, `uren_metingen`. De windmelding gebruikt de bijgestelde waarde. |
 | `sensor.stormchase_regen_begint_over` | Minuten tot de eerste regen. Regent het al, dan het begin van de volgende bui na het droge stuk (attribuut `volgende_bui: true`), anders onbekend. Draagt de volledige verwachting per 5 minuten als attribuut. |
 | `sensor.stormchase_regen_stopt_over` | Minuten tot de bui van nu ophoudt; onbekend als het droog is. |
 | `sensor.stormchase_regenbeeld` | Het regenbeeld in één zin, bijvoorbeeld "Regent nu, zwaar (13,7 mm/u), droog over 47 min; volgende bui over 82 min (licht, tot 1,6 mm/u)." |

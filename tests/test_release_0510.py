@@ -23,7 +23,9 @@ MODEL_0910 = [47.2, 44.3, 44.3, 46.4, 46.4, 48.6, 48.6, 50.0, 50.0, 50.0, 52.2, 
 GEMETEN_0910 = [34.7, 32.4, 31.9, 31.2, 36.6, 37.0, 27.5, 35.5, 33.3, 30.3, 28.9, 36.5, 40.5, 35.7, 34.6, 28.2, 38.8]
 
 
-def _vul(wc: Windcorrectie, model, gemeten, start=1_000_000.0, stap=600.0) -> float:
+# 0.52.0: de correctie telt pas na zes uur aan paren; deze tests vullen
+# daarom per uur in plaats van per tien minuten.
+def _vul(wc: Windcorrectie, model, gemeten, start=1_000_000.0, stap=3600.0) -> float:
     t = start
     for m, g in zip(model, gemeten):
         wc.bij(t, g, m, t - 120)
@@ -102,7 +104,7 @@ class TestWindcorrectie:
         terug = Windcorrectie(opgeslagen)
         assert terug.factor(t) == wc.factor(t)
         assert Windcorrectie("rommel").paren == []
-        assert Windcorrectie([[1, "x", 3], [1, 2, 3]]).paren == [(1.0, 2.0, 3.0)]
+        assert Windcorrectie([[1, "x", 3], [1, 2, 3]]).paren == [(1.0, 2.0, 3.0, False)]
 
 
 def _data_2227() -> dict:

@@ -226,6 +226,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             gemeten.get("windstoten"),
             model.get("windstoten_model"),
             model.get("model_tijd"),
+            # 0.52.0: tekenen van een front, zodat dat paar niet meeleert
+            onweer=gemeten.get("onweer") or gemeten.get("onweer_afgelopen_uur"),
+            druk_1u=gemeten.get("druk_verandering_1u"),
         ):
             staatplan.plan()
             meteo.herbereken_wind()
