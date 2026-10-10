@@ -21,3 +21,6 @@
 | Regenvalidatie afwijking (mediaan) | −10,6 min, 9/10 negatief; ≤15 min ≈ −8 | 10 uitkomsten t/m 08-10 | 08-10 19:40 |
 | Slaagpercentage bronnen per dag | 100 % (n=1686, 20 herstarts) | 08-10 | 09-10 03:40 |
 | Validatievenster (alle soorten samen) | 60/60 vol: regen 34, passage 21, aankomst 5 | 09-10 03:47 | 09-10 03:40 |
+| Windstoten verwacht − gemeten (model, vóór 0.51.0) | +13,6 km/u (MAE 13,6) | 09-10 06:03-23:33, n=104 | 10-10 03:40 |
+| Windstoten na bijstelling | −0,2 km/u (MAE 6,9); laatste 2,5 u −5,7 | 23:34-03:44, n=26 | 10-10 03:40 |
+| Slaagpercentage bronnen per dag | 99,93 % (n=2761) | 09-10 | 10-10 03:40 |

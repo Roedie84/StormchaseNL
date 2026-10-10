@@ -154,3 +154,12 @@ laatste ronde: 09-10 19:40, gemeten t/m 09-10 19:45
 - Validatie: aankomst 3 / passage 20 / regen 44 (L-SC-006 houdt: geen verdringing). L-SC-001 wacht op onweer. Geen release.
 
 laatste ronde: 09-10 23:40, gemeten t/m 09-10 23:50
+
+## 10-10 03:40 · dagafsluiting 09-10
+- Onweer 09-10: 0 inslagen <50 km, niveau groen, nadert 0×, ensemble 0 % → hits/misses/lead-time niet meetbaar; alleen beschikbaarheid. Locatie: tracker iPhone.
+- Bronnen 09-10: 2759/2761 = 99,93 % (2× 503 Open-Meteo 18:03); radar 1535, KNMI-nowcast 328, EDR 218. Na 00:00 15 bronnen 0 mislukt. Push verbonden (153 meldingen sinds 22:43).
+- **Windstoten (0.51.0) eerste meting:** vóór de bijstelling (06:03-23:33, n=104) verwacht − gemeten **+13,6 km/u** (MAE 13,6). Erna (23:34-03:44, n=26) bias −0,2 / MAE 6,9, maar in twee helften: +8,8 tot 01:12, **−5,7 sinds 01:13** (verwacht 12,6-14,9 tegen gemeten 18-24). Oorzaak: de factor startte om 23:34 op de **ondergrens 0,50** met 7 paren uit één frontpassage (model 55 km/u, station al 14-29) en staat nu op 0,54; het kale model zit nu dichter bij de meting (25,2 tegen 22,6) dan de bijgestelde waarde (13,6). Gevolg: zolang de factor ~0,5 is, ziet de windmelding (60 km/u) een modelwaarde van 120 km/u als 60 → **H-SC-4 → voorstel L-SC-007** (meldgedrag: Ruud beslist). De 24-uursmediaan herstelt vanzelf als de frontparen uit het venster vallen (~23:30 vandaag).
+- Regen: KNMI-uitkomsten met bron (n=6) mediaan +0,4 min, 3 te vroeg / 3 te laat; H-SC-3 loopt (≥ 20 nodig). Validatievenster: aankomst 3 / passage 20 / regen 44 — geen verdringing.
+- Lopend: L-SC-001 wacht op onweer. Geen release (geen gepland punt, geen acute bug; windstoten = meldgedrag → voorstel).
+
+laatste ronde: 10-10 03:40, gemeten t/m 10-10 03:46

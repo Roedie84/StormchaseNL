@@ -112,3 +112,12 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-09 23:40,TUSSEN,sc_windstoten_verwacht_min_gemeten_kmh,12.5,1,"0.51.0: verwacht 28.6 vs gemeten 16.1 (Hupsel 21:40 UTC)"
 2026-10-09 23:40,TUSSEN,sc_validatie_venster_onweer,23,1,"aankomst 3 + passage 20, regen 44"
 2026-10-09 23:40,TUSSEN,sc_herstarts,3,3,"19:48 20:53 22:43"
+2026-10-09,DAG,sc_inslagen_binnen_50km,0,1,"hele dag; ensemble 0%, CAPE <=180"
+2026-10-09,DAG,sc_waarschuwing_niveau,groen,1,hele dag
+2026-10-09,DAG,sc_nadert_aan_perioden,0,0,"geen onweer: hits/misses/valse alarmen n.v.t."
+2026-10-09,DAG,sc_herstarts,22,22,"HA-herstarts 06:03-22:43"
+2026-10-09,DAG,sc_bronnen_slaag_pct,99.93,2761,"per_dag 09-10: 2759 gelukt, 2 mislukt (503 Open-Meteo icon_d2+ensemble 18:03)"
+2026-10-09,DAG,sc_windstoten_bias_kmh,13.6,104,"verwacht-gemeten (Hupsel 3,4 km) 06:03-23:33, model zonder bijstelling; MAE 13.6"
+2026-10-10 03:44,TUSSEN,sc_windstoten_bias_kmh,-0.2,26,"na 0.51.0 bijstelling (23:34-03:44), MAE 6.9; 23:34-01:12 +8.8 (n=10), 01:13-03:44 -5.7 (n=16)"
+2026-10-10 03:44,TUSSEN,sc_windstoten_correctiefactor,0.54,32,"start 23:34 op ondergrens 0.50 (7 paren, front 22:30-23:30); model nu 25.2 vs gemeten 22.6"
+2026-10-10 03:44,TUSSEN,sc_regen_knmi_mediaan_afwijking_min,0.4,6,"regen_per_bron knmi (alleen uitkomsten met bron): 3 te vroeg / 3 te laat"
