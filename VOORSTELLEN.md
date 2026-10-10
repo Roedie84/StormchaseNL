@@ -65,4 +65,4 @@ Status: open / akkoord / afgewezen / gebouwd vX / geverifieerd / teruggedraaid. 
 - Verwacht effect: bijgestelde stoten bij > 30 km/u binnen ±4 km/u i.p.v. −8,6; geen gemiste windmelding bij een zware storm doordat rustige uren de factor bepalen.
 - Aanvulling 10-10 15:40 (0.52.0, n=23): factor 0,63 → 0,70 zonder frontparen. Model 37-44: bijgesteld −6,9 km/u (verhouding 0,85); model 43-50: **−0,8** (MAE 2,8; verhouding 0,72). De verhouding stijgt dus niet eenduidig met de windsterkte; een deel van de −8,6 kwam van de achterlopende 24-uursfactor. Bewijs voor (a) zwakker; (c) blijft het veiligste voor de melding. Eerst een dag met stoten > 50 km/u afwachten.
 - Meten na bouw: bias/MAE per windklasse (KPI sc_windstoten_bias_kmh_klasse), en of een gemeten stoot ≥ 60 km/u ooit samenvalt met bijgesteld < 60.
-
+- Aanvulling 10-10 19:40: 15:54-19:44 n=24 bias +0,7 km/u (MAE 4,3), maar bij gemeten ≥ 33 km/u (buienlijn met onweer op 46 km, n=5) −6,5 km/u. Onderschatting zit in de harde (convectieve) stoten, precies waar de windmelding telt.

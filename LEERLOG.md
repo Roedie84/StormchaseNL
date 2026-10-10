@@ -188,3 +188,12 @@ laatste ronde: 10-10 11:40, gemeten t/m 10-10 11:50
 - Geen release (geen acute bug; windmelding = meldgedrag).
 
 laatste ronde: 10-10 15:40, gemeten t/m 10-10 15:45
+
+## 10-10 19:40 · tussenronde
+- Geïnstalleerd 0.52.0. HA-herstarts 16:19, 16:40, 18:07 (EMS-releases). Locatie tracker iPhone. Bronnen: 15 bronnen, sinds 09-10 18:03 0 mislukt; bronstatus "alles in orde". Logboek 0 Stormchase-fouten.
+- **Onweer (gebeurtenis):** cel NO (azimut 47-48°). 16:28 op 80 km, `nadert` aan (snel, 9,4-9,6 km/u) tot de herstart van 16:40; 17:31 inslagen op 46-47 km (binnen 50 km 4 → 16), daarna weg (18:28: 0, dichtstbijzijnde 83 km W). 0 binnen 25 km → geen vals alarm, geen miss. Werkelijke nadering 80 → 46 km in 63 min ≈ 32 km/u tegen geschat 9,5 (n=1; 2 punten 10 s uit elkaar, geen hypothese). Na de herstart van 16:40 51 min geen afstand (geen nieuwe inslagen van de bron), na 18:07 binnen-50-km 16 → 4: Blitzortung-markers verdwijnen bij een HA-herstart (extern, niet te meten met deze bron).
+- L-SC-001: nadering wijzigde alleen bij nieuwe inslagen (16:28:28 / 16:28:38, markers 6 → 9) → tweede meetpunt, nog geen verificatie bij een cel die doorkomt.
+- **Windstoten (0.52.0):** 15:54-19:44 n=24: bias **+0,7 km/u**, MAE 4,3 (mediaan +0,2); factor 0,69 (119 paren, 7 frontparen weg). Bij gemeten ≥ 33 km/u (buienlijn 17:34-18:14, n=5) **−6,5** → H-SC-5 (verhouding stijgt bij harde stoten) weer gesteund, nu bij convectieve stoten; L-SC-008 aangevuld.
+- Regen: droog, bui over 102 min (licht). Geen nieuwe KNMI-uitkomst; H-SC-3 loopt (≥ 20 nodig). Geen release.
+
+laatste ronde: 10-10 19:40, gemeten t/m 10-10 19:45
