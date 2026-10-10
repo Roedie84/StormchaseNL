@@ -139,7 +139,7 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-10 15:45,TUSSEN,sc_windstoten_bias_kmh_model_37_44,-6.9,12,"11:53-13:44: MAE 7.0; verhouding mediaan 0.85"
 2026-10-10 15:45,TUSSEN,sc_regen_knmi_mediaan_afwijking_min,-2.4,9,"knmi uitgekomen 9/11, te vroeg 6 / te laat 3; laatste 3: -2.4, -13.3, -7.1"
 2026-10-10 15:45,TUSSEN,sc_bronstatus,alles in orde,15,"herstarts 12:04, 13:37, 14:41"
-2026-10-10 19:45,TUSSEN,sc_onweer_inslagen_binnen_50km_max,16,1,"17:31-18:07 op 46-47 km NO; 0 binnen 25 km; niveau groen; geen vals alarm/miss"
+2026-10-10 19:45,TUSSEN,sc_onweer_inslagen_binnen_50km_max,8,1,"17:31 op 45-47 km NO (ring toonde 16: dubbel via 2 Blitzortung-instanties); 0 binnen 25 km; niveau groen; geen vals alarm/miss"
 2026-10-10 19:45,TUSSEN,sc_nadering_snelheid_fout_kmh,-22.5,1,"geschat 9.5 (16:28) tegen 80->46 km in 63 min = 32 km/u; ruwe schatting, n=1"
 2026-10-10 19:45,TUSSEN,sc_windstoten_bias_kmh,0.7,24,"15:54-19:44 MAE 4.3, mediaan 0.2; factor 0.69"
 2026-10-10 19:45,TUSSEN,sc_windstoten_bias_kmh_gemeten_ge33,-6.5,5,"17:34-18:14 buienlijn; model x 0.69"
