@@ -121,3 +121,8 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-10 03:44,TUSSEN,sc_windstoten_bias_kmh,-0.2,26,"na 0.51.0 bijstelling (23:34-03:44), MAE 6.9; 23:34-01:12 +8.8 (n=10), 01:13-03:44 -5.7 (n=16)"
 2026-10-10 03:44,TUSSEN,sc_windstoten_correctiefactor,0.54,32,"start 23:34 op ondergrens 0.50 (7 paren, front 22:30-23:30); model nu 25.2 vs gemeten 22.6"
 2026-10-10 03:44,TUSSEN,sc_regen_knmi_mediaan_afwijking_min,0.4,6,"regen_per_bron knmi (alleen uitkomsten met bron): 3 te vroeg / 3 te laat"
+2026-10-10 07:44,TUSSEN,sc_windstoten_bias_kmh,-1.8,24,"bijgesteld, 03:50-07:44 per 10 min; MAE 2.8; 03:50-05:40 -3.7, 05:50-07:44 0.0 (MAE 1.4)"
+2026-10-10 07:44,TUSSEN,sc_windstoten_model_bias_kmh,10.0,24,"kaal model (attribuut model) zelfde punten; MAE 10.0"
+2026-10-10 07:44,TUSSEN,sc_windstoten_correctiefactor,0.55,53,"paren_24u 53; 0.53-0.64 sinds 03:44"
+2026-10-10 07:44,TUSSEN,sc_onweer_inslagen_50km,0,1,"geen onweer; CAPE 0 (piek 12u 250), LI 5.7, ensemble 0"
+2026-10-10 07:44,TUSSEN,sc_bronnen_mislukt_sinds_0350,0,15,"15 bronnen; laatste fout 09-10 18:03 (503); push verbonden 269 meldingen"
