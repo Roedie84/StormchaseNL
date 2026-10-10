@@ -179,3 +179,12 @@ laatste ronde: 10-10 07:40, gemeten t/m 10-10 07:44
 - Hypotheses: H-SC-3 (KNMI regenaankomst, n ≥ 20 nodig), H-SC-5 (verhouding stijgt met windsterkte; n=1 dag). L-SC-001 wacht op onweer. Geen release (geen acute bug; windmelding = meldgedrag).
 
 laatste ronde: 10-10 11:40, gemeten t/m 10-10 11:50
+
+## 10-10 15:40 · tussenronde
+- Geïnstalleerd **0.52.0** (12:04). HA-herstarts 12:04, 13:37, 14:41. Locatie tracker iPhone. Bronstatus "alles in orde".
+- **Onweer op afstand:** inslagen op 64-70 km tussen 13:45 en 15:40 (actieve markers 3 → 42; NNO, cel ONO 27 km/u), **0 binnen 50 km** → niveau groen is juist (geen vals alarm, geen miss binnen de ringen). Naderingssnelheid veranderde alleen bij nieuwe inslagen (15:37 −3,7, 15:40 −3,1; geen 10-s-herhalingen) → eerste meetpunt L-SC-001, nog geen naderende cel. Verwachting stond op "geen onweer" / ensemble 0 % (CAPE 280, LI 1,1, TT 52,3) bij inslagen op 65 km: grensgeval, geen hypothese bij n=1.
+- **Windstoten na 0.52.0 (L-SC-007):** 7 frontparen weg, factor 0,63 → 0,67 bij de start en 0,70 nu. 11:53-15:34 (n=23) bijgesteld **−4,0 km/u** (MAE 5,0) tegen kaal model +9,5. Per helft: model 37-44 −6,9 (verhouding 0,85), model 43-50 **−0,8** (MAE 2,8; verhouding 0,72). **H-SC-5 verzwakt:** bij de hoogste modelwaarden was de verhouding juist lager; de −8,6 van 11:40 kwam deels van de achterlopende factor. L-SC-008 aangevuld.
+- Regen KNMI: 11 voorspellingen, 9 uitgekomen, mediaan −2,4 min (6 te vroeg / 3 te laat); de laatste drie kwamen 2-13 min eerder dan voorspeld. H-SC-3 loopt (≥ 20 nodig).
+- Geen release (geen acute bug; windmelding = meldgedrag).
+
+laatste ronde: 10-10 15:40, gemeten t/m 10-10 15:45
