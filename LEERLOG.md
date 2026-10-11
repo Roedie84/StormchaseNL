@@ -228,3 +228,12 @@ laatste ronde: 11-10 03:40, gemeten t/m 11-10 03:45
 - Hypotheses: H-SC-3 (KNMI regen), H-SC-6 (vroege naderingsschatting; wacht op onweer), H-SC-7 (nachtverhouding wind). Geen release.
 
 laatste ronde: 11-10 07:40, gemeten t/m 11-10 07:45
+
+## 11-10 11:40 · tussenronde
+- HA-herstarts 08:40 en 10:15 → **0.52.2 actief** (0.52.1 afstandsreeks + KNMI-push zonder draadfout). Systeemlog na beide herstarts: 0 Stormchase-fouten/draadfouten. KNMI-push verbonden sinds 10:15. Locatie tracker iPhone.
+- Geen onweer: niveau groen, 0 inslagen < 50 km, `onweer_nadert` uit → alleen beschikbaarheid: bronstatus "alles in orde", niets haperend.
+- **Windstoten overdag (H-SC-7):** 07:44-11:34 n=24: bias **−1,8 km/u** (MAE 2,8; mediaan −1,3); 07:44-09:44 −2,4, 09:44-11:34 −1,1. Overdag licht te laag, 's nachts te hoog (+5,2/+5,3 op twee nachten) → past bij H-SC-7 (één factor voor dag en nacht). Toets per uur van de dag in de dagafsluiting 12-10 (≥ 3 nachten).
+- KNMI-regen (H-SC-3): deze ronde niet geteld (`regen_per_bron` alleen in de diagnostiek, niet als attribuut) → bij de dagafsluiting.
+- Hypotheses: H-SC-3 (KNMI regen), H-SC-6 (vroege naderingsschatting; wacht op onweer), H-SC-7 (nachtverhouding wind). Geen release.
+
+laatste ronde: 11-10 11:40, gemeten t/m 11-10 11:40

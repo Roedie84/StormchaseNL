@@ -171,3 +171,6 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-11 07:45,TUSSEN,sc_regen_knmi_mediaan_min,-7,21,"16 te vroeg / 5 te laat; nieuw 05:57 -27 (horizon >45), 06:32 -7"
 2026-10-11 07:45,TUSSEN,sc_onweer_gebeurtenissen,0,0,"geen onweer; niveau groen"
 2026-10-11 07:45,TUSSEN,sc_bronstatus_ok,1,1,"alles in orde; radar laatste succes 07:41"
+2026-10-11 11:40,TUSSEN,sc_windstoten_bias_kmh,-1.8,24,"07:44-11:34 overdag MAE 2.8, mediaan -1.3; 07:44-09:44 -2.4 (n=13), 09:44-11:34 -1.1 (n=11)"
+2026-10-11 11:40,TUSSEN,sc_onweer_gebeurtenissen,0,0,"geen onweer; niveau groen, 0 inslagen <50 km, nadert uit"
+2026-10-11 11:40,TUSSEN,sc_bronstatus_ok,1,1,"alles in orde; KNMI-push verbonden sinds 10:15 (41 meldingen); 0 Stormchase-fouten na herstarts 08:40/10:15"
