@@ -180,3 +180,7 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-11 19:45,TUSSEN,sc_wind_bias_kmh,-2.6,24,"15:43-19:34 MAE 3.5, mediaan -0.8; zonder modelsprong 18:04-18:34 (current 34.6->16.6->26.6) -1.3 (n=20); 18:43-19:34 +0.3 (n=6)"
 2026-10-11 19:45,TUSSEN,sc_onweer_events,0,0,"niveau groen, 0 inslagen < 50 km, onweer_nadert uit"
 2026-10-11 19:45,TUSSEN,sc_herstarts,10,0,"15:49-18:09 via supervisor; 0 Stormchase-fouten; bronstatus alles in orde; radar 19:42"
+2026-10-11 23:45,TUSSEN,sc_windstoot_bias_kmh,1.0,23,"19:44-23:34 model (Open-Meteo x factor) - gemeten; MAE 3.5, mediaan 0.4"
+2026-10-11 23:45,TUSSEN,sc_windstoot_bias_avond_kmh,-1.9,14,"19:44-21:54; MAE 2.2"
+2026-10-11 23:45,TUSSEN,sc_windstoot_bias_nacht_kmh,5.4,9,"22:04-23:34; MAE 5.4; model 12.1-13.3 tegen gemeten 4.8-11.8 (derde nacht na +5.2/+5.3)"
+2026-10-11 23:45,TUSSEN,sc_herstarts,8,0,"21:02-23:31; 0.52.2 actief; 0 Stormchase-fouten; bronstatus alles in orde; radar 23:41 vers"

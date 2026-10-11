@@ -254,3 +254,11 @@ laatste ronde: 11-10 15:40, gemeten t/m 11-10 15:40
 - Hypotheses: H-SC-3 (KNMI regen), H-SC-6 (wacht op onweer), H-SC-7 (dag te laag/nacht te hoog; toets per uur in de dagafsluiting 12-10). Geen release.
 
 laatste ronde: 11-10 19:40, gemeten t/m 11-10 19:45
+
+## 11-10 23:40 · tussenronde
+- 8 HA-herstarts 21:02-23:31; 0.52.2 actief, 0 Stormchase-fouten. Locatie tracker iPhone. Lichte regen rond 23:40.
+- Geen onweer: niveau groen, 0 inslagen < 50 km, `onweer_nadert` uit → alleen beschikbaarheid: bronstatus "alles in orde"; radarbeeld 23:41 vers.
+- **Windstoten (H-SC-7):** 19:44-23:34 n=23: bias +1,0 km/u (MAE 3,5). Avond tot 22:00 **−1,9** (n=14), vanaf 22:00 **+5,4** (n=9; model 12-13 tegen gemeten 5-12). Derde nacht met dezelfde orde (+5,2 / +5,3 / +5,4) → H-SC-7 sterker; L-SC-008 (akkoord) bouwen in de dagafsluiting, en daar per uur van de dag toetsen of een windsterkte-afhankelijke verhouding de nachtbias wegneemt.
+- Hypotheses: H-SC-3 (KNMI regen), H-SC-6 (wacht op onweer), H-SC-7. Geen release.
+
+laatste ronde: 11-10 23:40, gemeten t/m 11-10 23:45
