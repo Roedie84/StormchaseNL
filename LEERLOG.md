@@ -246,3 +246,11 @@ laatste ronde: 11-10 11:40, gemeten t/m 11-10 11:40
 - Hypotheses: H-SC-3, H-SC-6 (wacht op onweer), H-SC-7. Geen release.
 
 laatste ronde: 11-10 15:40, gemeten t/m 11-10 15:40
+
+## 11-10 19:40 · tussenronde
+- 10 HA-herstarts 15:49-18:09 (supervisor, geen crash), daarna rustig; 0.52.2 actief, 0 Stormchase-fouten. Locatie tracker iPhone.
+- Geen onweer: niveau groen, 0 inslagen < 50 km, `onweer_nadert` uit → alleen beschikbaarheid: bronstatus "alles in orde"; radarbeeld 19:42 vers.
+- **Windstoten (H-SC-7):** 15:43-19:34 n=24: bias **−2,6 km/u** (MAE 3,5; mediaan −0,8). Daarin 18:04-18:34 −7..−12: Open-Meteo's `current`-stoot zakte van 34,6 naar 16,6 en sprong om 18:39 terug naar 26,6 (factor bleef 0,68) → modelsprong van de bron, geen integratiefout. Zonder dat halfuur −1,3 (n=20, MAE 2,4). Avond 18:43-19:34 **+0,3** (n=6): de overgang naar de nacht, waar H-SC-7 een positieve bias verwacht. Sinds 18:34 frontdetectie aan (`paren_front` 1 → 8, luchtdruk +2,2 hPa/3 u); factor rekent zonder fronten.
+- Hypotheses: H-SC-3 (KNMI regen), H-SC-6 (wacht op onweer), H-SC-7 (dag te laag/nacht te hoog; toets per uur in de dagafsluiting 12-10). Geen release.
+
+laatste ronde: 11-10 19:40, gemeten t/m 11-10 19:45
