@@ -96,9 +96,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # dagtellers, zodat ook die een herstart overleven.
     if isinstance(bewaarde_bron, dict):
         stats.herstel_tellers(bewaarde_bron.get("tellers"))
+        # 0.52.1: de afstandsreeks (nadering achteraf narekenen) ook
+        stats.herstel_reeks(bewaarde_bron.get("afstandsreeks"))
 
     def _bron_data() -> dict:
-        return {**bronhistorie.naar_opslag(), "tellers": stats.tellers_naar_opslag()}
+        return {
+            **bronhistorie.naar_opslag(),
+            "tellers": stats.tellers_naar_opslag(),
+            "afstandsreeks": stats.reeks_naar_opslag(),
+        }
 
     stats.koppel_historie(
         bronhistorie,

@@ -5,6 +5,19 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.52.1] — 2026-10-11
+
+### Opgelost
+
+- **Afstandsreeks in de diagnostiek is weer bruikbaar.** De reeks waarmee de
+  nadering achteraf na te rekenen is, kreeg elke ronde van tien seconden een
+  punt, ook als de afstand gelijk bleef. De 180 plaatsen besloegen zo een
+  half uur: na de cel van 10 oktober 20:34-20:59 stond er alleen nog
+  180 keer 73,6 km in, zonder snelheid. Nu komt er alleen een punt bij als
+  de afstand of de naderingssnelheid verandert; bij een herhaling schuift
+  `tot` op. De reeks overleeft ook een herstart (opgeslagen naast de
+  bronstatistiek). Geen invloed op waarschuwingen of meldingen.
+
 ## [0.52.0] — 2026-10-10
 
 ### Gewijzigd

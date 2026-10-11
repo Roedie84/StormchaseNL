@@ -134,6 +134,11 @@ def _telling(waarde) -> int:
     return waarde
 
 
+def _getal(waarde) -> bool:
+    """Een echt getal (geen bool)."""
+    return isinstance(waarde, (int, float)) and not isinstance(waarde, bool)
+
+
 def _moment(waarde) -> datetime | None:
     """Een ISO-tijdstip uit de opslag, alleen met tijdzone."""
     if not isinstance(waarde, str):
@@ -322,16 +327,58 @@ class Statistieken:
         self.meldingen_mislukt = _telling(bewaard.get("meldingen_mislukt"))
 
     def noteer_meting(self, afstand: float | None, snelheid: float | None) -> None:
-        """Bewaar een meetpunt, maar alleen als er iets te meten viel."""
-        if afstand is None:
+        """Bewaar een meetpunt, maar alleen als er iets te meten viel.
+
+        0.52.1: alleen een nieuw punt als afstand of snelheid verandert. Tot
+        nu toe kwam er elke ronde van tien seconden een punt bij, ook met
+        dezelfde afstand; de 180 plaatsen besloegen zo een half uur. Op
+        10-10 stond er na de cel van 20:34-20:59 alleen nog 180 keer 73,6 km
+        zonder snelheid in, en was de nadering niet meer na te rekenen.
+        Bij een herhaling schuift alleen ``tot`` op: zo blijft zichtbaar hoe
+        lang een afstand bleef staan.
+        """
+        if not _getal(afstand):
             return
+        if snelheid is not None and not _getal(snelheid):
+            snelheid = None
+        nu = _tijd(dt_util.utcnow())
+        if self.afstandsreeks:
+            laatste = self.afstandsreeks[-1]
+            if laatste.get("afstand") == afstand and laatste.get("snelheid") == snelheid:
+                laatste["tot"] = nu
+                return
         self.afstandsreeks.append(
-            {
-                "op": _tijd(dt_util.utcnow()),
-                "afstand": afstand,
-                "snelheid": snelheid,
-            }
+            {"op": nu, "afstand": afstand, "snelheid": snelheid, "tot": nu}
         )
+        self._wijziging()
+
+    def reeks_naar_opslag(self) -> list[dict[str, Any]]:
+        """De afstandsreeks voor de opslag (0.52.1: overleeft een herstart)."""
+        return [dict(punt) for punt in self.afstandsreeks]
+
+    def herstel_reeks(self, bewaard) -> None:
+        """Neem een bewaarde afstandsreeks over; rommel wordt overgeslagen."""
+        if not isinstance(bewaard, list):
+            return
+        punten = []
+        for punt in bewaard:
+            if not isinstance(punt, dict):
+                continue
+            op = _moment(punt.get("op"))
+            afstand = punt.get("afstand")
+            snelheid = punt.get("snelheid")
+            if op is None or not _getal(afstand):
+                continue
+            if snelheid is not None and not _getal(snelheid):
+                snelheid = None
+            tot = _moment(punt.get("tot")) or op
+            punten.append(
+                {"op": _tijd(op), "afstand": afstand, "snelheid": snelheid, "tot": _tijd(tot)}
+            )
+        # Wat er sinds de start al bijkwam, komt achteraan
+        nieuw = list(self.afstandsreeks)
+        self.afstandsreeks.clear()
+        self.afstandsreeks.extend(punten + nieuw)
 
     def als_dict(self) -> dict[str, Any]:
         """Alles op een rij voor in de diagnostiek."""
