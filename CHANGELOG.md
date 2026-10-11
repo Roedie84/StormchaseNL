@@ -5,6 +5,17 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.52.2] — 2026-10-11
+
+### Opgelost
+
+- **Geen draadfout meer van de KNMI-push bij het afsluiten.** Bij een herstart
+  van HA gaf paho soms nog een verbreek- of berichtcallback nadat de event
+  loop al dicht was; `call_soon_threadsafe` gooide dan "Event loop is closed"
+  als *Uncaught thread exception* in de log (09-10 en 10-10). Callbacks naar
+  een gesloten loop worden nu stil overgeslagen. Geen invloed op meldingen.
+  3 tests (test_release_0522).
+
 ## [0.52.1] — 2026-10-11
 
 ### Opgelost

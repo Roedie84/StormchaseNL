@@ -169,20 +169,35 @@ class KnmiPush:
 
     # ---- callbacks: in de draad van paho ----
 
+    def _naar_loop(self, functie, *args) -> None:
+        """Terug naar de event loop; na het sluiten van de loop stil negeren.
+
+        Bij het afsluiten van HA kan paho nog een verbreek- of berichtcallback
+        geven nadat de event loop dicht is; call_soon_threadsafe gooit dan
+        RuntimeError ("Event loop is closed") als ongevangen draadfout.
+        """
+        loop = self._loop
+        if loop is None or loop.is_closed():
+            return
+        try:
+            loop.call_soon_threadsafe(functie, *args)
+        except RuntimeError:
+            pass
+
     def _bij_verbinden(self, client, _userdata, _flags, reden, *_rest) -> None:
         code = _reden(reden)
         if code not in (None, 0):
-            self._loop.call_soon_threadsafe(self._geweigerd_of_mislukt, code)
+            self._naar_loop(self._geweigerd_of_mislukt, code)
             return
         for onderwerp in ONDERWERPEN:
             client.subscribe(onderwerp)
-        self._loop.call_soon_threadsafe(self._verbonden)
+        self._naar_loop(self._verbonden)
 
     def _bij_verbreken(self, _client, _userdata, *rest) -> None:
-        self._loop.call_soon_threadsafe(self._verbroken)
+        self._naar_loop(self._verbroken)
 
     def _bij_bericht(self, _client, _userdata, bericht) -> None:
-        self._loop.call_soon_threadsafe(self._bericht, bericht.payload)
+        self._naar_loop(self._bericht, bericht.payload)
 
     # ---- terug in de event loop ----
 
