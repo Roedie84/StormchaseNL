@@ -219,3 +219,12 @@ laatste ronde: 10-10 23:40, gemeten t/m 10-10 23:45
 - Niet meetbaar: lead-time en afstandsfout (geen onweer < 25 km); radarvooruitblik-versheid (alleen op aanvraag).
 
 laatste ronde: 11-10 03:40, gemeten t/m 11-10 03:45
+
+## 11-10 07:40 · tussenronde
+- **0.52.1 door HACS gedownload om 04:59, nog niet actief** (geen HA-herstart sinds 10-10 20:26; diagnostiek-manifest 0.52.0). HACS meldde bij die installatie een back-upfout (`/tmp/hacs_backup/stormchase/__pycache__` niet leeg) — HACS-kwestie, update-entiteit staat wel op 0.52.1. Logboek 0 Stormchase-fouten. Locatie tracker iPhone.
+- Geen onweer: niveau groen, 0 inslagen < 50 km, `onweer_nadert` uit → alleen beschikbaarheid: bronstatus "alles in orde", radar laatste succes 07:41, KNMI-push verbonden sinds 20:26 (336 meldingen). Buienradar/Bright Sky/MeteoAlarm-velden staan op 09-10: dat zijn terugvalbronnen die bij werkende KNMI niet draaien (code gecontroleerd) — geen meetfout.
+- **Windstoten (H-SC-7, tweede nacht):** 03:45-07:45 n=21: bias **+5,3 km/u** (MAE 5,8; mediaan +4,9); 04-06 u +1,9 (n=11), 06-07:45 u **+7,6** (n=8). Factor 0,67 (24 u, 144 paren) tegen verhouding nu ~0,47 (model 33,5, gemeten 14-17) → de stootvoorspelling zit 's nachts/vroeg te hoog, net als 00-04 u op 10-10 (+5,2). n=2 nachten; toets in de dagafsluiting per uur van de dag.
+- **Regen KNMI (H-SC-3):** n=21 uitgekomen (was 19), mediaan −7, 16 te vroeg / 5 te laat. Nieuw: 05:57 voorspeld 47 min, kwam na 20 (**−27**, horizon > 45 min, géén meetvensterartefact); 06:32 12 → 5 (−7, meetvenster); 03:37 voorspeld 22 min, niet uitgekomen.
+- Hypotheses: H-SC-3 (KNMI regen), H-SC-6 (vroege naderingsschatting; wacht op onweer), H-SC-7 (nachtverhouding wind). Geen release.
+
+laatste ronde: 11-10 07:40, gemeten t/m 11-10 07:45

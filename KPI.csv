@@ -167,3 +167,7 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-10,DAG,sc_regen_knmi_mediaan_min,-6.9,19,"regen_per_bron knmi 22 voorspeld, 19 uitgekomen, 14 te vroeg / 5 te laat (tekentoets p 0.064)"
 2026-10-11 03:45,TUSSEN,sc_windstoten_bias_kmh,5.2,22,"00:04-03:34 MAE 6.2; verhouding gemeten/model 0.53 tegen factor 0.68; kaal model +15.3"
 2026-10-11 03:45,TUSSEN,sc_inslagen_binnen_50km,0,1,"nacht 00:00-03:45 geen onweer; niveau groen; CAPE 0, ensemble 0"
+2026-10-11 07:45,TUSSEN,sc_windstoten_bias_kmh,5.3,21,"03:45-07:45 MAE 5.8; 04-06 u +1.9 (n=11), 06-07:45 +7.6 (n=8); factor 0.67"
+2026-10-11 07:45,TUSSEN,sc_regen_knmi_mediaan_min,-7,21,"16 te vroeg / 5 te laat; nieuw 05:57 -27 (horizon >45), 06:32 -7"
+2026-10-11 07:45,TUSSEN,sc_onweer_gebeurtenissen,0,0,"geen onweer; niveau groen"
+2026-10-11 07:45,TUSSEN,sc_bronstatus_ok,1,1,"alles in orde; radar laatste succes 07:41"
