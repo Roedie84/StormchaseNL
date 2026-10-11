@@ -207,3 +207,15 @@ laatste ronde: 10-10 19:40, gemeten t/m 10-10 19:45
 - Hypotheses: H-SC-3 (KNMI regen te laat voorspeld), H-SC-5 (windverhouding bij harde stoten), H-SC-6 (vroege naderingsschatting). Geen release.
 
 laatste ronde: 10-10 23:40, gemeten t/m 10-10 23:45
+
+## 11-10 03:40 · dagafsluiting 10-10
+- Recorder: eenmalige opschoning 03:00-03:05 klaar; historie 10-10 compleet. Geïnstalleerd 0.52.0; 12 HA-herstarts; locatie tracker iPhone (9× 4-10 s "laatst bekend", 0× thuis). Nacht 00:00-03:45 geen onweer.
+- **Onweer 10-10:** 3 cellen (64-70 km 13:45-15:51; 80 → 46 km 16:24-17:31; 93 → 74 km 20:34-20:59), max 8 inslagen < 50 km, 0 < 25 km, niveau heel de dag groen → 0 hits, 0 misses; 2 nadert-perioden (12,0 / 28,1 min) zonder aankomst = 2 valse nadert (07-10: 4), geen melding (buiten 30 km). Validatie aankomst 0/1, passage 0/2. Lead-time/afstandsfout bij aankomst n.v.t.
+- Bronnen 10-10 2766/2766 = 100 % (4 d 99,92 %); radarbeeld mediaan 3,0 min, max 7,4; Blitzortung 's nachts 18,2 min (11-10: 11,1) weg.
+- **L-SC-001 geverifieerd (mechanisme):** alleen bij nieuwe inslagen, 0 aankomstsprongen zonder inslag, geen 15-min-perioden. Aankomst zelf nog 0/1.
+- **Windstoten (L-SC-007):** dag −2,3 km/u (MAE 4,8, n=153) tegen kaal model +10,9; na 0.52.0 −1,9. **H-SC-5 verworpen:** per modelklasse −3,8/−3,2/−4,3/+2,5 (geen oplopende onderschatting); de −8 bij hoge gemeten stoten is selectie op de uitkomst. L-SC-008 → alleen optie (c). **H-SC-7 (nieuw):** 's nachts lagere verhouding (00-04 u 0,53 tegen factor 0,68 → +5,2 km/u, n=22; na 12:04 dag 0,72 / nacht 0,65).
+- **H-SC-3 (KNMI regen):** n=19 uitgekomen, mediaan −6,9, 14 te vroeg / 5 te laat (p 0,064). 8 van de 14 zichtbare afwijkingen liggen op −6,8..−7,3 (≤15 min 4/4): dat is het meetvenster van `regent` (−10..+10, L-SC-005 afgewezen), geen KNMI-fout → geen voorstel; volgen.
+- **Gebouwd 0.52.1 (L-SC-009):** afstandsreeks alleen bij nieuwe afstand/snelheid en over herstarts (was 180× 73,6 km in 30 min). 737 tests groen, workflow groen, HACS ververst (update zichtbaar). Maakt H-SC-6 toetsbaar.
+- Niet meetbaar: lead-time en afstandsfout (geen onweer < 25 km); radarvooruitblik-versheid (alleen op aanvraag).
+
+laatste ronde: 11-10 03:40, gemeten t/m 11-10 03:45

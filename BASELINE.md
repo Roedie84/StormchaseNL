@@ -24,3 +24,9 @@
 | Windstoten verwacht − gemeten (model, vóór 0.51.0) | +13,6 km/u (MAE 13,6) | 09-10 06:03-23:33, n=104 | 10-10 03:40 |
 | Windstoten na bijstelling | −0,2 km/u (MAE 6,9); laatste 2,5 u −5,7 | 23:34-03:44, n=26 | 10-10 03:40 |
 | Slaagpercentage bronnen per dag | 99,93 % (n=2761) | 09-10 | 10-10 03:40 |
+| Slaagpercentage bronnen per dag | 100 % (n=2766, 12 herstarts); 4 d 99,92 % | 10-10 | 11-10 03:40 |
+| Windstoten na bijstelling (dag) | −2,3 km/u (MAE 4,8) tegen kaal model +10,9 | 10-10, n=153 | 11-10 03:40 |
+| Windstoten bias per modelklasse <30/30-38/38-45/≥45 | −3,8 / −3,2 / −4,3 / +2,5 km/u | 10-10, n=53/47/20/33 | 11-10 03:40 |
+| Valse nadert-alarmen per dag (na 0.45.0) | 2 bij 3 cellen 46-93 km; geen periode van ~15 min | 10-10 | 11-10 03:40 |
+| Radarbeeld-wissels | mediaan 3,0 min, max 7,4 | 09-10 23:57-11-10 03:45, n=559 | 11-10 03:40 |
+| Regen KNMI afwijking | mediaan −6,9 min, 14 te vroeg / 5 te laat | regen_per_bron, n=19 | 11-10 03:40 |
