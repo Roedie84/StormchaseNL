@@ -220,7 +220,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # 0.51.0: modelwindstoten bijstellen met wat het station meet. Elke
     # nieuwe stationsmeting wordt gekoppeld aan de modelwaarde van dat moment.
-    windcorrectie = Windcorrectie(staat.get("windcorrectie"))
+    # 0.54.0 (L-SC-010): de tijdzone van Home Assistant voor het uur van de dag
+    from homeassistant.util import dt as _dt
+
+    windcorrectie = Windcorrectie(staat.get("windcorrectie"), tijdzone=_dt.get_default_time_zone())
     meteo.windcorrectie = windcorrectie
 
     @callback

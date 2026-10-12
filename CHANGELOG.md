@@ -5,6 +5,13 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.54.0] — 2026-10-12
+
+### Gewijzigd
+
+- **Windstootfactor per tijd van de dag (L-SC-010).** De bijstelling van de modelwindstoot gebruikte één verhouding gemeten/model over 24 uur. Die zat 's nachts te hoog (drie nachten op rij ~+5 km/u) en overdag te laag (~−3 km/u). Nu telt de mediaan van de rustige metingen uit hetzelfde tijdvak van de dag (uur ±2 uur) over de laatste 72 uur; zijn dat er minder dan vier, dan blijft de 24-uursfactor gelden. Naspelen op 10-12 oktober (274 metingen): gemiddelde afwijking 4,30 → 3,77 km/u. Grenzen (0,5-1,3) en frontregels blijven gelijk; de metingen worden nu 80 uur bewaard.
+- Nieuwe attributen op `sensor.stormchase_windstoten`: `factor_bron` (tijdvak of 24 uur), `correctiefactor_24u` en `paren_tijdvak`.
+
 ## [0.53.0] — 2026-10-12
 
 ### Gewijzigd

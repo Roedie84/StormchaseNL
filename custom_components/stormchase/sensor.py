@@ -561,9 +561,19 @@ class MeteoSensor(CoordinatorEntity[MeteoCoordinator], SensorEntity):
             # 0.53.0 (L-SC-008c): waar de windmelding naar kijkt
             "windstoten_melding": (data.get("windmelding") or {}).get("waarde"),
             "melding_bron": (data.get("windmelding") or {}).get("bron"),
+            # 0.54.0 (L-SC-010): factor uit het tijdvak van de dag of over 24 uur
+            "factor_bron": wind.get("factor_bron"),
+            "correctiefactor_24u": wind.get("factor_24u"),
+            "paren_tijdvak": wind.get("paren_tijdvak"),
             "uitleg": (
-                "Modelwaarde x mediane verhouding gemeten/model van het "
-                "dichtstbijzijnde station over 24 uur, zonder fronten"
+                (
+                    "Modelwaarde x mediane verhouding gemeten/model van het "
+                    "dichtstbijzijnde station in dit tijdvak van de dag "
+                    "(+-2 uur, 72 uur), zonder fronten"
+                    if wind.get("factor_bron") == "tijdvak"
+                    else "Modelwaarde x mediane verhouding gemeten/model van het "
+                    "dichtstbijzijnde station over 24 uur, zonder fronten"
+                )
                 if wind.get("toegepast")
                 else "Modelwaarde; correctie volgt zodra er zes uur aan "
                 "stationsmetingen buiten een front is"

@@ -22,6 +22,14 @@ houden we de verhouding gemeten/model bij en schalen de modelwaarde daarmee.
   in const.py (onweer bij het station, drukverandering over een uur, sprong
   in de gemeten stoot), plus een uur naloop.
 
+- 0.54.0 (L-SC-010): de verhouding hangt af van de tijd van de dag. Met
+  één factor over 24 uur zat de bijstelling 's nachts ~+5 km/u te hoog en
+  overdag ~-3 km/u te laag (drie nachten op rij). Nu telt de mediaan van de
+  rustige paren uit hetzelfde tijdvak (uur van de dag +-2 uur) over de laatste
+  72 uur. Zijn dat er minder dan vier, dan blijft de 24-uursfactor gelden.
+  Replay 10-10/12-10 (n=274): MAE 4,30 -> 3,77 km/u. Grenzen en frontregels
+  blijven gelijk.
+
 Opslag: per paar [tijd, gemeten, model, front]. Paren uit 0.51.x hebben geen
 frontvlag; bij het terugzetten kijken we dan alsnog naar de stootsprong.
 
@@ -30,6 +38,7 @@ Bewust zonder Home Assistant erin, zodat het los te testen is.
 
 from __future__ import annotations
 
+from datetime import datetime, timezone, tzinfo
 from statistics import median
 
 try:
@@ -40,6 +49,9 @@ try:
         FRONT_STOOT_VENSTER_S,
         WIND_MELDING_STATION_MAX_S,
         WINDCORRECTIE_MIN_SPANNE_S,
+        WINDCORRECTIE_TIJDVAK_MIN_PAREN,
+        WINDCORRECTIE_TIJDVAK_S,
+        WINDCORRECTIE_TIJDVAK_VENSTER_S,
     )
 except ImportError:  # in de tests zonder pakketstructuur
     from const import (
@@ -49,11 +61,15 @@ except ImportError:  # in de tests zonder pakketstructuur
         FRONT_STOOT_VENSTER_S,
         WIND_MELDING_STATION_MAX_S,
         WINDCORRECTIE_MIN_SPANNE_S,
+        WINDCORRECTIE_TIJDVAK_MIN_PAREN,
+        WINDCORRECTIE_TIJDVAK_S,
+        WINDCORRECTIE_TIJDVAK_VENSTER_S,
     )
 
 VENSTER_S = 24 * 3600
-BEWAAR_S = 48 * 3600
-MAX_PAREN = 400
+# 0.54.0: 72 uur nodig voor het tijdvak (+ marge); ~6 paren per uur
+BEWAAR_S = 80 * 3600
+MAX_PAREN = 600
 MIN_PAREN = 6
 MIN_SPANNE_S = WINDCORRECTIE_MIN_SPANNE_S
 MIN_MODEL_KMH = 10.0
@@ -65,9 +81,11 @@ FACTOR_MAX = 1.3
 class Windcorrectie:
     """Leert de verhouding tussen gemeten en verwachte windstoten."""
 
-    def __init__(self, bewaard: list | None = None) -> None:
+    def __init__(self, bewaard: list | None = None, tijdzone: tzinfo | None = None) -> None:
         # (tijd, gemeten, model, front)
         self.paren: list[tuple[float, float, float, bool]] = []
+        # 0.54.0: voor het uur van de dag (Home Assistant geeft zijn tijdzone)
+        self.tijdzone: tzinfo = tijdzone or timezone.utc
         self.herstel(bewaard)
 
     # ---- vullen ----
@@ -139,9 +157,39 @@ class Windcorrectie:
         ruw = median(p[1] / p[2] for p in rustig)
         return round(min(FACTOR_MAX, max(FACTOR_MIN, ruw)), 2), len(rustig)
 
+    def _seconde_van_de_dag(self, t: float) -> int:
+        d = datetime.fromtimestamp(t, self.tijdzone)
+        return d.hour * 3600 + d.minute * 60 + d.second
+
+    def factor_tijdvak(self, nu: float) -> tuple[float | None, int]:
+        """0.54.0 (L-SC-010): mediaan van de rustige paren uit hetzelfde
+        tijdvak van de dag (+-2 uur) over 72 uur, en hoeveel dat er zijn.
+        None zolang er minder dan WINDCORRECTIE_TIJDVAK_MIN_PAREN zijn."""
+        venster = [p for p in self.paren
+                   if nu - WINDCORRECTIE_TIJDVAK_VENSTER_S <= p[0] <= nu + 60]
+        rustig = self._rustig(venster)
+        nu_s = self._seconde_van_de_dag(nu)
+        dag = 24 * 3600
+        vak = []
+        for p in rustig:
+            verschil = abs(self._seconde_van_de_dag(p[0]) - nu_s)
+            if min(verschil, dag - verschil) <= WINDCORRECTIE_TIJDVAK_S:
+                vak.append(p)
+        if len(vak) < WINDCORRECTIE_TIJDVAK_MIN_PAREN:
+            return None, len(vak)
+        ruw = median(p[1] / p[2] for p in vak)
+        return round(min(FACTOR_MAX, max(FACTOR_MIN, ruw)), 2), len(vak)
+
     def corrigeer(self, model: float | None, nu: float) -> dict:
         """Bijgestelde windstoten plus waar dat op rust."""
-        factor, paren = self.factor(nu)
+        factor_24u, paren = self.factor(nu)
+        # 0.54.0: tijdvakfactor alleen als het leren al loopt (24-uursfactor
+        # bestaat); anders blijft de modelwaarde staan zoals voorheen.
+        factor_vak, paren_vak = self.factor_tijdvak(nu)
+        if factor_24u is not None and factor_vak is not None:
+            factor, bron = factor_vak, "tijdvak"
+        else:
+            factor, bron = factor_24u, ("24 uur" if factor_24u is not None else None)
         venster = self._venster(nu)
         rustig = self._rustig(venster)
         if model is None:
@@ -160,6 +208,10 @@ class Windcorrectie:
             "paren_front": len(venster) - len(rustig),
             "front": bool(venster) and venster[-1] not in rustig,
             "uren": round((rustig[-1][0] - rustig[0][0]) / 3600, 1) if rustig else 0.0,
+            # 0.54.0 (L-SC-010)
+            "factor_bron": bron,
+            "factor_24u": factor_24u,
+            "paren_tijdvak": paren_vak,
         }
 
     # ---- opslag ----

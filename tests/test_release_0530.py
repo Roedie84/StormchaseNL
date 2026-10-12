@@ -110,7 +110,8 @@ class TestKoppeling:
         assert "gemeten" in notifier
 
     def test_versie_en_changelog(self):
+        # 0.54.0 en later: de versie loopt door, de changelog-regel blijft
         manifest = json.loads((BRON / "manifest.json").read_text(encoding="utf-8"))
-        assert manifest["version"] == "0.53.0"
+        assert tuple(int(x) for x in manifest["version"].split(".")) >= (0, 53, 0)
         changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
         assert "## [0.53.0]" in changelog

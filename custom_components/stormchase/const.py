@@ -435,3 +435,8 @@ WINDCORRECTIE_MIN_SPANNE_S = 6 * 3600
 # minuten en loopt zelf ~10 minuten achter; 40 minuten laat één gemiste
 # meting toe.
 WIND_MELDING_STATION_MAX_S = 40 * 60
+# 0.54.0 (L-SC-010): windstootfactor per tijd van de dag. Paren uit hetzelfde
+# tijdvak (uur van de dag +-2 uur) over 72 uur; minder dan 4 -> 24-uursfactor.
+WINDCORRECTIE_TIJDVAK_S = 2 * 3600
+WINDCORRECTIE_TIJDVAK_VENSTER_S = 72 * 3600
+WINDCORRECTIE_TIJDVAK_MIN_PAREN = 4
