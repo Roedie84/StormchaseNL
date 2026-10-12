@@ -558,6 +558,9 @@ class MeteoSensor(CoordinatorEntity[MeteoCoordinator], SensorEntity):
             "paren_front": wind.get("paren_front"),
             "front": bool(wind.get("front")),
             "uren_metingen": wind.get("uren"),
+            # 0.53.0 (L-SC-008c): waar de windmelding naar kijkt
+            "windstoten_melding": (data.get("windmelding") or {}).get("waarde"),
+            "melding_bron": (data.get("windmelding") or {}).get("bron"),
             "uitleg": (
                 "Modelwaarde x mediane verhouding gemeten/model van het "
                 "dichtstbijzijnde station over 24 uur, zonder fronten"

@@ -427,3 +427,11 @@ FRONT_NALOOP_S = 3600
 # De correctie telt pas als de bruikbare paren samen minstens zes uur beslaan;
 # tot dan het kale model (één front van een paar uur is te weinig).
 WINDCORRECTIE_MIN_SPANNE_S = 6 * 3600
+# 0.53.0 (L-SC-008, optie c): de windmelding kijkt naar de hoogste van de
+# bijgestelde verwachting en de laatste stationsmeting, zolang die meting
+# niet ouder is dan WIND_MELDING_STATION_MAX_S. De bijstelling haalt de
+# modelwaarde bij rustig weer terecht omlaag (factor ~0,55-0,7), maar mag een
+# echt gemeten harde stoot nooit wegpoetsen. Het station meet elke tien
+# minuten en loopt zelf ~10 minuten achter; 40 minuten laat één gemiste
+# meting toe.
+WIND_MELDING_STATION_MAX_S = 40 * 60

@@ -30,6 +30,7 @@ from .spreiding import beoordeel, ensemble as vat_ensemble_samen, samenvatting
 from .tijd import MARGE_KWARTIER, MARGE_UUR, aantal_gevuld, dichtstbijzijnde, op_stempel
 from .validatie import Validatie
 from .nadering import Naderingstrend
+from .windcorrectie import voor_melding
 from .herstart import OPSLAG_VERSIE, inslagtijd, puntsleutel, snoei_storm
 from .herpoging import HerpogingMixin
 from .verouderd import VerouderdMixin
@@ -1172,6 +1173,8 @@ class MeteoCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
         self._vorige_rang: int | None = None
         # 0.51.0: modelwindstoten bijstellen met de stationsmeting
         self.windcorrectie = None
+        # 0.53.0: laatste stationsmeting (km/u, epoch) voor de windmelding
+        self.wind_gemeten: tuple[float, float] | None = None
 
     def _wind(self, model) -> dict:
         """Windstoten na correctie met de stationsmeting (0.51.0)."""
@@ -1179,6 +1182,31 @@ class MeteoCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
             return {"waarde": model, "model": model, "factor": None,
                     "paren": 0, "toegepast": False}
         return self.windcorrectie.corrigeer(model, dt_util.utcnow().timestamp())
+
+    def _windmelding(self, bijgesteld) -> dict:
+        """Hoogste van bijgestelde verwachting en verse stationsmeting (0.53.0)."""
+        gemeten, tijd = self.wind_gemeten or (None, None)
+        return voor_melding(bijgesteld, gemeten, tijd, dt_util.utcnow().timestamp())
+
+    def meld_gemeten_wind(self, gemeten, tijd) -> None:
+        """Nieuwe stationsmeting: telt mee voor de windmelding (0.53.0, L-SC-008c).
+
+        Zonder dit kwam een gemeten harde stoot pas bij de volgende
+        Open-Meteo-ronde (elk half uur) in beeld, en dan alleen als het
+        bijgestelde model zelf boven de drempel kwam.
+        """
+        if gemeten is None or tijd is None:
+            return
+        try:
+            self.wind_gemeten = (float(gemeten), float(tijd))
+        except (TypeError, ValueError):
+            return
+        data = self.data if isinstance(self.data, dict) else None
+        melding = self._windmelding(data.get("windstoten") if data else None)
+        self._controleer_wind(melding["waarde"], melding["bron"])
+        if data is not None and data.get("windmelding") != melding:
+            data["windmelding"] = melding
+            self.async_update_listeners()
 
     def herbereken_wind(self) -> None:
         """Na een nieuwe stationsmeting de bijgestelde stoten bijwerken."""
@@ -1190,6 +1218,7 @@ class MeteoCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
             return
         data["windstoten"] = wind["waarde"]
         data["windcorrectie"] = wind
+        data["windmelding"] = self._windmelding(wind["waarde"])
         self.async_update_listeners()
 
     @staticmethod
@@ -1318,11 +1347,15 @@ class MeteoCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
 
         return uit
 
-    def _controleer_wind(self, windstoten: float | None) -> None:
+    def _controleer_wind(
+        self, windstoten: float | None, bron: str | None = None
+    ) -> None:
         """Meld het als de wind boven de drempel uitkomt.
 
         Alleen bij de overgang, zodat je niet elk half uur opnieuw bericht
-        krijgt zolang het hard waait.
+        krijgt zolang het hard waait. Sinds 0.53.0 is `windstoten` de hoogste
+        van de bijgestelde verwachting en de verse stationsmeting; `bron`
+        zegt welke van de twee het was.
         """
         if windstoten is None:
             return
@@ -1334,7 +1367,8 @@ class MeteoCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
             if self.stats is not None:
                 self.stats.noteer_event("wind")
             self.hass.bus.async_fire(
-                EVENT_WIND, {"windstoten": windstoten, "drempel": drempel}
+                EVENT_WIND,
+                {"windstoten": windstoten, "drempel": drempel, "bron": bron},
             )
 
         self._was_winderig = winderig
@@ -1509,7 +1543,9 @@ class MeteoCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
 
         huidig = payload.get("current") or {}
         wind = self._wind(huidig.get("wind_gusts_10m"))
-        self._controleer_wind(wind["waarde"])
+        # 0.53.0 (L-SC-008c): de melding kijkt ook naar de stationsmeting
+        windmelding = self._windmelding(wind["waarde"])
+        self._controleer_wind(windmelding["waarde"], windmelding["bron"])
         self._controleer_weer(huidig)
 
         # Velden uit de losse verzoeken
@@ -1668,6 +1704,7 @@ class MeteoCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
             "windstoten": wind["waarde"],
             "windstoten_model": huidig.get("wind_gusts_10m"),
             "windcorrectie": wind,
+            "windmelding": windmelding,
             "model_tijd": dt_util.utcnow().timestamp(),
             "current": payload.get("current") or {},
             "hourly": hourly,

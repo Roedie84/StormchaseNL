@@ -529,6 +529,12 @@ class StormNotifier:
             zwaarte = "harde windstoten"
 
         bericht = f"{zwaarte.capitalize()} tot {stoten:.0f} km/u op je locatie."
+        # 0.53.0 (L-SC-008c): kwam de drempel uit de stationsmeting, zeg dat
+        if event.data.get("bron") == "station":
+            bericht = (
+                f"{zwaarte.capitalize()} tot {stoten:.0f} km/u gemeten "
+                "bij het weerstation in de buurt."
+            )
 
         await self._stuur(bericht, "wind", titel="Harde wind")
         self._laatste_wind = dt_util.utcnow()

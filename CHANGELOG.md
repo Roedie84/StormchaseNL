@@ -5,6 +5,30 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.53.0] — 2026-10-12
+
+### Gewijzigd
+
+- **Windmelding kijkt ook naar de stationsmeting (L-SC-008, optie c).** De
+  windstootcorrectie haalt de modelwaarde bij rustig weer terecht omlaag
+  (factor ~0,55-0,7), maar bij harde buienstoten zat de bijgestelde waarde
+  juist te laag: 10 oktober bij gemeten stoten van 33 km/u of meer gemiddeld
+  6,5 km/u te laag (11:40: model 37, bijgesteld 23, gemeten 39). Een echte
+  stoot boven de drempel mocht zo niet weggepoetst worden. Nu telt voor de
+  windmelding de hoogste van de bijgestelde verwachting en de laatste
+  stationsmeting (Hupsel), zolang die niet ouder is dan 40 minuten. Een
+  nieuwe stationsmeting wordt meteen getoetst, niet pas bij de volgende
+  Open-Meteo-ronde. Komt de drempel uit de meting, dan zegt het bericht
+  "gemeten bij het weerstation in de buurt".
+  - `sensor.stormchase_windstoten` zelf blijft de bijgestelde verwachting;
+    nieuwe attributen `windstoten_melding` en `melding_bron`
+    (`verwachting` / `station`).
+  - Het windevent krijgt het veld `bron`.
+  - Offline getoetst (9-12 oktober, 274 meetparen): een verhouding per
+    windklasse, per vergelijkbare windsterkte of als rechte lijn nam de
+    nachtelijke overschatting niet weg (nacht +2,4..+3,0 km/u tegen +2,5 nu,
+    dag niet beter). Dat deel van L-SC-008 is daarom niet gebouwd.
+
 ## [0.52.2] — 2026-10-11
 
 ### Opgelost

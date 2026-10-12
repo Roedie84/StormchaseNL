@@ -38,6 +38,7 @@ try:
         FRONT_NALOOP_S,
         FRONT_STOOT_SPRONG_KMH,
         FRONT_STOOT_VENSTER_S,
+        WIND_MELDING_STATION_MAX_S,
         WINDCORRECTIE_MIN_SPANNE_S,
     )
 except ImportError:  # in de tests zonder pakketstructuur
@@ -46,6 +47,7 @@ except ImportError:  # in de tests zonder pakketstructuur
         FRONT_NALOOP_S,
         FRONT_STOOT_SPRONG_KMH,
         FRONT_STOOT_VENSTER_S,
+        WIND_MELDING_STATION_MAX_S,
         WINDCORRECTIE_MIN_SPANNE_S,
     )
 
@@ -190,6 +192,42 @@ class Windcorrectie:
                 f = _stootsprong(klaar, t, g)
             klaar.append((t, g, m, bool(f)))
         self.paren = klaar[-MAX_PAREN:]
+
+
+def voor_melding(
+    bijgesteld: float | None,
+    gemeten: float | None,
+    gemeten_tijd: float | None,
+    nu: float,
+    max_leeftijd_s: float = WIND_MELDING_STATION_MAX_S,
+) -> dict:
+    """Welke windstoot telt voor de windmelding (0.53.0, L-SC-008 optie c)?
+
+    De hoogste van de bijgestelde verwachting en de laatste stationsmeting,
+    als die meting vers genoeg is. Zo kan de bijstelling (die bij rustig weer
+    terecht omlaag gaat) een echt gemeten harde stoot nooit onder de drempel
+    duwen. Geeft de waarde en waar die vandaan komt: "verwachting",
+    "station" of None als er niets is.
+    """
+    station = None
+    if gemeten is not None and gemeten_tijd is not None:
+        try:
+            gemeten, gemeten_tijd = float(gemeten), float(gemeten_tijd)
+        except (TypeError, ValueError):
+            gemeten = None
+        else:
+            leeftijd = nu - gemeten_tijd
+            if gemeten >= 0 and -300 <= leeftijd <= max_leeftijd_s:
+                station = gemeten
+    try:
+        verwacht = None if bijgesteld is None else float(bijgesteld)
+    except (TypeError, ValueError):
+        verwacht = None
+    if station is not None and (verwacht is None or station > verwacht):
+        return {"waarde": station, "bron": "station",
+                "verwachting": verwacht, "gemeten": station}
+    return {"waarde": verwacht, "bron": "verwachting" if verwacht is not None else None,
+            "verwachting": verwacht, "gemeten": station}
 
 
 def _drukfront(druk_1u) -> bool:

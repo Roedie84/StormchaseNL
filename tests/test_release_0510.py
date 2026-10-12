@@ -178,5 +178,6 @@ class TestEntiteiten:
         assert "meting.async_add_listener(_koppel_wind)" in init
         assert '"windcorrectie": windcorrectie.naar_opslag()' in init
         coord = (BRON / "coordinator.py").read_text(encoding="utf-8")
-        # De windmelding gaat op de bijgestelde waarde
-        assert 'self._controleer_wind(wind["waarde"])' in coord
+        # De windmelding gaat op de bijgestelde waarde (sinds 0.53.0 de
+        # hoogste van die en een verse stationsmeting, zie test_release_0530)
+        assert 'windmelding = self._windmelding(wind["waarde"])' in coord

@@ -227,6 +227,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     def _koppel_wind() -> None:
         gemeten = meting.data or {}
         model = meteo.data or {}
+        # 0.53.0 (L-SC-008c): een gemeten harde stoot telt direct mee voor
+        # de windmelding, los van de bijstelling
+        meteo.meld_gemeten_wind(
+            gemeten.get("windstoten"), _epoch(gemeten.get("waargenomen_op"))
+        )
         if windcorrectie.bij(
             _epoch(gemeten.get("waargenomen_op")),
             gemeten.get("windstoten"),
