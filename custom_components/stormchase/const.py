@@ -79,6 +79,11 @@ DEFAULT_RADARBRON = "rainviewer"
 ENSEMBLE_URL = "https://ensemble-api.open-meteo.com/v1/ensemble"
 ENSEMBLE_LOKAAL = "icon_d2_eps"
 ENSEMBLE_WERELD = "gefs025"
+# 0.54.2: op volgorde geprobeerd tot er een model met genoeg leden met CAPE
+# voor de komende twaalf uur is. icon_d2_eps gaf sinds 11-10 geen CAPE meer
+# en gefs025 is geen geldige naam bij Open-Meteo (ensemble bleef unknown).
+ENSEMBLE_KANDIDATEN = (ENSEMBLE_LOKAAL, "icon_eu_eps", "icon_seamless_eps",
+                       "ecmwf_ifs025", "gfs025", "ncep_gefs025")
 METING_INTERVAL = timedelta(minutes=15)
 
 # Update-intervallen

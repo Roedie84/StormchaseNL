@@ -116,6 +116,7 @@ from .const import (
     D2_KWARTIER,
     D2_UURLIJKS,
     METEO_URL,
+    ENSEMBLE_KANDIDATEN,
     ENSEMBLE_LOKAAL,
     ENSEMBLE_MODELLEN,
     ENSEMBLE_URL,
@@ -1324,7 +1325,8 @@ class MeteoCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
                 stats.bronnen["ensemble"].fout(err)
 
         # Ensemble: hoeveel leden komen boven de drempel uit?
-        for model in (ENSEMBLE_LOKAAL, ENSEMBLE_WERELD):
+        fouten_ensemble: list[str] = []
+        for model in ENSEMBLE_KANDIDATEN:
             try:
                 async with async_timeout.timeout(25):
                     antwoord = await self._session.get(
@@ -1346,13 +1348,17 @@ class MeteoCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
                     break
                 _LOGGER.debug("Ensemble %s: te weinig leden met waarden, volgende model", model)
             except (aiohttp.ClientError, TimeoutError, ValueError) as err:
+                # 0.54.2: een kandidaat die faalt is nog geen bronfout;
+                # pas als geen enkel model bruikbaar is (hieronder)
                 _LOGGER.debug("Ensemble %s niet beschikbaar: %s", model, err)
-                if stats is not None:
-                    stats.bronnen["ensemble_leden"].fout(err)
+                fouten_ensemble.append(f"{model}: {err}")
         else:
             # 0.54.1: geen enkel model bruikbaar is een fout, geen succes
             if stats is not None and "ensemble_leden" not in uit:
-                stats.bronnen["ensemble_leden"].fout(ValueError("geen ensemble met bruikbare leden"))
+                stats.bronnen["ensemble_leden"].fout(ValueError(
+                    "geen ensemble met bruikbare leden"
+                    + (f" ({'; '.join(fouten_ensemble)[:200]})" if fouten_ensemble else "")
+                ))
 
         return uit
 

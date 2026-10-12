@@ -5,6 +5,12 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.54.2] — 2026-10-12
+
+### Opgelost
+
+- **Ensemble: meerdere modellen proberen.** Na 0.54.1 bleek live dat icon_d2_eps geen bruikbare CAPE-leden meer geeft en dat `gefs025` geen geldige modelnaam is bij Open-Meteo; de bron stond terecht op fout en de kans bleef unknown. Nu worden op volgorde icon_d2_eps, icon_eu_eps, icon_seamless_eps, ecmwf_ifs025, gfs025 en ncep_gefs025 geprobeerd tot er een model met minstens 5 leden met CAPE is. Een kandidaat die faalt is geen bronfout meer; alleen als geen enkel model lukt, met de fout per model erbij. Het gebruikte model staat in het attribuut `model`.
+
 ## [0.54.1] — 2026-10-12
 
 ### Opgelost
