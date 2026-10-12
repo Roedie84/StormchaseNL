@@ -282,3 +282,12 @@ laatste ronde: 12-10 03:40, gemeten t/m 12-10 03:45
 - Hypotheses: H-SC-3 (KNMI regen), H-SC-6 (eerste naderingssnelheid te hoog), H-SC-7 (tijd-van-de-dag → L-SC-010). Geen release.
 
 laatste ronde: 12-10 07:40, gemeten t/m 12-10 07:42
+
+## 12-10 11:40 · tussenronde
+- 7 HA-herstarts (08:26-10:53, EMS-releases); 0 Stormchase-fouten. **0.54.0** (L-SC-010, chatsessie 11:21) gereleased; HACS toonde hem nog niet → informatie ververst; nog niet geïnstalleerd (actief 0.53.0).
+- Droog, groen, 0 inslagen < 50 km → alleen beschikbaarheid: 15 bronnen "alles in orde", 1× 503 Open-Meteo 10:00 (extern, hersteld), KNMI-push verbonden, radarbeeld 11:42.
+- **Windstoten (H-SC-7 / basis voor L-SC-010):** 07:44-11:44 n=24, bias +0,6 km/u (MAE 1,7); vóór 10:00 **+1,65** (n=13), vanaf 10:00 **−0,63** (n=11) → hetzelfde dag/nacht-patroon (ochtend boven, middag onder) dat 0.54.0 moet wegnemen. Nulmeting voor de verificatie na installatie.
+- L-SC-008c: `windstoten_melding` 12,2 met bron station (meting 12,2 > bijgesteld 10,1); geen melding.
+- Hypotheses: H-SC-3 (KNMI regen), H-SC-6 (eerste naderingssnelheid te hoog), H-SC-7 (tijd-van-de-dag, gebouwd 0.54.0 → verifiëren). Geen release.
+
+laatste ronde: 12-10 11:40, gemeten t/m 12-10 11:45

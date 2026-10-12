@@ -201,3 +201,7 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-12 07:42,TUSSEN,sc_windstoten_bias_kmh,0.6,24,"03:45-07:34 MAE 1.37; tot 06:00 +0.85 (n=14), daarna +0.25 (n=10); factor 0.66"
 2026-10-12 07:42,TUSSEN,sc_inslagen_50km,0,1,"03:45-07:42 geen onweer; bronstatus alles in orde"
 2026-10-12 07:42,TUSSEN,sc_windmelding_bron_station,1,1,"0.53.0: windstoten_melding 8.1 bron station (bijgesteld 7.9); 0 meldingen"
+2026-10-12 11:45,TUSSEN,sc_onweer_gebeurtenissen,0,0,"07:42-11:45 droog, groen, 0 inslagen < 50 km"
+2026-10-12 11:45,TUSSEN,sc_bronnen_slaag_pct,100,15,"alles in orde; 1x 503 Open-Meteo 10:00 (extern, hersteld); KNMI-push verbonden; radar 11:42 vers"
+2026-10-12 11:45,TUSSEN,sc_windstoten_bias_kmh,0.61,24,"07:44-11:44 MAE 1.68; voor 10:00 +1.65 (n=13), vanaf 10:00 -0.63 (n=11); factor 0.64; 0.53.0 actief"
+2026-10-12 11:45,TUSSEN,sc_windmelding,0,0,"windstoten_melding max 12.2 (bron station) < 60"
