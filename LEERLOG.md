@@ -310,3 +310,12 @@ laatste ronde: 12-10 15:40, gemeten t/m 12-10 15:45
 - Hypotheses: H-SC-3 (KNMI regen te vroeg), H-SC-6 (eerste naderingssnelheid te hoog; wacht op onweer), H-SC-7 (tijd-van-de-dag, 0.54.0 actief → verifiëren in de dagafsluiting; let op de avondovergang 17-19 u). Geen release.
 
 laatste ronde: 12-10 19:40, gemeten t/m 12-10 19:46
+
+## 12-10 23:40 · tussenronde
+- 6 HA-herstarts (21:10-23:17); actief **0.54.2**, 0 Stormchase-fouten. Locatie tracker iPhone. Droog, helder.
+- Geen onweer: groen, 0 inslagen < 50 km → alleen beschikbaarheid: "alles in orde", radar 23:43 vers, KNMI-push verbonden (11 meldingen). Ensemble 0 %.
+- **Windstoten / L-SC-010** (tijdvakfactor 0,60, 60 paren; 24-uursfactor 0,63): 19:44-23:33 n=24 bias **−0,1 km/u** (MAE 1,6). Tot 22:00 +1,1 (n=14, avonddaling); **na 22:00 −1,7** (n=10) bij oplopende gemeten stoot 10,6 → 13,8. Vorige nachten zat het 24-uursmodel 's nachts +2,5..+5,2 te hoog → eerste nacht met tijdvakfactor zonder overschatting (n=1, en de wind nam toe). H-SC-7: eerste steun; dagmeting 03:40.
+- L-SC-008c: `windstoten_melding` 13,8 met bron station; geen windmelding (< 60).
+- Hypotheses: H-SC-3 (KNMI regen te vroeg), H-SC-6 (eerste naderingssnelheid te hoog; wacht op onweer), H-SC-7 (tijd-van-de-dag; nacht nu −1,7 i.p.v. +2,5..+5,2). Geen release.
+
+laatste ronde: 12-10 23:40, gemeten t/m 12-10 23:43
