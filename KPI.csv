@@ -209,3 +209,8 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-12 15:45,TUSSEN,sc_windstoten_bias_kmh,-1.61,24,"11:44-15:34 MAE 2.73; voor 12:38 (24u-factor) -3.57 (n=6); tijdvak 0.72 12:43-14:34 +0.82 (n=12); 14:44-15:34 -4.5 (n=6)"
 2026-10-12 15:45,TUSSEN,sc_ensemble_beschikbaar,1,1,"onweerskans_ensemble unknown t/m 14:45, daarna 0 % (0.54.2)"
 2026-10-12 15:45,TUSSEN,sc_windmelding,0,0,"windstoten_melding max 17.0 (bron station) < 60"
+2026-10-12 19:46,TUSSEN,sc_onweer_gebeurtenissen,0,0,"15:45-19:46 droog, groen, 0 inslagen < 50 km"
+2026-10-12 19:46,TUSSEN,sc_bronnen_slaag_pct,100,15,"alles in orde; radar 19:41 vers; KNMI-push verbonden; 2 HA-herstarts"
+2026-10-12 19:46,TUSSEN,sc_windstoten_bias_kmh,1.60,24,"15:44-19:34 MAE 2.73; tot 17:15 -0.43 (n=10); 17:15-18:35 +4.46 (n=8, windafname); na 18:35 +1.17 (n=6); tijdvakfactor 0.70 (45 paren), 24u 0.59"
+2026-10-12 19:46,TUSSEN,sc_ensemble_beschikbaar,1,1,"0 %, icon_eu_eps 40 leden"
+2026-10-12 19:46,TUSSEN,sc_windmelding,0,0,"windstoten_melding 7.6 (bron verwachting) < 60"

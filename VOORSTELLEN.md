@@ -81,3 +81,4 @@ Status: open / akkoord / afgewezen / gebouwd vX / geverifieerd / teruggedraaid. 
 - Verwacht effect: MAE −12 % (4,3 → ~3,8 km/u), nachtbias +2,5 → ~+1,5, dagbias −2,7 → ~−1,8.
 - Meten na bouw: KPI sc_windstoten_bias_kmh per dag en per tijdvak (dag 08-20 / nacht 20-08), MAE tegen de replay-baseline 4,30.
 - Eerste meetpunt 12-10 15:40 (n=24, 11:44-15:34): vóór 12:38 (24-uursfactor 0,64) −3,6 km/u (n=6); met tijdvakfactor 0,72 (60 paren) 12:43-14:34 **+0,8** (n=12, MAE 1,6), 14:44-15:34 **−4,5** (n=6; gemeten liep op naar 17-20 km/u bij model 19-20). Eén middag: geen oordeel; dagmeting in de dagafsluiting, verifiëren na ≥ 3 dagen.
+- 12-10 19:40 (n=24, 15:44-19:34, tijdvakfactor 0,70): bias +1,6 (MAE 2,7); tot 17:15 −0,4, 17:15-18:35 +4,5 (windafname rond zonsondergang, verwachting loopt 30-60 min achter), na 18:35 +1,2. Avondovergang apart bekijken in de dagmeting.
