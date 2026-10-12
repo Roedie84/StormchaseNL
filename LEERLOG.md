@@ -262,3 +262,14 @@ laatste ronde: 11-10 19:40, gemeten t/m 11-10 19:45
 - Hypotheses: H-SC-3 (KNMI regen), H-SC-6 (wacht op onweer), H-SC-7. Geen release.
 
 laatste ronde: 11-10 23:40, gemeten t/m 11-10 23:45
+
+## 12-10 03:40 · dagafsluiting 11-10
+- Geen purge/repack in de log; HA-herstart 03:33. 11-10: ~40 herstarts (supervisor), 0 Stormchase-fouten; bronnen 100 % (n=2967; 5 d 99,98 %). Niveau hele dag groen, 0 inslagen < 50 km.
+- **Gemist in de tussenronden:** cel 15:21-16:03 op 94 → 68,8 km (plus 17:26 op 61,9 km); `onweer_nadert` 15:43-16:06 aan ("nadert snel") → 1 vals nadert-alarm (23 min, geen ~15-min-patroon). Eerste snelheid 54 km/u, 8 min later 35-38 (H-SC-6: eerste schatting te hoog, n=1); aankomst 82 → 109-119 min, niet uitgekomen. L-SC-009 **geverifieerd** (afstandsreeks bevat deze cel met snelheden, over ~40 herstarts).
+- **Windstoten 11-10 (HA, n=144):** bias +0,6 km/u (MAE 4,3) tegen kaal model +10,7; dag 08-20 −2,9, nacht +4,0; nacht 12-10 00-03:45 +2,2 (n=23). Max gemeten 37,9 → geen stoot ≥ 60.
+- **Toets L-SC-008 / H-SC-7 (replay repo-code op recorderreeksen 10-10 06:00-12-10 03:44, n=274; replay-MAE 4,30 ≈ HA 4,25):** windsterkte-afhankelijke factor (klassen, buren ±25 %, Theil-Sen) MAE 4,23-4,56, nacht blijft +2,6..+3,0 → **verworpen**. Tijd-van-de-dag-factor (uur ±2 u over 72 u) MAE 3,77, dag −1,8 / nacht +1,8; dag/nacht 22-08 3,78 → H-SC-7 = tijd-van-de-dag-effect → nieuw voorstel **L-SC-010 (open)**.
+- **Release 0.53.0** (L-SC-008 optie c, akkoord): windmelding op max(bijgesteld, stationsmeting ≤ 40 min), stationsmeting direct getoetst, attributen `windstoten_melding`/`melding_bron`. 756 tests groen, workflow groen, HACS ververst.
+- Regen KNMI (H-SC-3) 11-10: n=11 uitgekomen, mediaan −6,7, 7 te vroeg / 4 te laat; cumulatief n=28, −6,9, 20/8.
+- Hypotheses: H-SC-3 (KNMI regen te vroeg), H-SC-6 (eerste naderingssnelheid te hoog; 1 cel), H-SC-7 (tijd-van-de-dag → L-SC-010).
+
+laatste ronde: 12-10 03:40, gemeten t/m 12-10 03:45
