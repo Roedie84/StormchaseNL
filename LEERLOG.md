@@ -291,3 +291,13 @@ laatste ronde: 12-10 07:40, gemeten t/m 12-10 07:42
 - Hypotheses: H-SC-3 (KNMI regen), H-SC-6 (eerste naderingssnelheid te hoog), H-SC-7 (tijd-van-de-dag, gebouwd 0.54.0 → verifiëren). Geen release.
 
 laatste ronde: 12-10 11:40, gemeten t/m 12-10 11:45
+
+## 12-10 15:40 · tussenronde
+- 6 HA-herstarts (12:38-15:43); actief **0.54.2** (0.54.0 sinds 12:38, 0.54.2 sinds 14:45; ensemble-fixes van een andere sessie). 0 Stormchase-fouten. Locatie tracker iPhone.
+- Geen onweer: niveau groen, 0 inslagen < 50 km, `onweer_nadert` uit → alleen beschikbaarheid: bronstatus "alles in orde", radarbeeld 15:40 vers, KNMI-push verbonden.
+- **Onweerskans ensemble:** `unknown` t/m 14:45, daarna 0 % (icon_eu_eps, 40 leden) → werkt sinds 0.54.2; `ensemble_leden` laatste fout 14:36 (vóór installatie). 24 u volgen.
+- **Windstoten / L-SC-010:** 11:44-15:34 n=24 bias −1,6 km/u (MAE 2,7). Vóór 12:38 (24-uursfactor) −3,6 (n=6); met tijdvakfactor 0,72 12:43-14:34 **+0,8** (n=12), daarna **−4,5** (n=6) toen de gemeten stoot opliep naar 17-20 km/u. Eén middag → geen oordeel; dagmeting om 03:40.
+- L-SC-008c: `windstoten_melding` 17,0 met bron station (> bijgesteld 13,8); geen melding (< 60).
+- Hypotheses: H-SC-3 (KNMI regen te vroeg), H-SC-6 (eerste naderingssnelheid te hoog; wacht op onweer), H-SC-7 (tijd-van-de-dag, 0.54.0 actief → verifiëren). Geen release.
+
+laatste ronde: 12-10 15:40, gemeten t/m 12-10 15:45
