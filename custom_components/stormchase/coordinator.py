@@ -26,7 +26,7 @@ from .cel import (
     volg_cel,
     volg_cellen,
 )
-from .spreiding import beoordeel, ensemble as vat_ensemble_samen, samenvatting
+from .spreiding import MIN_LEDEN as ENSEMBLE_MIN_LEDEN, beoordeel, ensemble as vat_ensemble_samen, leden_pieken, samenvatting
 from .tijd import MARGE_KWARTIER, MARGE_UUR, aantal_gevuld, dichtstbijzijnde, op_stempel
 from .validatie import Validatie
 from .nadering import Naderingstrend
@@ -1334,16 +1334,25 @@ class MeteoCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
                     antwoord.raise_for_status()
                     payload = await antwoord.json()
 
-                if (payload.get("hourly") or {}).get("time"):
+                # 0.54.1: alleen bruikbaar als er genoeg leden met waarden
+                # zijn voor de komende twaalf uur; anders het volgende model
+                # proberen (icon_d2_eps gaf sinds 11-10 een lege reeks).
+                stamp_nu = dt_util.now().strftime("%Y-%m-%dT%H:00")
+                if len(leden_pieken(payload.get("hourly"), stamp_nu)) >= ENSEMBLE_MIN_LEDEN:
                     uit["ensemble_leden"] = payload
                     uit["ensemble_model"] = model
                     if stats is not None:
                         stats.bronnen["ensemble_leden"].succes()
                     break
+                _LOGGER.debug("Ensemble %s: te weinig leden met waarden, volgende model", model)
             except (aiohttp.ClientError, TimeoutError, ValueError) as err:
                 _LOGGER.debug("Ensemble %s niet beschikbaar: %s", model, err)
                 if stats is not None:
                     stats.bronnen["ensemble_leden"].fout(err)
+        else:
+            # 0.54.1: geen enkel model bruikbaar is een fout, geen succes
+            if stats is not None and "ensemble_leden" not in uit:
+                stats.bronnen["ensemble_leden"].fout(ValueError("geen ensemble met bruikbare leden"))
 
         return uit
 
@@ -1574,15 +1583,9 @@ class MeteoCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
         # Per ensemblelid de hoogste waarde over de komende twaalf uur. Een
         # momentopname zegt weinig over een dag: convectie piekt vaak maar
         # een paar uur.
+        # 0.54.1: in de eigen tijdreeks van het ensemble (zie leden_pieken)
         leden_payload = extra.get("ensemble_leden")
-        blok = (leden_payload or {}).get("hourly") or {}
-        pieken = []
-        for sleutel, reeks in blok.items():
-            if not sleutel.startswith("cape") or sleutel == "time":
-                continue
-            venster = [w for w in (reeks or [])[index : index + 12] if w is not None]
-            if venster:
-                pieken.append(max(venster))
+        pieken = leden_pieken((leden_payload or {}).get("hourly"), stamp)
 
         kansen = vat_ensemble_samen(pieken)
         kansen["model"] = extra.get("ensemble_model")

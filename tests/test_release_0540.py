@@ -141,5 +141,5 @@ class TestKoppeling:
         import json
 
         manifest = json.loads((BRON / "manifest.json").read_text())
-        assert manifest["version"] == "0.54.0"
+        assert tuple(int(x) for x in manifest["version"].split(".")) >= (0, 54, 0)
         assert "## [0.54.0]" in (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")

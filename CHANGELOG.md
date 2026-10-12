@@ -5,6 +5,12 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.54.1] — 2026-10-12
+
+### Opgelost
+
+- **Onweerskans ensemble bleef op unknown** (sinds 11-10, 0 leden). De bron `ensemble_leden` gaf "geslaagd" zodra het antwoord een tijdreeks had, ook als er voor de komende twaalf uur geen bruikbare CAPE-waarden in stonden. Een model telt nu pas als minstens 5 leden waarden hebben; anders wordt het volgende model geprobeerd (gefs025), en lukt geen enkel model dan staat de bron op fout in plaats van geslaagd. Het venster van twaalf uur wordt in de eigen tijdreeks van het ensemble gezocht. Bij stabiel weer staat er weer 0%.
+
 ## [0.54.0] — 2026-10-12
 
 ### Gewijzigd

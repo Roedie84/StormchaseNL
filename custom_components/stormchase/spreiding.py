@@ -130,6 +130,34 @@ def duiding_kans(kans: int | None) -> str:
     return "vrijwel zeker"
 
 
+def leden_pieken(hourly: dict | None, stamp: str, uren: int = 12) -> list[float]:
+    """Per ensemblelid de hoogste CAPE over de komende `uren` (0.54.1).
+
+    Zoekt het huidige uur in de EIGEN tijdreeks van het ensemble op (die
+    hoeft niet gelijk te lopen met de gewone voorspelling) en neemt alleen
+    leden mee die in dat venster echt waarden hebben. Gemeld 12-10: sinds
+    11-10 stond de ensemblekans op unknown met 0 leden terwijl de bron wel
+    "geslaagd" was - het antwoord had een tijdreeks maar geen bruikbare
+    CAPE-waarden voor dit venster.
+    """
+    blok = hourly or {}
+    tijden = blok.get("time") or []
+    if not tijden:
+        return []
+    if stamp in tijden:
+        begin = tijden.index(stamp)
+    else:
+        begin = next((i for i, t in enumerate(tijden) if t >= stamp), len(tijden))
+    pieken = []
+    for sleutel, reeks in blok.items():
+        if sleutel == "time" or not sleutel.startswith("cape"):
+            continue
+        venster = [w for w in (reeks or [])[begin : begin + uren] if w is not None]
+        if venster:
+            pieken.append(max(venster))
+    return pieken
+
+
 def ensemble(pieken_per_lid: list[float]) -> dict:
     """Vat een ensemble samen in kansen en spreiding.
 
