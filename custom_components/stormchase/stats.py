@@ -35,6 +35,8 @@ HAPERT_NA_POGINGEN = 2
 # ... of als het laatste succes langer geleden is dan dit, ook bij één
 # mislukte ronde: een bron die zelden ophaalt, mist er dan echt een.
 HAPERT_NA_MINUTEN = 15
+#: 0.55.0: zo lang niet aangesproken = rust (reservebron die niet nodig is).
+RUST_NA_UREN = 24
 
 
 @dataclass
@@ -105,13 +107,34 @@ class BronStatus:
         nu = nu or dt_util.utcnow()
         return (nu - self.laatste_succes).total_seconds() > HAPERT_NA_MINUTEN * 60
 
+    def toestand(self, nu: datetime | None = None) -> str:
+        """0.55.0: "in gebruik", "hapert" of "rust (niet nodig)".
+
+        Meteoalarm stond op 100 % terwijl hij al vier dagen niet meer
+        gevraagd werd (KNMI neemt het over). Een reservebron die lang niet
+        is aangesproken en niet faalt, is niet nodig - geen 100 %.
+        """
+        if self.hapert(nu):
+            return "hapert"
+        nu = nu or dt_util.utcnow()
+        laatst = max(
+            (m for m in (self.laatste_succes, self.laatste_fout_op) if m is not None),
+            default=None,
+        )
+        if laatst is None or (nu - laatst).total_seconds() > RUST_NA_UREN * 3600:
+            return "rust (niet nodig)"
+        return "in gebruik"
+
     def als_dict(self) -> dict[str, Any]:
         """Voor in de diagnostiek."""
         totaal = self.gelukt + self.mislukt
+        toestand = self.toestand()
         return {
+            "toestand": toestand,
             "gelukt": self.gelukt,
             "mislukt": self.mislukt,
-            "slaagpercentage": round(self.gelukt / totaal * 100) if totaal else None,
+            "slaagpercentage": (round(self.gelukt / totaal * 100)
+                                if totaal and toestand != "rust (niet nodig)" else None),
             "laatste_succes": _tijd(self.laatste_succes),
             "laatste_fout": self.laatste_fout,
             "laatste_fout_op": _tijd(self.laatste_fout_op),

@@ -5,6 +5,14 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.55.0] — 2026-10-15
+
+### Opgelost
+
+- **Ringen tellen een inslag niet meer dubbel.** Met twee Blitzortung-instanties (bijv. *Onweer detectie* en *iPhone 16 Pro Max*) bestaat elke inslag als twee geo_location-entiteiten. 10-10 17:31 telde de 50 km-ring daardoor 16 in plaats van 8 (gevonden op het analysedashboard). Nu één keer per inslag (tijd + positie, `puntsleutel`), ook voor de celtracking en de frequentie.
+- **Ringen alleen binnen het tijdvenster.** Na een herstart bleef de 50 km-ring op 4 staan zonder bijbehorende inslagen. De ringen tellen nu alleen inslagen van de laatste `ring_window` minuten (standaard 120), net als de terugval via de afstandssensor.
+- **Bronstatus: reservebron in rust.** Meteoalarm stond op 100 % terwijl hij al dagen niet gevraagd werd (KNMI neemt het over). Per bron nu `toestand`: in gebruik, hapert of "rust (niet nodig)" (24 uur niet aangesproken); in rust geen slaagpercentage.
+
 ## [0.54.2] — 2026-10-12
 
 ### Opgelost

@@ -508,6 +508,13 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         """
         punten: list[tuple[float, float]] = []
         laatste: datetime | None = None
+        # 0.55.0: dezelfde inslag via twee Blitzortung-instanties (bijv.
+        # "Onweer detectie" en "iPhone 16 Pro Max") telde dubbel: 10-10 17:31
+        # sprong de 50 km-ring van 8 naar 16. Eén keer per (tijd, positie).
+        gezien_sleutels: set[tuple] = set()
+        venster = int(self._opt(CONF_RING_WINDOW, DEFAULT_RING_WINDOW)) * 60
+        nu_ts = dt_util.utcnow().timestamp()
+        self._ring_km: list[float] = []
 
         for state in self.hass.states.async_all("geo_location"):
             if pattern not in state.entity_id:
@@ -517,6 +524,15 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
             lengte = state.attributes.get(ATTR_LONGITUDE)
             if breedte is None or lengte is None:
                 continue
+            try:
+                stempel_nu = inslagtijd(
+                    state.attributes, state.last_changed.timestamp(), nu_ts)
+                sleutel_nu = puntsleutel(stempel_nu, float(breedte), float(lengte))
+            except (TypeError, ValueError):
+                continue
+            if sleutel_nu in gezien_sleutels:
+                continue
+            gezien_sleutels.add(sleutel_nu)
 
             meters = location_distance(latitude, longitude, breedte, lengte)
             if meters is None:
@@ -528,6 +544,10 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
                     peiling(latitude, longitude, float(breedte), float(lengte)),
                 )
             )
+            # 0.55.0: de ringen tellen alleen inslagen binnen het venster -
+            # na een herstart bleef de ring op 4 staan zonder nieuwe inslagen.
+            if nu_ts - stempel_nu <= venster:
+                self._ring_km.append(round(meters / 1000, 1))
 
             if laatste is None or state.last_changed > laatste:
                 laatste = state.last_changed
@@ -537,13 +557,9 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
             # zelf, niet die van het eerste zien; anders telt een herlaadbeurt
             # alle bestaande inslagen opnieuw als nieuw.
             if state.entity_id not in self._gezien:
-                stempel = inslagtijd(
-                    state.attributes,
-                    state.last_changed.timestamp(),
-                    dt_util.utcnow().timestamp(),
-                )
+                stempel = stempel_nu
                 self._gezien[state.entity_id] = stempel
-                sleutel = puntsleutel(stempel, float(breedte), float(lengte))
+                sleutel = sleutel_nu
                 if sleutel in self._herstelde_punten:
                     # Al teruggezet uit de opslag
                     self._herstelde_punten.discard(sleutel)
@@ -998,8 +1014,11 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
             last_strike = gewijzigd
 
             markers = len(punten)
+            ring_km = getattr(self, "_ring_km", None)
+            if ring_km is None:
+                ring_km = [d for d, _ in punten]
             rings = {
-                grens: sum(1 for d, _ in punten if d < grens)
+                grens: sum(1 for d in ring_km if d < grens)
                 for grens in self.ring_bounds
             }
             ring_bron = "geo_location (herberekend)"
