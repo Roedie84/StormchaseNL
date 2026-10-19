@@ -37,5 +37,6 @@ def test_coordinator_loopt_de_kandidaten_af():
 
 def test_versie():
     manifest = json.loads((BRON / "manifest.json").read_text())
-    assert manifest["version"] == "0.54.2"
+    # 0.56.0: niet vastpinnen op deze versie, wel niet ouder
+    assert tuple(int(x) for x in manifest["version"].split(".")) >= (0, 54, 2)
     assert "## [0.54.2]" in (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")

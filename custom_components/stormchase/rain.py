@@ -39,6 +39,7 @@ from .const import (
     RAIN_INTERVAL,
 )
 from .buienreeks import lees_reeks
+from .regencorrectie import corrigeer, leer
 from .knmi_api import NietGevonden, poging, vijf_minuten_slot
 from .knmi_grid import radarcel
 from .knmi_verwerk import nowcast_reeks
@@ -251,8 +252,12 @@ class RainCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdateC
         gelezen = lees_reeks(reeks, drempel)
         nu_intensiteit = gelezen["intensiteit"]
         regent = gelezen["regent"]
-        begint_over = gelezen["begint_over"]
+        begint_kaal = gelezen["begint_over"]
         stopt_over = gelezen["stopt_over"]
+        # 0.56.0 (L-SC-011): de start bijgesteld met wat de eigen uitkomsten
+        # van deze bron leren. De validatie blijft de kale waarde vastleggen.
+        correctie = self._regencorrectie(bron)
+        begint_over = corrigeer(begint_kaal, correctie)
 
         toekomst = [mm for minuten, mm in reeks if 0 <= minuten <= 120]
         piek = max(toekomst) if toekomst else 0.0
@@ -263,6 +268,8 @@ class RainCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdateC
             "intensiteit": nu_intensiteit,
             "regent": regent,
             "begint_over": begint_over,
+            "begint_over_kaal": begint_kaal,
+            "regencorrectie": correctie,
             "stopt_over": stopt_over,
             "volgende_bui_over": gelezen["volgende_bui_over"],
             "piek": piek,
@@ -287,12 +294,29 @@ class RainCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdateC
                 self.validatie.uitgekomen(
                     "regen", nu, {"intensiteit": nu_intensiteit}
                 )
-            elif begint_over is not None and begint_over <= 60:
+            elif begint_kaal is not None and begint_kaal <= 60:
                 self.validatie.voorspel(
-                    "regen", nu, begint_over, {"verwachte_piek": piek, "bron": bron}
+                    "regen", nu, begint_kaal, {"verwachte_piek": piek, "bron": bron}
                 )
 
         return data
+
+    def _regencorrectie(self, bron: str) -> dict | None:
+        """De geldende bijstelling voor deze bron; opnieuw geleerd na elke nieuwe uitkomst."""
+        val = self.validatie
+        if val is None:
+            return None
+        sleutel = (bron, getattr(val, "afgerond", 0))
+        cache = getattr(self, "_correctie_cache", None)
+        if cache is not None and cache[0] == sleutel:
+            return cache[1]
+        try:
+            correctie = leer(val.uitkomsten, bron)
+        except Exception:  # noqa: BLE001 - een bijstelling mag de verwachting nooit raken
+            _LOGGER.debug("Regencorrectie niet te leren", exc_info=True)
+            correctie = None
+        self._correctie_cache = (sleutel, correctie)
+        return correctie
 
     def _vuur_event(self, data: dict) -> None:
         """Meld het als er binnen de ingestelde tijd regen aankomt.

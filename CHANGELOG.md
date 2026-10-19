@@ -5,6 +5,15 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.56.0] — 2026-10-19
+
+### Gewijzigd
+
+- **Regenmelding op tijd (L-SC-011).** De KNMI-nowcast voorspelde de start van de regen structureel te laat: van 43 uitgekomen voorspellingen begon het 31 keer eerder dan voorspeld (mediaan 7 min), en verder vooruit meer (15-45 min gemiddeld 10, verder 15 min). Met een vooraankondiging van 10 minuten kwam de melding zo vaak pas als het al regende.
+- Nieuw `regencorrectie.py`: Stormchase leert uit de eigen afgeronde voorspellingen van dezelfde bron een bijstelling, net als de windstootcorrectie. Twee vormen worden met leave-one-out getoetst - een verschuiving per horizon (tot 15 / 15-45 / verder) en een verhouding werkelijk/voorspeld - en alleen een vorm die de gemiddelde afwijking minstens 10% kleiner maakt wordt gebruikt (vanaf 15 uitkomsten; verschuiving hooguit 30 min, verhouding 0,4-1,3). Na elke nieuwe uitkomst opnieuw geleerd.
+- De bijgestelde start voedt de sensor *Regen begint over*, de binaire regensensor, het event `stormchase_rain_incoming` (en dus de melding), het regenbeeld en de briefing. De validatie legt bewust de kale nowcast vast, zodat de correctie niet van zichzelf leert.
+- Attributen op *Regen begint over*: `zonder_correctie`, `gecorrigeerd`, `correctie_vorm`, `verschuiving_min` of `verhouding`, `uitkomsten`, `afwijking_min` (geen / verschuiving / verhouding) en `uitleg`. In de diagnostiek `begint_over_kaal` en `regencorrectie`.
+
 ## [0.55.0] — 2026-10-15
 
 ### Opgelost

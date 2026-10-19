@@ -546,6 +546,8 @@ class MeteoSensor(CoordinatorEntity[MeteoCoordinator], SensorEntity):
     def extra_state_attributes(self) -> dict | None:
         """Bij de windstoten: de kale modelwaarde en de correctie (0.51.0)."""
         data = self.coordinator.data
+        if data and self.entity_description.key == "rain_starts":
+            return _regen_attributen(data)
         if not data or self.entity_description.key != "wind_gusts":
             return None
         wind = data.get("windcorrectie") or {}
@@ -579,6 +581,28 @@ class MeteoSensor(CoordinatorEntity[MeteoCoordinator], SensorEntity):
                 "stationsmetingen buiten een front is"
             ),
         }
+
+
+def _regen_attributen(data: dict) -> dict:
+    """0.56.0 (L-SC-011): de kale nowcast naast de bijgestelde start."""
+    c = data.get("regencorrectie") or {}
+    if c.get("vorm") == "verschuiving":
+        uitleg = "Kale nowcast plus de mediane afwijking van de eigen uitkomsten per horizon"
+    elif c.get("vorm") == "verhouding":
+        uitleg = "Kale nowcast x de mediane verhouding werkelijk/voorspeld uit de eigen uitkomsten"
+    else:
+        uitleg = c.get("reden") or "Kale nowcast"
+    return {
+        "zonder_correctie": data.get("begint_over_kaal"),
+        "gecorrigeerd": bool(c.get("toegepast")),
+        "bron": data.get("bron"),
+        "correctie_vorm": c.get("vorm"),
+        "verschuiving_min": c.get("verschuiving_min"),
+        "verhouding": c.get("verhouding"),
+        "uitkomsten": c.get("uitkomsten"),
+        "afwijking_min": c.get("afwijking_min"),
+        "uitleg": uitleg,
+    }
 
 
 class ChasePotentialSensor(CoordinatorEntity[MeteoCoordinator], SensorEntity):
