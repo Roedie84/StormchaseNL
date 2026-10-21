@@ -319,3 +319,18 @@ laatste ronde: 12-10 19:40, gemeten t/m 12-10 19:46
 - Hypotheses: H-SC-3 (KNMI regen te vroeg), H-SC-6 (eerste naderingssnelheid te hoog; wacht op onweer), H-SC-7 (tijd-van-de-dag; nacht nu −1,7 i.p.v. +2,5..+5,2). Geen release.
 
 laatste ronde: 12-10 23:40, gemeten t/m 12-10 23:43
+
+## 13-10 11:30 · dagafsluiting 12-10 (uit analyse-bestand, toen niet weggeschreven)
+- 12-10: 0 onweer < 50 km, 24 herstarts, bronnen 99,5 %. Windstoten uurgemiddelden +0,56 km/u (vóór 12:38 +0,84; tijdvakfactor +0,22); avond 17-19 u +3,1..+3,3 (windafname loopt achter).
+
+## 21-10 19:40 · inhaalronde (dagafsluiting 13-10 t/m 20-10 + tussenronde 21-10)
+- Gat 13-10 11:30 → 21-10: geen leerronden. Nagemeten uit recorder, statistiek en diagnostiek; actief **0.56.0** (sinds 19-10, laatste herstart 21-10 15:44).
+- **Onweer 17-10** (enige gebeurtenis): cel 13:17-18:09, dichtstbij 30,5 km (15:17), max 71 inslagen < 50 km. Niveau groen, geen melding (> 30 km) en geen windmelding (max uurstoot 58,4) → terecht. `onweer_nadert` 13:35-14:23 (48 min) bij echte nadering 59,6 → 31 km = terecht.
+- **H-SC-6 bevestigd (n=2):** eerste naderingssnelheid 13:35 **222 km/u** bij een celwissel (89,6 → 59,6 km in 8 min = andere cel), werkelijk ~35 km/u; aankomst 16 en 27 min → 0/2 uitgekomen. Zelfde patroon als 11-10 (54 tegen 35-38) → **L-SC-013** (open, Ruud).
+- **Meetbaarheid passage:** 3 passages 17-10 (42,4 / 39,2 km voorspeld) zonder gemeten afstand terwijl de inslagen op 36-42 km lagen; afronding zoekt de kleinste afstand van hetzelfde cel-id → bij id-wissel geen meting → **L-SC-012** (zelf bouwen: meetfout).
+- Bronnen per dag 99,15-99,96 % (13-10 DNS-storing, 19-10 Open-Meteo 503: extern, hersteld). Radar 20-10: 485 wissels, mediaan 3,0 min, max 7,8. Locatie: 89× 9-13 s "laatst bekend" bij herstarts, 0× thuis.
+- **L-SC-010 geverifieerd:** nachtbias 13-20/10 −1,2 km/u gemiddeld (−3,3..+0,8) tegen +2,5..+5,4 vóór 0.54.0; dag −0,7. 8 dagen bias −0,9, MAE 2,7 (uurgemiddelden; winderige week).
+- **L-SC-011 (0.56.0) niet actief:** `regencorrectie.vorm` geen; leave-one-out 10,3 → 9,6 (verschuiving, −7 %) / 9,3 min (verhouding, −9,7 %), eis −10 %. KNMI-regen mediaan −7 min (46 uitgekomen, 33× eerder dan voorspeld). Eerste uitkomsten na 0.56.0 (20/21-10): −5, −7, +8, +18. H-SC-3 blijft; geen voorstel tot ≥ 10 nieuwe uitkomsten.
+- Hypotheses: H-SC-3 (regenstart te laat voorspeld; correctie net onder de drempel), H-SC-6 (snelheid na celwissel), H-SC-8 nieuw (passage niet gemeten bij cel-id-wissel). Geen release (geen acute fout).
+
+laatste ronde: 21-10 19:40, gemeten t/m 21-10 19:45

@@ -35,3 +35,9 @@
 | Slaagpercentage bronnen per dag | 100 % (n=2967, ~40 herstarts); 5 d 99,98 % (n=10608) | 11-10 | 12-10 03:40 |
 | Valse nadert-alarmen per dag | 1 (23 min) bij 1 cel 69-94 km | 11-10 | 12-10 03:40 |
 | Regen KNMI afwijking | mediaan −6,9 min, 20 te vroeg / 8 te laat | regen_per_bron, n=28 | 12-10 03:40 |
+| Windstoten na bijstelling (uurgemiddelden, tijdvakfactor) | −0,9 km/u (MAE 2,7); nacht −1,2 / dag −0,7 | 13..20-10, n=192 u | 21-10 19:40 |
+| Slaagpercentage bronnen per dag | 99,15-99,96 % (mediaan 99,9) | 13..20-10, ~2770/dag | 21-10 19:40 |
+| Herstarts per dag (proxy 'laatst bekend') | 2-20 (mediaan 11,5) | 13..20-10 | 21-10 19:40 |
+| Radarbeeld-wissels | mediaan 3,0 min, max 7,8 | 20-10, n=485 | 21-10 19:40 |
+| Regen KNMI afwijking | mediaan −7 min, 33 eerder / 13 later; LOO-correctie −9,7 % (niet actief) | n=46 | 21-10 19:40 |
+| Passage met gemeten afstand | 19/26 (73 %); 17-10 0/3 | bewaard t/m 21-10 | 21-10 19:40 |

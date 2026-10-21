@@ -75,10 +75,26 @@ Status: open / akkoord / afgewezen / gebouwd vX / geverifieerd / teruggedraaid. 
 - Meten na installatie: na de volgende cel bevat de reeks één punt per nieuwe afstand met snelheid, ook over een herstart → H-SC-6 (snelheid eerste minuten tegen werkelijke nadering) toetsbaar.
 
 ## L-SC-010 · windstoot-bijstelling: factor per tijd van de dag (nacht apart)
-- Status: **gebouwd 0.54.0, actief sinds 12-10 12:38** (eerste meetpunt 15:40, zie onder; 12-10 11:40, chatsessie; akkoord Ruud chat 12-10 11:19 zonder de 2 extra nachten af te wachten). Tijdvak = uur van de dag ±2 u in de HA-tijdzone, 72 u, rustige paren; < 4 paren of nog geen 24-uursfactor → 24-uursfactor/kaal model. Bewaren 80 u (MAX_PAREN 600). Attributen `factor_bron`, `correctiefactor_24u`, `paren_tijdvak`. 12 tests `tests/test_release_0540.py`, suite 768 groen. Meten na installatie: zie onder.
+- Status: **geverifieerd 21-10 19:40** — nachtbias 13-20/10 gemiddeld −1,2 km/u (−3,3..+0,8, n=8 nachten, uurgemiddelden) tegen +2,5..+5,4 vóór 0.54.0; dag −0,7; geen nachtelijke overschatting meer. Eerder: **gebouwd 0.54.0, actief sinds 12-10 12:38** (eerste meetpunt 15:40, zie onder; 12-10 11:40, chatsessie; akkoord Ruud chat 12-10 11:19 zonder de 2 extra nachten af te wachten). Tijdvak = uur van de dag ±2 u in de HA-tijdzone, 72 u, rustige paren; < 4 paren of nog geen 24-uursfactor → 24-uursfactor/kaal model. Bewaren 80 u (MAX_PAREN 600). Attributen `factor_bron`, `correctiefactor_24u`, `paren_tijdvak`. 12 tests `tests/test_release_0540.py`, suite 768 groen. Meten na installatie: zie onder.
 - Onderbouwing (H-SC-7): de 24-uursfactor (0,65-0,71) zit 's nachts te hoog en overdag te laag. Dag 11-10 (HA, n=144): dag 08-20 −2,9 km/u, nacht +4,0; nachten 10-10 +5,2, 11-10 +5,3 (03:45-07:45), 11/12-10 +5,4 (22-24 u) en +2,2 (00-03:45, n=23). Replay op de recorderreeksen (repo-code, 10-10 06:00-12-10 03:44, n=274; replay MAE 4,30 ≈ HA 4,25): per uur ±2 u over 72 u MAE **3,77** (dag −1,8 / nacht +1,8); dag/nacht-split 22-08 over 48 u **3,78** (−1,85 / +1,3); per uur ±1 u 3,78; mediaan laatste 3 u 3,83 (maar bij model ≥ 35 +1,3). Windklasse-varianten (L-SC-008a) 4,23-4,56: geen verbetering.
 - Voorstel: factor = mediaan van de rustige paren uit hetzelfde tijdvak (uur van de dag ±2 u) over 72 u, met de 24-uursfactor als terugval zolang er < 4 paren in dat tijdvak zijn; grenzen 0,5-1,3 en frontregels blijven. Eerst nogmaals replayen na ≥ 2 extra nachten.
 - Verwacht effect: MAE −12 % (4,3 → ~3,8 km/u), nachtbias +2,5 → ~+1,5, dagbias −2,7 → ~−1,8.
 - Meten na bouw: KPI sc_windstoten_bias_kmh per dag en per tijdvak (dag 08-20 / nacht 20-08), MAE tegen de replay-baseline 4,30.
 - Eerste meetpunt 12-10 15:40 (n=24, 11:44-15:34): vóór 12:38 (24-uursfactor 0,64) −3,6 km/u (n=6); met tijdvakfactor 0,72 (60 paren) 12:43-14:34 **+0,8** (n=12, MAE 1,6), 14:44-15:34 **−4,5** (n=6; gemeten liep op naar 17-20 km/u bij model 19-20). Eén middag: geen oordeel; dagmeting in de dagafsluiting, verifiëren na ≥ 3 dagen.
 - 12-10 19:40 (n=24, 15:44-19:34, tijdvakfactor 0,70): bias +1,6 (MAE 2,7); tot 17:15 −0,4, 17:15-18:35 +4,5 (windafname rond zonsondergang, verwachting loopt 30-60 min achter), na 18:35 +1,2. Avondovergang apart bekijken in de dagmeting.
+
+## L-SC-011 · regenstart bijstellen met de eigen uitkomsten
+- Status: **gebouwd 0.56.0** (19-10, andere sessie) — **nog niet actief** (21-10 19:40): `regencorrectie.vorm` geen, leave-one-out geen 10,3 / verschuiving 9,6 / verhouding 9,3 min (−9,7 %), eis ≥ 10 % kleiner. Meten: elke ronde vorm/afwijking; zodra actief: afwijking gecorrigeerd tegen kaal (KNMI, n ≥ 10 nieuwe uitkomsten) en meldingen die pas kwamen toen het al regende.
+
+## L-SC-012 · passage afrekenen ook als de cel een nieuw id kreeg (meetfout)
+- Status: **gepland (zelf bouwen: meetfout; raakt geen drempels of meldgedrag)** — volgende dagafsluiting.
+- Onderbouwing: 17-10 drie passages (13:37 42,4 km, 15:48 39,2 km, 16:05) zonder gemeten afstand (`werkelijke_afstand_km` null) terwijl de inslagen op 36-42 km lagen. `passage_afgerond` zoekt `_min_per_cel[open_cel]`; bij een nieuwe cel-id (opknippen/samengaan) is die er niet, en zonder `cel` in de ronde wordt hij alleen via `verlopen` als mis afgesloten. Passage totaal 19/26 met afstand.
+- Voorstel: bij ontbrekende id terugvallen op de kleinste afstand van een cel binnen ~15 km en ±30° van de voorspelde baan in het passagevenster; vastleggen welke route (`gemeten_via`).
+- Meten: aandeel passages met afstand (nu 73 %) → ≥ 90 % bij de volgende onweersdag.
+
+## L-SC-013 · naderingssnelheid niet rekenen over een celwissel
+- Status: **open** (raakt `onweer_nadert`/aankomst en dus meldgedrag → Ruud beslist).
+- Onderbouwing (H-SC-6, n=2): 17-10 13:35 sprong de afstand 89,6 → 59,6 km (andere cel); snelheid 222 → 196 km/u (13:35-13:44), aankomst 16 min, werkelijk ~35 km/u (59,6 → 31,2 km in 48 min), 0/2 aankomsten uitgekomen. 11-10: eerste 54 km/u tegen 35-38. `onweer_nadert` ging terecht aan, maar de aankomsttijd was 3-6× te kort.
+- Voorstel: een afstandsprong > 15 km tussen twee nieuwe inslagafstanden (of > 120 km/u) start de reeks opnieuw; snelheid en aankomst pas na ≥ 2 nieuwe afstanden van dezelfde cel.
+- Verwacht effect: geen aankomst < 20 min bij een cel op > 50 km; aankomst-hit hoger (nu 0/6).
+- Meten: eerste snelheid tegen de snelheid over de hele nadering; aankomst-uitkomsten per onweersdag.
