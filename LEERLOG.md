@@ -334,3 +334,13 @@ laatste ronde: 12-10 23:40, gemeten t/m 12-10 23:43
 - Hypotheses: H-SC-3 (regenstart te laat voorspeld; correctie net onder de drempel), H-SC-6 (snelheid na celwissel), H-SC-8 nieuw (passage niet gemeten bij cel-id-wissel). Geen release (geen acute fout).
 
 laatste ronde: 21-10 19:40, gemeten t/m 21-10 19:45
+
+## 21-10 23:40 · tussenronde
+- Geen onweer (0 inslagen < 50 km, niveau groen, ensemble 0 %); alleen beschikbaarheid gemeten. Actief 0.56.0; 2 herstarts (20:16, 20:58), locatie 10 s "laatst bekend", 0× thuis.
+- Bronnen 21-10 t/m 23:43: alle ≥ 99,7 % (knmi_nowcast 1 mislukt, radar 4); KNMI-push verbonden, radarbeeld 2 min oud.
+- Windstoten 19-23 u: bias +0,4 km/u, MAE 1,2 (n=4 uur; wind neemt toe 24 → 31 km/u). L-SC-010 houdt ook bij toenemende wind.
+- Regen: 0 nieuwe uitkomsten sinds 19:40. Lange horizon (> 45 min, vrijwel altijd "57 min") 16 van 28 uitgekomen (57 %); vandaag 14:52 en 17:27 niet uitgekomen. Geen melding (rain_lead 10 min) → geen vals alarm voor Ruud; alleen KPI. H-SC-3 blijft (4 uitkomsten na 0.56.0, nodig ≥ 10).
+- Radarvooruitblik: status "wacht op radarbeeld" met 0 frames sinds de herstart; code: bouwt alleen na bekijken (bewust, scheelt kaartverzoeken). Status-tekst misleidend, geen fout.
+- Hypotheses: H-SC-3, H-SC-6, H-SC-8. Geen release; L-SC-012 (meetfout passage) blijft voor de dagafsluiting.
+
+laatste ronde: 21-10 23:40, gemeten t/m 21-10 23:43
