@@ -215,6 +215,8 @@ MAX_SNELHEID = 400               # km/u; hierboven is het geen echte beweging
 LOCATIE_GESCHIEDENIS = 400       # aantal bewaarde locatiepunten
 
 EVENT_WIND = f"{DOMAIN}_wind"
+# 0.57.0: harde wind van tevoren (windvooruitblik.py)
+EVENT_WIND_OUTLOOK = f"{DOMAIN}_wind_outlook"
 
 # Configuratie - waarschuwingen
 CONF_ALERT_COUNTRY = "alert_country"

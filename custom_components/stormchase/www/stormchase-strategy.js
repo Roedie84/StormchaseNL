@@ -88,6 +88,7 @@ const ENTITEITEN = {
   li: ["sensor", "lifted_index", "stormchase_lifted_index"],
   cin: ["sensor", "cin", "stormchase_convectieve_remming"],
   windstoten: ["sensor", "wind_gusts", "stormchase_windstoten"],
+  windvooruit: ["sensor", "wind_outlook", "stormchase_windvooruitblik"],
   schering6: ["sensor", "wind_shear_6km", "stormchase_windschering_0_6_km"],
   schering3: ["sensor", "wind_shear_3km", "stormchase_windschering_0_3_km"],
   schering1: ["sensor", "wind_shear_1km", "stormchase_windschering_0_1_km"],
@@ -2320,8 +2321,22 @@ class StormchaseHudCard extends HTMLElement {
     return (
       paneelKop("klok", "Verwachting per uur", rechts) +
       `<div class="pb"><div class="uren">${kolommen}</div>` +
-      `<div class="meternoot">Per uur: temperatuur, neerslagkans en windstoten</div></div>`
+      `<div class="meternoot">Per uur: temperatuur, neerslagkans en windstoten</div>` +
+      this._windVooruit() +
+      `</div>`
     );
+  }
+
+  /* 0.57.0: harde wind vandaag of morgen, boven de winddrempel. */
+  _windVooruit() {
+    const s = this._s("windvooruit");
+    const dagen = (attr(s, "dagen") || []).slice(0, 2).filter((d) => d && d.klasse);
+    if (!dagen.length) return "";
+    const tekst = dagen
+      .map((d) => `${esc(d.dag)} tot <b>${fmt(d.max_kmh)} km/u</b> rond ${esc(d.piek_om)}` +
+        (d.boven_drempel_van ? ` (${esc(d.boven_drempel_van)}\u2013${esc(d.boven_drempel_tot)})` : ""))
+      .join(" \u00b7 ");
+    return `<div class="meternoot" style="color:var(--oranje)">Harde wind: ${tekst}</div>`;
   }
 
   /* ---- voet ---- */

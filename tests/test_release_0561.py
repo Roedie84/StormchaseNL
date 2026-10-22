@@ -87,9 +87,3 @@ def test_zonder_cel_in_de_ronde_toch_afrekenen():
     blok = bron.split("def _controleer_voorspellingen", 1)[1].split("def plan_validatie_opslag", 1)[0]
     assert "val.volg_passagecel(cellen, self._laatste_pos_per_cel)" in blok
     assert "if cel or afstand_passage is not None:" in blok
-
-
-def test_versie():
-    import json
-    manifest = json.loads((ROOT / "manifest.json").read_text(encoding="utf-8"))
-    assert manifest["version"] == "0.56.1"

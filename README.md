@@ -443,6 +443,27 @@ Regels zonder inhoud vallen weg. Het bericht negeert de wachttijd, de
 stilstandcontrole en het stiltevenster, want je hebt zelf een tijdstip
 gekozen. Met `stormchase.send_briefing` stuur je hem direct.
 
+### Harde wind van tevoren
+
+Sinds 0.57.0 kijkt de integratie ook vooruit naar de wind. Per uur telt de
+hoogste verwachte windstoot van Open-Meteo en de KNMI-uurverwachting; boven de
+winddrempel (standaard 60 km/u) komt er een bericht:
+
+- voor morgen vanaf 18:00 de avond ervoor;
+- voor vandaag direct, als dat nog niet gemeld was;
+- per dag een keer per zwaarteklasse (drempel, 75 en 100 km/u): schaalt de
+  verwachting op, dan opnieuw.
+
+```
+Storm op komst
+Krachtige windstoten verwacht morgen (vr 23-10): tot 78 km/u rond 14:00, boven 60 km/u van 13:00 tot 16:00 (KNMI).
+```
+
+Het bericht volgt de schakelaar *Ook bij wind* en het stiltevenster, maar komt
+ook onderweg door. De sensor *Windvooruitblik* geeft de hoogste stoot van
+vandaag en morgen, met per dag het piekuur en het tijdvak boven de drempel;
+het dagelijkse weerbericht noemt het ook.
+
 ### Weersituaties
 
 Naast onweer, regen en wind meldt de integratie sneeuw, ijzel, mist, hitte en

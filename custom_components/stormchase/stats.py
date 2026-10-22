@@ -220,6 +220,7 @@ class Statistieken:
             "cleared": 0,
             "rain_incoming": 0,
             "wind": 0,
+            "wind_vooruit": 0,
             "weather": 0,
             "outlook": 0,
             "shelter": 0,

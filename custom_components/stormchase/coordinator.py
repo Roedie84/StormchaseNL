@@ -52,6 +52,7 @@ from .indices import (
     windschering,
 )
 
+from . import windvooruitblik
 from .const import (
     CLEARED_FACTOR,
     DOMAIN,
@@ -111,6 +112,7 @@ from .const import (
     EVENT_WEATHER,
     OUTLOOK_RANGEN,
     EVENT_WIND,
+    EVENT_WIND_OUTLOOK,
     METEO_HOURLY,
     METEO_INTERVAL,
     D2_KWARTIER,
@@ -1217,6 +1219,47 @@ class MeteoCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
         self.windcorrectie = None
         # 0.53.0: laatste stationsmeting (km/u, epoch) voor de windmelding
         self.wind_gemeten: tuple[float, float] | None = None
+        # 0.57.0: windvooruitblik - welke dag in welke klasse al gemeld is,
+        # de KNMI-bron (AlertCoordinator) en het bewaarplan voor de opslag
+        self.windvooruitblik_gemeld: dict = {}
+        self.knmi_bron = None
+        self.bewaarplan = None
+
+    def _knmi_uren(self) -> list | None:
+        """De KNMI-uurverwachting, als die actueel is (zoals weather.py)."""
+        data = getattr(self.knmi_bron, "data", None)
+        if not isinstance(data, dict) or data.get("bron") != "knmi":
+            return None
+        if (data.get("verouderd_minuten") or 0) > 60:
+            return None
+        return (data.get("knmi_weer") or {}).get("uren") or None
+
+    def _windvooruitblik(self, hourly: dict) -> dict:
+        """Harde wind de komende dagen, en melden als dat aan de orde is (0.57.0)."""
+        nu = dt_util.now()
+        drempel = float(self._opt(CONF_WIND_THRESHOLD, DEFAULT_WIND_THRESHOLD))
+        uren = windvooruitblik.per_uur(hourly, self._knmi_uren(), nu.tzinfo)
+        overzicht = windvooruitblik.dagen(uren, nu, drempel)
+        self.windvooruitblik_gemeld = windvooruitblik.gemeld_opschonen(self.windvooruitblik_gemeld, nu)
+        melding = windvooruitblik.te_melden(overzicht, nu, self.windvooruitblik_gemeld)
+        if melding is not None:
+            self.windvooruitblik_gemeld[melding["datum"]] = melding["klasse"]
+            titel, tekst = windvooruitblik.bericht(melding, drempel)
+            if self.stats is not None:
+                self.stats.noteer_event("wind_vooruit")
+            self.hass.bus.async_fire(
+                EVENT_WIND_OUTLOOK, {**melding, "drempel": drempel, "titel": titel, "bericht": tekst}
+            )
+            if self.bewaarplan is not None:
+                self.bewaarplan.plan()
+        komend = [d["max_kmh"] for d in overzicht[:2]]
+        return {
+            "drempel": drempel,
+            "max_kmh": max(komend) if komend else None,
+            "dagen": overzicht,
+            "knmi": self._knmi_uren() is not None,
+            "gemeld": dict(self.windvooruitblik_gemeld),
+        }
 
     def _wind(self, model) -> dict:
         """Windstoten na correctie met de stationsmeting (0.51.0)."""
@@ -1759,5 +1802,7 @@ class MeteoCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
             "current": payload.get("current") or {},
             "hourly": hourly,
             "hourly_index": index,
+            # 0.57.0: harde wind de komende dagen
+            "windvooruitblik": self._windvooruitblik(hourly),
             "daily": payload.get("daily") or {},
         })

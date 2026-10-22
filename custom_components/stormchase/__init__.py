@@ -208,6 +208,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             "meting_druk": meting.druk_naar_opslag(),
             # 0.51.0: paren modelwindstoot/stationsmeting
             "windcorrectie": windcorrectie.naar_opslag(),
+            # 0.57.0: welke dagen de windvooruitblik al meldde
+            "windvooruitblik": dict(meteo.windvooruitblik_gemeld),
         }
 
     staatplan.plannen = lambda: staat_opslag.async_delay_save(
@@ -217,6 +219,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     waarschuwingen.herstel_gemeld(staat.get("gemeld"))
     notifier.herstel(staat.get("notifier"))
     meting.herstel_druk(staat.get("meting_druk"))
+    if isinstance(staat.get("windvooruitblik"), dict):
+        meteo.windvooruitblik_gemeld = dict(staat["windvooruitblik"])
 
     # 0.51.0: modelwindstoten bijstellen met wat het station meet. Elke
     # nieuwe stationsmeting wordt gekoppeld aan de modelwaarde van dat moment.
@@ -252,6 +256,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     storm.bewaarplan = staatplan
     waarschuwingen.bewaarplan = staatplan
     notifier.bewaarplan = staatplan
+    meteo.bewaarplan = staatplan
+    meteo.knmi_bron = waarschuwingen
 
     laatste_opslag = Store(hass, 1, f"{LAATSTE_SLEUTEL}_{entry.entry_id}")
     laatste = await laatste_opslag.async_load() or {}

@@ -49,6 +49,7 @@ from .const import (
     EVENT_OUTLOOK,
     EVENT_WEATHER,
     EVENT_WIND,
+    EVENT_WIND_OUTLOOK,
     ONDERWEG_RELEVANT,
     RICHTINGEN,
 )
@@ -159,6 +160,7 @@ class StormNotifier:
             self.hass.bus.async_listen(EVENT_RAIN_INCOMING, self._handle_rain),
             self.hass.bus.async_listen(EVENT_ALERT, self._handle_alert),
             self.hass.bus.async_listen(EVENT_WIND, self._handle_wind),
+            self.hass.bus.async_listen(EVENT_WIND_OUTLOOK, self._handle_wind_outlook),
             self.hass.bus.async_listen(EVENT_WEATHER, self._handle_weather),
             self.hass.bus.async_listen(EVENT_OUTLOOK, self._handle_outlook),
             self.hass.bus.async_listen(EVENT_SHELTER, self._handle_shelter),
@@ -588,6 +590,26 @@ class StormNotifier:
             return "Vorst", tekst + "."
 
         return "Weer", f"Weersituatie: {soort}."
+
+    @callback
+    async def _handle_wind_outlook(self, event: Event) -> None:
+        """Harde wind verwacht, vandaag of morgen (0.57.0).
+
+        Een vooraankondiging: geen stilstandcontrole (ook onderweg wil je
+        weten dat morgen een stormdag wordt) en geen wachttijd (de coordinator
+        meldt elke dag hoogstens een keer per zwaarteklasse). Wel het
+        stiltevenster en dezelfde schakelaar als de windmelding.
+        """
+        if not self._opt(CONF_WIND_NOTIFY, True):
+            return
+        if not self.ingeschakeld or not self.diensten:
+            return
+        if self._in_stiltevenster():
+            return
+        bericht = event.data.get("bericht")
+        if not bericht:
+            return
+        await self._stuur(bericht, "wind_vooruit", titel=event.data.get("titel") or "Harde wind op komst")
 
     @callback
     async def _handle_weather(self, event: Event) -> None:

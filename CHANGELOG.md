@@ -5,6 +5,15 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.57.0] — 2026-10-22
+
+### Toegevoegd
+
+- **Windvooruitblik: harde wind van tevoren melden.** Gevraagd 21-10 met storm Austen op komst: "hoe gaat de storm chase app daarmee om". De windmelding keek alleen naar nu, de vooruitblik alleen naar onweer; een stormdag kwam pas binnen via een KNMI-code of op het moment zelf.
+- Nieuw `windvooruitblik.py`: per uur de hoogste verwachte windstoot van Open-Meteo en de KNMI-uurverwachting (zolang die actueel is), per dag (vandaag, morgen, overmorgen) de hoogste stoot, het piekuur, de bron en het tijdvak boven de winddrempel. Zwaarteklassen: drempel, 75 en 100 km/u.
+- Melding (event `stormchase_wind_outlook`): morgen vanaf 18:00 de avond ervoor, vandaag direct; per dag een keer per klasse, opnieuw bij opschalen. Titel "Harde wind op komst" of vanaf 75 km/u "Storm op komst". Volgt *Ook bij wind* en het stiltevenster; geen stilstandcontrole of wachttijd. Wat al gemeld is, blijft over een herstart bewaard.
+- Sensor *Windvooruitblik* (km/u, hoogste van vandaag en morgen) met per dag de details; regel "Harde wind: ..." in het dagelijkse weerbericht. Teller `wind_vooruit` in de diagnostiek.
+
 ## [0.56.1] — 2026-10-22
 
 ### Opgelost

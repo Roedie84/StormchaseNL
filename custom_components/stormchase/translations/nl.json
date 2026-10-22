@@ -279,6 +279,9 @@
       "hail": {
         "name": "Hagelkans"
       },
+      "wind_outlook": {
+        "name": "Windvooruitblik"
+      },
       "wind_gusts": {
         "name": "Windstoten"
       },

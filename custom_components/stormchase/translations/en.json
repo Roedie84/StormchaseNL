@@ -279,6 +279,9 @@
       "hail": {
         "name": "Hail potential"
       },
+      "wind_outlook": {
+        "name": "Wind outlook"
+      },
       "wind_gusts": {
         "name": "Wind gusts"
       },

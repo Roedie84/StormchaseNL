@@ -176,6 +176,24 @@ class Briefing:
 
         return deel + "."
 
+    def _regel_wind_vooruit(self) -> str | None:
+        """Harde wind vandaag of morgen, boven de drempel (0.57.0)."""
+        meteo = self._gegevens.get("meteo")
+        if meteo is None or not meteo.data:
+            return None
+        vooruit = meteo.data.get("windvooruitblik") or {}
+        delen = []
+        for dag in (vooruit.get("dagen") or [])[:2]:
+            if not dag.get("klasse"):
+                continue
+            deel = f"{dag['dag']} stoten tot {dag['max_kmh']} km/u rond {dag['piek_om']}"
+            if dag.get("boven_drempel_van"):
+                deel += f" ({dag['boven_drempel_van']}-{dag['boven_drempel_tot']})"
+            delen.append(deel)
+        if not delen:
+            return None
+        return "Harde wind: " + "; ".join(delen) + "."
+
     def _regel_neerslag(self) -> str | None:
         """Wat er de komende twee uur valt."""
         regen = self._gegevens.get("rain")
@@ -303,6 +321,7 @@ class Briefing:
             self._regel_waarschuwing(),
             self._regel_nu(),
             self._regel_vandaag(),
+            self._regel_wind_vooruit(),
             self._regel_neerslag(),
             self._regel_onweer(),
         ]

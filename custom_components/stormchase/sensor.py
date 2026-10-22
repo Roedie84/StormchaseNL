@@ -159,6 +159,14 @@ METEO_SENSORS: tuple[MeteoSensorDescription, ...] = (
         suggested_display_precision=0,
         value=lambda data: data.get("windstoten"),
     ),
+    # 0.57.0: hoogste verwachte windstoot vandaag en morgen, per dag erbij
+    MeteoSensorDescription(
+        key="wind_outlook",
+        translation_key="wind_outlook",
+        native_unit_of_measurement="km/h",
+        suggested_display_precision=0,
+        value=lambda data: (data.get("windvooruitblik") or {}).get("max_kmh"),
+    ),
     MeteoSensorDescription(
         key="wind_shear_6km",
         translation_key="wind_shear_6km",
@@ -548,6 +556,8 @@ class MeteoSensor(CoordinatorEntity[MeteoCoordinator], SensorEntity):
         data = self.coordinator.data
         if data and self.entity_description.key == "rain_starts":
             return _regen_attributen(data)
+        if data and self.entity_description.key == "wind_outlook":
+            return data.get("windvooruitblik")
         if not data or self.entity_description.key != "wind_gusts":
             return None
         wind = data.get("windcorrectie") or {}
