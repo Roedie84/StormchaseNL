@@ -351,3 +351,15 @@ laatste ronde: 22-10 07:40, gemeten t/m 22-10 07:45
 - Hypotheses: H-SC-3 (regenstart lange horizon), H-SC-6 (snelheid na celwissel; L-SC-013 open), H-SC-8 (passage bij id-wissel; gebouwd 0.56.1, toets bij onweer). Geen release.
 
 laatste ronde: 22-10 11:40, gemeten t/m 22-10 11:45
+
+## 22-10 15:40 · tussenronde
+- Actief 0.57.0 (herstarts 14:18, 14:34, 15:27 door installaties elders). **Onweer:** eerste inslagen < 50 km 14:34 (2), vanaf 15:20 snel groeiend tot 372 om 15:45; < 25 km 1 (15:41), < 10 km 0. Locatie tracker. KNMI groen (geen code), ensemble 0 %, onweersverwachting "Geen onweer verwacht" → de modellen misten het (CAPE 110-230).
+- `onweer_nadert` aan 14:22 (cel 78 km; 12 min vóór de eerste inslag < 50 km), uit 14:36, aan 14:40-15:00, aan sinds 15:14. Afstand 46,2 (15:21) → 23,7 km (15:41) ≈ 67 km/u radiaal. Aankomst 15:43 "28 min" (→ ~16:11): uitslag volgende ronde.
+- **H-SC-6 sterk bevestigd, nu ook voor de celsnelheid:** `celsnelheid` 14:20-15:34 37 % van de tijd > 120 km/u, max 407 (14:58), mediaan 42; `naderingssnelheid` max 137,6 (14:25). Code: zwaartepunt mag 40 km verspringen (`CONTINUITEIT_KM`), regressie al na 2 min → een snel groeiende cel geeft 150-400 km/u. Die waarde gaat de meldtekst in ("Cel trekt … met … km/u") en de passage. → **L-SC-014** (open: meldgedrag).
+- Meetfout bij de herstart 15:27:18: `inslagen_binnen_50_km` 28 s lang 486 (ervoor 10, erna 11). n=1; code nalezen in de dagafsluiting.
+- **Windvooruitblik (0.57.0), eerste toets:** vandaag 60 km/u om 13:00 voorspeld (KNMI, gemeld) tegen gemeten max 51,8 (12-13 u, Hupsel 2,6 km) → +8 km/u, drempel 60 niet gehaald = 1 vals alarm (n=1). Nu: vandaag 53, morgen 72 (19-24 u), za 67.
+- Windstoten 11-15 u: bias +4,4 km/u (MAE 4,4) bij dalende meting (44,6 → 37,7) → past bij "te hoog bij afname" (H-SC-9-kandidaat, 3 van 4 perioden vandaag).
+- Bronnen: buienradar hapert sinds 06:50 (5 op rij, DNS), 95 %; KNMI-nowcast dekt; rest ≥ 97 %. Radarbeeld 5 min oud.
+- Hypotheses: H-SC-3 (regenstart lange horizon), H-SC-6 (snelheid bij celwissel en groei; L-SC-013 en L-SC-014 open), H-SC-8 (passage bij id-wissel, 0.56.1; uitslag van dit onweer in de dagafsluiting). Geen release.
+
+laatste ronde: 22-10 15:40, gemeten t/m 22-10 15:45

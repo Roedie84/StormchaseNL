@@ -44,3 +44,4 @@
 | Bronnen per dag | 99,82 % (2.715 rondes) | 21-10 | 22-10 03:40 |
 | Windstoten bias dag (uurgemiddelden) | +0,89 km/u, MAE 2,16 (nacht +0,52) | 21-10, n=24 | 22-10 03:40 |
 | Passages met gemeten afstand | 19/26 (73 %) vóór 0.56.1 | t/m 21-10 | 22-10 03:40 |
+| Celsnelheid > 120 km/u (tijdsaandeel tijdens onweer) | 37 %, max 407, mediaan 42 | 22-10 14:20-15:34 | 22-10 15:40 |
