@@ -87,7 +87,7 @@ Status: open / akkoord / afgewezen / gebouwd vX / geverifieerd / teruggedraaid. 
 - Status: **gebouwd 0.56.0** (19-10, andere sessie) — **nog niet actief** (21-10 19:40): `regencorrectie.vorm` geen, leave-one-out geen 10,3 / verschuiving 9,6 / verhouding 9,3 min (−9,7 %), eis ≥ 10 % kleiner. Meten: elke ronde vorm/afwijking; zodra actief: afwijking gecorrigeerd tegen kaal (KNMI, n ≥ 10 nieuwe uitkomsten) en meldingen die pas kwamen toen het al regende.
 
 ## L-SC-012 · passage afrekenen ook als de cel een nieuw id kreeg (meetfout)
-- Status: **gepland (zelf bouwen: meetfout; raakt geen drempels of meldgedrag)** — volgende dagafsluiting.
+- Status: **gebouwd 0.56.1** (22-10 03:48, dagafsluiting; zelf gebouwd: meetfout; workflow groen, HACS ververst; wacht op installatie). Opvolgercel ≤ 15 km van de laatste plek (ook keten), `gemeten_via` in de uitkomst, afrekenen ook zonder cel in de ronde als er een meting is. 7 tests `tests/test_release_0561.py`, suite 800 groen. Meten: aandeel passages met afstand ≥ 90 % bij de volgende onweersdag; `gemeten_via` "opvolger" komt voor. (eerder: gepland)
 - Onderbouwing: 17-10 drie passages (13:37 42,4 km, 15:48 39,2 km, 16:05) zonder gemeten afstand (`werkelijke_afstand_km` null) terwijl de inslagen op 36-42 km lagen. `passage_afgerond` zoekt `_min_per_cel[open_cel]`; bij een nieuwe cel-id (opknippen/samengaan) is die er niet, en zonder `cel` in de ronde wordt hij alleen via `verlopen` als mis afgesloten. Passage totaal 19/26 met afstand.
 - Voorstel: bij ontbrekende id terugvallen op de kleinste afstand van een cel binnen ~15 km en ±30° van de voorspelde baan in het passagevenster; vastleggen welke route (`gemeten_via`).
 - Meten: aandeel passages met afstand (nu 73 %) → ≥ 90 % bij de volgende onweersdag.

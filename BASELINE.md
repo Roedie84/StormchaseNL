@@ -41,3 +41,6 @@
 | Radarbeeld-wissels | mediaan 3,0 min, max 7,8 | 20-10, n=485 | 21-10 19:40 |
 | Regen KNMI afwijking | mediaan −7 min, 33 eerder / 13 later; LOO-correctie −9,7 % (niet actief) | n=46 | 21-10 19:40 |
 | Passage met gemeten afstand | 19/26 (73 %); 17-10 0/3 | bewaard t/m 21-10 | 21-10 19:40 |
+| Bronnen per dag | 99,82 % (2.715 rondes) | 21-10 | 22-10 03:40 |
+| Windstoten bias dag (uurgemiddelden) | +0,89 km/u, MAE 2,16 (nacht +0,52) | 21-10, n=24 | 22-10 03:40 |
+| Passages met gemeten afstand | 19/26 (73 %) vóór 0.56.1 | t/m 21-10 | 22-10 03:40 |
