@@ -215,6 +215,9 @@ MAX_SNELHEID = 400               # km/u; hierboven is het geen echte beweging
 LOCATIE_GESCHIEDENIS = 400       # aantal bewaarde locatiepunten
 
 EVENT_WIND = f"{DOMAIN}_wind"
+# 0.58.2: live windmelding rustig houden bij stoten rond de drempel
+WIND_HYSTERESE = 10.0            # km/u onder de drempel voor weer 'niet winderig'
+WIND_MIN_INTERVAL = 120          # minuten: hoogstens één windmelding per 2 uur
 # 0.57.0: harde wind van tevoren (windvooruitblik.py)
 EVENT_WIND_OUTLOOK = f"{DOMAIN}_wind_outlook"
 

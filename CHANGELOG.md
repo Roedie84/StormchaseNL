@@ -5,6 +5,19 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.58.2] — 2026-10-22
+
+### Opgelost
+
+- **Minder windmeldingen.** 22-10 kwamen er binnen een paar uur drie vooruitblikmeldingen: "vandaag" bij precies 60 km/u (de drempel, in het lopende uur), "morgen" 63 km/u (Open-Meteo) en om 18:51 nog eens "morgen" 77 km/u (KNMI). Nu:
+  - per dag in principe een melding; opnieuw alleen bij een echte opschaling: naar klasse 3 (100 km/u of meer) of minstens 15 km/u hoger dan gemeld;
+  - pas melden vanaf drempel + 5 km/u (niet bij 60-64 km/u bij drempel 60);
+  - "vandaag" alleen als het tijdvak boven de drempel minstens een uur in de toekomst begint en de dag nog niet als "morgen" gemeld was; het lopende uur telt niet;
+  - morgen blijft vanaf 18:00 met de hoogste van beide bronnen.
+- De opslag bewaart per dag klasse en km/u (`{"klasse", "kmh"}`); de oude vorm `{datum: klasse}` blijft leesbaar (km/u dan de ondergrens van de klasse). Over een herstart wordt niets opnieuw gemeld.
+- **Live windmelding knippert niet meer rond de drempel.** Hysterese: eenmaal winderig pas weer "niet winderig" onder drempel min 10 km/u. En hoogstens een windmelding per 2 uur, ook als de algemene wachttijd korter staat.
+- Nieuw veld per dag in de windvooruitblik: `eerste_boven` (eerste uur boven de drempel).
+
 ## [0.58.1] — 2026-10-22
 
 ### Opgelost

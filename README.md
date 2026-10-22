@@ -458,10 +458,17 @@ Sinds 0.57.0 kijkt de integratie ook vooruit naar de wind. Per uur telt de
 hoogste verwachte windstoot van Open-Meteo en de KNMI-uurverwachting; boven de
 winddrempel (standaard 60 km/u) komt er een bericht:
 
-- voor morgen vanaf 18:00 de avond ervoor;
-- voor vandaag direct, als dat nog niet gemeld was;
-- per dag een keer per zwaarteklasse (drempel, 75 en 100 km/u): schaalt de
-  verwachting op, dan opnieuw.
+- pas vanaf 5 km/u boven de drempel (bij 60 km/u dus vanaf 65 km/u);
+- voor morgen vanaf 18:00 de avond ervoor, met de hoogste van beide bronnen;
+- voor vandaag alleen als het tijdvak boven de drempel minstens een uur later
+  begint (wat nu al waait is voor de live windmelding) en de dag nog niet als
+  morgen gemeld was;
+- per dag in principe een bericht; opnieuw alleen bij een echte opschaling:
+  naar 100 km/u of meer, of minstens 15 km/u hoger dan wat al gemeld is.
+
+Wat gemeld is blijft over een herstart bewaard. De live windmelding heeft sinds
+0.58.2 hysterese (pas weer "niet winderig" onder drempel min 10 km/u) en komt
+hoogstens een keer per 2 uur.
 
 ```
 Storm op komst

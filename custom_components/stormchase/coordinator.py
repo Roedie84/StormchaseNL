@@ -112,6 +112,7 @@ from .const import (
     EVENT_WEATHER,
     OUTLOOK_RANGEN,
     EVENT_WIND,
+    WIND_HYSTERESE,
     EVENT_WIND_OUTLOOK,
     METEO_HOURLY,
     METEO_INTERVAL,
@@ -1249,9 +1250,10 @@ class MeteoCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
         uren = windvooruitblik.per_uur(hourly, self._knmi_uren(), nu.tzinfo)
         overzicht = windvooruitblik.dagen(uren, nu, drempel)
         self.windvooruitblik_gemeld = windvooruitblik.gemeld_opschonen(self.windvooruitblik_gemeld, nu)
-        melding = windvooruitblik.te_melden(overzicht, nu, self.windvooruitblik_gemeld)
+        melding = windvooruitblik.te_melden(overzicht, nu, self.windvooruitblik_gemeld, drempel)
         if melding is not None:
-            self.windvooruitblik_gemeld[melding["datum"]] = melding["klasse"]
+            # 0.58.2: klasse en km/u bewaren (opnieuw pas bij +15 km/u of klasse 3)
+            self.windvooruitblik_gemeld[melding["datum"]] = windvooruitblik.als_gemeld(melding)
             titel, tekst = windvooruitblik.bericht(melding, drempel)
             if self.stats is not None:
                 self.stats.noteer_event("wind_vooruit")
@@ -1468,7 +1470,12 @@ class MeteoCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
             return
 
         drempel = float(self._opt(CONF_WIND_THRESHOLD, DEFAULT_WIND_THRESHOLD))
-        winderig = windstoten >= drempel
+        # 0.58.2: hysterese - eenmaal winderig blijft het dat tot onder
+        # drempel - WIND_HYSTERESE, zodat stoten rond de drempel niet knipperen
+        if self._was_winderig:
+            winderig = windstoten >= drempel - WIND_HYSTERESE
+        else:
+            winderig = windstoten >= drempel
 
         if winderig and self._was_winderig is False:
             if self.stats is not None:

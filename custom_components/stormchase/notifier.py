@@ -49,6 +49,7 @@ from .const import (
     EVENT_OUTLOOK,
     EVENT_WEATHER,
     EVENT_WIND,
+    WIND_MIN_INTERVAL,
     EVENT_WIND_OUTLOOK,
     ONDERWEG_RELEVANT,
     RICHTINGEN,
@@ -515,8 +516,10 @@ class StormNotifier:
         if self._in_stiltevenster() or not self._ter_plaatse():
             return
 
-        wacht = int(self._opt(CONF_NOTIFY_COOLDOWN, DEFAULT_NOTIFY_COOLDOWN))
-        if wacht > 0 and self._laatste_wind is not None:
+        # 0.58.2: hoogstens één windmelding per WIND_MIN_INTERVAL minuten,
+        # ook als de algemene wachttijd korter staat (live: 5 minuten)
+        wacht = max(int(self._opt(CONF_NOTIFY_COOLDOWN, DEFAULT_NOTIFY_COOLDOWN)), WIND_MIN_INTERVAL)
+        if self._laatste_wind is not None:
             verstreken = (dt_util.utcnow() - self._laatste_wind).total_seconds()
             if verstreken < wacht * 60:
                 return
@@ -597,7 +600,8 @@ class StormNotifier:
 
         Een vooraankondiging: geen stilstandcontrole (ook onderweg wil je
         weten dat morgen een stormdag wordt) en geen wachttijd (de coordinator
-        meldt elke dag hoogstens een keer per zwaarteklasse). Wel het
+        meldt elke dag in principe een keer, sinds 0.58.2 opnieuw alleen bij
+        klasse 3 of minstens 15 km/u meer). Wel het
         stiltevenster en dezelfde schakelaar als de windmelding.
         """
         if not self._opt(CONF_WIND_NOTIFY, True):

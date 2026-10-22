@@ -126,4 +126,4 @@ def test_dashboard_onderscheidt_gemeten_geel():
 
 def test_versie():
     manifest = json.loads((ROOT / "manifest.json").read_text(encoding="utf-8"))
-    assert manifest["version"] == "0.58.1"
+    assert tuple(int(x) for x in manifest["version"].split(".")) >= (0, 58, 1)

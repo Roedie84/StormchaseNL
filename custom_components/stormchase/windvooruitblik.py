@@ -17,6 +17,18 @@ Melden:
 * elke dag één keer per zwaarteklasse (drempel, 75, 100 km/u): schaalt het op,
   dan opnieuw.
 
+0.58.2 (22-10, "veel meldingen van storm nu"): drie meldingen op één middag
+(vandaag 60 km/u precies op de drempel in het lopende uur, morgen 63 uit
+Open-Meteo en daarna 77 uit KNMI). Nu:
+* per dag in principe één melding; opnieuw alleen bij een echte opschaling:
+  naar klasse 3 (100 km/u) of minstens OPSCHALING_KMH hoger dan gemeld;
+* pas melden vanaf drempel + MARGE_KMH;
+* vandaag alleen als het tijdvak boven de drempel minstens een uur in de
+  toekomst begint (het lopende uur telt niet; dat is de live windmelding) en
+  de dag nog niet als morgen gemeld was;
+* `gemeld` is {datum: {"klasse", "kmh"}}; de oude vorm {datum: klasse} blijft
+  leesbaar.
+
 Bewust zonder Home Assistant, zodat het los te testen is.
 """
 
@@ -26,6 +38,10 @@ from datetime import date, datetime, timedelta, tzinfo
 
 MELD_VANAF_UUR = 18
 KLASSEN = (75.0, 100.0)
+# 0.58.2: rust in de meldingen
+MARGE_KMH = 5.0
+OPSCHALING_KMH = 15.0
+VOORLOOP = timedelta(hours=1)
 DAGEN = 3
 DAGNAMEN = ("ma", "di", "wo", "do", "vr", "za", "zo")
 
@@ -122,6 +138,8 @@ def dagen(uren: dict, nu: datetime, drempel: float, aantal: int = DAGEN) -> list
             "boven_drempel_tot": _tot(boven[-1]) if aaneen else None,
             "uren_boven_drempel": len(boven),
             "aaneengesloten": aaneen,
+            # 0.58.2: het eerste uur boven de drempel (ook bij losse uren)
+            "eerste_boven": boven[0].isoformat() if boven else None,
             "hele_dag": len(boven) == 24,
             "klasse": klasse(piek, drempel),
         })
@@ -129,17 +147,81 @@ def dagen(uren: dict, nu: datetime, drempel: float, aantal: int = DAGEN) -> list
     return uit
 
 
-def te_melden(dagoverzicht: list[dict], nu: datetime, gemeld: dict) -> dict | None:
-    """De dag die nu gemeld moet worden, of None. `gemeld`: {datum: klasse}."""
+def vorige(gemeld: dict, datum: str, drempel: float) -> tuple[int, float] | None:
+    """(klasse, km/u) zoals gemeld, of None (0.58.2).
+
+    De oude opslag {datum: klasse} kent geen km/u; dan de ondergrens van die
+    klasse (drempel, 75, 100).
+    """
+    waarde = (gemeld or {}).get(datum)
+    if waarde is None:
+        return None
+    if isinstance(waarde, dict):
+        try:
+            k = int(waarde.get("klasse") or 0)
+            kmh = waarde.get("kmh")
+            kmh = float(kmh) if kmh is not None else None
+        except (TypeError, ValueError):
+            return None
+    else:
+        try:
+            k, kmh = int(waarde), None
+        except (TypeError, ValueError):
+            return None
+    if k <= 0:
+        return None
+    if kmh is None:
+        grenzen = (drempel, *[g for g in KLASSEN if g > drempel])
+        kmh = grenzen[min(k, len(grenzen)) - 1]
+    return k, kmh
+
+
+def als_gemeld(d: dict) -> dict:
+    """Wat er van een melding bewaard wordt (0.58.2)."""
+    return {"klasse": int(d["klasse"]), "kmh": d["max_kmh"]}
+
+
+def te_melden(dagoverzicht: list[dict], nu: datetime, gemeld: dict,
+              drempel: float | None = None) -> dict | None:
+    """De dag die nu gemeld moet worden, of None.
+
+    `gemeld`: {datum: {"klasse", "kmh"}} (of de oude vorm {datum: klasse}).
+    `drempel`: de winddrempel (standaard 60 km/u).
+    """
     vandaag = nu.date().isoformat()
     for d in dagoverzicht:
         if d["dag"] == "morgen" and nu.hour < MELD_VANAF_UUR:
             continue
         if d["datum"] != vandaag and d["dag"] != "morgen":
             continue
-        if d["klasse"] > int(gemeld.get(d["datum"], 0)):
+        if not d.get("klasse"):
+            continue
+        grens = 60.0 if drempel is None else float(drempel)
+        if d["max_kmh"] < grens + MARGE_KMH:
+            continue
+        eerder = vorige(gemeld, d["datum"], grens)
+        if eerder is None:
+            if d["datum"] == vandaag and not _komt_nog(d, nu):
+                continue
+            return d
+        k, kmh = eerder
+        if (d["klasse"] >= 3 and k < 3) or d["max_kmh"] >= kmh + OPSCHALING_KMH:
             return d
     return None
+
+
+def _komt_nog(d: dict, nu: datetime) -> bool:
+    """Begint het tijdvak boven de drempel minstens een uur na nu? (0.58.2)"""
+    eerste = d.get("eerste_boven")
+    if not eerste:
+        return False
+    try:
+        moment = datetime.fromisoformat(eerste)
+    except (TypeError, ValueError):
+        return False
+    if moment.tzinfo is None and nu.tzinfo is not None:
+        moment = moment.replace(tzinfo=nu.tzinfo)
+    return moment >= nu + VOORLOOP
 
 
 def bericht(d: dict, drempel: float) -> tuple[str, str]:
