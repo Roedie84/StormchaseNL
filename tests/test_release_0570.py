@@ -121,4 +121,4 @@ def test_ingebouwd():
 def test_versie():
     import json
     manifest = json.loads((ROOT / "manifest.json").read_text(encoding="utf-8"))
-    assert manifest["version"] == "0.57.0"
+    assert tuple(int(x) for x in manifest["version"].split(".")) >= (0, 57, 0)

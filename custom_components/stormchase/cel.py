@@ -34,6 +34,21 @@ MAX_CELGROOTTE_KM = 60.0
 # geen betekenis.
 MIN_CELSNELHEID = 5.0
 
+# Boven deze snelheid is het geen beweging van de bui maar een verspringend
+# zwaartepunt: bij een snel groeiende cel komen er aan een kant inslagen bij
+# en schuift het midden mee. Op 22-10 rekende de cel zo 37 % van de tijd
+# boven de 120 km/u (max 407) terwijl de bui werkelijk ~67 km/u ging
+# (L-SC-014). Zo'n snelheid telt als onbekend: geen richting, geen passage.
+MAX_CELSNELHEID = 120.0
+
+# Een spoor korter dan dit zegt nog niets betrouwbaars over de richting.
+MIN_SPOORDUUR = 300  # seconden
+
+# Verspringt het zwaartepunt tussen twee rondes meer dan dit (of meer dan
+# MAX_CELSNELHEID over de verstreken tijd), dan begint de reeks opnieuw. De
+# cel houdt zijn kenmerk; alleen de snelheidsmeting start opnieuw.
+SPRONG_KM = 10.0
+
 # Verder vooruit dan dit is de passage niet meer betrouwbaar. Gemeten over
 # echte buien: tot een kwartier vooruit zat hij er 0,2 kilometer naast, tot
 # drie kwartier 3,8 kilometer, en daarboven 16,9 kilometer met een trefkans
@@ -209,7 +224,7 @@ def beweging_van_reeks(
 
     tijden = [t for t, _, _ in reeks]
     duur = tijden[-1] - tijden[0]
-    if duur < 120:  # minder dan twee minuten zegt te weinig
+    if duur < MIN_SPOORDUUR:  # te kort spoor zegt te weinig (L-SC-014)
         return None
 
     gem_t = sum(tijden) / len(tijden)
@@ -226,6 +241,41 @@ def beweging_van_reeks(
 
     # Van km per seconde naar km per uur
     return (vx * 3600, vy * 3600)
+
+
+def is_sprong(
+    vorige: tuple[float, float, float], nu: float, lat: float, lon: float
+) -> bool:
+    """Verspringt het zwaartepunt meer dan een bui in die tijd kan afleggen?"""
+    t_vorig, vorige_lat, vorige_lon = vorige
+    x, y = naar_km(lat, lon, vorige_lat, vorige_lon)
+    grens = max(SPRONG_KM, MAX_CELSNELHEID * max(nu - t_vorig, 0) / 3600)
+    return math.hypot(x, y) > grens
+
+
+def geldige_beweging(
+    reeks: list[tuple[float, float, float]], lat0: float, lon0: float
+) -> tuple[tuple[float, float] | None, float | None]:
+    """De snelheidsvector als die te vertrouwen is, plus de ruwe snelheid.
+
+    Geeft (vector, ruw). De vector is None bij een te kort spoor of een
+    onwaarschijnlijke snelheid; ruw blijft dan staan om te kunnen meten hoe
+    vaak dat gebeurt.
+    """
+    beweging = beweging_van_reeks(reeks, lat0, lon0)
+    if beweging is None:
+        return (None, None)
+    ruw = round(math.hypot(*beweging), 1)
+    if ruw > MAX_CELSNELHEID:
+        return (None, ruw)
+    return (beweging, ruw)
+
+
+def spoorduur(reeks: list[tuple[float, float, float]]) -> int:
+    """Hoe lang het spoor al loopt, in seconden."""
+    if len(reeks) < 2:
+        return 0
+    return int(reeks[-1][0] - reeks[0][0])
 
 
 def passage(
@@ -282,7 +332,9 @@ def volg_cel(
     if geschiedenis:
         _, vorige_lat, vorige_lon = geschiedenis[-1]
         x, y = naar_km(dichtstbij["latitude"], dichtstbij["longitude"], vorige_lat, vorige_lon)
-        if math.hypot(x, y) > CONTINUITEIT_KM:
+        if math.hypot(x, y) > CONTINUITEIT_KM or is_sprong(
+            geschiedenis[-1], nu, dichtstbij["latitude"], dichtstbij["longitude"]
+        ):
             geschiedenis = []
 
     geschiedenis = geschiedenis + [
@@ -301,11 +353,14 @@ def volg_cel(
         "richting": None,
         "richting_graden": None,
         "snelheid": None,
+        "snelheid_ruw": None,
+        "spoorduur": spoorduur(geschiedenis),
         "passage_over": None,
         "passage_afstand": None,
     }
 
-    beweging = beweging_van_reeks(geschiedenis, lat0, lon0)
+    beweging, ruw = geldige_beweging(geschiedenis, lat0, lon0)
+    resultaat["snelheid_ruw"] = ruw
     if beweging is None:
         return resultaat
 
@@ -410,6 +465,12 @@ def volg_cellen(
             vorig = beschikbaar.pop(beste[1])
             kenmerk = vorig["id"]
             punten_spoor = vorig["punten"]
+            # Zelfde cel, maar het zwaartepunt verspringt: snelheidsmeting
+            # opnieuw beginnen (L-SC-014).
+            if punten_spoor and is_sprong(
+                punten_spoor[-1], nu, cel["latitude"], cel["longitude"]
+            ):
+                punten_spoor = []
 
         punten_spoor = (punten_spoor + [(nu, cel["latitude"], cel["longitude"])])[-40:]
         nieuwe_sporen.append({"id": kenmerk, "punten": punten_spoor})
@@ -422,11 +483,13 @@ def volg_cellen(
             "richting": None,
             "richting_graden": None,
             "snelheid": None,
+            "snelheid_ruw": None,
+            "spoorduur": spoorduur(punten_spoor),
             "passage_over": None,
             "passage_afstand": None,
         }
 
-        beweging = beweging_van_reeks(punten_spoor, lat0, lon0)
+        beweging, gegevens["snelheid_ruw"] = geldige_beweging(punten_spoor, lat0, lon0)
         if beweging is not None:
             vx, vy = beweging
             snelheid = math.hypot(vx, vy)

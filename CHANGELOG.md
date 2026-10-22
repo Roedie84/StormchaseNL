@@ -5,6 +5,15 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.57.1] — 2026-10-22
+
+### Opgelost
+
+- **Onmogelijke celsnelheden niet meer gebruikt (L-SC-014).** Bij een snel groeiende cel versprong het zwaartepunt en rekende de cel 150-400 km/u: op 22-10 lag de celsnelheid 37 % van de tijd boven 120 km/u (max 407), terwijl de bui werkelijk ~67 km/u ging. Die snelheid kwam in de meldtekst ("Cel trekt naar het ... met ... km/u") en in de passage.
+- Een celsnelheid boven 120 km/u of een spoor korter dan 5 minuten (was 2) telt nu als onbekend: geen richting, geen passage, niet in de meldtekst of op de kaart.
+- Verspringt het zwaartepunt tussen twee rondes meer dan 10 km (of meer dan 120 km/u over de verstreken tijd), dan begint de snelheidsmeting opnieuw. De cel houdt zijn kenmerk, zodat de nameting van de passage blijft werken.
+- Meten: attributen `snelheid_ruw` en `spoorduur_s` op *Celsnelheid*, en `snelheid_ruw` per cel bij *Celrichting*.
+
 ## [0.57.0] — 2026-10-22
 
 ### Toegevoegd

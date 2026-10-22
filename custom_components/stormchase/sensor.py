@@ -439,6 +439,15 @@ class StormSensor(CoordinatorEntity[StormCoordinator], SensorEntity):
         if self.entity_description.key == "flash_rate":
             return {"trend": data.frequentie_trend}
 
+        if self.entity_description.key == "cell_speed":
+            # Boven 120 km/u of bij een spoor korter dan 5 minuten is de
+            # snelheid onbekend; de ruwe waarde blijft zichtbaar (L-SC-014).
+            cel = data.cel or {}
+            return {
+                "snelheid_ruw": cel.get("snelheid_ruw"),
+                "spoorduur_s": cel.get("spoorduur"),
+            }
+
         if self.entity_description.key == "cell_direction":
             cel = data.cel or {}
             alle = data.cellen or []
@@ -457,6 +466,7 @@ class StormSensor(CoordinatorEntity[StormCoordinator], SensorEntity):
                         "voorrand": c.get("rand_afstand"),
                         "richting": c.get("richting"),
                         "snelheid": c.get("snelheid"),
+                        "snelheid_ruw": c.get("snelheid_ruw"),
                         "inslagen": c.get("inslagen"),
                         "intensiteit": c.get("intensiteit"),
                         "passage_over": c.get("passage_over"),
