@@ -100,7 +100,7 @@ Status: open / akkoord / afgewezen / gebouwd vX / geverifieerd / teruggedraaid. 
 - Meten: eerste snelheid tegen de snelheid over de hele nadering; aankomst-uitkomsten per onweersdag.
 
 ## L-SC-014 · celsnelheid: onmogelijke snelheden niet gebruiken (validatie)
-- Status: **open** (raakt passage en meldtekst → meldgedrag → Ruud beslist).
+- Status: **uitgevoerd** in 0.57.1 (akkoord Ruud 22-10). Toets: aandeel `snelheid_ruw` > 120 km/u en passage-uitkomsten bij het volgende onweer.
 - Onderbouwing (H-SC-6, 22-10 14:20-15:34, n=400 waarden): `celsnelheid` 37 % van de tijd > 120 km/u, max 407 km/u, mediaan 42; werkelijke nadering ~67 km/u (46,2 → 23,7 km in 20 min). Oorzaak: het zwaartepunt van een snel groeiende cel verspringt (tot 40 km toegestaan, `CONTINUITEIT_KM`) en de regressie start na 2 min (`beweging_van_reeks`). De snelheid gaat de meldtekst in ("Cel trekt naar het … met … km/u") en de passage (`passage_over/afstand`).
 - Voorstel: snelheid > 120 km/u of een reeks korter dan 5 min als "onbekend" behandelen (geen richting/passage, niet in de meldtekst); bij een zwaartepuntsprong > 10 km tussen twee rondes de reeks opnieuw starten.
 - Verwacht effect: geen celsnelheid > 120 km/u in de meldingen; passage alleen bij een stabiel spoor.
