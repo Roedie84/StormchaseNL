@@ -374,3 +374,13 @@ laatste ronde: 22-10 15:40, gemeten t/m 22-10 15:45
 - Hypotheses: H-SC-3 (regenstart lange horizon), H-SC-6 (snelheid bij sprong; L-SC-015 open), H-SC-8 (passage; 1 misser vandaag). Geen release.
 
 laatste ronde: 22-10 19:40, gemeten t/m 22-10 19:45
+
+## 22-10 23:40 · tussenronde
+- Actief **0.58.3** (L-SC-015, andere sessie 20:00; herstarts 20:10 en 22:11). Groen; laatste inslag < 50 km viel 20:52 uit het venster; geen onweer → aankomst, passage en L-SC-015 niet toetsbaar.
+- Herstart-artefact (15:27: 486 inslagen): herstart 20:10 met 15 inslagen in het venster gaf geen sprong (n=1 schoon); 22:11 zonder inslagen niet toetsbaar.
+- **Windstoten 20-24 u:** uurbias +5,0/+8,3/+3,3/+1,9 km/u (gem. +4,6, MAE 4,6). Groot bij dalende meting (15 → 11 km/u), klein bij stijgende (11 → 17) → "te hoog bij afname" nu 5 van 6 perioden vandaag (H-SC-9-kandidaat; wacht op vrije plek).
+- **Windvooruitblik:** morgen 79 km/u (KNMI, klasse 2, > 60 van 20:00 tot 24:00; om 15:40 nog 72), za 69 (open-meteo). Toets morgenavond tegen het station.
+- Bronnen: "buienradar hapert" staat nog (laatste succes 06:50, 5 op rij) terwijl knmi_nowcast 100 % → L-SC-016 blijft gepland. Zelfde patroon bij `meting` (Bright Sky): laatste succes 10:24, 0 op rij mislukt, "in gebruik" — reservebron die niet gevraagd wordt; meenemen in L-SC-016. Radar 100 %, beeld vers.
+- Hypotheses: H-SC-3 (regenstart lange horizon), H-SC-6 (snelheid bij sprong; L-SC-015 gebouwd, toets bij onweer), H-SC-8 (passage). Geen release.
+
+laatste ronde: 22-10 23:40, gemeten t/m 22-10 23:45

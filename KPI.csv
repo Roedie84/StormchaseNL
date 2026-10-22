@@ -316,3 +316,7 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-22 19:40,TUSSEN,sc_windstoten_bias_kmh,6.38,4,"15-19 u uurgemiddelden (+3.2/+6.9/+10.6/+4.7); gemeten dalend 33.1 -> 22.2"
 2026-10-22 19:40,TUSSEN,sc_bronstatus_vals_hapert_uur,9,1,"buienradar 'hapert' sinds ~10:24 (laatste succes 06:50) terwijl knmi_nowcast 100 %; reservebron niet gevraagd -> L-SC-016"
 2026-10-22 19:40,TUSSEN,sc_station_onweer_min,69,1,"onweer_gemeten_bij_station 16:34-17:43"
+2026-10-22 23:40,TUSSEN,sc_windstoten_bias_kmh,4.64,4,"20-24 u uurgemiddelden (+5.0/+8.3/+3.3/+1.9); MAE 4.64; meting 15->11 (dalend) dan 11->17 (stijgend)"
+2026-10-22 23:40,TUSSEN,sc_windvooruitblik_morgen_kmh,79,1,"23-10 KNMI klasse 2, >60 van 20:00-24:00 (15:40: 72)"
+2026-10-22 23:40,TUSSEN,sc_herstart_artefact_inslagen,0,1,"herstart 20:10 met 15 inslagen in venster: geen sprong"
+2026-10-22 23:40,TUSSEN,sc_bronnen_min_slaag_pct,95,15,"buienradar 95 ('hapert', reserve, niet gevraagd); knmi_nowcast 100; rest >= 97"

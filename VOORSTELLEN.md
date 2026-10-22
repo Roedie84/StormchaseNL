@@ -107,7 +107,7 @@ Status: open / akkoord / afgewezen / gebouwd vX / geverifieerd / teruggedraaid. 
 - Meten: tijdsaandeel > 120 km/u per onweersdag (nu 37 %); passage-uitkomsten met afstand.
 
 ## L-SC-015 · naderingsreeks ook opnieuw bij een afstandsprong zonder celwissel
-- Status: **open** (raakt `onweer_nadert`/aankomst en dus meldgedrag → Ruud beslist).
+- Status: **gebouwd 0.58.3** (andere sessie 22-10 20:00; geïnstalleerd, actief na de herstart van 20:10). 23:40: geen onweer sinds → nog niet getoetst. Toets bij het volgende onweer: tijdsaandeel |naderingssnelheid| > 120 km/u en valse aankomsten. Was: **open** (raakt `onweer_nadert`/aankomst en dus meldgedrag → Ruud beslist).
 - Onderbouwing (22-10, na 0.58.0): 17:25-17:32 `naderingssnelheid` −90 → −219 km/u (7 min) terwijl de afstand juist daalde (90,3 → 59,5 km): de dichtstbijzijnde inslag (< 25 km om 17:23) viel uit het venster, de afstand sprong in één ronde ~20 → 90 km en de regressie combineerde beide (geen celwissel → reeks niet gewist). 17:44 omgekeerd: sprong 45,2 → 38,0 km gaf +69 → +108,6 km/u, `onweer_nadert`/geel 17:41-18:00 met aankomst 21-33 min; daarna 0 inslagen < 25 km → vals alarm (n=1). `celsnelheid` bleef tegelijk ≤ 120 (L-SC-014 werkt).
 - Voorstel: een sprong > 15 km tussen twee opeenvolgende afstanden in de reeks, of een regressiesnelheid |v| > 120 km/u (`MAX_CELSNELHEID`), start de reeks opnieuw; snelheid en aankomst pas weer na 3 nieuwe afstanden.
 - Verwacht effect: geen |naderingssnelheid| > 120 km/u; minder valse aankomsten bij uitdovende/verspringende buien.
@@ -117,4 +117,5 @@ Status: open / akkoord / afgewezen / gebouwd vX / geverifieerd / teruggedraaid. 
 - Status: **gepland** (zelf bouwen: alleen classificatie bronstatus; ophalen en terugval ongewijzigd). Dagafsluiting 23-10.
 - Onderbouwing: `sensor.stormchase_bronstatus` staat sinds de DNS-storing van 10:24 de hele dag op "buienradar hapert" (5 op rij mislukt, laatste succes 06:50, laatste fout 15:17). Code `rain.py` `_haal_op`: Buienradar wordt alleen gevraagd als KNMI-nowcast faalt — dus alleen tíjdens een algemene storing; daarna blijft `op_rij_mislukt` ≥ 2 staan tot de volgende KNMI-storing. KNMI-nowcast werkte 10:40-19:45 gewoon (100 %). De status meldt dus een storing die er niet is (meetfout in de rapportage).
 - Bouw: een reservebron die sinds zijn laatste fout niet meer gevraagd is terwijl de hoofdbron weer slaagt, telt niet als haperend maar als "reserve (laatst mislukt HH:MM)"; hapert pas weer als hij gevraagd wordt en faalt. Test: KNMI faalt 2× met Buienradar mee, daarna KNMI 1× goed → status geen "buienradar hapert".
-- Meten: uren per dag dat de bronstatus "hapert" toont terwijl regen via KNMI binnenkomt (22-10: ~9 u).
+- Meten: uren per dag dat de bronstatus "hapert" toont terwijl regen via KNMI binnenkomt (22-10: ~13 u, 10:24-23:45).
+- Aanvulling 23:40: `meting` (Bright Sky) staat "in gebruik" met laatste succes 10:24 en 0 op rij mislukt — ook een reservebron die niet gevraagd wordt; de status zou dat zichtbaar moeten maken (bijv. "reserve, laatst gebruikt HH:MM") in plaats van "in gebruik".
