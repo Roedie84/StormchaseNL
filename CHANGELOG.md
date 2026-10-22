@@ -5,6 +5,12 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.58.3] — 2026-10-22
+
+### Opgelost
+
+- **Naderingsreeks opnieuw na een afstandsprong (L-SC-015).** Valt de dichtstbijzijnde inslag uit het venster, dan springt de afstand: 22-10 van ~20 naar 90 km, en de regressie gaf 7 minuten lang -124..-219 km/u. Omgekeerd gaf een nieuwe, dichtere inslag van een andere bui 45 -> 38 km in 20 s, +108 km/u en een vals nadert-alarm (17:41-18:00). Nu begint de reeks opnieuw bij meer dan 15 km verschil met de vorige afstand, of meer dan 120 km/u tussen twee opeenvolgende afstanden. Die stapsnelheid telt vanaf het eerste punt waarop de vorige afstand gemeten werd: een afstand die minuten gelijk blijft en dan een stap zakt, is een gewone nadering. Na een sprong is de naderingssnelheid (en dus het nadert-alarm en de aankomsttijd) onbekend tot er weer 3 nieuwe afstanden zijn.
+
 ## [0.58.2] — 2026-10-22
 
 ### Opgelost

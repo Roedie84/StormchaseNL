@@ -20,6 +20,16 @@ ander kenmerk), of begint het spoor van dezelfde cel opnieuw omdat het
 zwaartepunt versprong (L-SC-014), dan begint de reeks opnieuw. Anders kwamen
 afstanden van twee cellen in een regressie terecht: 22-10 gaf dat 138 km/u en
 eerder 222 km/u, tegen werkelijk zo'n 35 km/u.
+
+0.58.3 (L-SC-015): de reeks begint ook opnieuw bij een afstandsprong van meer
+dan 15 km, of als de snelheid tussen twee opeenvolgende afstanden meer dan
+120 km/u is. Valt de dichtstbijzijnde inslag uit het venster, dan springt de
+afstand (22-10: 20 naar 90 km, -219 km/u); een nieuwe, dichtere inslag van een
+andere bui gaf 45 naar 38 km in 20 s en +108 km/u met een vals nadert-alarm.
+De stapsnelheid rekent vanaf het eerste punt waarop de vorige afstand gemeten
+werd: de afstand blijft vaak minutenlang gelijk (nieuwe inslagen verder weg)
+en zakt dan in een stap; dat is een gewone nadering, geen sprong. Na een
+sprong is de snelheid onbekend tot er weer genoeg punten zijn.
 """
 
 from __future__ import annotations
@@ -29,6 +39,37 @@ from collections import deque
 # Zonder nieuwe inslag telt een afstandsverschil pas vanaf hier als nieuwe
 # meting. Kleiner is ruis van de GPS of afronding; groter is verplaatsing.
 VERPLAATSING_KM = 0.5
+
+# L-SC-015: grotere stappen zijn geen beweging van een bui maar een wissel van
+# de dichtstbijzijnde inslag; dan begint de reeks opnieuw.
+SPRONG_KM = 15.0
+MAX_STAPSNELHEID_KMH = 120.0
+
+
+def is_sprong(punten, t: float, afstand: float) -> bool:
+    """Is (t, afstand) een sprong ten opzichte van de reeks `punten`? (L-SC-015)
+
+    Meer dan SPRONG_KM verschil met de vorige afstand, of meer dan
+    MAX_STAPSNELHEID_KMH sinds het eerste punt waarop die vorige afstand (binnen
+    VERPLAATSING_KM) gemeten werd.
+    """
+    if not punten:
+        return False
+    vorige = punten[-1][1]
+    verschil = abs(afstand - vorige)
+    if verschil > SPRONG_KM:
+        return True
+    if verschil == 0:
+        return False
+    sinds = punten[-1][0]
+    for tp, dp in reversed(punten):
+        if abs(dp - vorige) >= VERPLAATSING_KM:
+            break
+        sinds = tp
+    dt = t - sinds
+    if dt <= 0:
+        return False
+    return verschil * 3600 / dt > MAX_STAPSNELHEID_KMH
 
 
 def regressiesnelheid(punten: list[tuple[float, float]]) -> float | None:
@@ -75,6 +116,7 @@ class Naderingstrend:
         # Kenmerk van de cel waar de reeks bij hoort (L-SC-013)
         self._cel = None
         self.celwissels = 0
+        self.sprongen = 0
 
     def volg_cel(self, kenmerk, herstart: bool = False) -> bool:
         """Meld welke cel nu gevolgd wordt. True als de reeks opnieuw begint.
@@ -125,6 +167,13 @@ class Naderingstrend:
         self._sleutel = _sleutel(inslag)
         if not nieuw:
             return False
+
+        # L-SC-015: na een afstandsprong begint de reeks opnieuw
+        if is_sprong(self.metingen, nu, afstand):
+            self.metingen.clear()
+            self._snelheid = None
+            self._geldig_tot = None
+            self.sprongen += 1
 
         self.metingen.append((nu, afstand))
         recent = [(t, d) for t, d in self.metingen if t >= nu - self.venster_s]

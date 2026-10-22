@@ -165,6 +165,6 @@ def test_live_hysterese():
 
 def test_versie():
     manifest = json.loads((ROOT / "manifest.json").read_text(encoding="utf-8"))
-    assert manifest["version"] == "0.58.2"
+    assert tuple(int(x) for x in manifest["version"].split(".")) >= (0, 58, 2)
     changelog = (ROOT.parents[1] / "CHANGELOG.md").read_text(encoding="utf-8")
     assert changelog.index("## [0.58.2]") < changelog.index("## [0.58.1]")
