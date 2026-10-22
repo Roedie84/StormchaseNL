@@ -341,3 +341,13 @@ laatste ronde: 22-10 03:40, gemeten t/m 22-10 03:45
 - Hypotheses: H-SC-3 (regenstart lange horizon), H-SC-6 (snelheid na celwissel; L-SC-013 open), H-SC-8 (passage bij id-wissel; gebouwd, toets bij onweer). H-SC-9 genoteerd als kandidaat (max 3 lopend: vervangt H-SC-8 zodra die getoetst is). Geen release.
 
 laatste ronde: 22-10 07:40, gemeten t/m 22-10 07:45
+
+## 22-10 11:40 · tussenronde
+- Geen onweer (0 inslagen < 50 km, groen, ensemble 0 %). Actief **0.57.0** (windvooruitblik, andere sessie 10:54; herstart ~11:03).
+- Bronnen: DNS-storing 10:24-10:40 (knmi_nowcast, knmi_edr, meting elk 1× mislukt, direct hersteld). **Buienradar "hapert"**: laatste succes 06:50, 2 op rij mislukt (DNS), 96 % cumulatief; regen liep via KNMI-nowcast → geen gemis. Radar 23 mislukt van 21.849.
+- **Regen (1 bui, H-SC-3):** start 09:50 (0,12 mm/u), bui 10:05-11:35 tot 1,56 mm/u. Voorspelde start: 07:40 "77 min" (→ 08:57, **53 min te vroeg**), 08:02 "52" (→ 08:54, 56 te vroeg), 08:47 "32" (→ 09:19, 31 te vroeg), 09:12 "32" (→ 09:44, 6), 09:47 "9" (→ 09:56, −6). Lange horizon dit keer te vróeg, tot nu toe meestal te laat → richting wisselt; ≤ 15 min klopt (± 6). Uitkomsten tellen mee voor L-SC-011 (actief bij ≥ 10).
+- **Windstoten (H-SC-9):** uurgemiddelden 07-11 u model 31,1/29,8/34,9/36,9 tegen gemeten 23,3/27,8/31,8/36,5 → bias +7,7/+2,0/+3,1/+0,4 (gem. +3,3, MAE 3,3) bij **toenemende** wind. 03-07 u was −0,4 bij toename → "traag bij toename" niet bevestigd; model ligt vóór op de meting. H-SC-9 blijft kandidaat (wisselend teken, n=3 perioden).
+- **Nieuw meetpunt windvooruitblik (0.57.0):** vandaag max 60 km/u om 13:00 (KNMI, klasse 1, gemeld); morgen 53, za 65 (open-meteo). Gemeten max tot nu 39,6 km/u. Toets 15:40: gemeten piek 12-15 u tegen 60.
+- Hypotheses: H-SC-3 (regenstart lange horizon), H-SC-6 (snelheid na celwissel; L-SC-013 open), H-SC-8 (passage bij id-wissel; gebouwd 0.56.1, toets bij onweer). Geen release.
+
+laatste ronde: 22-10 11:40, gemeten t/m 22-10 11:45
