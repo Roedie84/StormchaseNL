@@ -50,6 +50,8 @@ from .const import (
     DOMAIN,
 )
 from .radar import (
+    INSLAG_STRAAL_OUD,
+    INSLAG_STRAAL_VERS,
     INSLAG_VENSTER,
     KAART_HELDERHEID,
     KAART_KLEUR,
@@ -184,25 +186,26 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
             deel = min(ouderdom / INSLAG_VENSTER, 1.0)
             doorzicht = int(255 - deel * 120)
             groen = int(255 - deel * 130)
-            straal = 6 if deel < 0.2 else 5
+            # 0.57.1: kleiner. Gemeld 22-10 16:22 (screenshot): "kleinere
+            # bliksem stippen, deze zijn veel te groot" - met straal 6-8 werd
+            # een actieve cel een gele vlek die de radar eronder afdekte.
+            straal = INSLAG_STRAAL_VERS if deel < 0.2 else INSLAG_STRAAL_OUD
 
             px, py = positie
 
-            # Een donkere rand eromheen, anders verdwijnt een oranje stip in
+            # Een dunne donkere rand, anders verdwijnt een oranje stip in
             # het geel en rood van de radar eronder.
             tekenaar.ellipse(
-                (px - straal - 2, py - straal - 2, px + straal + 2, py + straal + 2),
-                fill=(20, 10, 40, min(doorzicht, 180)),
+                (px - straal - 1, py - straal - 1, px + straal + 1, py + straal + 1),
+                fill=(20, 10, 40, min(doorzicht, 160)),
             )
             tekenaar.ellipse(
                 (px - straal, py - straal, px + straal, py + straal),
                 fill=(255, groen, 60, doorzicht),
             )
-            # Witte kern: die blijft op elke ondergrond zichtbaar
-            tekenaar.ellipse(
-                (px - 2, py - 2, px + 2, py + 2),
-                fill=(255, 255, 255, doorzicht),
-            )
+            # Witte kern alleen bij verse inslagen
+            if deel < 0.2:
+                tekenaar.point((px, py), fill=(255, 255, 255, doorzicht))
 
     # Kleur per activiteit, zoals op professionele stormkaarten
     KLEUREN = {

@@ -161,6 +161,10 @@ KAART_KLEUR = 0.55
 # om de verplaatsing van een cel te zien zonder dat het een vlek wordt.
 INSLAG_VENSTER = 900
 
+# 0.57.1: straal van een inslagstip op de radar (px); was 6 en 5
+INSLAG_STRAAL_VERS = 3
+INSLAG_STRAAL_OUD = 2
+
 # Een zwaartepunt kan tussen twee metingen niet verder verspringen dan dit.
 # Gebeurt dat toch, dan is het geen verplaatsing maar een cel die van vorm
 # veranderde. Zulke sprongen worden niet als spoor getekend.

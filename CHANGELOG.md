@@ -14,6 +14,12 @@ en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/)
 - Verspringt het zwaartepunt tussen twee rondes meer dan 10 km (of meer dan 120 km/u over de verstreken tijd), dan begint de snelheidsmeting opnieuw. De cel houdt zijn kenmerk, zodat de nameting van de passage blijft werken.
 - Meten: attributen `snelheid_ruw` en `spoorduur_s` op *Celsnelheid*, en `snelheid_ruw` per cel bij *Celrichting*.
 
+## [0.57.1] — 2026-10-22
+
+### Gewijzigd
+
+- **Kleinere bliksemstippen op de radar.** Gemeld 22-10 16:22 met een screenshot: "kleinere bliksem stippen, deze zijn veel te groot". Een actieve cel werd een gele vlek die de radar eronder afdekte. Straal van 6 (vers) en 5 (ouder) naar 3 en 2 px (`INSLAG_STRAAL_VERS` / `INSLAG_STRAAL_OUD` in `radar.py`), donkere rand van 2 naar 1 px, witte kern alleen nog een punt bij verse inslagen.
+
 ## [0.57.0] — 2026-10-22
 
 ### Toegevoegd
