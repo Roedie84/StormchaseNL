@@ -116,3 +116,9 @@ def test_ingebouwd():
     assert "meteo.knmi_bron = waarschuwingen" in init
     assert 'key="wind_outlook"' in (ROOT / "sensor.py").read_text(encoding="utf-8")
     assert "_regel_wind_vooruit()" in (ROOT / "briefing.py").read_text(encoding="utf-8")
+
+
+def test_versie():
+    import json
+    manifest = json.loads((ROOT / "manifest.json").read_text(encoding="utf-8"))
+    assert tuple(int(x) for x in manifest["version"].split(".")) >= (0, 57, 0)

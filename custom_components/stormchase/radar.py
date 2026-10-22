@@ -161,7 +161,7 @@ KAART_KLEUR = 0.55
 # om de verplaatsing van een cel te zien zonder dat het een vlek wordt.
 INSLAG_VENSTER = 900
 
-# 0.57.1: straal van een inslagstip op de radar (px); was 6 en 5
+# 0.57.2: straal van een inslagstip op de radar (px); was 6 en 5
 INSLAG_STRAAL_VERS = 3
 INSLAG_STRAAL_OUD = 2
 

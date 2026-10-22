@@ -186,7 +186,7 @@ class RadarImage(CoordinatorEntity[RadarCoordinator], ImageEntity):
             deel = min(ouderdom / INSLAG_VENSTER, 1.0)
             doorzicht = int(255 - deel * 120)
             groen = int(255 - deel * 130)
-            # 0.57.1: kleiner. Gemeld 22-10 16:22 (screenshot): "kleinere
+            # 0.57.2: kleiner. Gemeld 22-10 16:22 (screenshot): "kleinere
             # bliksem stippen, deze zijn veel te groot" - met straal 6-8 werd
             # een actieve cel een gele vlek die de radar eronder afdekte.
             straal = INSLAG_STRAAL_VERS if deel < 0.2 else INSLAG_STRAAL_OUD
