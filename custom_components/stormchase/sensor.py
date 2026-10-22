@@ -20,7 +20,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .buienreeks import begin_weergave, gaat_om_volgende_bui, regenbeeld
 from .const import DOMAIN, MAX_AFWIJKING_KM, SPEED_DEADZONE
-from .indices import gemeten_onweer, niveau_met_metingen, verwachting_met_metingen
+from .indices import gemeten_uit_storm, niveau_met_metingen, verwachting_met_metingen
 from .coordinator import MeteoCoordinator, StormCoordinator, StormData
 from .meting import MetingCoordinator
 from .alerts import AlertCoordinator
@@ -844,11 +844,7 @@ def _gemeten(storm: StormCoordinator | None) -> bool:
     Zelfde regel als binary_sensor.stormchase_onweer_nadert, plus inslagen
     binnen 25 km.
     """
-    data = storm.data if storm is not None else None
-    if not data:
-        return False
-    nadert = data.speed is not None and data.speed > SPEED_DEADZONE
-    return gemeten_onweer(nadert, data.distance)
+    return gemeten_uit_storm(storm.data if storm is not None else None, SPEED_DEADZONE)
 
 
 class AlertSensor(CoordinatorEntity[AlertCoordinator], SensorEntity):

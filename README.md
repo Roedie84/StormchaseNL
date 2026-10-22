@@ -218,7 +218,7 @@ over gevaar gaan. Elke waarschuwing wordt maar een keer gemeld.
 | `binary_sensor.stormchase_onweer_nabij` | Aan binnen de ingestelde waarschuwingsafstand. |
 | `binary_sensor.stormchase_onweer_nadert` | Aan bij structureel afnemende afstand. |
 | `binary_sensor.stormchase_regen_verwacht` | Aan bij regen nu of binnen de ingestelde tijd. |
-| `binary_sensor.stormchase_weerwaarschuwing` | Aan bij een actieve officiele waarschuwing. |
+| `binary_sensor.stormchase_weerwaarschuwing` | Aan bij een actieve officiele waarschuwing, en sinds 0.58.1 ook bij gemeten onweer (nadert of inslagen binnen 25 km). Attributen `officieel` en `gemeten_onweer` zeggen welke van de twee. |
 
 Beide hebben attributen met afstand, azimut, snelheid en aankomsttijd, zodat
 je automatiseringen niet meerdere entiteiten hoeven uit te lezen.
@@ -472,6 +472,12 @@ Het bericht volgt de schakelaar *Ook bij wind* en het stiltevenster, maar komt
 ook onderweg door. De sensor *Windvooruitblik* geeft de hoogste stoot van
 vandaag en morgen, met per dag het piekuur en het tijdvak boven de drempel;
 het dagelijkse weerbericht noemt het ook.
+
+Het tijdvak staat er sinds 0.58.1 in gewone taal (attribuut `tijdvak` per
+dag): "van 13:00 tot 16:00", "van 20:00 tot middernacht" (`boven_drempel_tot`
+is dan `24:00`), "de hele dag", of bij losse uren alleen het aantal, zoals
+"4 uur boven 60 km/u". Bij losse uren zijn `boven_drempel_van` en `_tot` leeg
+en is `aaneengesloten` `false`.
 
 ### Weersituaties
 

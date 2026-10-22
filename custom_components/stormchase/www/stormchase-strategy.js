@@ -1617,12 +1617,15 @@ class StormchaseHudCard extends HTMLElement {
       const lijst = attr(nv, "waarschuwingen") || [];
       const eerste = lijst[0] || {};
       const actief = niveau && niveau !== "groen";
-      const soort = attr(nv, "soort") || eerste.soort;
-      const gebied = attr(nv, "gebied") || eerste.gebied;
-      const tot = klokTijd(eerste.tot);
+      // 0.58.1: geel door gemeten onweer, zonder officiele code
+      const gemetenAlleen = actief && attr(nv, "gemeten_onweer") &&
+        (attr(nv, "niveau_waarschuwingen") || "groen") === "groen";
+      const soort = gemetenAlleen ? "onweer gemeten, geen officiele code" : attr(nv, "soort") || eerste.soort;
+      const gebied = gemetenAlleen ? null : attr(nv, "gebied") || eerste.gebied;
+      const tot = gemetenAlleen ? null : klokTijd(eerste.tot);
       waarschuwing = tegel(
         actief ? niveau : "groen",
-        `<div class="lbl">${esc(bron)}-waarschuwing</div>` +
+        `<div class="lbl">${gemetenAlleen ? "Gemeten onweer" : esc(bron) + "-waarschuwing"}</div>` +
           `<div class="big accent">${actief ? "CODE " + esc(niveau.toUpperCase()) : "GEEN CODE"}</div>` +
           `<div class="sub">${
             actief
@@ -2049,8 +2052,19 @@ class StormchaseHudCard extends HTMLElement {
       rood: "rgba(251,77,101,.45)",
     }[niveau] || "rgba(52,211,153,.25)";
 
+    // 0.58.1: geel door gemeten onweer, zonder officiele code
+    const gemetenAlleen = actief && attr(nv, "gemeten_onweer") &&
+      (attr(nv, "niveau_waarschuwingen") || "groen") === "groen";
+
     let inhoud;
-    if (actief) {
+    if (gemetenAlleen) {
+      inhoud =
+        `<div class="code" style="--accent:${kleur};--accent-zacht:${zacht}">` +
+        `<div class="codebord">Code ${esc(niveau)}</div><div class="codetekst">` +
+        `<div class="t">Onweer gemeten</div>` +
+        `<div class="s">Nadert of inslagen binnen 25 km${PUNT}geen officiele waarschuwing</div>` +
+        `</div></div>`;
+    } else if (actief) {
       const soort = attr(nv, "soort") || (eerste && eerste.soort);
       const gebied = attr(nv, "gebied") || (eerste && eerste.gebied);
       const van = eerste && klokTijd(eerste.vanaf);
@@ -2339,7 +2353,7 @@ class StormchaseHudCard extends HTMLElement {
     if (!dagen.length) return "";
     const tekst = dagen
       .map((d) => `${esc(d.dag)} tot <b>${fmt(d.max_kmh)} km/u</b> rond ${esc(d.piek_om)}` +
-        (d.boven_drempel_van ? ` (${esc(d.boven_drempel_van)}\u2013${esc(d.boven_drempel_tot)})` : ""))
+        (d.tijdvak ? `, ${esc(d.tijdvak)}` : ""))
       .join(" \u00b7 ");
     return `<div class="meternoot" style="color:var(--oranje)">Harde wind: ${tekst}</div>`;
   }

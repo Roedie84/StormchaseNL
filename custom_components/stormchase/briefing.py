@@ -19,6 +19,7 @@ from homeassistant.helpers.event import async_track_time_change
 from homeassistant.util import dt as dt_util
 
 from .taal import hoofdletter
+from .indices import TEKST_GEMETEN, gemeten_uit_storm, verwachting_met_metingen
 
 from .const import (
     CONF_BRIEFING,
@@ -27,6 +28,7 @@ from .const import (
     DEFAULT_BRIEFING_AFTERNOON,
     DEFAULT_BRIEFING_MORNING,
     DOMAIN,
+    SPEED_DEADZONE,
     WMO_TEKST,
 )
 
@@ -187,8 +189,10 @@ class Briefing:
             if not dag.get("klasse"):
                 continue
             deel = f"{dag['dag']} stoten tot {dag['max_kmh']} km/u rond {dag['piek_om']}"
-            if dag.get("boven_drempel_van"):
-                deel += f" ({dag['boven_drempel_van']}-{dag['boven_drempel_tot']})"
+            # 0.58.1: tijdvak in gewone taal ("de hele dag", "tot middernacht",
+            # bij losse uren alleen het aantal)
+            if dag.get("tijdvak"):
+                deel += f", {dag['tijdvak']}"
             delen.append(deel)
         if not delen:
             return None
@@ -217,6 +221,11 @@ class Briefing:
 
         return "Komende twee uur geen neerslag verwacht."
 
+    def _gemeten(self) -> bool:
+        """Gemeten onweer: nadert, of inslagen binnen 25 km (0.58.1)."""
+        storm = self._gegevens.get("storm")
+        return gemeten_uit_storm(storm.data if storm is not None else None, SPEED_DEADZONE)
+
     def _regel_onweer(self) -> str | None:
         """Onweer in de buurt, of de kans erop."""
         storm = self._gegevens.get("storm")
@@ -228,7 +237,20 @@ class Briefing:
                 deel += f", {storm.data.trend}"
             if storm.data.eta:
                 deel += f", hier over {storm.data.eta} minuten"
-            return deel + "."
+            deel += "."
+            # 0.58.1: gemeten onweer gaat voor op een model dat niets ziet,
+            # zoals bij de sensor Onweersverwachting (0.58.0)
+            if meteo is not None and meteo.data:
+                oordeel = meteo.data.get("verwachting")
+                _tekst, overstemd = verwachting_met_metingen(
+                    oordeel, meteo.data.get("verwachting_rang"), self._gemeten()
+                )
+                if overstemd:
+                    deel = (
+                        f"{TEKST_GEMETEN}: {deel[0].lower()}{deel[1:]} "
+                        f"Het model gaf: {oordeel.lower()}."
+                    )
+            return deel
 
         if meteo is not None and meteo.data:
             oordeel = meteo.data.get("verwachting")
@@ -289,6 +311,13 @@ class Briefing:
 
         aantal = alerts.data.get("aantal") or 0
         if not aantal:
+            # 0.58.1: geen officiele code, wel gemeten onweer: niveau geel,
+            # zoals sensor Waarschuwingsniveau sinds 0.58.0
+            if self._gemeten():
+                return (
+                    "Waarschuwingsniveau geel: onweer gemeten (nadert of "
+                    "inslagen binnen 25 km), geen officiele waarschuwing."
+                )
             return None
 
         niveau = alerts.data.get("niveau")

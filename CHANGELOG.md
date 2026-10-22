@@ -5,6 +5,19 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.58.1] — 2026-10-22
+
+### Opgelost
+
+- **Windtijdvak leesbaar.** Live za 24-10 stond er "boven 60 km/u van 00:00 tot 00:00" bij 4 losse uren. Een tot-tijd van middernacht heet nu `24:00` ("tot middernacht" in de tekst), een dag die helemaal boven de drempel zit "de hele dag", en bij niet-aaneengesloten uren is er geen van-tot meer maar het aantal: "tot 72 km/u rond 23:00, 4 uur boven 60 km/u". Nieuwe velden per dag: `tijdvak`, `aaneengesloten`, `hele_dag`. Geldt voor de melding, het dagelijkse weerbericht en het dashboard.
+
+### Gewijzigd
+
+- **Weerbericht en Weerwaarschuwing volgen gemeten onweer**, zoals *Waarschuwingsniveau* en *Onweersverwachting* in 0.58.0.
+- `binary_sensor.stormchase_weerwaarschuwing` staat ook aan zolang onweer nadert of er inslagen binnen 25 km zijn. Nieuwe attributen `officieel` en `gemeten_onweer`.
+- Het dagelijkse weerbericht meldt zonder officiele code maar met gemeten onweer "Waarschuwingsniveau geel: onweer gemeten ...", en zet bij een model dat geen onweer zag "Onweer in de buurt (gemeten)" voor de onweersregel, met het modeloordeel erachter.
+- Dashboard: een niveau dat alleen door metingen geel is, staat als "Gemeten onweer" in de tegels in plaats van als KNMI-waarschuwing.
+
 ## [0.58.0] — 2026-10-22
 
 ### Opgelost

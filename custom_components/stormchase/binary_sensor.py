@@ -19,6 +19,7 @@ from .const import (
     SPEED_DEADZONE,
 )
 from .coordinator import StormCoordinator
+from .indices import gemeten_uit_storm
 from .alerts import AlertCoordinator
 from .rain import RainCoordinator
 from .meting import MetingCoordinator
@@ -38,7 +39,7 @@ async def async_setup_entry(
             StormApproachingBinarySensor(storm, entry),
             RainExpectedBinarySensor(regen, entry),
             AlertActiveBinarySensor(
-                hass.data[DOMAIN][entry.entry_id]["alerts"], entry
+                hass.data[DOMAIN][entry.entry_id]["alerts"], entry, storm
             ),
             MovingBinarySensor(storm, entry),
             ShelterBinarySensor(storm, entry),
@@ -190,24 +191,46 @@ class RainExpectedBinarySensor(CoordinatorEntity[RainCoordinator], BinarySensorE
 
 
 class AlertActiveBinarySensor(CoordinatorEntity[AlertCoordinator], BinarySensorEntity):
-    """Aan zolang er een officiele waarschuwing van kracht is."""
+    """Aan zolang er een officiele waarschuwing van kracht is.
+
+    0.58.1: ook aan bij gemeten onweer (nadert, of inslagen binnen 25 km),
+    net als het waarschuwingsniveau dan minstens geel staat (0.58.0).
+    """
 
     _attr_has_entity_name = True
     _attr_translation_key = "alert_active"
     _attr_device_class = BinarySensorDeviceClass.SAFETY
 
-    def __init__(self, coordinator: AlertCoordinator, entry: ConfigEntry) -> None:
+    def __init__(
+        self,
+        coordinator: AlertCoordinator,
+        entry: ConfigEntry,
+        storm: StormCoordinator | None = None,
+    ) -> None:
         """Initialiseer de sensor."""
         super().__init__(coordinator)
+        self._storm = storm
         self._attr_unique_id = f"{entry.entry_id}_alert_active"
         self._attr_device_info = _device(entry)
 
+    async def async_added_to_hass(self) -> None:
+        """Luister ook naar de stormcoordinator, voor gemeten onweer."""
+        await super().async_added_to_hass()
+        if self._storm is not None:
+            self.async_on_remove(
+                self._storm.async_add_listener(self.async_write_ha_state)
+            )
+
+    def _gemeten(self) -> bool:
+        storm = self._storm.data if self._storm is not None else None
+        return gemeten_uit_storm(storm, SPEED_DEADZONE)
+
     @property
     def is_on(self) -> bool | None:
-        """True bij een of meer actieve waarschuwingen."""
+        """True bij een of meer actieve waarschuwingen, of gemeten onweer."""
         if self.coordinator.data is None:
             return None
-        return bool(self.coordinator.data.get("aantal"))
+        return bool(self.coordinator.data.get("aantal")) or self._gemeten()
 
     @property
     def extra_state_attributes(self) -> dict:
@@ -220,6 +243,9 @@ class AlertActiveBinarySensor(CoordinatorEntity[AlertCoordinator], BinarySensorE
             "soort": data.get("soort"),
             "gebied": data.get("gebied"),
             "aantal": data.get("aantal"),
+            # 0.58.1: officiele waarschuwing en/of gemeten onweer
+            "officieel": bool(data.get("aantal")),
+            "gemeten_onweer": self._gemeten(),
         }
 
 

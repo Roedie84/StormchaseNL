@@ -69,6 +69,33 @@ def klasse(stoot: float | None, drempel: float) -> int:
     return 1 + sum(1 for k in KLASSEN if stoot >= k and k > drempel)
 
 
+def _tot(laatste: datetime) -> str:
+    """Eindtijd van het laatste uur; middernacht als 24:00."""
+    eind = laatste + timedelta(hours=1)
+    return "24:00" if eind.date() != laatste.date() else eind.strftime("%H:%M")
+
+
+def tijdvak(d: dict, drempel: float) -> str | None:
+    """Het tijdvak boven de drempel in gewone taal (0.58.1).
+
+    "de hele dag", "van 20:00 tot middernacht", "van 13:00 tot 16:00", of bij
+    losse uren geen van-tot maar het aantal: "4 uur boven 60 km/u".
+    """
+    uren = d.get("uren_boven_drempel") or 0
+    if not uren and not d.get("boven_drempel_van"):
+        return None
+    grens = f"boven {drempel:.0f} km/u"
+    if d.get("hele_dag"):
+        return f"{grens} de hele dag"
+    # Een dagoverzicht van voor 0.58.1 kent `aaneengesloten` niet; een van-tot
+    # was daar alleen bruikbaar als het tijdvak klopte.
+    if d.get("boven_drempel_van") and d.get("aaneengesloten", True):
+        tot = d.get("boven_drempel_tot")
+        tot = "middernacht" if tot == "24:00" else tot
+        return f"{grens} van {d['boven_drempel_van']} tot {tot}"
+    return f"{uren} uur {grens}"
+
+
 def dagen(uren: dict, nu: datetime, drempel: float, aantal: int = DAGEN) -> list[dict]:
     """Per lokale dag vanaf vandaag (alleen uren die nog komen)."""
     huidig = nu.replace(minute=0, second=0, microsecond=0)
@@ -80,17 +107,25 @@ def dagen(uren: dict, nu: datetime, drempel: float, aantal: int = DAGEN) -> list
             continue
         piek_om, (piek, bron) = max(reeks, key=lambda mw: mw[1][0])
         boven = [m for m, (w, _b) in reeks if w >= drempel]
+        # 0.58.1: alleen een van-tot bij aaneengesloten uren; tot middernacht
+        # heet 24:00 (was 00:00, live za 24-10: "00:00 tot 00:00", 4 uur).
+        aaneen = bool(boven) and all(
+            b - a == timedelta(hours=1) for a, b in zip(boven, boven[1:])
+        )
         uit.append({
             "datum": dag.isoformat(),
             "dag": "vandaag" if i == 0 else "morgen" if i == 1 else DAGNAMEN[dag.weekday()],
             "max_kmh": round(piek),
             "piek_om": piek_om.strftime("%H:%M"),
             "bron": bron,
-            "boven_drempel_van": boven[0].strftime("%H:%M") if boven else None,
-            "boven_drempel_tot": (boven[-1] + timedelta(hours=1)).strftime("%H:%M") if boven else None,
+            "boven_drempel_van": boven[0].strftime("%H:%M") if aaneen else None,
+            "boven_drempel_tot": _tot(boven[-1]) if aaneen else None,
             "uren_boven_drempel": len(boven),
+            "aaneengesloten": aaneen,
+            "hele_dag": len(boven) == 24,
             "klasse": klasse(piek, drempel),
         })
+        uit[-1]["tijdvak"] = tijdvak(uit[-1], drempel)
     return uit
 
 
@@ -116,8 +151,9 @@ def bericht(d: dict, drempel: float) -> tuple[str, str]:
         datum = date.fromisoformat(d["datum"])
         wanneer = f"morgen ({DAGNAMEN[datum.weekday()]} {datum.day}-{datum.month})"
     tekst = f"{zwaarte} verwacht {wanneer}: tot {stoot} km/u rond {d['piek_om']}"
-    if d.get("boven_drempel_van"):
-        tekst += f", boven {drempel:.0f} km/u van {d['boven_drempel_van']} tot {d['boven_drempel_tot']}"
+    vak = tijdvak(d, drempel)
+    if vak:
+        tekst += f", {vak}"
     tekst += f" ({'KNMI' if d.get('bron') == 'knmi' else 'Open-Meteo'})."
     titel = "Storm op komst" if stoot >= 75 else "Harde wind op komst"
     return titel, tekst

@@ -508,6 +508,19 @@ def gemeten_onweer(nadert: bool | None, afstand: float | None) -> bool:
     return afstand is not None and afstand <= GEMETEN_NABIJ_KM
 
 
+def gemeten_uit_storm(data, deadzone: float = 1.0) -> bool:
+    """Gemeten onweer uit StormData (snelheid en afstand), 0.58.1.
+
+    Zelfde regel als binary_sensor.stormchase_onweer_nadert (snelheid boven de
+    dode zone), plus inslagen binnen 25 km.
+    """
+    if not data:
+        return False
+    snelheid = getattr(data, "speed", None)
+    nadert = snelheid is not None and snelheid > deadzone
+    return gemeten_onweer(nadert, getattr(data, "distance", None))
+
+
 def niveau_met_metingen(niveau: str | None, gemeten: bool) -> str:
     """Het waarschuwingsniveau, minstens geel bij gemeten onweer."""
     niveau = niveau or "groen"
