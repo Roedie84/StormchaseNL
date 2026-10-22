@@ -93,15 +93,28 @@ Status: open / akkoord / afgewezen / gebouwd vX / geverifieerd / teruggedraaid. 
 - Meten: aandeel passages met afstand (nu 73 %) → ≥ 90 % bij de volgende onweersdag.
 
 ## L-SC-013 · naderingssnelheid niet rekenen over een celwissel
-- Status: **open** (raakt `onweer_nadert`/aankomst en dus meldgedrag → Ruud beslist).
+- Status: **gebouwd 0.58.0** (andere sessie 22-10 16:50; geïnstalleerd 16:51): reeks begint opnieuw bij een celwissel. Niet meegebouwd: het deel "afstandsprong > 15 km of > 120 km/u start de reeks opnieuw" → zie L-SC-015. Was: **open** (raakt `onweer_nadert`/aankomst en dus meldgedrag → Ruud beslist).
 - Onderbouwing (H-SC-6, n=2): 17-10 13:35 sprong de afstand 89,6 → 59,6 km (andere cel); snelheid 222 → 196 km/u (13:35-13:44), aankomst 16 min, werkelijk ~35 km/u (59,6 → 31,2 km in 48 min), 0/2 aankomsten uitgekomen. 11-10: eerste 54 km/u tegen 35-38. `onweer_nadert` ging terecht aan, maar de aankomsttijd was 3-6× te kort.
 - Voorstel: een afstandsprong > 15 km tussen twee nieuwe inslagafstanden (of > 120 km/u) start de reeks opnieuw; snelheid en aankomst pas na ≥ 2 nieuwe afstanden van dezelfde cel.
 - Verwacht effect: geen aankomst < 20 min bij een cel op > 50 km; aankomst-hit hoger (nu 0/6).
 - Meten: eerste snelheid tegen de snelheid over de hele nadering; aankomst-uitkomsten per onweersdag.
 
 ## L-SC-014 · celsnelheid: onmogelijke snelheden niet gebruiken (validatie)
-- Status: **uitgevoerd** in 0.57.1 (akkoord Ruud 22-10). Toets: aandeel `snelheid_ruw` > 120 km/u en passage-uitkomsten bij het volgende onweer.
+- Status: **deels geverifieerd 22-10 19:40** — na installatie (0.57.1, 16:17) `celsnelheid` 0 % van de tijd > 120 km/u (16:17-19:45, n=644 waarden, max 119,9, mediaan 34,7) tegen 37 % (14:20-15:34) en 12,7 % (15:45-16:17). Passage-uitkomsten nog niet getoetst. Was: **uitgevoerd** in 0.57.1 (akkoord Ruud 22-10). Toets: aandeel `snelheid_ruw` > 120 km/u en passage-uitkomsten bij het volgende onweer.
 - Onderbouwing (H-SC-6, 22-10 14:20-15:34, n=400 waarden): `celsnelheid` 37 % van de tijd > 120 km/u, max 407 km/u, mediaan 42; werkelijke nadering ~67 km/u (46,2 → 23,7 km in 20 min). Oorzaak: het zwaartepunt van een snel groeiende cel verspringt (tot 40 km toegestaan, `CONTINUITEIT_KM`) en de regressie start na 2 min (`beweging_van_reeks`). De snelheid gaat de meldtekst in ("Cel trekt naar het … met … km/u") en de passage (`passage_over/afstand`).
 - Voorstel: snelheid > 120 km/u of een reeks korter dan 5 min als "onbekend" behandelen (geen richting/passage, niet in de meldtekst); bij een zwaartepuntsprong > 10 km tussen twee rondes de reeks opnieuw starten.
 - Verwacht effect: geen celsnelheid > 120 km/u in de meldingen; passage alleen bij een stabiel spoor.
 - Meten: tijdsaandeel > 120 km/u per onweersdag (nu 37 %); passage-uitkomsten met afstand.
+
+## L-SC-015 · naderingsreeks ook opnieuw bij een afstandsprong zonder celwissel
+- Status: **open** (raakt `onweer_nadert`/aankomst en dus meldgedrag → Ruud beslist).
+- Onderbouwing (22-10, na 0.58.0): 17:25-17:32 `naderingssnelheid` −90 → −219 km/u (7 min) terwijl de afstand juist daalde (90,3 → 59,5 km): de dichtstbijzijnde inslag (< 25 km om 17:23) viel uit het venster, de afstand sprong in één ronde ~20 → 90 km en de regressie combineerde beide (geen celwissel → reeks niet gewist). 17:44 omgekeerd: sprong 45,2 → 38,0 km gaf +69 → +108,6 km/u, `onweer_nadert`/geel 17:41-18:00 met aankomst 21-33 min; daarna 0 inslagen < 25 km → vals alarm (n=1). `celsnelheid` bleef tegelijk ≤ 120 (L-SC-014 werkt).
+- Voorstel: een sprong > 15 km tussen twee opeenvolgende afstanden in de reeks, of een regressiesnelheid |v| > 120 km/u (`MAX_CELSNELHEID`), start de reeks opnieuw; snelheid en aankomst pas weer na 3 nieuwe afstanden.
+- Verwacht effect: geen |naderingssnelheid| > 120 km/u; minder valse aankomsten bij uitdovende/verspringende buien.
+- Meten: tijdsaandeel |naderingssnelheid| > 120 per onweersdag (22-10: 7 min na 16:17); aankomst-hits/valse alarmen.
+
+## L-SC-016 · bronstatus: reservebron niet "hapert" zolang hij niet nodig is (rapportage)
+- Status: **gepland** (zelf bouwen: alleen classificatie bronstatus; ophalen en terugval ongewijzigd). Dagafsluiting 23-10.
+- Onderbouwing: `sensor.stormchase_bronstatus` staat sinds de DNS-storing van 10:24 de hele dag op "buienradar hapert" (5 op rij mislukt, laatste succes 06:50, laatste fout 15:17). Code `rain.py` `_haal_op`: Buienradar wordt alleen gevraagd als KNMI-nowcast faalt — dus alleen tíjdens een algemene storing; daarna blijft `op_rij_mislukt` ≥ 2 staan tot de volgende KNMI-storing. KNMI-nowcast werkte 10:40-19:45 gewoon (100 %). De status meldt dus een storing die er niet is (meetfout in de rapportage).
+- Bouw: een reservebron die sinds zijn laatste fout niet meer gevraagd is terwijl de hoofdbron weer slaagt, telt niet als haperend maar als "reserve (laatst mislukt HH:MM)"; hapert pas weer als hij gevraagd wordt en faalt. Test: KNMI faalt 2× met Buienradar mee, daarna KNMI 1× goed → status geen "buienradar hapert".
+- Meten: uren per dag dat de bronstatus "hapert" toont terwijl regen via KNMI binnenkomt (22-10: ~9 u).

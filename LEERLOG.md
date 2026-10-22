@@ -363,3 +363,14 @@ laatste ronde: 22-10 11:40, gemeten t/m 22-10 11:45
 - Hypotheses: H-SC-3 (regenstart lange horizon), H-SC-6 (snelheid bij celwissel en groei; L-SC-013 en L-SC-014 open), H-SC-8 (passage bij id-wissel, 0.56.1; uitslag van dit onweer in de dagafsluiting). Geen release.
 
 laatste ronde: 22-10 15:40, gemeten t/m 22-10 15:45
+
+## 22-10 19:40 · tussenronde
+- Actief **0.58.2** (andere sessies: 0.57.1 L-SC-014 16:17, 0.58.0 L-SC-013 16:51, 0.58.1/0.58.2 wind). Locatie tracker. Nu groen, 51 inslagen < 50 km (oud), 0 < 25 km.
+- **Onweer-uitkomst:** aankomst 15:43 "28 min" (→ 16:11) kwam niet uit: 0 inslagen < 10 km, < 25 km alleen losse inslagen (15:41, 16:00, 16:19, 16:26, 17:23). Aankomst liep 15:45-15:56 op 29 → 932 min en viel weg → de bui trok langs. Passage 15:36 voorspeld 2,2 km, werkelijk > 10 km → H-SC-8 (n=1, fout ≥ 8 km). KNMI-station meldde onweer 16:34-17:43.
+- **L-SC-014 werkt:** `celsnelheid` na 16:17 0 % > 120 km/u (n=644, max 119,9) tegen 37 % eerder vandaag.
+- **H-SC-6, nieuw restgat (L-SC-015 open):** 17:25-17:32 `naderingssnelheid` −124..−219 km/u bij een afstandsprong ~20 → 90 km zonder celwissel (oude inslag viel uit het venster); 17:44 sprong 45 → 38 km gaf +108 km/u → nadert/geel 17:41-18:00, aankomst 21 min, daarna 0 inslagen < 25 km = vals alarm (n=1). 18:17-18:22 nog 5 min geel met aankomst 326-543 min.
+- **Meetfout bronstatus (L-SC-016, gepland):** "buienradar hapert" staat sinds ~10:24 terwijl KNMI-nowcast 100 % werkt; Buienradar is alleen reserve en wordt pas weer gevraagd als KNMI faalt (`rain.py`). Bouwen in de dagafsluiting.
+- Windstoten 15-19 u bias +6,4 km/u (MAE 6,4) bij dalende meting 33 → 22 → "te hoog bij afname" nu 4 van 5 perioden (H-SC-9-kandidaat; wacht op vrije plek).
+- Hypotheses: H-SC-3 (regenstart lange horizon), H-SC-6 (snelheid bij sprong; L-SC-015 open), H-SC-8 (passage; 1 misser vandaag). Geen release.
+
+laatste ronde: 22-10 19:40, gemeten t/m 22-10 19:45
