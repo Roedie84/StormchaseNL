@@ -19,7 +19,8 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .buienreeks import begin_weergave, gaat_om_volgende_bui, regenbeeld
-from .const import DOMAIN, MAX_AFWIJKING_KM
+from .const import DOMAIN, MAX_AFWIJKING_KM, SPEED_DEADZONE
+from .indices import gemeten_onweer, niveau_met_metingen, verwachting_met_metingen
 from .coordinator import MeteoCoordinator, StormCoordinator, StormData
 from .meting import MetingCoordinator
 from .alerts import AlertCoordinator
@@ -360,7 +361,7 @@ async def async_setup_entry(
         for position, bound in enumerate(storm.ring_bounds)
     ]
     entities.append(ChasePotentialSensor(meteo, storm, entry))
-    entities.append(ForecastSensor(meteo, entry))
+    entities.append(ForecastSensor(meteo, entry, storm))
     entities.append(SpreadSensor(meteo, entry))
     entities.append(EnsembleSensor(meteo, entry))
     entities.append(MetingSensor(data["meting"], entry))
@@ -373,7 +374,7 @@ async def async_setup_entry(
     )
 
     waarschuwingen: AlertCoordinator = data["alerts"]
-    entities.append(AlertSensor(waarschuwingen, entry))
+    entities.append(AlertSensor(waarschuwingen, entry, storm))
 
     regen: RainCoordinator = data["rain"]
     entities += [RainSensor(regen, entry, beschrijving) for beschrijving in RAIN_SENSORS]
@@ -837,24 +838,57 @@ class RainSensor(CoordinatorEntity[RainCoordinator], SensorEntity):
         }
 
 
+def _gemeten(storm: StormCoordinator | None) -> bool:
+    """Gemeten onweer volgens de stormcoordinator (0.58.0).
+
+    Zelfde regel als binary_sensor.stormchase_onweer_nadert, plus inslagen
+    binnen 25 km.
+    """
+    data = storm.data if storm is not None else None
+    if not data:
+        return False
+    nadert = data.speed is not None and data.speed > SPEED_DEADZONE
+    return gemeten_onweer(nadert, data.distance)
+
+
 class AlertSensor(CoordinatorEntity[AlertCoordinator], SensorEntity):
     """Het zwaarste actieve waarschuwingsniveau."""
 
     _attr_has_entity_name = True
     _attr_translation_key = "alert_level"
 
-    def __init__(self, coordinator: AlertCoordinator, entry: ConfigEntry) -> None:
+    def __init__(
+        self,
+        coordinator: AlertCoordinator,
+        entry: ConfigEntry,
+        storm: StormCoordinator | None = None,
+    ) -> None:
         """Initialiseer de sensor."""
         super().__init__(coordinator)
+        self._storm = storm
         self._attr_unique_id = f"{entry.entry_id}_alert_level"
         self._attr_device_info = _device(entry)
 
+    async def async_added_to_hass(self) -> None:
+        """Luister ook naar de stormcoordinator, voor gemeten onweer."""
+        await super().async_added_to_hass()
+        if self._storm is not None:
+            self.async_on_remove(
+                self._storm.async_add_listener(self.async_write_ha_state)
+            )
+
     @property
     def native_value(self) -> str | None:
-        """Groen als er niets speelt, anders de kleur van de waarschuwing."""
+        """Groen als er niets speelt, anders de kleur van de waarschuwing.
+
+        0.58.0: minstens geel zolang onweer nadert of er inslagen binnen 25 km
+        zijn, ook zonder officiele waarschuwing.
+        """
         if self.coordinator.data is None:
             return None
-        return self.coordinator.data.get("niveau") or "groen"
+        return niveau_met_metingen(
+            self.coordinator.data.get("niveau"), _gemeten(self._storm)
+        )
 
     @property
     def extra_state_attributes(self) -> dict:
@@ -877,6 +911,10 @@ class AlertSensor(CoordinatorEntity[AlertCoordinator], SensorEntity):
             "bron": data.get("bron"),
             "regio": data.get("regio"),
             "niveau_per_uur": data.get("niveau_per_uur"),
+            # 0.58.0: het niveau van de waarschuwingen zelf, en of gemeten
+            # onweer het niveau optilt
+            "niveau_waarschuwingen": data.get("niveau") or "groen",
+            "gemeten_onweer": _gemeten(self._storm),
         }
 
 
@@ -935,18 +973,40 @@ class ForecastSensor(CoordinatorEntity[MeteoCoordinator], SensorEntity):
     _attr_has_entity_name = True
     _attr_translation_key = "forecast"
 
-    def __init__(self, coordinator: MeteoCoordinator, entry: ConfigEntry) -> None:
+    def __init__(
+        self,
+        coordinator: MeteoCoordinator,
+        entry: ConfigEntry,
+        storm: StormCoordinator | None = None,
+    ) -> None:
         """Initialiseer de sensor."""
         super().__init__(coordinator)
+        self._storm = storm
         self._attr_unique_id = f"{entry.entry_id}_forecast"
         self._attr_device_info = _device(entry)
 
+    async def async_added_to_hass(self) -> None:
+        """Luister ook naar de stormcoordinator, voor gemeten onweer."""
+        await super().async_added_to_hass()
+        if self._storm is not None:
+            self.async_on_remove(
+                self._storm.async_add_listener(self.async_write_ha_state)
+            )
+
+    def _oordeel(self) -> tuple[str | None, bool]:
+        data = self.coordinator.data or {}
+        return verwachting_met_metingen(
+            data.get("verwachting"),
+            data.get("verwachting_rang"),
+            _gemeten(self._storm),
+        )
+
     @property
     def native_value(self) -> str | None:
-        """Het oordeel."""
+        """Het oordeel; gemeten onweer gaat voor op "geen" of "kleine kans" (0.58.0)."""
         if self.coordinator.data is None:
             return None
-        return self.coordinator.data.get("verwachting")
+        return self._oordeel()[0]
 
     @property
     def extra_state_attributes(self) -> dict:
@@ -954,8 +1014,12 @@ class ForecastSensor(CoordinatorEntity[MeteoCoordinator], SensorEntity):
         data = self.coordinator.data
         if not data:
             return {}
+        overstemd = self._oordeel()[1]
         return {
             "toelichting": data.get("verwachting_toelichting"),
+            # 0.58.0: wat het model zei als metingen het oordeel overstemmen
+            "model_oordeel": data.get("verwachting"),
+            "overstemd_door_metingen": overstemd,
             "energie": data.get("duiding_cape"),
             "stabiliteit": data.get("duiding_stabiliteit"),
             "windschering": data.get("duiding_schering"),

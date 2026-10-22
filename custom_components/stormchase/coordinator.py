@@ -1107,6 +1107,14 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         # Een punt telt alleen bij een nieuwe inslag (of echte verplaatsing);
         # de snelheid verandert dus niet doordat oude punten uit het venster
         # vallen (L-SC-001).
+        # 0.58.0 (L-SC-013): de reeks hoort bij de gevolgde cel. Wisselt die
+        # (ander kenmerk) of begon haar spoor opnieuw na een zwaartepunts-
+        # sprong (L-SC-014), dan begint de reeks opnieuw in plaats van
+        # afstanden van twee cellen te combineren.
+        if cellen:
+            self._nadering.volg_cel(
+                cellen[0].get("id"), bool(cellen[0].get("herstart"))
+            )
         nu_trend = dt_util.utcnow().timestamp()
         self._nadering.bij(nu_trend, distance, last_strike)
         speed = self._nadering.snelheid(nu_trend)

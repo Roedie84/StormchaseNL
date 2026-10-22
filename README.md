@@ -23,7 +23,7 @@ sensoren uit en rekent daar bovenop.
 |---|---|
 | `sensor.stormchase_afstand` | Afstand tot de dichtstbijzijnde inslag, herberekend vanaf je eigen positie. Attribuut `gemeten_via` toont of dat gelukt is. |
 | `sensor.stormchase_azimut` | Richting van die inslag. |
-| `sensor.stormchase_naderingssnelheid` | km/u, **positief = komt dichterbij**. Lineaire regressie over 15 minuten, niet eerste-tegen-laatste, omdat losse inslagen flink springen. Alleen nieuwe inslagafstanden tellen (minstens 3 in het venster); zonder nieuwe inslag blijft de waarde staan en vervalt ze zodra er te weinig metingen in het venster over zijn. |
+| `sensor.stormchase_naderingssnelheid` | km/u, **positief = komt dichterbij**. Lineaire regressie over 15 minuten, niet eerste-tegen-laatste, omdat losse inslagen flink springen. Alleen nieuwe inslagafstanden tellen (minstens 3 in het venster); zonder nieuwe inslag blijft de waarde staan en vervalt ze zodra er te weinig metingen in het venster over zijn. Sinds 0.58.0 hoort de reeks bij de gevolgde cel: wisselt die, of verspringt haar zwaartepunt, dan begint de reeks opnieuw (geen afstanden van twee cellen in een regressie). |
 | `sensor.stormchase_aankomst` | Geschatte minuten tot aankomst. Niet beschikbaar als het onweer niet nadert. |
 | `sensor.stormchase_trend` | `nadert snel` · `nadert` · `stabiel` · `trekt weg` · `trekt snel weg` |
 | `sensor.stormchase_inslagen_binnen_X_km` | Drie ringen, standaard 10 / 25 / 50 km. |
@@ -47,6 +47,12 @@ sensoren uit en rekent daar bovenop.
 oordeel: geen onweer verwacht, kleine kans, kans op onweer, kans op zwaar
 onweer of kans op noodweer. De attributen bevatten de duiding per onderdeel
 en een toelichting waarom het oordeel zo uitvalt.
+
+Metingen gaan voor op het model (0.58.0): nadert er onweer of slaat het binnen
+25 km in, terwijl het model op "geen onweer verwacht" of "kleine kans" staat,
+dan toont de sensor "Onweer in de buurt (gemeten)". Het oordeel van het model
+staat dan in het attribuut `model_oordeel`, en `overstemd_door_metingen` is
+`true`.
 
 Het gaat om de combinatie. CAPE van 2500 bij stabiele lucht levert niets op,
 en veel energie zonder windschering hooguit een losse bui die zichzelf binnen
@@ -173,6 +179,9 @@ verwachting per uur en per dag komt onveranderd van Open-Meteo.
 ### Waarschuwingen
 
 `sensor.stormchase_waarschuwingsniveau` staat op groen, geel, oranje of rood.
+Zolang onweer nadert of er inslagen binnen 25 km zijn, staat het niveau
+minstens op geel, ook zonder officiele waarschuwing (0.58.0). Het niveau van de
+waarschuwingen zelf staat in het attribuut `niveau_waarschuwingen`.
 In Nederland komen de waarschuwingen sinds 0.49.0 rechtstreeks van het KNMI
 (zie [KNMI-bronnen](#knmi-bronnen-nederland)). Daarbuiten, en als terugval, is
 de bron MeteoAlarm, de Europese koepel waar nationale weerdiensten hun

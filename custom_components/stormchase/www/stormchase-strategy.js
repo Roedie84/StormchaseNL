@@ -1639,9 +1639,14 @@ class StormchaseHudCard extends HTMLElement {
     const vw = s("verwachting");
     if (vw) {
       const tekst = bruikbaar(vw) ? vw.state : null;
-      const toel = attr(vw, "toelichting");
+      // 0.58.0: overstemd door metingen, dan het modeloordeel eronder
+      const toel = attr(vw, "overstemd_door_metingen")
+        ? `Model: ${attr(vw, "model_oordeel") || STREEP}`
+        : attr(vw, "toelichting");
       const l = (tekst || "").toLowerCase();
-      const niveau = l.includes("noodweer")
+      const niveau = l.includes("gemeten")
+        ? "geel"
+        : l.includes("noodweer")
         ? "rood"
         : l.includes("zwaar")
           ? "oranje"

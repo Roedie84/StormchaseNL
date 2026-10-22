@@ -457,10 +457,14 @@ def volg_cellen(
         # voorspelling later tegen dezelfde cel af te rekenen: sinds
         # buienlijnen worden opgeknipt kan de dichtstbijzijnde cel een andere
         # zijn dan die waarover de voorspelling ging.
+        # 0.58.0 (L-SC-013): herstart = het spoor begint deze ronde opnieuw
+        # (nieuwe cel of zwaartepuntsprong); de naderingsreeks volgt dat.
+        herstart = False
         if beste is None:
             kenmerk = volgend_kenmerk
             volgend_kenmerk += 1
             punten_spoor: list[tuple[float, float, float]] = []
+            herstart = True
         else:
             vorig = beschikbaar.pop(beste[1])
             kenmerk = vorig["id"]
@@ -471,6 +475,7 @@ def volg_cellen(
                 punten_spoor[-1], nu, cel["latitude"], cel["longitude"]
             ):
                 punten_spoor = []
+                herstart = True
 
         punten_spoor = (punten_spoor + [(nu, cel["latitude"], cel["longitude"])])[-40:]
         nieuwe_sporen.append({"id": kenmerk, "punten": punten_spoor})
@@ -478,6 +483,7 @@ def volg_cellen(
         gegevens = {
             **cel,
             "id": kenmerk,
+            "herstart": herstart,
             "spoor": [(lat, lon) for _, lat, lon in punten_spoor],
             "intensiteit": intensiteit(cel["inslagen"]),
             "richting": None,

@@ -489,3 +489,44 @@ def draairichting(richtingen: list[float | None]) -> str:
     if totaal < -30:
         return "linksdraaiend"
     return "nauwelijks draaiing"
+
+
+# 0.58.0: metingen gaan voor op het model. 22-10 14:22-15:56 stond het niveau
+# de hele middag op groen en de verwachting op "Geen onweer verwacht"
+# (ensemble 0 %, bliksempotentie 0), terwijl onweer_nadert drie keer aan
+# stond, de dichtstbijzijnde inslag op 23,0 km lag en er 372 inslagen binnen
+# 50 km vielen.
+GEMETEN_NABIJ_KM = 25.0
+TEKST_GEMETEN = "Onweer in de buurt (gemeten)"
+NIVEAUS = ("groen", "geel", "oranje", "rood")
+
+
+def gemeten_onweer(nadert: bool | None, afstand: float | None) -> bool:
+    """Is er nu gemeten onweer: nadert het, of slaat het binnen 25 km in?"""
+    if nadert:
+        return True
+    return afstand is not None and afstand <= GEMETEN_NABIJ_KM
+
+
+def niveau_met_metingen(niveau: str | None, gemeten: bool) -> str:
+    """Het waarschuwingsniveau, minstens geel bij gemeten onweer."""
+    niveau = niveau or "groen"
+    if not gemeten:
+        return niveau
+    rang = NIVEAUS.index(niveau) if niveau in NIVEAUS else 0
+    return NIVEAUS[max(rang, 1)]
+
+
+def verwachting_met_metingen(
+    oordeel: str | None, rang: int | None, gemeten: bool
+) -> tuple[str | None, bool]:
+    """De verwachting, overstemd door metingen als het model te laag zit.
+
+    Geeft (oordeel, overstemd). Alleen "geen" en "kleine kans" wijken; zegt het
+    model zelf al kans op onweer of zwaarder, dan blijft dat staan.
+    """
+    if not gemeten or oordeel is None:
+        return oordeel, False
+    if (rang or 0) >= RANG_ONWEER:
+        return oordeel, False
+    return TEKST_GEMETEN, True

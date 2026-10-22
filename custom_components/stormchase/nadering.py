@@ -14,6 +14,12 @@ veranderd is, bijvoorbeeld omdat je rijdt). De snelheid wordt alleen bij zo'n
 nieuw punt berekend en daarna vastgehouden. Ze vervalt zodra er te weinig
 metingen in het venster over zijn; ze verandert nooit doordat een oud punt uit
 het venster valt.
+
+0.58.0 (L-SC-013): de reeks hoort bij een cel. Wisselt de gevolgde cel (een
+ander kenmerk), of begint het spoor van dezelfde cel opnieuw omdat het
+zwaartepunt versprong (L-SC-014), dan begint de reeks opnieuw. Anders kwamen
+afstanden van twee cellen in een regressie terecht: 22-10 gaf dat 138 km/u en
+eerder 222 km/u, tegen werkelijk zo'n 35 km/u.
 """
 
 from __future__ import annotations
@@ -66,6 +72,33 @@ class Naderingstrend:
         self._snelheid: float | None = None
         # Tijdstip waarna de vastgehouden snelheid te weinig steun heeft
         self._geldig_tot: float | None = None
+        # Kenmerk van de cel waar de reeks bij hoort (L-SC-013)
+        self._cel = None
+        self.celwissels = 0
+
+    def volg_cel(self, kenmerk, herstart: bool = False) -> bool:
+        """Meld welke cel nu gevolgd wordt. True als de reeks opnieuw begint.
+
+        Zonder cel (geen verse inslagen) blijft alles staan. Een andere cel,
+        of dezelfde cel waarvan het spoor opnieuw begon, wist de reeks en de
+        vastgehouden snelheid: afstanden van twee cellen horen niet in een
+        regressie.
+        """
+        if kenmerk is None:
+            return False
+        vorige = self._cel
+        self._cel = kenmerk
+        if vorige is None:
+            return False
+        if kenmerk == vorige and not herstart:
+            return False
+        if not self.metingen and self._snelheid is None:
+            return False
+        self.metingen.clear()
+        self._snelheid = None
+        self._geldig_tot = None
+        self.celwissels += 1
+        return True
 
     def bij(self, nu: float, afstand: float | None, inslag=None) -> bool:
         """Verwerk een ronde. True als dit een nieuwe meting was.
@@ -120,6 +153,7 @@ class Naderingstrend:
             "sleutel": self._sleutel,
             "snelheid": self._snelheid,
             "geldig_tot": self._geldig_tot,
+            "cel": self._cel,
         }
 
     def herstel(self, bewaard: dict | None, nu: float) -> None:
@@ -151,9 +185,12 @@ class Naderingstrend:
         else:
             self._snelheid = None
             self._geldig_tot = None
+        cel = bewaard.get("cel")
+        self._cel = cel if _is_getal(cel) or isinstance(cel, str) else None
 
     def wis(self) -> None:
         self.metingen.clear()
         self._sleutel = None
         self._snelheid = None
         self._geldig_tot = None
+        self._cel = None

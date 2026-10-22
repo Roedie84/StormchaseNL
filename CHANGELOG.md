@@ -5,6 +5,18 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.58.0] — 2026-10-22
+
+### Opgelost
+
+- **Naderingssnelheid niet meer over een celwissel heen (L-SC-013).** De regressie combineerde afstanden van twee cellen zodra een andere cel de dichtstbijzijnde werd: vandaag max 138 km/u, eerder 222 km/u tegen werkelijk ~35 km/u. De naderingsreeks hoort nu bij de gevolgde cel (kenmerk). Wisselt die, of begint het spoor van dezelfde cel opnieuw na een zwaartepuntsprong (L-SC-014), dan begint de reeks opnieuw; de snelheid is onbekend tot er weer 3 nieuwe afstanden van die cel zijn. Zonder verse cel blijft de reeks staan. De gevolgde cel blijft over een herstart bewaard.
+
+### Gewijzigd
+
+- **Gemeten onweer gaat voor op het model.** 22-10 14:22-15:56 stond *Waarschuwingsniveau* de hele middag op groen en *Onweersverwachting* op "Geen onweer verwacht" (ensemble 0 %, bliksempotentie 0), terwijl *Onweer nadert* drie keer aan stond, de dichtstbijzijnde inslag op 23,0 km lag en er 372 inslagen binnen 50 km vielen.
+- *Waarschuwingsniveau* staat minstens op geel zolang onweer nadert of er inslagen binnen 25 km zijn. Nieuwe attributen `niveau_waarschuwingen` (het niveau van de officiele waarschuwingen zelf) en `gemeten_onweer`.
+- *Onweersverwachting* toont dan "Onweer in de buurt (gemeten)" in plaats van "Geen onweer verwacht" of "Kleine kans op onweer"; een modeloordeel van "Kans op onweer" of zwaarder blijft staan. Nieuwe attributen `model_oordeel` en `overstemd_door_metingen`. Het dashboard kleurt die tegel geel en toont het modeloordeel eronder.
+
 ## [0.57.2] — 2026-10-22
 
 ### Gewijzigd
