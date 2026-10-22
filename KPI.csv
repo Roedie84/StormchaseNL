@@ -292,3 +292,6 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-22 03:40,TUSSEN,sc_wind_bias_kmh,2.35,3,"uurgemiddelden 00-03 u (+2.5/-0.1/+4.7); gemeten stoot daalt 31->25"
 2026-10-22 03:40,TUSSEN,sc_bronnen_dag_pct,99.7,412,"22-10 t/m 03:45 (radar 1 mislukt)"
 2026-10-22 03:40,TUSSEN,sc_radar_beeldleeftijd_min,3,1,"03:43"
+2026-10-22 07:40,TUSSEN,sc_onweer_inslagen_50km,0,0,"geen onweer; niveau groen; ensemble 0 %"
+2026-10-22 07:40,TUSSEN,sc_bronnen_min_slaag_pct,97,14,"buienradar 97 (cumulatief), rest >= 99; knmi_nowcast 1 mislukt 06:49, radar 1 mislukt 06:04; KNMI-push verbonden"
+2026-10-22 07:40,TUSSEN,sc_windstoten_bias_kmh,-0.43,4,"03-07 u uurgemiddelden; MAE 1.21; gemeten stijgend 25.8 -> 29.4"

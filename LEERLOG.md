@@ -331,3 +331,13 @@ laatste ronde: 21-10 23:40, gemeten t/m 21-10 23:43
 - Hypotheses: H-SC-3 (regenstart te laat; correctie nog niet actief), H-SC-6 (snelheid na celwissel; L-SC-013 open), H-SC-8 (passage niet gemeten bij id-wissel → nu gebouwd, toets bij onweer).
 
 laatste ronde: 22-10 03:40, gemeten t/m 22-10 03:45
+
+## 22-10 07:40 · tussenronde
+- Geen onweer (0 inslagen < 50 km, groen, ensemble 0 %); alleen beschikbaarheid. Actief **0.56.1** (geïnstalleerd, herstart 07:07); locatie: tracker.
+- Bronnen: alle in gebruik ≥ 97 % (buienradar 97 cumulatief, rest ≥ 99 %); sinds 03:45 1× knmi_nowcast (time-out 06:49) en 1× radar (06:04) mislukt, direct hersteld. KNMI-push verbonden.
+- Windstoten 03-07 u: bias −0,43 km/u, MAE 1,21 (n=4) bij weer toenemende gemeten stoot (25,8 → 29,4). Nacht 00-03 u was +2,35 bij afname → het model volgt met vertraging: bij afname te hoog, bij toename iets te laag. Wordt **H-SC-9** (traagheid, n=2 perioden); toets bij de volgende sterke toe-/afname.
+- Regen: "over 72 min een bui (licht, 0,1 mm/u)" om 07:45 = weer de lange horizon (H-SC-3); uitslag volgende ronde.
+- L-SC-012 (0.56.1) geïnstalleerd; toets wacht op een onweersdag.
+- Hypotheses: H-SC-3 (regenstart lange horizon), H-SC-6 (snelheid na celwissel; L-SC-013 open), H-SC-8 (passage bij id-wissel; gebouwd, toets bij onweer). H-SC-9 genoteerd als kandidaat (max 3 lopend: vervangt H-SC-8 zodra die getoetst is). Geen release.
+
+laatste ronde: 22-10 07:40, gemeten t/m 22-10 07:45
