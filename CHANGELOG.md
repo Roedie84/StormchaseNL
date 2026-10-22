@@ -5,6 +5,14 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.56.1] — 2026-10-22
+
+### Opgelost
+
+- **Passage ook na een kenmerkwissel nagemeten (L-SC-012).** Kreeg de cel waarover een passage voorspeld was een nieuw kenmerk (buienlijn opgeknipt, cellen samengegaan), dan werd de passage zonder gemeten afstand afgesloten. Op 17-10 gebeurde dat drie keer (voorspeld 42,4 en 39,2 km) terwijl de inslagen op 36-42 km lagen; in totaal had 19 van de 26 bewaarde passages een afstand. Nu geldt een cel die binnen 15 km van de laatst bekende plek van de gevolgde cel opduikt als opvolger (ook een opvolger van een opvolger), en telt de kleinste afstand van de opvolger als de eigen cel er niet meer is. De uitkomst krijgt `gemeten_via` ("zelfde cel" of "opvolger").
+- **Afrekenen ook in een ronde zonder cel.** Was de bui op het verwachte moment al uit beeld, dan verliep de passage na 30 minuten als "niet uitgekomen" zonder naar de gemeten afstand te kijken. Nu wordt hij op het verwachte moment afgerekend met wat er gemeten is.
+- Alleen de nameting verandert: voorspellingen, waarschuwingsdrempels en meldingen zijn ongewijzigd.
+
 ## [0.56.0] — 2026-10-19
 
 ### Gewijzigd

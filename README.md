@@ -697,6 +697,9 @@ voorspelde afstand langskwam (`binnen_10_km`, met `binnen_20_km` als ruime
 maat, `trefkans_10_km_pct`/`trefkans_20_km_pct` en de mediane afwijking).
 `uitgekomen` betekent bij passages alleen "afstand gemeten" en blijft voor
 vergelijkbaarheid bestaan. Elke uitkomst draagt de gemeten afwijking in km.
+Sinds 0.56.1 wordt een passage ook nagemeten als de cel onderweg een nieuw
+kenmerk kreeg (opgeknipt of samengegaan): een cel die binnen 15 km van de
+laatste plek opduikt telt als opvolger; `gemeten_via` zegt welke route.
 
 Wat erin zit: de instellingen, de actuele waarden, per bron het aantal
 geslaagde en mislukte ophaalrondes met de laatste foutmelding, welke

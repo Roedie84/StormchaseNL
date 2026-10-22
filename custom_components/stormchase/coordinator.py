@@ -370,6 +370,8 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         # Kleinste afstand per cel, zodat een voorspelling wordt afgerekend
         # tegen dezelfde cel en niet tegen wat er later het dichtst bij is.
         self._min_per_cel: dict[int, float] = {}
+        # 0.56.1: laatst bekende (lat, lon) per cel, voor de opvolger.
+        self._laatste_pos_per_cel: dict[int, tuple[float, float]] = {}
         self._laatste_dichtbij: float | None = None
         self._was_schuilen: bool | None = None
         self.validatie = Validatie()
@@ -817,9 +819,29 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
                     },
                 )
 
-            # Afrekenen tegen de kleinste afstand van dezelfde cel
-            open_cel = (val.open.get("passage") or {}).get("cel")
-            val.passage_afgerond(nu, self._min_per_cel.get(open_cel))
+        # 0.56.1 (L-SC-012): laatste plek per cel bijhouden en bij een
+        # verdwenen cel een opvolger zoeken, zodat de passage ook na een
+        # kenmerkwissel een gemeten afstand krijgt. En afrekenen ook in een
+        # ronde zonder cel (de bui is weg); tot 0.56.0 verliep de passage dan
+        # als "niet uitgekomen" zonder naar de gemeten afstand te kijken.
+        for gevolgd in cellen or []:
+            kenmerk = gevolgd.get("id")
+            lat, lon = gevolgd.get("latitude"), gevolgd.get("longitude")
+            if kenmerk is not None and lat is not None and lon is not None:
+                self._laatste_pos_per_cel[kenmerk] = (lat, lon)
+        if len(self._laatste_pos_per_cel) > 200:
+            bewaren = set(self._min_per_cel)
+            self._laatste_pos_per_cel = {
+                k: v for k, v in self._laatste_pos_per_cel.items() if k in bewaren
+            }
+        val.volg_passagecel(cellen, self._laatste_pos_per_cel)
+
+        # Afrekenen tegen de kleinste afstand van dezelfde cel of een opvolger
+        # Zonder cel én zonder meting niet afsluiten: dan wacht verlopen() de
+        # gewone 30 minuten af, zoals voorheen (de cel kan terugkomen).
+        afstand_passage, via = val.passage_meting(self._min_per_cel)
+        if cel or afstand_passage is not None:
+            val.passage_afgerond(nu, afstand_passage, via)
 
     def plan_validatie_opslag(self) -> None:
         """Plan het wegschrijven van de validatie als er iets veranderd is."""

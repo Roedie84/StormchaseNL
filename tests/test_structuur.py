@@ -306,7 +306,11 @@ def test_passage_wordt_tegen_dezelfde_cel_afgerekend():
 
     # Per cel bijhouden, en afrekenen tegen het kenmerk uit de voorspelling
     assert "_min_per_cel" in bron
-    assert 'val.open.get("passage") or {}).get("cel")' in bron
+    # 0.56.1 (L-SC-012): het kenmerk uit de voorspelling (en zijn opvolgers
+    # na een kenmerkwissel) wordt in validatie.passage_meting opgezocht.
+    assert "val.passage_meting(self._min_per_cel)" in bron
+    validatie = (BRON / "validatie.py").read_text(encoding="utf-8")
+    assert 'min_per_cel.get(voorspelling.get("cel"))' in validatie
 
     cel = (BRON / "cel.py").read_text(encoding="utf-8")
     assert '"id": kenmerk' in cel

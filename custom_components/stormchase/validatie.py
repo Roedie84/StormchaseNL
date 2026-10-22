@@ -55,6 +55,23 @@ GEDULD_MINUTEN = {
 PASSAGE_RAAK_KM = 10.0
 PASSAGE_RUIM_KM = 20.0
 
+# 0.56.1 (L-SC-012): een cel waarover een passage voorspeld is, krijgt soms
+# een nieuw kenmerk (de buienlijn wordt opgeknipt of twee cellen gaan samen).
+# Tot 0.56.0 werd zo'n passage dan zonder afstand afgesloten: op 17-10 drie
+# passages zonder meting terwijl de inslagen op 36-42 km lagen. Een cel die
+# binnen deze afstand van de laatst bekende plek van de gevolgde cel opduikt,
+# geldt als opvolger; de afstand van de opvolger telt dan mee.
+OPVOLGER_KM = 15.0
+
+
+def _km_tussen(a: tuple[float, float], b: tuple[float, float]) -> float:
+    """Afstand in km tussen twee (lat, lon)-punten, vlakke benadering."""
+    from math import cos, hypot, radians
+
+    x = (b[1] - a[1]) * 111.320 * cos(radians(a[0]))
+    y = (b[0] - a[0]) * 110.574
+    return hypot(x, y)
+
 
 def _open_uit_opslag(bewaard) -> dict[str, dict]:
     """Open voorspellingen uit de opslag; wat niet compleet is valt weg.
@@ -218,8 +235,55 @@ class Validatie:
             if nu > voorspelling["verwacht_op"] + geduld:
                 self._rond_af(soort, nu, {"uitgekomen": False})
 
+    def volg_passagecel(
+        self, cellen: list[dict] | None, laatste_pos: dict
+    ) -> None:
+        """Opvolgers zoeken als de cel van de open passage verdwenen is.
+
+        `laatste_pos` is de laatst bekende (lat, lon) per celkenmerk. Alleen
+        als geen enkele gevolgde cel (de oorspronkelijke of een eerdere
+        opvolger) nog in de ronde zit, worden cellen binnen OPVOLGER_KM van
+        hun laatste plek als opvolger toegevoegd. Raakt alleen de nameting.
+        """
+        voorspelling = self.open.get("passage")
+        if voorspelling is None or voorspelling.get("cel") is None:
+            return
+        gevolgd = [voorspelling["cel"], *voorspelling.get("opvolgers", [])]
+        actueel = {g.get("id") for g in cellen or []}
+        if any(k in actueel for k in gevolgd):
+            return
+        plekken = [laatste_pos[k] for k in gevolgd if k in laatste_pos]
+        if not plekken:
+            return
+        nieuw = []
+        for g in cellen or []:
+            kenmerk = g.get("id")
+            lat, lon = g.get("latitude"), g.get("longitude")
+            if kenmerk is None or kenmerk in gevolgd or lat is None or lon is None:
+                continue
+            if any(_km_tussen(p, (lat, lon)) <= OPVOLGER_KM for p in plekken):
+                nieuw.append(kenmerk)
+        if nieuw:
+            voorspelling["opvolgers"] = [*voorspelling.get("opvolgers", []), *nieuw]
+            self.wijzigingen += 1
+
+    def passage_meting(self, min_per_cel: dict) -> tuple[float | None, str | None]:
+        """Kleinste afstand van de gevolgde cel, anders van een opvolger."""
+        voorspelling = self.open.get("passage")
+        if voorspelling is None:
+            return (None, None)
+        eigen = min_per_cel.get(voorspelling.get("cel"))
+        if eigen is not None:
+            return (eigen, "zelfde cel")
+        opvolgers = [min_per_cel[k] for k in voorspelling.get("opvolgers", [])
+                     if k in min_per_cel]
+        if opvolgers:
+            return (min(opvolgers), "opvolger")
+        return (None, None)
+
     def passage_afgerond(
-        self, nu: float, werkelijke_afstand: float | None
+        self, nu: float, werkelijke_afstand: float | None,
+        gemeten_via: str | None = None,
     ) -> None:
         """Een celpassage beoordelen op afstand in plaats van op tijd."""
         voorspelling = self.open.get("passage")
@@ -247,6 +311,7 @@ class Validatie:
                 "verwachte_afstand_km": verwacht,
                 "werkelijke_afstand_km": werkelijke_afstand,
                 "afwijking_km": verschil,
+                **({"gemeten_via": gemeten_via} if gemeten_via else {}),
             },
         )
 
