@@ -433,3 +433,12 @@ laatste ronde: 23-10 15:40, gemeten t/m 23-10 15:45
 - Hypotheses: H-SC-3 (regenstart: 15-30 min te vroeg?), H-SC-8 (passage), H-SC-9 (windstoten: traagheid + vandaag niveaufout bij front). Geen release.
 
 laatste ronde: 23-10 19:40, gemeten t/m 23-10 19:45
+
+## 23-10 23:40 · tussenronde
+- Actief **0.59.1**. Geen Stormchase-logregels. Geen inslagen < 50 km; niveau geel → **groen om 23:32** (KNMI-waarschuwing voorbij). Lichte regen.
+- **Windstoten (L-SC-017 / H-SC-9):** per stationsmeting 19:44-23:34 bias **−1,92**, MAE 3,61 (n=24; 19:40-ronde −5,15). Per uur −5,0/−5,4/−3,5 bij aantrekkende wind (19-21 u), **+1,0/+2,7** bij afnemende (22-23 u) → past bij traagheid (te laag bij stijgen, te hoog bij dalen), niet bij een vaste niveaufout.
+- **Windvooruitblik:** 76-84 km/u (piek schoof 22:00 → 23:00); gemeten max **64,9** (21:24), > 60 vanaf 20:44 (5×) → piek 15 km/u te hoog, starttijd ~1,5 u te vroeg. Open-meteo rekent open veld; het weerstation staat in de tuin. n=1 dag; afrekening in de dagafsluiting (toets 22-10 erbij).
+- Radar-vooruitblik: beeld 22:53, `referentietijd` 23:40, status "actueel" (L-SC-018 gepland).
+- Hypotheses: H-SC-3 (regenstart; geen nieuwe bui), H-SC-8 (passage), H-SC-9 (windstoten: traagheid bevestigd in de avond). Geen release.
+
+laatste ronde: 23-10 23:40, gemeten t/m 23-10 23:45
