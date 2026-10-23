@@ -5,6 +5,13 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.59.1] — 2026-10-23
+
+### Opgelost
+
+- **Geen "Timeout waiting for strategy element ll-strategy-dashboard-stormchase" meer bij een trage verbinding.** De frontend wacht maar een paar seconden tot de strategie geregistreerd is; het grote script (~112 KB, kaarten plus strategie) haalde dat via Nabu Casa, mobiel of vlak na een herstart niet altijd. De strategieklassen staan nu ook in een klein, los bestand `www/stormchase-dashboard.js` (~7 KB) dat alleen config-objecten teruggeeft (kaarttypes als tekst, geen afhankelijkheid van de kaarten) en de strategie direct registreert. `stormchase-strategy.js` houdt de kaarten; het strategieblok daarin blijft als identieke terugval voor wie alleen dat bestand als bron heeft. De registreer-guard zorgt dat elk element maar een keer gedefinieerd wordt. De strategie blijft dynamisch (kaarten op de actieve locatie, Alle waarden volgt de entiteiten); de gegenereerde config is identiek aan 0.59.0.
+- Beide bestanden worden geserveerd (static path met cache-headers) en als Lovelace-bron vastgelegd (`?v=<versie>&t=<starttijd>`), het kleine eerst, plus via `add_extra_js_url`. Per bestand blijft precies een bron over: dubbele worden verwijderd, en verweesde bronnen onder `/stormchase/` die bij geen bestand meer horen ook. Bij een herlaad zonder herstart worden oude `add_extra_js_url`-adressen eerst weggehaald, en het nieuwe pad wordt alsnog geregistreerd als het oude er al stond.
+
 ## [0.59.0] — 2026-10-23
 
 ### Toegevoegd

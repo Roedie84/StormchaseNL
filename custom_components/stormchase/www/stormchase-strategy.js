@@ -6,6 +6,11 @@
  *  1. De dashboardstrategie (custom:stormchase). Die bouwt bij elke
  *     paginalading een panel-view met daarin een enkele kaart, plus een tab
  *     met kaarten van derden en een tab met alle waarden.
+ *     Sinds 0.59.1 laadt de strategie vooral uit het kleine
+ *     stormchase-dashboard.js, dat direct registreert (geen time-out meer
+ *     bij een trage verbinding). Het blok hier is een identieke terugval
+ *     voor wie alleen dit bestand als bron heeft; de registreer-guard
+ *     zorgt dat elk element maar een keer gedefinieerd wordt.
  *  2. De kaart zelf: <stormchase-hud-card>. Een eigen element met Shadow DOM
  *     en eigen opmaak, zonder HACS-kaarten en zonder externe bestanden. Het
  *     zoekt de entiteiten zelf op (via het entiteitenregister, met de nette

@@ -324,6 +324,12 @@ RICHTINGEN = [
 # Frontend / dashboardstrategie
 STRATEGY_FILE = "stormchase-strategy.js"
 STRATEGY_URL = f"/{DOMAIN}/{STRATEGY_FILE}"
+# 0.59.1: de strategie los in een klein bestand, zodat hij binnen de
+# time-out van de frontend registreert. Het grote bestand houdt de kaarten.
+DASHBOARD_FILE = "stormchase-dashboard.js"
+DASHBOARD_URL = f"/{DOMAIN}/{DASHBOARD_FILE}"
+# Volgorde: eerst de kleine strategie, dan de kaarten.
+FRONTEND_FILES = ((DASHBOARD_FILE, DASHBOARD_URL), (STRATEGY_FILE, STRATEGY_URL))
 
 # Open-Meteo
 METEO_URL = "https://api.open-meteo.com/v1/forecast"

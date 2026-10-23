@@ -640,9 +640,11 @@ dashboard en in de console (F12, regel `STORMCHASE commandocentrum geladen`)
 staat welke versie je browser draait.
 
 Krijg je toch *Timeout waiting for strategy element*, dan draait Lovelace
-waarschijnlijk in YAML-modus en moet je de bron handmatig toevoegen onder
-Instellingen → Dashboards → Bronnen: URL `/stormchase/stormchase-strategy.js`,
-type JavaScript-module. Ververs daarna één keer hard met Ctrl+Shift+R.
+waarschijnlijk in YAML-modus en moet je de bronnen handmatig toevoegen onder
+Instellingen → Dashboards → Bronnen: URL's `/stormchase/stormchase-dashboard.js`
+(de strategie, klein en snel geladen) en `/stormchase/stormchase-strategy.js`
+(de kaarten), beide type JavaScript-module. Ververs daarna één keer hard met
+Ctrl+Shift+R.
 
 Wil je alleen het commandocentrum als losse view binnen een bestaand
 dashboard:
