@@ -45,3 +45,5 @@
 | Windstoten bias dag (uurgemiddelden) | +0,89 km/u, MAE 2,16 (nacht +0,52) | 21-10, n=24 | 22-10 03:40 |
 | Passages met gemeten afstand | 19/26 (73 %) vóór 0.56.1 | t/m 21-10 | 22-10 03:40 |
 | Celsnelheid > 120 km/u (tijdsaandeel tijdens onweer) | 37 %, max 407, mediaan 42 | 22-10 14:20-15:34 | 22-10 15:40 |
+| Windstoten bias naar trend meting (uurgemiddelden) | dalend +1,74 · stijgend −1,46 km/u; MAE 2,52 (model+½·fout vorig uur: 2,24) | 12..22-10, n=238 | 23-10 03:40 |
+| Bronstatus vals "hapert" (reservebron) | 13,6 u/dag | 22-10 | 23-10 03:40 |

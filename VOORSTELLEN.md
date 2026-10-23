@@ -114,8 +114,16 @@ Status: open / akkoord / afgewezen / gebouwd vX / geverifieerd / teruggedraaid. 
 - Meten: tijdsaandeel |naderingssnelheid| > 120 per onweersdag (22-10: 7 min na 16:17); aankomst-hits/valse alarmen.
 
 ## L-SC-016 · bronstatus: reservebron niet "hapert" zolang hij niet nodig is (rapportage)
-- Status: **gepland** (zelf bouwen: alleen classificatie bronstatus; ophalen en terugval ongewijzigd). Dagafsluiting 23-10.
+- Status: **gebouwd 0.58.4** (23-10 03:47, dagafsluiting; workflow groen, HACS ververst; wacht op installatie). `RESERVE_VOOR` = buienradar→knmi_nowcast, meting→knmi_edr; slaagt de hoofdbron na de laatste poging van de reserve, dan geen "hapert" maar toestand "reserve (niet nodig)"; faalt hij opnieuw als hij gevraagd wordt, dan weer "hapert". 6 tests `tests/test_release_0584.py`, suite 876 groen. Meten na installatie: uren "hapert" terwijl de hoofdbron werkt = 0. Was: **gepland** (zelf bouwen: alleen classificatie bronstatus; ophalen en terugval ongewijzigd).
 - Onderbouwing: `sensor.stormchase_bronstatus` staat sinds de DNS-storing van 10:24 de hele dag op "buienradar hapert" (5 op rij mislukt, laatste succes 06:50, laatste fout 15:17). Code `rain.py` `_haal_op`: Buienradar wordt alleen gevraagd als KNMI-nowcast faalt — dus alleen tíjdens een algemene storing; daarna blijft `op_rij_mislukt` ≥ 2 staan tot de volgende KNMI-storing. KNMI-nowcast werkte 10:40-19:45 gewoon (100 %). De status meldt dus een storing die er niet is (meetfout in de rapportage).
 - Bouw: een reservebron die sinds zijn laatste fout niet meer gevraagd is terwijl de hoofdbron weer slaagt, telt niet als haperend maar als "reserve (laatst mislukt HH:MM)"; hapert pas weer als hij gevraagd wordt en faalt. Test: KNMI faalt 2× met Buienradar mee, daarna KNMI 1× goed → status geen "buienradar hapert".
 - Meten: uren per dag dat de bronstatus "hapert" toont terwijl regen via KNMI binnenkomt (22-10: ~13 u, 10:24-23:45).
 - Aanvulling 23:40: `meting` (Bright Sky) staat "in gebruik" met laatste succes 10:24 en 0 op rij mislukt — ook een reservebron die niet gevraagd wordt; de status zou dat zichtbaar moeten maken (bijv. "reserve, laatst gebruikt HH:MM") in plaats van "in gebruik".
+
+## L-SC-017 · windstoten: de fout van het vorige uur half meenemen (traagheid)
+- Status: **open** (raakt de windmelding en dus meldgedrag → Ruud beslist).
+- Onderbouwing: 12..22-10, n=238 uurgemiddelden van `sensor.stormchase_windstoten` tegen `…_windstoten_gemeten`: bij dalende meting bias +1,74, bij stijgende −1,46 km/u; 13 van 13 dagen hetzelfde teken. model(t) tegen gemeten(t−1) MAE 2,52 = tegen gemeten(t) 2,52 → het (bijgestelde) model loopt ~een half uur achter. 22-10: dalend +5,47 (n=13), stijgend +1,22 (n=10).
+- Voorstel: bijgestelde verwachting = model + k × (laatste gemeten − model op dat moment), k = 0,5, alleen met een stationsmeting ≤ 60 min oud; daarboven ongewijzigd. Sensorwaarde en windmelding volgen; de vooruitblik (dagen vooruit) niet.
+- Backtest (zelfde data): k 0 / 0,25 / 0,5 / 0,75 / 1 → MAE 2,52 / 2,32 / **2,24** / 2,33 / 2,55; beide helften beter (2,11→1,78 en 2,92→2,71). Bias −0,62 → −0,31.
+- Verwacht effect: ~11 % kleinere uurfout, minder windmeldingen die blijven hangen als de wind al afneemt.
+- Meten na bouw: MAE en bias per trend (stijgend/dalend), aantal windmeldingen per dag, 7 dagen voor/na. Voorbehoud: getoetst op uurgemiddelden; live rekent de integratie per 10 min.

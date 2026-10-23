@@ -384,3 +384,15 @@ laatste ronde: 22-10 19:40, gemeten t/m 22-10 19:45
 - Hypotheses: H-SC-3 (regenstart lange horizon), H-SC-6 (snelheid bij sprong; L-SC-015 gebouwd, toets bij onweer), H-SC-8 (passage). Geen release.
 
 laatste ronde: 22-10 23:40, gemeten t/m 22-10 23:45
+
+## 23-10 03:40 · dagafsluiting 22-10
+- Actief 0.58.3 → **0.58.4 gereleased 03:47** (L-SC-016, workflow groen, HACS ververst; wacht op installatie). Geen onweer sinds 20:52; nu regen (KNMI-nowcast), groen.
+- **Onweersdag 22-10 (n=1 gebeurtenis):** modellen misten het (KNMI groen, ensemble 0 %, CAPE 110-230); nadert 12 min vóór de eerste inslag < 50 km; aankomst "28 min" miste (bui trok langs, 0 < 10 km); passage-fout ≥ 8 km; 1 vals nadert-alarm na afstandsprong (→ L-SC-015, gebouwd). Celsnelheid > 120 km/u na 0.57.1 0 % (was 37 %). n te klein voor trefkans; elke volgende onweersdag telt.
+- **Windstoten dag:** bias +3,57 km/u, MAE 3,86 (24 u). Bij dalende meting +5,47 (n=13), bij stijgende +1,22 (n=10).
+- **H-SC-9 getoetst over 10 dagen (12..22-10, n=238 uur):** dalend +1,74, stijgend −1,46 km/u, 13 van 13 dagen dalend > stijgend; model(t) past even goed op gemeten(t−1) als op gemeten(t) (MAE 2,52/2,52) → het model loopt ~een half uur achter (traagheid, geen windsterkte-effect). Backtest "model + ½ × fout van het vorige uur": MAE 2,52 → 2,24 (−11 %), in beide helften beter → **L-SC-017 (open)**: raakt windmelding = meldgedrag → Ruud.
+- **L-SC-016 gebouwd 0.58.4:** bronstatus stond 22-10 13,6 u (10:24-24:00) en nu nog steeds onterecht op "buienradar hapert"; meting (Bright Sky) "in gebruik" terwijl KNMI-EDR het werk doet. Effect na installatie meten.
+- Windvooruitblik: 22-10 1 vals alarm (60 tegen 51,8 gemeten); vandaag 79 km/u 19-24 u (gemeld) → toets vanavond tegen het station.
+- Niet gemeten: bronnen-slaagpercentage per dag (alleen in de diagnostiek, niet via een sensor); regenstart-uitkomsten (validatie niet als attribuut).
+- Hypotheses: H-SC-3 (regenstart lange horizon), H-SC-8 (passage), H-SC-9 (windstoten traag → L-SC-017). H-SC-6 → toets L-SC-015 bij het volgende onweer.
+
+laatste ronde: 23-10 03:40, gemeten t/m 23-10 03:50
