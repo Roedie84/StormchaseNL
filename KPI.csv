@@ -343,3 +343,9 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-23 11:40,TUSSEN,sc_bronstatus_vals_hapert_uur,0,1,11:44 'alles in orde' (geen statuswissel in de recorder sinds 07:40)
 2026-10-23 11:40,TUSSEN,sc_windvooruitblik_vandaag_kmh,79,6,"08:09-11:09 tussen 75 en 81; KNMI-weerwaarschuwing aan sinds 08:39 (niveau geel)"
 2026-10-23 11:40,TUSSEN,sc_onweer_gebeurtenissen,0,0,"geen inslagen <50 km; droog; ensemble 0 %, CAPE 0"
+2026-10-23 15:40,TUSSEN,sc_windstoten_bias_kmh,-2.12,23,"per stationsmeting 11:44-15:34 (MAE 2.67); uurgemiddelden 11 -0.3, 12 +0.3, 13 -1.8, 14 -2.9, 15 -5.5; meting 31.5 -> 48.8 (stijgend, vlagerig)"
+2026-10-23 15:40,TUSSEN,sc_windstoten_mae_vooraf_kmh,3.55,23,"verwachting van vóór de meting (10 min vooruit), bias -2.33"
+2026-10-23 15:40,TUSSEN,sc_regenstart_fout_min,-5,1,"13:12 'over 57 min' -> 14:09; regen 14:05 (0.12 mm/u); 13:37 'over 24' -> +4; 13:59 'over 11' -> -5"
+2026-10-23 15:40,TUSSEN,sc_windvooruitblik_vandaag_kmh,80,8,"11:51-14:54 tussen 74 en 87; geel (KNMI-waarschuwing)"
+2026-10-23 15:40,TUSSEN,sc_onweer_gebeurtenissen,0,0,"geen inslagen <50 km; ensemble 0 %, CAPE 0 (piek 12 u 60)"
+2026-10-23 15:40,TUSSEN,sc_bronstatus_vals_hapert_uur,0,1,"15:42 'alles in orde'; statuswissels niet in de recorder"

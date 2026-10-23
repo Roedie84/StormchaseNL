@@ -414,3 +414,12 @@ laatste ronde: 23-10 07:40, gemeten t/m 23-10 07:45
 - Hypotheses: H-SC-3 (regenstart lange horizon), H-SC-8 (passage), H-SC-9 (windstoten traag → L-SC-017: eerste 4 uur duidelijk beter). Geen release.
 
 laatste ronde: 23-10 11:40, gemeten t/m 23-10 11:45
+
+## 23-10 15:40 · tussenronde
+- Actief **0.59.1** (11:48, andere sessie; dashboardstrategie). 0 Stormchase-logregels. Geen inslagen < 50 km, ensemble 0 %; niveau **geel** (KNMI-wind), windvooruitblik 74-87 (nu 80) voor vanavond.
+- **L-SC-017 middag:** per stationsmeting bias −2,12, MAE 2,67 km/u (n=23; ochtend 1,21); uurgemiddelden 11 −0,3, 12 +0,3, 13 −1,8, **14 −2,9, 15 −5,5** bij vlagerige toename 31,5 → 48,8. Vooraf (10 min vooruit) MAE 3,55. Halve correctie haalt een aanhoudende stijging niet bij; vóór L-SC-017 was het patroon hetzelfde (H-SC-9). Dag-MAE 03:40 vergelijken met 22-10 (3,86).
+- **Regenstart (H-SC-3), 1 bui:** 13:12 "over 57 min" → regen 14:05 (5 min eerder); 13:37 "over 24" +4, 13:59 "over 11" −5 → ±5 min op 1 uur. Licht (0,1-0,4 mm/u) tot 15:03. Volgende: 15:03 "over 54" (→ 15:57).
+- Bronstatus 15:42 "alles in orde" (L-SC-016 houdt).
+- Hypotheses: H-SC-3 (regenstart lange horizon: deze bui goed), H-SC-8 (passage), H-SC-9 (windstoten traag → L-SC-017; middag weer −3..−5,5). Geen release.
+
+laatste ronde: 23-10 15:40, gemeten t/m 23-10 15:45
