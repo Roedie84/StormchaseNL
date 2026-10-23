@@ -450,3 +450,14 @@ WIND_MELDING_STATION_MAX_S = 40 * 60
 WINDCORRECTIE_TIJDVAK_S = 2 * 3600
 WINDCORRECTIE_TIJDVAK_VENSTER_S = 72 * 3600
 WINDCORRECTIE_TIJDVAK_MIN_PAREN = 4
+# 0.59.0 (L-SC-017): uurbijsturing. De bijgestelde verwachting loopt ~een half
+# uur achter op de meting (te hoog bij afnemende, te laag bij toenemende
+# wind). De helft van de laatste fout (gemeten min verwachting van dat moment)
+# gaat bij de komende stoten, begrensd op +-WINDBIJSTURING_MAX_KMH en
+# lineair aflopend naar 0 over WINDBIJSTURING_AFLOOP_S. Een meting ouder dan
+# WINDBIJSTURING_MAX_LEEFTIJD_S geeft geen bijsturing.
+# Replay 10 dagen (238 uur): uurfout 2,52 -> 2,24 km/u.
+WINDBIJSTURING_AANDEEL = 0.5
+WINDBIJSTURING_MAX_KMH = 15.0
+WINDBIJSTURING_AFLOOP_S = 3 * 3600
+WINDBIJSTURING_MAX_LEEFTIJD_S = 3600

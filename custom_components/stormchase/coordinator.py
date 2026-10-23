@@ -1200,6 +1200,27 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
         return data
 
 
+def _komende_uurstoten(hourly: dict | None, nu: float, aantal: int = 3) -> list:
+    """0.59.0 (L-SC-017): [(epoch, stoot)] van de komende uren uit Open-Meteo."""
+    tijden = (hourly or {}).get("time") or []
+    stoten = (hourly or {}).get("wind_gusts_10m") or []
+    uit = []
+    for tekst, waarde in zip(tijden, stoten):
+        if waarde is None:
+            continue
+        moment = dt_util.parse_datetime(str(tekst))
+        if moment is None:
+            continue
+        if moment.tzinfo is None:
+            moment = moment.replace(tzinfo=dt_util.get_default_time_zone())
+        t = moment.timestamp()
+        if t > nu:
+            uit.append((t, waarde))
+            if len(uit) >= aantal:
+                break
+    return uit
+
+
 class MeteoCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdateCoordinator[dict]):
     """Haalt onweersparameters op bij Open-Meteo.
 
@@ -1271,12 +1292,21 @@ class MeteoCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
             "gemeld": dict(self.windvooruitblik_gemeld),
         }
 
-    def _wind(self, model) -> dict:
+    def _wind(self, model, hourly: dict | None = None) -> dict:
         """Windstoten na correctie met de stationsmeting (0.51.0)."""
         if self.windcorrectie is None:
             return {"waarde": model, "model": model, "factor": None,
                     "paren": 0, "toegepast": False}
-        return self.windcorrectie.corrigeer(model, dt_util.utcnow().timestamp())
+        nu = dt_util.utcnow().timestamp()
+        wind = self.windcorrectie.corrigeer(model, nu)
+        # 0.59.0 (L-SC-017): de komende uren bijgesteld en bijgestuurd
+        wind["komende_uren"] = [
+            {"tijd": dt_util.utc_from_timestamp(t).isoformat(), "kmh": w}
+            for t, w in self.windcorrectie.bijgestuurde_uren(
+                _komende_uurstoten(hourly, nu), nu, wind.get("factor")
+            )
+        ]
+        return wind
 
     def _windmelding(self, bijgesteld) -> dict:
         """Hoogste van bijgestelde verwachting en verse stationsmeting (0.53.0)."""
@@ -1308,7 +1338,7 @@ class MeteoCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
         data = self.data
         if not isinstance(data, dict) or "windstoten_model" not in data:
             return
-        wind = self._wind(data.get("windstoten_model"))
+        wind = self._wind(data.get("windstoten_model"), data.get("hourly"))
         if wind == data.get("windcorrectie"):
             return
         data["windstoten"] = wind["waarde"]
@@ -1656,7 +1686,7 @@ class MeteoCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
             self.stats.bronnen["open_meteo"].succes()
 
         huidig = payload.get("current") or {}
-        wind = self._wind(huidig.get("wind_gusts_10m"))
+        wind = self._wind(huidig.get("wind_gusts_10m"), hourly)
         # 0.53.0 (L-SC-008c): de melding kijkt ook naar de stationsmeting
         windmelding = self._windmelding(wind["waarde"])
         self._controleer_wind(windmelding["waarde"], windmelding["bron"])

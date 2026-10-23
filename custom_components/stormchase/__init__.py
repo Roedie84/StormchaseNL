@@ -249,7 +249,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             druk_1u=gemeten.get("druk_verandering_1u"),
         ):
             staatplan.plan()
-            meteo.herbereken_wind()
+        # 0.59.0 (L-SC-017): elke meting stuurt bij, ook zonder nieuw paar
+        meteo.herbereken_wind()
 
     entry.async_on_unload(meting.async_add_listener(_koppel_wind))
     meting.bewaarplan = staatplan

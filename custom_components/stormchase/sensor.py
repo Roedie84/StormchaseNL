@@ -588,6 +588,10 @@ class MeteoSensor(CoordinatorEntity[MeteoCoordinator], SensorEntity):
             "factor_bron": wind.get("factor_bron"),
             "correctiefactor_24u": wind.get("factor_24u"),
             "paren_tijdvak": wind.get("paren_tijdvak"),
+            # 0.59.0 (L-SC-017): helft van de laatste fout, aflopend over 3 uur
+            "bijsturing": wind.get("bijsturing"),
+            "bijsturing_fout": wind.get("bijsturing_fout"),
+            "komende_uren": wind.get("komende_uren"),
             "uitleg": (
                 (
                     "Modelwaarde x mediane verhouding gemeten/model van het "

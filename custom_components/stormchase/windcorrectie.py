@@ -30,6 +30,14 @@ houden we de verhouding gemeten/model bij en schalen de modelwaarde daarmee.
   Replay 10-10/12-10 (n=274): MAE 4,30 -> 3,77 km/u. Grenzen en frontregels
   blijven gelijk.
 
+- 0.59.0 (L-SC-017): uurbijsturing. Uit de leerronde bleek dat de bijgestelde
+  verwachting ~een half uur achterloopt op de meting. De laatste
+  stationsmeting min de verwachting van dat moment (modelwaarde x factor) is
+  de fout (alleen zodra er een factor is; anders blijft het kale model); de helft daarvan gaat bij de komende stoten, begrensd op +-15 km/u
+  en lineair aflopend naar 0 over drie uur. Geen (verse) meting: geen
+  bijsturing. De factor zelf leert ongewijzigd met de kale modelwaarde.
+  Replay 10 dagen (238 uur): uurfout 2,52 -> 2,24 km/u (-11 %).
+
 Opslag: per paar [tijd, gemeten, model, front]. Paren uit 0.51.x hebben geen
 frontvlag; bij het terugzetten kijken we dan alsnog naar de stootsprong.
 
@@ -44,6 +52,10 @@ from statistics import median
 try:
     from .const import (
         FRONT_DRUK_1U_HPA,
+        WINDBIJSTURING_AANDEEL,
+        WINDBIJSTURING_AFLOOP_S,
+        WINDBIJSTURING_MAX_KMH,
+        WINDBIJSTURING_MAX_LEEFTIJD_S,
         FRONT_NALOOP_S,
         FRONT_STOOT_SPRONG_KMH,
         FRONT_STOOT_VENSTER_S,
@@ -56,6 +68,10 @@ try:
 except ImportError:  # in de tests zonder pakketstructuur
     from const import (
         FRONT_DRUK_1U_HPA,
+        WINDBIJSTURING_AANDEEL,
+        WINDBIJSTURING_AFLOOP_S,
+        WINDBIJSTURING_MAX_KMH,
+        WINDBIJSTURING_MAX_LEEFTIJD_S,
         FRONT_NALOOP_S,
         FRONT_STOOT_SPRONG_KMH,
         FRONT_STOOT_VENSTER_S,
@@ -86,6 +102,9 @@ class Windcorrectie:
         self.paren: list[tuple[float, float, float, bool]] = []
         # 0.54.0: voor het uur van de dag (Home Assistant geeft zijn tijdzone)
         self.tijdzone: tzinfo = tijdzone or timezone.utc
+        # 0.59.0 (L-SC-017): laatste stationsmeting met de modelwaarde van
+        # dat moment (tijd, gemeten, model), voor de uurbijsturing
+        self.laatste: tuple[float, float, float] | None = None
         self.herstel(bewaard)
 
     # ---- vullen ----
@@ -112,9 +131,14 @@ class Windcorrectie:
             )
         except (TypeError, ValueError):
             return False
-        if gemeten < 0 or model < MIN_MODEL_KMH:
+        if gemeten < 0 or model < 0:
             return False
         if abs(tijd - model_tijd) > MAX_TIJDVERSCHIL_S:
+            return False
+        # 0.59.0: ook bij weinig wind telt de fout voor de uurbijsturing
+        if self.laatste is None or tijd > self.laatste[0]:
+            self.laatste = (tijd, gemeten, model)
+        if model < MIN_MODEL_KMH:
             return False
         # Dezelfde stationsmeting komt bij elke ophaalronde terug
         if any(abs(p[0] - tijd) < 1 for p in self.paren):
@@ -198,6 +222,12 @@ class Windcorrectie:
             waarde = model
         else:
             waarde = round(model * factor, 1)
+        # 0.59.0 (L-SC-017): de helft van de laatste fout erbij, aflopend
+        # Alleen op de bijgestelde waarde: zonder factor blijft het kale model
+        sturing = (self.bijsturing(nu, factor) if factor is not None
+                   else {"kmh": 0.0, "start": 0.0, "fout": None})
+        if waarde is not None and sturing["kmh"]:
+            waarde = round(max(0.0, waarde + sturing["kmh"]), 1)
         return {
             "waarde": waarde,
             "model": model,
@@ -212,7 +242,36 @@ class Windcorrectie:
             "factor_bron": bron,
             "factor_24u": factor_24u,
             "paren_tijdvak": paren_vak,
+            # 0.59.0 (L-SC-017)
+            "bijsturing": sturing["kmh"],
+            "bijsturing_fout": sturing["fout"],
         }
+
+    def bijsturing(self, nu: float, factor: float | None = None) -> dict:
+        """0.59.0 (L-SC-017): bijsturing met de fout van het laatste uur.
+
+        fout = laatste stationsmeting - verwachting van dat moment (model x
+        factor, of de kale modelwaarde zolang er geen factor is). De
+        bijsturing is WINDBIJSTURING_AANDEEL x fout, begrensd, en loopt
+        lineair af naar 0 over WINDBIJSTURING_AFLOOP_S na de meting. Geen
+        meting, of een ouder dan WINDBIJSTURING_MAX_LEEFTIJD_S: geen bijsturing.
+        """
+        return bijsturing(self.laatste, nu, factor)
+
+    def bijgestuurde_uren(self, uren: list, nu: float, factor: float | None = None) -> list:
+        """Komende uurstoten [(epoch, model)] bijgesteld en bijgestuurd."""
+        if factor is None:
+            return [(t, round(float(m), 1)) for t, m in uren if m is not None]
+        f = factor
+        start = self.bijsturing(nu, factor)["start"]
+        laatste_t = self.laatste[0] if self.laatste else nu
+        uit = []
+        for t, model in uren:
+            if model is None:
+                continue
+            waarde = float(model) * f + start * _afloop(t - laatste_t)
+            uit.append((t, round(max(0.0, waarde), 1)))
+        return uit
 
     # ---- opslag ----
 
@@ -244,6 +303,9 @@ class Windcorrectie:
                 f = _stootsprong(klaar, t, g)
             klaar.append((t, g, m, bool(f)))
         self.paren = klaar[-MAX_PAREN:]
+        # 0.59.0: de laatste meting voor de uurbijsturing (verloopt na een uur)
+        if self.paren:
+            self.laatste = tuple(self.paren[-1][:3])
 
 
 def voor_melding(
@@ -280,6 +342,33 @@ def voor_melding(
                 "verwachting": verwacht, "gemeten": station}
     return {"waarde": verwacht, "bron": "verwachting" if verwacht is not None else None,
             "verwachting": verwacht, "gemeten": station}
+
+
+def _afloop(sinds_s: float) -> float:
+    """Lineair van 1 (bij de meting) naar 0 na WINDBIJSTURING_AFLOOP_S."""
+    if sinds_s <= 0:
+        return 1.0
+    return max(0.0, 1.0 - sinds_s / WINDBIJSTURING_AFLOOP_S)
+
+
+def bijsturing(laatste, nu: float, factor: float | None = None) -> dict:
+    """0.59.0 (L-SC-017): {"kmh": nu, "start": bij de meting, "fout"}."""
+    leeg = {"kmh": 0.0, "start": 0.0, "fout": None}
+    if not laatste:
+        return leeg
+    try:
+        tijd, gemeten, model = (float(x) for x in laatste)
+    except (TypeError, ValueError):
+        return leeg
+    leeftijd = nu - tijd
+    if leeftijd > WINDBIJSTURING_MAX_LEEFTIJD_S or leeftijd < -300:
+        return leeg
+    verwacht = model * (1.0 if factor is None else factor)
+    fout = gemeten - verwacht
+    start = max(-WINDBIJSTURING_MAX_KMH,
+                min(WINDBIJSTURING_MAX_KMH, WINDBIJSTURING_AANDEEL * fout))
+    return {"kmh": round(start * _afloop(leeftijd), 1),
+            "start": round(start, 2), "fout": round(fout, 1)}
 
 
 def _drukfront(druk_1u) -> bool:

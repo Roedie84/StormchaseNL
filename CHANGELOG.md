@@ -5,6 +5,13 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.59.0] — 2026-10-23
+
+### Toegevoegd
+
+- **Windstootverwachting bijgestuurd met de fout van het laatste uur (L-SC-017).** De leerronde liet zien dat de bijgestelde verwachting ~een half uur achterloopt op de meting: te hoog als de wind afneemt, te laag als hij toeneemt. Nu: fout = laatste stationsmeting min de bijgestelde verwachting van dat moment (modelwaarde x factor); de helft daarvan gaat bij de komende stoten, begrensd op +-15 km/u en lineair aflopend naar 0 over drie uur. Geen verse meting (ouder dan een uur): geen bijsturing. Zolang er nog geen factor is blijft het kale model staan. Replay 10 dagen (238 uur): uurfout 2,52 -> 2,24 km/u (-11 %), in beide helften beter.
+- Nieuwe attributen op *Windstoten*: `bijsturing` (km/u nu), `bijsturing_fout` en `komende_uren` (de komende 3 uur bijgesteld en bijgestuurd). Het leren van de factor (kale modelwaarde) en de windvooruitblik (KNMI/Open-Meteo per uur) zijn ongewijzigd. De windmelding gebruikt de bijgestuurde waarde, en de stationsmeting blijft als ondergrens tellen.
+
 ## [0.58.4] — 2026-10-23
 
 ### Opgelost
