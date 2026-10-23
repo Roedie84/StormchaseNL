@@ -396,3 +396,12 @@ laatste ronde: 22-10 23:40, gemeten t/m 22-10 23:45
 - Hypotheses: H-SC-3 (regenstart lange horizon), H-SC-8 (passage), H-SC-9 (windstoten traag → L-SC-017). H-SC-6 → toets L-SC-015 bij het volgende onweer.
 
 laatste ronde: 23-10 03:40, gemeten t/m 23-10 03:50
+
+## 23-10 07:40 · tussenronde
+- Actief **0.59.0** (L-SC-017, andere sessie 07:12 na akkoord Ruud; actief na de herstart van 07:39). Groen, geen inslagen < 50 km, lichte regen (KNMI-nowcast).
+- **L-SC-016 effect:** bronstatus 07:43 "alles in orde" (was sinds 22-10 10:24 "buienradar hapert") → 0 uur vals "hapert" sinds installatie. Volle dag meten in de dagafsluiting.
+- **Windstoten 03-07 u (vóór L-SC-017):** bias −2,6/−1,3/−2,0/−3,8 km/u (gem. −2,4, MAE 2,4) bij stijgende meting 19,7 → 26,3 → zelfde traagheid als H-SC-9 (te laag bij toename). Dit is de laatste ongecorrigeerde reeks; vanaf 07:39 meten wat L-SC-017 doet (MAE/bias per trend, 7 d voor/na).
+- Windvooruitblik vandaag 75 km/u (03:40: 79); toets vanavond tegen het station.
+- Hypotheses: H-SC-3 (regenstart lange horizon), H-SC-8 (passage), H-SC-9 (windstoten traag → L-SC-017 gebouwd). Geen release.
+
+laatste ronde: 23-10 07:40, gemeten t/m 23-10 07:45
