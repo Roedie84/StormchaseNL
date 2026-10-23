@@ -38,6 +38,11 @@ HAPERT_NA_MINUTEN = 15
 #: 0.55.0: zo lang niet aangesproken = rust (reservebron die niet nodig is).
 RUST_NA_UREN = 24
 
+#: 0.58.4 (L-SC-016): reservebron -> de bron waarvoor hij invalt. Buienradar
+#: wordt alleen gevraagd als de KNMI-nowcast faalt (rain.py), Bright Sky
+#: ("meting") alleen als de KNMI-waarnemingen (EDR) ontbreken (meting.py).
+RESERVE_VOOR = {"buienradar": "knmi_nowcast", "meting": "knmi_edr"}
+
 
 @dataclass
 class BronStatus:
@@ -59,6 +64,8 @@ class BronStatus:
     bij_uitkomst: Callable[[bool], None] | None = field(
         default=None, repr=False, compare=False
     )
+    # 0.58.4 (L-SC-016): de bron waarvoor deze bron invalt (None = geen reserve)
+    hoofdbron: "BronStatus | None" = field(default=None, repr=False, compare=False)
 
     def _meld(self, gelukt: bool) -> None:
         """Geef de uitkomst door aan de dagtellers; nooit ten koste van de bron."""
@@ -92,13 +99,39 @@ class BronStatus:
         self.laatste_fout_op = dt_util.utcnow()
         self._meld(False)
 
+    def _laatst_gevraagd(self) -> datetime | None:
+        """Het laatste moment waarop deze bron is aangesproken."""
+        return max(
+            (m for m in (self.laatste_succes, self.laatste_fout_op) if m is not None),
+            default=None,
+        )
+
+    def niet_nodig_als_reserve(self) -> bool:
+        """0.58.4 (L-SC-016): een reservebron die sinds zijn laatste poging
+        niet meer gevraagd is, omdat de hoofdbron daarna weer slaagde.
+
+        22-10 stond de bronstatus van 10:24 tot middernacht op "buienradar
+        hapert": Buienradar faalde tijdens een DNS-storing samen met de
+        KNMI-nowcast, en werd daarna niet meer gevraagd omdat de nowcast weer
+        werkte. `op_rij_mislukt` bleef zo staan tot de volgende storing.
+        """
+        hoofd = self.hoofdbron
+        if hoofd is None or hoofd.op_rij_mislukt != 0 or hoofd.laatste_succes is None:
+            return False
+        laatst = self._laatst_gevraagd()
+        return laatst is None or hoofd.laatste_succes > laatst
+
     def hapert(self, nu: datetime | None = None) -> bool:
         """Of deze bron nu echt hapert (0.42.0).
 
         Niet bij één gemiste ronde: pas na HAPERT_NA_POGINGEN op rij, of als
         het laatste succes langer dan HAPERT_NA_MINUTEN geleden is.
+        0.58.4: een reservebron die niet nodig is, hapert niet (L-SC-016);
+        hij hapert weer zodra hij gevraagd wordt en faalt.
         """
         if self.op_rij_mislukt == 0:
+            return False
+        if self.niet_nodig_als_reserve():
             return False
         if self.op_rij_mislukt >= HAPERT_NA_POGINGEN:
             return True
@@ -117,12 +150,12 @@ class BronStatus:
         if self.hapert(nu):
             return "hapert"
         nu = nu or dt_util.utcnow()
-        laatst = max(
-            (m for m in (self.laatste_succes, self.laatste_fout_op) if m is not None),
-            default=None,
-        )
+        laatst = self._laatst_gevraagd()
         if laatst is None or (nu - laatst).total_seconds() > RUST_NA_UREN * 3600:
             return "rust (niet nodig)"
+        # 0.58.4 (L-SC-016): reservebron die nu niet gevraagd wordt
+        if self.niet_nodig_als_reserve():
+            return "reserve (niet nodig)"
         return "in gebruik"
 
     def als_dict(self) -> dict[str, Any]:
@@ -248,6 +281,12 @@ class Statistieken:
     _bij_wijziging: Callable[[], None] | None = field(
         default=None, repr=False, compare=False
     )
+
+    def __post_init__(self) -> None:
+        """0.58.4 (L-SC-016): koppel elke reservebron aan zijn hoofdbron."""
+        for reserve, hoofd in RESERVE_VOOR.items():
+            if reserve in self.bronnen and hoofd in self.bronnen:
+                self.bronnen[reserve].hoofdbron = self.bronnen[hoofd]
 
     def koppel_historie(
         self,

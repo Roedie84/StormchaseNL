@@ -103,6 +103,10 @@ De laatst bekende waarden blijven staan met het aantal minuten ouderdom
 erbij, tot drie uur. Daarboven wordt de sensor alsnog onbeschikbaar, want dan
 is leeg eerlijker dan verkeerd. `sensor.stormchase_bronstatus` laat zien welke
 bron hapert, en op het dashboard verschijnt een tegel zodra dat gebeurt.
+Een reservebron (Buienradar voor de KNMI-neerslagverwachting, Bright Sky voor
+de KNMI-waarnemingen) die alleen tijdens een storing van de hoofdbron faalde,
+telt niet als haperend zodra de hoofdbron weer werkt: die staat dan als
+"reserve (niet nodig)", met de laatste fout erbij.
 
 Een mislukte bron wordt niet pas na het hele interval opnieuw geprobeerd,
 maar na 2 en daarna 5 minuten; lukt dat niet, dan weer volgens het gewone

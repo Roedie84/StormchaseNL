@@ -5,6 +5,12 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.58.4] — 2026-10-23
+
+### Opgelost
+
+- **Bronstatus: een reservebron hapert niet zolang hij niet nodig is (L-SC-016).** 22-10 stond `sensor.stormchase_bronstatus` van 10:24 tot na middernacht op "buienradar hapert". Buienradar faalde tijdens een DNS-storing samen met de KNMI-nowcast, en werd daarna niet meer gevraagd omdat de nowcast weer werkte (`rain.py`); `op_rij_mislukt` bleef zo staan tot de volgende storing, terwijl de regen gewoon via het KNMI binnenkwam. Nu: slaagt de hoofdbron na de laatste poging van de reservebron, dan hapert de reserve niet en heet hij "reserve (niet nodig)". Wordt hij opnieuw gevraagd en faalt hij, dan hapert hij weer. Hetzelfde voor Bright Sky ("meting") als reserve voor de KNMI-waarnemingen (EDR), die "in gebruik" toonde terwijl hij sinds de ochtend niet gevraagd was. Ophalen, terugval en tellers zijn ongewijzigd; alleen de classificatie.
+
 ## [0.58.3] — 2026-10-22
 
 ### Opgelost
