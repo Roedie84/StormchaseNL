@@ -423,3 +423,13 @@ laatste ronde: 23-10 11:40, gemeten t/m 23-10 11:45
 - Hypotheses: H-SC-3 (regenstart lange horizon: deze bui goed), H-SC-8 (passage), H-SC-9 (windstoten traag → L-SC-017; middag weer −3..−5,5). Geen release.
 
 laatste ronde: 23-10 15:40, gemeten t/m 23-10 15:45
+
+## 23-10 19:40 · tussenronde
+- Actief **0.59.1**. 0 Stormchase-logregels. Geen inslagen < 50 km, ensemble 0 %; niveau **geel** (KNMI-wind). Regen sinds 16:08 (piek 6,5 mm/u), nu matig.
+- **Windstoten (L-SC-017 / H-SC-9):** per stationsmeting 15:44-19:34 bias **−5,15**, MAE 5,15 km/u (n=22, alle te laag); per uur −2,4/−3,3/−4,9/**−8,2**/−4,2 bij meting 35-50 km/u (geen sterke stijging meer na 17 u). Het is dus niet alleen traagheid: het niveau is vandaag te laag (front, tijdvakfactor 0,58 tegen 24-u 0,67). Halve bijsturing laat de helft van een aanhoudende fout staan. Dagbeeld (en MAE tegen 22-10 3,86) 03:40; nog geen voorstel (n=1 dag).
+- **Windvooruitblik** 78-81 km/u (piek 22:00, > 60 vanaf 19:00); gemeten tot 19:34 max 50,5 → toets in de dagafsluiting.
+- **Regenstart (H-SC-3), 2 buien (16:08, 17:28):** horizon 15-30 min telkens te vroeg voorspeld, regen +6..+16 min later (n=6, gem. +9); < 5 min +1. Ochtendbui (13-14 u) was ±5 → n=3 buien, nog geen richting.
+- **Nieuw (rapportage):** radar-vooruitblik laatst gebouwd 15:50 (geen kijker = bewust), maar attribuut `referentietijd` 19:35 en status "actueel" → dashboardchip noemt een tijd die niet bij het beeld hoort → **L-SC-018** (gepland, dagafsluiting).
+- Hypotheses: H-SC-3 (regenstart: 15-30 min te vroeg?), H-SC-8 (passage), H-SC-9 (windstoten: traagheid + vandaag niveaufout bij front). Geen release.
+
+laatste ronde: 23-10 19:40, gemeten t/m 23-10 19:45

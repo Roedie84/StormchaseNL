@@ -127,3 +127,9 @@ Status: open / akkoord / afgewezen / gebouwd vX / geverifieerd / teruggedraaid. 
 - Backtest (zelfde data): k 0 / 0,25 / 0,5 / 0,75 / 1 → MAE 2,52 / 2,32 / **2,24** / 2,33 / 2,55; beide helften beter (2,11→1,78 en 2,92→2,71). Bias −0,62 → −0,31.
 - Verwacht effect: ~11 % kleinere uurfout, minder windmeldingen die blijven hangen als de wind al afneemt.
 - Meten na bouw: MAE en bias per trend (stijgend/dalend), aantal windmeldingen per dag, 7 dagen voor/na. Voorbehoud: getoetst op uurgemiddelden; live rekent de integratie per 10 min.
+
+## L-SC-018 · radar-vooruitblik: referentietijd en status van het gebouwde beeld (rapportage)
+- Status: **gepland** (zelf bouwen: alleen attributen/rapportage; bouwen, ophalen en kijkerregel ongewijzigd). Dagafsluiting.
+- Onderbouwing: 23-10 19:40 `image.stormchase_radar_vooruitblik` laatst gebouwd 15:50 (geen kijker binnen `KIJKER_GELDIG` 15 min → bewust geen nieuwe ronde), maar attribuut `referentietijd` = 17:35Z (19:35, van de coördinator) en `status` "actueel". De dashboardstrategie toont die referentietijd als chip ("Referentie 19:35") bij een GIF van ~15:45 tot de nieuwe ronde klaar is; regen 16:08-19:40 (tot 6,5 mm/u). Eerder 23-10 11:40 gezien als "laatst ververst 08:27".
+- Bouw: `referentietijd` = referentie van het gebouwde kenmerk (`_gebouwd_kenmerk`), extra `referentie_beschikbaar` (coördinator); `status` "verouderd (geen kijker)" als beide verschillen. Test: gebouwd kenmerk ≠ huidig → status niet "actueel", referentietijd = gebouwde.
+- Meten: elke ronde leeftijd van het gebouwde beeld tegen de status; chip toont de tijd van het getoonde beeld.
