@@ -129,14 +129,20 @@ Status: open / akkoord / afgewezen / gebouwd vX / geverifieerd / teruggedraaid. 
 - Meten na bouw: MAE en bias per trend (stijgend/dalend), aantal windmeldingen per dag, 7 dagen voor/na. Voorbehoud: getoetst op uurgemiddelden; live rekent de integratie per 10 min.
 
 ## L-SC-018 · radar-vooruitblik: referentietijd en status van het gebouwde beeld (rapportage)
-- Status: **gebouwd 0.59.2** (24-10 03:49, dagafsluiting; workflow groen, HACS ververst; wacht op installatie). `referentietijd` = gebouwde beeld, `referentie_beschikbaar` = nieuwste ronde, status "verouderd (geen kijker)"/"wordt bijgewerkt" als ze verschillen. 5 tests `tests/test_release_0592.py`, suite 910 groen. Toets: status tegen leeftijd van het beeld (`image.stormchase_radar_vooruitblik` last_changed). Was: **gepland**.
+- Status: **gebouwd 0.59.2, geïnstalleerd 07:41** — 24-10 11:40 niet toetsbaar: na de herstart van 10:16 geen kijker, dus geen beeld; status bleef de beginwaarde (gat → L-SC-020). Was: **gebouwd 0.59.2** (24-10 03:49, dagafsluiting; workflow groen, HACS ververst; wacht op installatie). `referentietijd` = gebouwde beeld, `referentie_beschikbaar` = nieuwste ronde, status "verouderd (geen kijker)"/"wordt bijgewerkt" als ze verschillen. 5 tests `tests/test_release_0592.py`, suite 910 groen. Toets: status tegen leeftijd van het beeld (`image.stormchase_radar_vooruitblik` last_changed). Was: **gepland**.
 - Onderbouwing: 23-10 19:40 `image.stormchase_radar_vooruitblik` laatst gebouwd 15:50 (geen kijker binnen `KIJKER_GELDIG` 15 min → bewust geen nieuwe ronde), maar attribuut `referentietijd` = 17:35Z (19:35, van de coördinator) en `status` "actueel". De dashboardstrategie toont die referentietijd als chip ("Referentie 19:35") bij een GIF van ~15:45 tot de nieuwe ronde klaar is; regen 16:08-19:40 (tot 6,5 mm/u). Eerder 23-10 11:40 gezien als "laatst ververst 08:27".
 - Bouw: `referentietijd` = referentie van het gebouwde kenmerk (`_gebouwd_kenmerk`), extra `referentie_beschikbaar` (coördinator); `status` "verouderd (geen kijker)" als beide verschillen. Test: gebouwd kenmerk ≠ huidig → status niet "actueel", referentietijd = gebouwde.
 - Meten: elke ronde leeftijd van het gebouwde beeld tegen de status; chip toont de tijd van het getoonde beeld.
 
 ## L-SC-019 · windstootfactor valt niet weg tijdens een lang front (bug)
-- Status: **gebouwd 0.59.2** (24-10 03:49, dagafsluiting; zelf gebouwd als bug: strijdig met L-SC-007 "factor mag bij een front niet springen"; drempels, windmelding-regels en vooruitblik ongewijzigd). 5 tests.
+- Status: **geverifieerd 24-10 11:40** — na installatie (07:41) bias +1,5 / MAE 3,6 km/u (n=24) tegen +19,0 / 19,0 ervoor (n=23); factor tijdens het front 0,76 uit het tijdvak (72 u). Was: **gebouwd 0.59.2** (24-10 03:49, dagafsluiting; zelf gebouwd als bug: strijdig met L-SC-007 "factor mag bij een front niet springen"; drempels, windmelding-regels en vooruitblik ongewijzigd). 5 tests.
 - Onderbouwing: 24-10 03:24 `sensor.stormchase_windstoten` 43,2 → 64,4 km/u (kaal model) bij gemeten 35,3; attributen: `correctiefactor` null, `front` true, `paren_front` 136, `uren_metingen` 6,0 → 5,8 → 1,0, `paren_tijdvak` 48. Code: tijdvakfactor alleen als de 24-uursfactor bestaat; die viel weg doordat de rustige paren in 24 uur < 6 uur besloegen.
 - Bouw: `factor_tijdens_front` — laatste paar in front/naloop en 24 uur te weinig → rustige paren van 72 uur (MIN_PAREN, 6 uur spanne, grenzen); `factor_bron` "72 uur (front)". Start zonder 72 uur: kaal model zoals voorheen.
 - Meten na installatie: minuten zonder factor terwijl `paren_tijdvak` ≥ 4 = 0; uurfout tijdens fronten.
 
+
+## L-SC-020 · radar-vooruitblik na een herstart zonder kijker: status "wacht op radarbeeld" (rapportage)
+- Status: **gepland** (zelf bouwen in de dagafsluiting: alleen de statustekst; bouwen en kijkerregel ongewijzigd).
+- Onderbouwing (24-10 11:40): na de herstart van 10:16 bouwt de vooruitblik bewust niets zolang niemand kijkt; `status` blijft "wacht op radarbeeld", `frames` 0, `referentietijd` leeg, terwijl `referentie_beschikbaar` 11:40 is. `gebouwde_stand` (0.59.2) past alleen de status "actueel" aan; de beginwaarde uit `__init__` blijft staan.
+- Bouw: geen gebouwd beeld + wel een radarronde + geen kijker → "nog niet gebouwd (geen kijker)"; test.
+- Meten: status na een herstart zonder kijker; L-SC-018 daarna opnieuw toetsen.

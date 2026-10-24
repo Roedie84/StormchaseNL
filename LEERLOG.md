@@ -350,3 +350,13 @@ laatste ronde: 23-10 23:40, gemeten t/m 23-10 23:45
 - HA-MCP kon niet verbinden (502 bij opbouw van de verbinding) → geen history, logs of dashboard; niets gemeten, geen release, dashboardkaart niet bijgewerkt. Volgende ronde meet door vanaf 03:55 (recorder bewaart ~10 d, dus geen verlies).
 
 laatste ronde: 24-10 07:40, gemeten t/m 24-10 03:50
+
+## 24-10 11:40 · tussenronde
+- Actief **0.59.2** (sinds herstart 07:41). Geen Stormchase-logregels. Geen onweer, 0 inslagen < 50 km; niveau de hele ronde groen. Bronstatus "alles in orde" (min. 99 %).
+- **L-SC-019 geverifieerd:** vóór de installatie (03:54-07:34) gaf het kale model 46,8-64,4 km/u bij 29,6-43,6 gemeten: bias **+19,0** (n=23). Na 07:41: bias **+1,5**, MAE 3,61 (n=24); factor uit het tijdvak van 72 u (0,76).
+- **H-SC-10 (frontvlag te lang):** om 11:43 nog `front` true, 139 frontparen tegen 4 rustige in 24 u → ~97 % van het venster "front" bij een gestaag aanwakkerende wind. Steunt de hypothese; toets in de dagafsluiting tegen druk/stootsprong.
+- **Windvooruitblik:** vandaag 65 (23-24 u), morgen 69 km/u (10 u > 60); melding vandaag klasse 1 (73). Gemeten max tot 11:40 43,6. 3e toets van "piek te hoog" vannacht (n=2: +8 en +20 km/u).
+- **L-SC-018 niet toetsbaar:** na de herstart geen kijker → geen beeld; status blijft "wacht op radarbeeld" met referentie 11:40 beschikbaar. `gebouwde_stand` past alleen "actueel" aan → **L-SC-020** (gepland, dagafsluiting).
+- Hypotheses: H-SC-3 (regenstart lange horizon; droog), H-SC-9 (windstoten traagheid; L-SC-017 loopt), H-SC-10 (frontvlag te lang). Geen release.
+
+laatste ronde: 24-10 11:40, gemeten t/m 24-10 11:45
