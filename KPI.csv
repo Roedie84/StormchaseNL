@@ -389,3 +389,8 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-24 19:40,TUSSEN,sc_inslagen_50km,0,1,"15:45-19:50 geen onweer; niveau groen; bronstatus alles in orde"
 2026-10-24 19:40,TUSSEN,sc_windvooruitblik_kmh,71,1,"windvooruitblik 68->71; gemeten max 15:44-19:43 42.2"
 2026-10-24 19:40,TUSSEN,sc_radar_vooruitblik_frames,0,1,"vooruitblik laatst gebouwd 08:16Z; na herstart 10:16 geen kijker -> L-SC-020 klaargezet"
+2026-10-24 23:40,TUSSEN,sc_wind_bias_front_kmh,-6.4,32,"18:43-23:44 front, verwachting voor stationsmeting: bias -6.4 MAE 6.7; factor tijdvak 0.51-0.69 tegen gemeten/model mediaan 0.81; replay frontfactor +0.5/MAE 3.4 (n=28) -> L-SC-022"
+2026-10-24 23:40,TUSSEN,sc_wind_gemeten_max_kmh,59.6,1,"23:24 station 59.6 (melding_bron station, net onder 60); model 65.2"
+2026-10-24 23:40,TUSSEN,sc_regenstart_fout_min,5,1,"19:50 aftelling 28 min -> regen vanaf 20:23 (0.12 mm/u) = 33 min; 19:58 24 -> 25 min; treffer"
+2026-10-24 23:40,TUSSEN,sc_inslagen_50km,0,1,"19:50-23:45 geen onweer; niveau groen; bronstatus alles in orde"
+2026-10-24 23:40,TUSSEN,sc_radar_vooruitblik_frames,0,1,"vooruitblik nog steeds 08:16Z (L-SC-020, release 0.59.3) terwijl het regent"

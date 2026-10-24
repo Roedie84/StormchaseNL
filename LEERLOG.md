@@ -379,3 +379,11 @@ laatste ronde: 24-10 15:40, gemeten t/m 24-10 15:45
 - Hypotheses: H-SC-3 (regenstart lange horizon), H-SC-9 (windstoten traagheid / front), H-SC-10 (frontvlag te lang). Geen release (tussenronde).
 
 laatste ronde: 24-10 19:40, gemeten t/m 24-10 19:50
+
+## 24-10 23:40 · tussenronde
+- Actief **0.59.2** (HA-herstart ~20:02). Geen Stormchase-logregels. Geen onweer, 0 inslagen < 50 km; niveau groen; bronstatus "alles in orde".
+- **Regenstart (H-SC-3): treffer.** 19:50 aftelling 28 min → regen vanaf 20:23 (33 min, fout +5); 19:58 24 → 25 min. Regent sindsdien licht (max 3,5 mm/u 21:34). Radar-vooruitblik nog van 08:16Z (L-SC-020 → 0.59.3).
+- **Windstoten tijdens het front (18:43-23:44, n=32):** verwachting vóór elke stationsmeting bias **−6,4 / MAE 6,7**. Gemeten/model mediaan 0,81, gebruikte tijdvakfactor 0,51-0,69 (uit rustige uren). Replay met de eerdere frontparen van dit front: +0,5 / MAE 3,4 → **L-SC-022** (open, Ruud; n = één front). Gemeten max **59,6** (23:24), windmelding volgde de stationsmeting (bron station) → geen gemiste melding.
+- Hypotheses: H-SC-3 (regenstart; 1 vals 18:58, 1 treffer 20:23), H-SC-9 (windstoten traagheid / front → L-SC-022), H-SC-10 (frontvlag; front loopt nog, `paren_front` 109). Geen release (tussenronde); 0.59.3 (L-SC-020/021) in de dagafsluiting.
+
+laatste ronde: 24-10 23:40, gemeten t/m 24-10 23:45

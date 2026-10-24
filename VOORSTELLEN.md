@@ -155,3 +155,11 @@ Status: open / akkoord / afgewezen / gebouwd vX / geverifieerd / teruggedraaid. 
 - Meten na installatie: na het volgende front `factor_bron` "72 uur (front)" of "tijdvak" tot er 6 u rustig is; bias per uur in de eerste 6 u na het front.
 - Aanvulling 24-10 19:40: de fout duurde 12:53-18:43 (geen herstel, nieuw front); 15:44-18:34 bias **+17,3** (n=18). Replay met tijdvakfactor 0,56: −3,4 / MAE 3,6.
 
+
+## L-SC-022 · windstoten tijdens een front: factor uit de frontparen zelf (strategie → Ruud)
+- Status: **open** (raakt de bijgestelde windverwachting en daarmee de windmelding → Ruud beslist).
+- Onderbouwing (24-10 23:40): front vanaf 18:43 (`front` true, `factor_bron` tijdvak = rustige paren). Per stationsmeting 18:43-23:44 (n=32): verwachting vóór de meting bias **−6,4 km/u, MAE 6,7**; gebruikte factor 0,51-0,69, terwijl gemeten/model tijdens het front mediaan **0,81** is (0,71-0,95). Kaal model +9,8, tijdvakfactor zonder bijsturing −11,8; de bijsturing (L-SC-017) haalt de helft terug maar loopt achter. Replay met de mediaan van de eerdere frontparen van dit front (≥ 4): **+0,5 / MAE 3,4** (n=28). Na het front (L-SC-021) past de tijdvakfactor juist wél (0,56: −3,4 / MAE 3,6) → front en rust hebben een eigen verhouding.
+- Kanttekening: één front-avond (24-10), plus het ochtendfront 24-10 met 0.59.2 (11:43-12:44 bias −0,6, n=7, factor bleef hangen). Voor een besluit liever ≥ 3 fronten.
+- Voorstel: zolang `front` true is en het lopende front ≥ 4 paren heeft: factor = mediaan gemeten/model van de paren van dít front (max. 12 u terug); anders zoals nu. Frontparen blijven buiten de rustige factor (L-SC-007/019/021 ongewijzigd).
+- Verwacht effect: tijdens een front MAE ~3,5 i.p.v. ~6,5 km/u, geen structurele onderschatting; windmelding blijft hoogste van verwachting en stationsmeting.
+- Meten na bouw: bias/MAE per front (verwachting vóór meting), `factor_bron` "front", windmeldingen per front.
