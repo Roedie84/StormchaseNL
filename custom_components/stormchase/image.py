@@ -78,7 +78,14 @@ from .wolken import (
 from .radarbron import RadarCoordinator
 from .knmi_api import KnmiWms, poging
 from .knmi_grid import bbox_webmercator
-from .vooruitblik import FrameCache, frame_tijden, framelabel, framesleutel, stel_gif_samen
+from .vooruitblik import (
+    FrameCache,
+    frame_tijden,
+    framelabel,
+    framesleutel,
+    gebouwde_stand,
+    stel_gif_samen,
+)
 
 
 async def async_setup_entry(
@@ -915,9 +922,15 @@ class RadarVooruitblik(CoordinatorEntity[RadarCoordinator], ImageEntity):
     @property
     def extra_state_attributes(self) -> dict:
         knmi = (self.coordinator.data or {}).get("knmi") or {}
+        # 0.59.2 (L-SC-018): status en referentietijd van het getoonde beeld
+        gebouwd = self._gebouwd_kenmerk[0] if self._gebouwd_kenmerk else None
+        status, referentie = gebouwde_stand(
+            self._status, gebouwd, knmi.get("tijd"), self._taak is not None
+        )
         return {
-            "status": self._status,
-            "referentietijd": knmi.get("referentie"),
+            "status": status,
+            "referentietijd": referentie,
+            "referentie_beschikbaar": knmi.get("referentie"),
             "frames": self._aantal_frames,
             "van_minuten": -VOORUITBLIK_TERUG,
             "tot_minuten": VOORUITBLIK_VOORUIT,

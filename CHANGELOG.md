@@ -5,6 +5,13 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.59.2] — 2026-10-24
+
+### Opgelost
+
+- **Windstoten: de correctie valt tijdens een lang front niet meer weg.** Na een front van ~18 uur (23/24-10) had het 24-uursvenster om 03:24 geen zes uur rustige stationsparen meer; de factor (0,70) verviel en *Windstoten* sprong van 43 naar het kale model 64 km/u, bij 35 km/u gemeten. Een front leert de factor niet (0.52.0) en mag hem dus ook niet laten verdwijnen: is er nu een front (laatste paar in front of naloop) en heeft het 24-uursvenster te weinig, dan telt de factor uit de rustige paren van de laatste 72 uur, met dezelfde eisen (minstens zes paren over zes uur, grenzen 0,5-1,3). `factor_bron` is dan "72 uur (front)". Bij een nieuwe installatie (geen 72 uur) en buiten een front blijft het zoals het was. Drempels, de windmelding zelf en de windvooruitblik zijn ongewijzigd; de windmelding krijgt alleen weer de bijgestelde waarde.
+- **Radar-vooruitblik: status en referentietijd horen bij het getoonde beeld (L-SC-018).** Zonder kijker wordt er bewust geen nieuwe GIF gebouwd, maar `referentietijd` kwam van de nieuwste radarronde en de status bleef "actueel" (23-10: beeld van 15:50, chip "Referentie 19:35"). Nu is `referentietijd` die van het gebouwde beeld, `referentie_beschikbaar` de nieuwste ronde, en de status "verouderd (geen kijker)" of "wordt bijgewerkt" zolang die twee verschillen. Bouwen, ophalen en de kijkerregel zijn ongewijzigd.
+
 ## [0.59.1] — 2026-10-23
 
 ### Opgelost

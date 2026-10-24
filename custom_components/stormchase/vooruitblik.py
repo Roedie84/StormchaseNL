@@ -162,3 +162,33 @@ def stel_gif_samen(
         disposal=2,
     )
     return uit.getvalue()
+
+
+def gebouwde_stand(
+    status: str,
+    gebouwd_tijd: float | None,
+    huidig_tijd: float | None,
+    bouwt: bool,
+) -> tuple[str, str | None]:
+    """Status en referentietijd van het GETOONDE beeld (0.59.2, L-SC-018).
+
+    Leerronde 23-10 19:40: de GIF was om 15:50 gebouwd (daarna geen kijker,
+    dus bewust geen nieuwe ronde), maar `referentietijd` kwam van de
+    coördinator (19:35) en de status bleef "actueel". De chip op het dashboard
+    noemde zo een tijd die niet bij het beeld hoorde. Nu: de referentie van het
+    gebouwde beeld, en "verouderd (geen kijker)" of "wordt bijgewerkt" als er
+    al een nieuwere radarronde is. Bouwen zelf verandert niet.
+
+    `gebouwd_tijd`/`huidig_tijd`: de KNMI-tijd (epoch s) uit het kenmerk.
+    """
+    from datetime import timezone
+
+    referentie = (
+        datetime.fromtimestamp(gebouwd_tijd, tz=timezone.utc).isoformat()
+        if gebouwd_tijd is not None else None
+    )
+    if status != "actueel" or gebouwd_tijd is None or huidig_tijd is None:
+        return status, referentie
+    if gebouwd_tijd == huidig_tijd:
+        return "actueel", referentie
+    return ("wordt bijgewerkt" if bouwt else "verouderd (geen kijker)"), referentie

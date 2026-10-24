@@ -598,6 +598,11 @@ class MeteoSensor(CoordinatorEntity[MeteoCoordinator], SensorEntity):
                     "dichtstbijzijnde station in dit tijdvak van de dag "
                     "(+-2 uur, 72 uur), zonder fronten"
                     if wind.get("factor_bron") == "tijdvak"
+                    # 0.59.2: tijdens een lang front de rustige paren van 72 uur
+                    else "Modelwaarde x mediane verhouding gemeten/model van het "
+                    "dichtstbijzijnde station over 72 uur, zonder fronten "
+                    "(er is nu een front)"
+                    if wind.get("factor_bron") == "72 uur (front)"
                     else "Modelwaarde x mediane verhouding gemeten/model van het "
                     "dichtstbijzijnde station over 24 uur, zonder fronten"
                 )

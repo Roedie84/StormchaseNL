@@ -37,6 +37,11 @@ houden we de verhouding gemeten/model bij en schalen de modelwaarde daarmee.
   en lineair aflopend naar 0 over drie uur. Geen (verse) meting: geen
   bijsturing. De factor zelf leert ongewijzigd met de kale modelwaarde.
   Replay 10 dagen (238 uur): uurfout 2,52 -> 2,24 km/u (-11 %).
+- 0.59.2: tijdens een front valt de factor niet weg. Lag het laatste paar in
+  een front of de naloop en had het 24-uursvenster geen zes uur rustige paren
+  meer, dan gold het kale model (24-10 03:24: 64 km/u bij 35 gemeten). Nu
+  telt dan de factor uit de rustige paren van 72 uur (zelfde eisen). Bij de
+  start (geen 72 uur) blijft het kale model staan zoals voorheen.
 
 Opslag: per paar [tijd, gemeten, model, front]. Paren uit 0.51.x hebben geen
 frontvlag; bij het terugzetten kijken we dan alsnog naar de stootsprong.
@@ -181,6 +186,29 @@ class Windcorrectie:
         ruw = median(p[1] / p[2] for p in rustig)
         return round(min(FACTOR_MAX, max(FACTOR_MIN, ruw)), 2), len(rustig)
 
+    def factor_tijdens_front(self, nu: float) -> tuple[float | None, int]:
+        """0.59.2: de factor uit de rustige paren van de laatste 72 uur,
+        maar alleen zolang er nu een front is (laatste paar front/naloop).
+
+        Leerronde 24-10: na een front van ~18 uur zakten de rustige paren in
+        het 24-uursvenster onder de zes uur (03:24); de factor (0,70) viel weg
+        en de sensor sprong van 43 naar het kale model 64 km/u bij 35 gemeten.
+        Een front leert de factor niet (0.52.0) - dan mag hij hem ook niet
+        laten verdwijnen. Zelfde eisen (MIN_PAREN, zes uur spanne, grenzen).
+        """
+        venster = self._venster(nu)
+        rustig = self._rustig(venster)
+        if not venster or venster[-1] in rustig:
+            return None, 0
+        lang = self._rustig(
+            [p for p in self.paren
+             if nu - WINDCORRECTIE_TIJDVAK_VENSTER_S <= p[0] <= nu + 60]
+        )
+        if len(lang) < MIN_PAREN or lang[-1][0] - lang[0][0] < MIN_SPANNE_S:
+            return None, len(lang)
+        ruw = median(p[1] / p[2] for p in lang)
+        return round(min(FACTOR_MAX, max(FACTOR_MIN, ruw)), 2), len(lang)
+
     def _seconde_van_de_dag(self, t: float) -> int:
         d = datetime.fromtimestamp(t, self.tijdzone)
         return d.hour * 3600 + d.minute * 60 + d.second
@@ -210,10 +238,15 @@ class Windcorrectie:
         # 0.54.0: tijdvakfactor alleen als het leren al loopt (24-uursfactor
         # bestaat); anders blijft de modelwaarde staan zoals voorheen.
         factor_vak, paren_vak = self.factor_tijdvak(nu)
-        if factor_24u is not None and factor_vak is not None:
+        # 0.59.2: tijdens een lang front niet terug naar het kale model.
+        basis, basis_bron = factor_24u, "24 uur"
+        if basis is None:
+            basis, _ = self.factor_tijdens_front(nu)
+            basis_bron = "72 uur (front)"
+        if basis is not None and factor_vak is not None:
             factor, bron = factor_vak, "tijdvak"
         else:
-            factor, bron = factor_24u, ("24 uur" if factor_24u is not None else None)
+            factor, bron = basis, (basis_bron if basis is not None else None)
         venster = self._venster(nu)
         rustig = self._rustig(venster)
         if model is None:
