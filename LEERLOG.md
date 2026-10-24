@@ -7,131 +7,25 @@ Doorlopende leerronde (elke 4 uur). Alleen gemeten getallen; KPI's in KPI.csv.
 - Validatie sinds ~31-08: aankomst 1/6, passage 21/21 "uitgekomen" maar afstandsfout ~18,5 km; regen ≤15 min 4/4, 15-45 6/11, >45 11/15.
 - Bronnen 10 d: korte storingen radar/open_meteo/buienradar; bronstatistiek begon bij elke herstart opnieuw → later L-SC-002.
 
-## 08-10 03:40 · dagafsluiting 07-10
-- Onweer 07-10: dichtstbij 68,7 km (n=27 afstanden), 0 inslagen <50 km, niveau groen. `onweer_nadert` 4× aan (48,9 min, 8 wissels) → 4 valse alarmen, 0 hits, 0 misses; lead-time niet meetbaar. Sinds 23:44 geen onweer.
+## 08-10 · samenvatting dag (7 rondes; ingekort na 14 dagen)
 - H-SC-1 extra steun: 3 van de 4 nadert-perioden duurden 14,8-15,0 min = `TREND_WINDOW`; past bij één nieuw punt dat 15 min in de regressie blijft hangen. L-SC-001 blijft open.
-- Bronnen over 16 herstarts (recorder): 2242/2248 = 99,73%; zwakst open_meteo 98,2% (DNS 16:45, 30 min hapert). Na 0.43.0 (actief 21:39) 0 fouten → herkansing nog onbewezen.
-- Locatie: vóór 0.42.0 8× kort "thuis" bij herstart, daarna 0× (8× "laatst bekend") → 0.42.0 geverifieerd.
 - Bug gevonden en gebouwd: radarbeeld ververste niet bij een nieuw frame (kenmerk las `data["path"]` i.p.v. `data["radar"]`); `image_last_updated` 4,7 u stil.
-- Gebouwd **0.44.0**: die fix + L-SC-002 (bronstatistiek per dag, 30 d, over herstarts, in diagnostics). 376 tests groen, workflow groen, HACS ververst.
-- Validatietellers ongewijzigd (aankomst 1/6, passage 21/21 met 18,6 km, regen 21/30).
-- Meetbaarheid: Blitzortung elke nacht ~02:00 onbeschikbaar (21 en 11 min) — blinde vlek, externe bron. Stormchase-logs van vóór 22:48 weg door herstarts.
-
-laatste ronde: 08-10 04:40, gemeten t/m 08-10 03:46
-
-## 08-10 07:40 · tussenronde
-- Geïnstalleerd: 0.44.0 (06:23) en 0.45.0 (07:03). Geen onweer (ensemble 0%, CAPE 10), niveau groen → alleen beschikbaarheid gemeten.
-- **0.44.0 radarfix geverifieerd:** sinds 06:23 16 beeldwissels, grootste gat 10 min (was 4,7 u stil).
-- **L-SC-002 eerste bewijs:** `bronnen_per_dag` 08-10 radar 80 gelukt tegen 40 sinds de herstart van 07:03 → tellers lopen over de herstart door. Alle bronnen 100% (n=130). Verifiëren over een dag­grens.
-- Locatie bij 2 herstarts: 10-13 s "laatst bekend", 0× "thuis".
-- **H-SC-2 (nieuw):** de validatie telt een passage als "uitgekomen" zodra er een afstand gemeten is (`validatie.py` `passage_afgerond`: `uitgekomen = werkelijke_afstand is not None`). Daardoor is "passage 21/21" geen trefkans. Uit de 12 bewaarde passage-uitkomsten: binnen 10 km 5/12 (42%), binnen 20 km 7/12; uitschieters −56, −31, −31, −25 km. Kandidaat L-SC-003 (zelf bouwen, rapportage).
+- Gebouwd 0.44.0: die fix + L-SC-002 (bronstatistiek per dag, 30 d, over herstarts, in diagnostics). 376 tests groen, workflow groen, HACS ververst.
+- L-SC-002 eerste bewijs: `bronnen_per_dag` 08-10 radar 80 gelukt tegen 40 sinds de herstart van 07:03 → tellers lopen over de herstart door. Alle bronnen 100% (n=130). Verifiëren over een dag­grens.
+- H-SC-2 (nieuw): de validatie telt een passage als "uitgekomen" zodra er een afstand gemeten is (`validatie.py` `passage_afgerond`: `uitgekomen = werkelijke_afstand is not None`). Daardoor is "passage 21/21" geen trefkans. Uit…
 - L-SC-001 (0.45.0) actief; wacht op onweer.
 - Geen release (tussenronde, niets acuut).
+- Gebouwd 0.46.0: L-SC-003 (passage-trefkans op afstand: raak ≤10 km, apart ≤20 km, mediane/grootste afwijking; baseline uit bewaarde uitkomsten 5/12 en 7/12) + L-SC-004 (nieuw: `regen_begint_over` toont tijdens regen het begin…
 
-laatste ronde: 08-10 07:40, gemeten t/m 08-10 07:43
-
-## 08-10 10:05 · bouw (chatsessie)
-- Gebouwd **0.46.0**: L-SC-003 (passage-trefkans op afstand: raak ≤10 km, apart ≤20 km, mediane/grootste afwijking; baseline uit bewaarde uitkomsten 5/12 en 7/12) + L-SC-004 (nieuw: `regen_begint_over` toont tijdens regen het begin van de volgende bui, gezien 08:10 stopt +16, nieuwe bui +91). Geen drempels of meldgedrag gewijzigd. 413 tests groen, workflow groen, HACS ververst.
-
-laatste ronde: 08-10 07:40, gemeten t/m 08-10 07:43
-
-## 08-10 11:45 · tussenronde
-- Geïnstalleerd: 0.46.0 (herstart 10:55). Geen onweer sinds 07:43 (0 inslagen <50 km, nadert 0×, ensemble 0%, CAPE 110) → alleen beschikbaarheid gemeten.
-- Bronnen 08-10 (over herstarts 08:55 en 10:55): 100% (n=508; radar 319, buienradar 66, meteoalarm 29). **L-SC-002:** `bronnen_per_dag` telt over 3 herstarts door; daggrens nog toetsen.
-- Locatie bij 2 herstarts: 10-11 s "laatst bekend", 0× "thuis".
-- **L-SC-003 eerste meetpunt gehaald:** diagnostics toont per passagehorizon raak/binnen 10/20 km. Over alle bewaarde uitkomsten (n=24, niet alleen de 20 zichtbare): binnen 10 km 9/24 (38%), binnen 20 km 12/24 (50%); ≤15 min 6/13, 15-45 min 3/8, >45 min 0/3. De baseline 5/12 · 7/12 van 07:40 telde alleen de laatste 20 uitkomsten → baseline herzien.
-- Regen: nu droog; `regen_begint_over` 19 min (0,21-0,93 mm/u), `volgende_bui` false (terecht: het regent niet). L-SC-004 wacht op regen met droog gat. `regen_verwacht` off bij 19 min (aanloop 10 min) → verwacht.
-- Geen release.
-
-laatste ronde: 08-10 11:45, gemeten t/m 08-10 11:44
-
-## 08-10 15:40 · tussenronde
-- Geïnstalleerd: 0.48.0 (0.47.0 en 0.48.0 door chatsessie; HA-herstarts 12:16, 14:19, 14:59, 15:08, 15:25, 15:39). Geen onweer (0 inslagen <50 km, nadert 0×, ensemble 0%, CAPE 30), niveau groen → onweer: alleen beschikbaarheid.
-- Bronnen 08-10 over alle herstarts: 100% (n=917; radar 553, buienradar 115, meteoalarm 54). **L-SC-002:** dagteller loopt over 6 herstarts door; daggrens toetsen in de dagafsluiting.
-- Regen: 3 buien (11:50-12:21, 13:51-14:24, vanaf 15:23). Regenvalidatie 23/31 (was 21/30); 2 nieuwe: −13 min (15-45) en −25,7 min (>45). Bekende uitkomsten: afwijking −22, −18,9, −7,9, +7, −8, −13, −25,7 → mediaan −13 min: regen "begint" structureel eerder dan voorspeld.
-- **L-SC-004 eerste meetpunt gehaald:** 15:39 regent, `stopt_over` 20, `volgende_bui` true, sensor 105 min (bui op +105/+110 in de reeks).
-- **0.48.0 (weerentiteit volgt radar):** sinds 14:19 rainy bij elke radarwaarde ≥0,1 (14:19, 15:23), terug naar model bij 0,0 (14:24) → werkt. Maar 15:39: `pouring` en neerslagintensiteit 6,04 terwijl de reeks op minuut 0 1,33 mm/u geeft; 6,04 is minuut +10.
-- **H-SC-3 (nieuw):** `lees_reeks` neemt als intensiteit "nu" het maximum over −10..+10 min (bewust, tegen dipjes). Dat verklaart (a) `pouring` tot 10 min te vroeg en (b) waarschijnlijk een deel van de vroege regenstart in de validatie (regent = max tot +10 min, voorspelling = eerste minuut > 0). Toets: regenuitkomsten herrekenen met alleen −10..0 → voorstel L-SC-005 (raakt `regent` en daarmee regenmeldingen: Ruud beslist).
-- Geen release (tussenronde, niets acuut).
-
-laatste ronde: 08-10 15:40, gemeten t/m 08-10 15:44
-
-## 08-10 19:40 · tussenronde
-- Geïnstalleerd: 0.48.0 (herstarts 16:31, 17:41, 18:36). Geen onweer (0 inslagen <50 km, ensemble 0%, CAPE 0-10), niveau groen → onweer: alleen beschikbaarheid gemeten.
-- Bronnen 08-10: 100% (n=1257; radar 791, buienradar 164, meteoalarm 76). **L-SC-002:** dagteller over 9 herstarts door (radar 791 per dag tegen 441 sinds 18:36). Daggrens in de dagafsluiting.
-- Regen: validatie 25/33 (was 23/31); 3 nieuwe afgeronde uitkomsten −17,7 (>45 min), −8 (≤15) en −8,1 min (>45). Alle 10 bekende afwijkingen: 9 negatief, 1 positief; mediaan −10,6 min (tekentoets p 0,02, n=10).
-- **H-SC-3 sterker:** de drie uitkomsten op ≤15 min zijn −7,9, −8 en −8 min — precies wat het vooruitkijken (−10..+10 min, reeks per 5 min) voorspelt: "regent" slaat aan zodra er over ~10 min regen in de reeks staat. Bij langere horizons komt daar de gewone voorspelfout bij. Ondersteunt L-SC-005 (open, Ruud beslist); offline replay nog niet mogelijk (radarreeksen niet in de recorder).
-- Open voorspelling in de validatie: regen over 43 min (0,21 mm/u) van eerder; live 19:41 droog, `regen_begint_over` 113 (0,1 mm/u), `regen_verwacht` off → toetsen.
-- Geen release (tussenronde, niets acuut).
-
-laatste ronde: 08-10 19:40, gemeten t/m 08-10 19:44
-
-## 08-10 23:40 · tussenronde
-- Geïnstalleerd: 0.48.1 (app-icoon, chatsessie). **0.49.0** (officiële KNMI-bronnen; chatsessie 23:26) staat klaar in HACS, nog niet geïnstalleerd → geen eigen release erbovenop. Na installatie meten: bronstatus van de nieuwe KNMI-bronnen (slaag%, latentie) naast radar/buienradar.
-- Geen onweer (0 inslagen <50 km, ensemble 0%, CAPE 0, LI 14,6), niveau groen → onweer: alleen beschikbaarheid gemeten.
-- Bronnen sinds herstart 22:02: alle 10 bronnen 100% (radar 677, buienradar 142, meteoalarm 68, open-meteo 31), 0× haperend. Locatie: tracker iPhone.
-- Regen: 2 nieuwe valse regenvoorspellingen (18:36 regen over 43 min, 20:44 over 60 min, beide licht; niet uitgekomen). Validatie nu 24/34 (≤15 min 5/5, 15-45 6/11, >45 13/18): korte horizon blijft betrouwbaar, lange horizon geeft ~1 op 3 vals. Open: regen over 57 min (piek 1,07 mm/u); live 23:41 droog, `regen_verwacht` off.
-- H-SC-3 ongewijzigd (geen nieuwe afgeronde regenstart); L-SC-005 afgewezen door Ruud (21:13), meting loopt als KPI door.
-- Geen release.
-
-laatste ronde: 08-10 23:40, gemeten t/m 08-10 23:44
-
-## 09-10 03:40 · dagafsluiting 08-10
-- Onweer 08-10: 0 inslagen <50 km, niveau groen, nadert 0×, ensemble 0% → hits/misses/lead-time niet meetbaar (geen gebeurtenis). Alleen beschikbaarheid gemeten.
-- Bronnen 08-10 (lokale dag, over 20 herstarts): 1686/1686 = 100% (radar 1044, buienradar 217, meteoalarm 100, meting 80, overige 45). Radarbeeld 22:00-03:41 elke 10-11 min. Locatie: tracker iPhone.
-- **L-SC-002 geverifieerd:** `bronnen_per_dag` heeft 08-10 en 09-10 apart (2 dagen, totaal opgeteld) → telt over herstarts én daggrens door.
-- Regen: avond/nacht 4 valse lichte regenvoorspellingen (18:36 +43, 20:44 +60, 22:52 +57, 00:37 +42 min); korte horizon blijft 5/5. Validatie 24/34.
-- **Meetfout gevonden:** `validatie.py` bewaart MAX_UITKOMSTEN = 60 uitkomsten over álle soorten samen; het venster is vol (34 regen + 21 passage + 5 aankomst). Elke afgeronde regenvoorspelling (8-10 per regendag) duwt de oudste uitkomst eruit — nu onweersuitkomsten uit augustus: passage 24 → 21, aankomst 6 → 5 sinds 08-10. De zeldzame onweersvalidatie (het lange geheugen voor L-SC-001) slijt zo weg. Voorstel L-SC-006 (zelf bouwen: venster per soort). Niet nu uitgebracht: 0.49.0 en 0.50.0 staan nog niet geïnstalleerd (0.48.1 draait) → niet erbovenop stapelen; bouwen in de eerste dagafsluiting na installatie.
+## 09-10 · samenvatting dag (6 rondes; ingekort na 14 dagen)
+- L-SC-002 geverifieerd: `bronnen_per_dag` heeft 08-10 en 09-10 apart (2 dagen, totaal opgeteld) → telt over herstarts én daggrens door.
+- Meetfout gevonden: `validatie.py` bewaart MAX_UITKOMSTEN = 60 uitkomsten over álle soorten samen; het venster is vol (34 regen + 21 passage + 5 aankomst). Elke afgeronde regenvoorspelling (8-10 per regendag) duwt de oudste ui…
 - H-SC-3 ongewijzigd (geen nieuwe afgeronde regenstart met bekende afwijking). L-SC-001 wacht op onweer.
 - Geen release.
-
-laatste ronde: 09-10 03:40, gemeten t/m 09-10 03:47
-
-## 09-10 07:40 · tussenronde
-- Geïnstalleerd: **0.50.0** om 06:02 en **0.50.1** om 06:57 (0.49.0 KNMI-bronnen zit erin). Herstarts sinds 03:47: 4 (06:03, 06:57, 07:02, 07:42). Locatie: tracker iPhone.
-- Geen onweer (0 inslagen <50 km, ensemble 0%, CAPE 0, LI 9,3), niveau groen → onweer: alleen beschikbaarheid gemeten. Het regent licht (1,2 mm/u, `regen_verwacht` aan).
-- Bronnen: "alles in orde", 0 haperend, 15 bronnen 100% (radar 1168 vandaag). Nieuwe KNMI-bronnen sinds 06:03 alle 100%: nowcast 34, edr 22, waarschuwingen 19, wms 15, verwachting 8; push verbonden.
-- **Bronwissel regen:** sinds 0.49.0 is de KNMI-nowcast de eerste bron; Buienradar alleen terugval (daarom Buienradar laatste succes 06:02). De regenvalidatie legt de bron niet vast → uitkomsten van vóór en na 06:03 lopen door elkaar. Scheiden op `gemaakt_op` ≥ 09-10 06:03 kan nog; daarna nodig: bron per voorspelling → toegevoegd aan L-SC-006.
-- Regen: 1 nieuwe afgeronde uitkomst (04:52, nog Buienradar): "over 57 min", kwam na 25 min (−32 min). Afwijkingen nu 11 bekend, 10 negatief (regen eerder dan voorspeld); validatie 24/34. H-SC-3 ongewijzigd; KNMI-nowcast los meten vanaf nu.
+- Bronwissel regen: sinds 0.49.0 is de KNMI-nowcast de eerste bron; Buienradar alleen terugval (daarom Buienradar laatste succes 06:02). De regenvalidatie legt de bron niet vast → uitkomsten van vóór en na 06:03 lopen door elka…
+- Regen: 1 nieuwe afgeronde uitkomst (04:52, nog Buienradar): "over 57 min", kwam na 25 min (−32 min). Afwijkingen nu 11 bekend, 10 negatief (regen eerder dan voorspeld); validatie 24/34. H-SC-3 ongewijzigd; KNMI-nowcast los me…
 - L-SC-006 (venster per soort): 0.50.x geïnstalleerd → bouwen in de dagafsluiting van 10-10; onweer nog 21 passage / 5 aankomst in het venster.
 - Geen release (tussenronde).
-
-laatste ronde: 09-10 07:40, gemeten t/m 09-10 07:45
-
-## 09-10 11:40 · tussenronde
-- Geïnstalleerd: 0.50.1 (geen nieuwe release). HA-herstarts sinds 07:45: 2 (10:09, 10:40). Locatie: tracker iPhone. Geen onweer (0 inslagen <50 km, CAPE 0, LI 4, ensemble 0 %), niveau groen → onweer: alleen beschikbaarheid gemeten.
-- Bronnen 09-10 t/m 11:44: 15 bronnen, 0 mislukt (radar 740, KNMI-nowcast 107, EDR 71, waarschuwingen 38, WMS 25); push verbonden (34 meldingen). Buienradar sinds 06:02 alleen terugval, niet nodig geweest.
-- Regen: het regent licht (0,12 mm/u, `stopt_over` 1, volgende bui +16 → sensor 16). **Eerste afgeronde uitkomst met KNMI-nowcast als bron:** 08:53 "over 41 min", kwam na 19 min (−21,6). Bekende afwijkingen nu 12, 11 negatief → het vroege patroon blijft ook met de nieuwe bron (n=1 KNMI, geen conclusie). Validatie 24/34; venster: regen 34, passage 21, aankomst 5 — dit keer verdrong regen geen onweersuitkomst.
-- Radarvooruitblik (0.49.0): beeld alleen ververst bij herstarts (07:42, 10:09, 10:41). Code: bouwt bewust alleen als iemand in de laatste 15 min keek (`KIJKER_GELDIG`) → geen versheids-KPI voor dit beeld; het gewone radarbeeld is vers (KNMI 11:40).
-- H-SC-3 loopt als KPI (L-SC-005 afgewezen). L-SC-006 (venster per soort + bron per voorspelling) bouwen in de dagafsluiting van 10-10. Geen release.
-
-laatste ronde: 09-10 11:40, gemeten t/m 09-10 11:45
-
-## 09-10 15:40 · tussenronde
-- Geïnstalleerd: 0.50.1. HA-herstarts sinds 11:45: 6 (12:11-14:43). Locatie: tracker iPhone. Geen onweer (0 inslagen <50 km, CAPE 0 / piek 12 u 140, LI 2,8, ensemble 0 %; wel windschering ~62 km/u, stoten 52 km/u verwacht), niveau groen → onweer: alleen beschikbaarheid.
-- Bronnen: 15 bronnen 0 mislukt (radar 1693, KNMI-nowcast 178, EDR 118, waarschuwingen 61); push verbonden. Buienradar en Bright Sky (`meting`) alleen terugval (laatste succes 06:02/06:18) — zo ontworpen.
-- Regen (KNMI-nowcast): 4 nieuwe afgeronde uitkomsten 12:40-14:12: −9,6 / **+13,1 / +20,6 / +8,0 min** → met KNMI nu vaker te LAAT (3 van 5 KNMI-uitkomsten), tot 0.49.0 bijna altijd te vroeg (11/12). H-SC-3 bijgesteld: patroon is bronafhankelijk; goed scheiden kan pas met de bron per uitkomst.
-- **L-SC-006 acuut gebouwd (0.50.2):** venster nu regen 37 / passage 20 / aankomst 3 — sinds 11:45 nog eens 3 onweersuitkomsten verdrongen (passage 21→20, aankomst 5→3), onherstelbaar. Daarom in een tussenronde: venster 60 per soort + bron per regenvoorspelling + `regen_per_bron`/`aantal_per_soort` in de diagnostiek. 10 tests, 691 groen, workflow groen, HACS ververst. Wacht op installatie.
-
-laatste ronde: 09-10 15:40, gemeten t/m 09-10 15:45
-
-## 09-10 19:40 · tussenronde
-- Geïnstalleerd: **0.50.2** (L-SC-006). HA-herstarts sinds 15:45: 7 (16:16-19:29). Locatie: tracker iPhone. Geen onweer (0 inslagen <50 km, CAPE 0 / piek 12 u 140, LI 2,3, ensemble 0 %; windschering 0-6 km 73 km/u, stoten verwacht 47 / gemeten 32 km/u), niveau groen → onweer: alleen beschikbaarheid.
-- Bronnen: alles in orde; 1× 503 bij Open-Meteo (icon_d2 + ensemble, 18:03, volgende ronde weer gelukt) → 99 %; radar 1949, KNMI-nowcast 251, EDR 170 zonder fout; push verbonden.
-- **L-SC-006 geverifieerd:** `aantal_per_soort` aankomst 3 / passage 20 / regen 40 (samen 63 > 60): onweersuitkomsten niet meer verdrongen sinds 15:45; nieuwe regenuitkomsten dragen `bron` (knmi 2×).
-- Regen KNMI-nowcast: 2 nieuwe uitkomsten +25,6 min (57 min, kwam na 83) en +2,8 min. Alle KNMI-uitkomsten sinds 0.49.0 (n=7): mediaan +8 min, 5 van 7 te laat (Buienradar-tijdperk: 21 van 27 bekende te vroeg). H-SC-3: bron bepaalt het teken; n te klein voor een correctievoorstel (≥ 20 KNMI-uitkomsten).
-- Geen release (tussenronde).
-
-laatste ronde: 09-10 19:40, gemeten t/m 09-10 19:45
-
-## 09-10 23:40 · tussenronde
-- Geïnstalleerd: **0.51.0** (windstoten bijgesteld met de stationsmeting, regenbeeld, regen stopt over; chatsessie 22:40). HA-herstarts sinds 19:45: 3 (19:48, 20:53, 22:43). Locatie: tracker iPhone. Geen onweer (0 inslagen <50 km, CAPE 100 / piek 12 u 180, LI 2,2, ensemble 0 %), niveau groen → onweer: alleen beschikbaarheid.
-- Bronnen sinds 22:43: 15 bronnen 0 mislukt (radar 2218, KNMI-nowcast 325, EDR 216); dag 09-10 2 mislukt (503 Open-Meteo 18:03). Push verbonden. Buienradar/meteoalarm alleen terugval.
-- Regen KNMI-nowcast: 4 nieuwe uitkomsten −1,9 / +2,9 / −14,8 / −6,9 min. Alle KNMI sinds 0.49.0 **n=11: mediaan +2,8 min, gem. +1,7, gem. absolute fout 11,6 min, 6 te laat / 5 te vroeg**; Buienradar-tijdperk mediaan −8 (21/27 te vroeg). **H-SC-3 bijgesteld:** KNMI heeft vrijwel geen bias maar wel ±12 min spreiding → een vaste correctie helpt niet; het voordeel zit in de bronwissel zelf. Volgen tot n ≥ 20.
-- 0.51.0 windstoten: verwacht 28,6 km/u tegen gemeten 16,1 (Hupsel, 3,4 km) — 1 meetpunt; effect van de bijstelling meten in de dagafsluiting (verwacht − gemeten per uur).
-- Validatie: aankomst 3 / passage 20 / regen 44 (L-SC-006 houdt: geen verdringing). L-SC-001 wacht op onweer. Geen release.
-
-laatste ronde: 09-10 23:40, gemeten t/m 09-10 23:50
 
 ## 10-10 03:40 · dagafsluiting 09-10
 - Onweer 09-10: 0 inslagen <50 km, niveau groen, nadert 0×, ensemble 0 % → hits/misses/lead-time niet meetbaar; alleen beschikbaarheid. Locatie: tracker iPhone.
@@ -442,3 +336,14 @@ laatste ronde: 23-10 19:40, gemeten t/m 23-10 19:45
 - Hypotheses: H-SC-3 (regenstart; geen nieuwe bui), H-SC-8 (passage), H-SC-9 (windstoten: traagheid bevestigd in de avond). Geen release.
 
 laatste ronde: 23-10 23:40, gemeten t/m 23-10 23:45
+
+## 24-10 03:40 · dagafsluiting 23-10
+- Actief 0.59.1 → **release 0.59.2** (03:49, workflow groen, HACS ververst; wacht op installatie): frontterugval windfactor (bug, L-SC-019) + L-SC-018. Geen onweer; niveau geel 08:39-23:32 (KNMI-wind), nu groen.
+- **Windstoten dag:** bias −2,17 km/u, MAE **2,50** (22-10 3,86; 10 d 2,52). Stijgend n=16 −2,82, dalend n=7 −0,94. Eerste hele dag met L-SC-017: op een dag met vooral stijgende wind geen winst zichtbaar (n=1); 7-daagse toets loopt.
+- **Bug gevonden (03:24):** na ~20 uur doorlopende frontvlag had het 24-uursvenster < 6 uur rustige paren; factor 0,70 viel weg en *Windstoten* sprong 43 → **64,4 km/u** (kaal model) bij 35,3 gemeten; windmelding-waarde ook 64,4 (> drempel 60). Strijdig met de bedoeling van L-SC-007 ("factor mag bij een front niet springen") → gebouwd 0.59.2: tijdens een front de rustige paren van 72 uur, zelfde eisen.
+- **H-SC-10 (nieuw):** de frontvlag stond ~22 uur aan (136 frontparen) bij een geleidelijk aantrekkende storm; een front hoort uren te duren, geen dag. Toets: uren frontvlag per dag tegen druk/stootsprong in de historie.
+- **Windvooruitblik:** 76-84,6 km/u tegen gemeten max 64,9 → drempel terecht, piek ~20 km/u te hoog (open veld tegen tuinstation; n=1, 22-10 vals alarm 60 tegen 51,8). Nog geen voorstel.
+- **L-SC-016 geverifieerd:** 0 uur vals "hapert" (22-10: 13,6 u). Regenstart (H-SC-3): 3 buien, lange horizon 2× te vroeg (+6..+16 min).
+- Hypotheses: H-SC-3 (regenstart lange horizon), H-SC-9 (windstoten traagheid; L-SC-017 loopt), H-SC-10 (frontvlag te lang). H-SC-8 (passage) wacht op onweer.
+
+laatste ronde: 24-10 03:40, gemeten t/m 24-10 03:50
