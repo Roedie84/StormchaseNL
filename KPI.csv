@@ -367,4 +367,4 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-23,DAG,sc_bronstatus_vals_hapert_uur,0,1,"L-SC-016 (0.58.4): hele dag 'alles in orde'; buienradar 'reserve (niet nodig)'; 1 DNS-storing 04:33 (radar/knmi_nowcast/buienradar)"
 2026-10-23,DAG,sc_regen_buien,3,9,"13:12-14:05 +-5 min; 16:08 en 17:28 horizon 15-30 min +6..+16 min te vroeg voorspeld (n=6)"
 2026-10-24 03:40,DAG,sc_windfactor_weggevallen_min,20,1,"03:24-03:44 kale model 64.4 bij gemeten 35.3 (rustige paren 24 u < 6 u na ~20 u front) -> 0.59.2"
-2026-10-24 03:40,DAG,sc_front_uren_24u,22,136,"paren_front 136 (~10 min) om 03:24; front-vlag doorlopend sinds ~05 u 23-10 bij geleidelijk aantrekkende wind (H-SC-10)"
+2026-10-24 03:40,DAG,sc_front_uren_24u,22,136,"paren_front 136 (~10 min) om 03:24; 136 van de paren in 24 u als front of naloop bij geleidelijk aantrekkende wind; begintijd niet uit de recorder te halen (H-SC-10)"
