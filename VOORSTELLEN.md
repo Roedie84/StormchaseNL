@@ -153,4 +153,5 @@ Status: open / akkoord / afgewezen / gebouwd vX / geverifieerd / teruggedraaid. 
 - Bouw: terugval op de rustige paren van 72 u zolang het 24-uursvenster front-/naloopparen bevat (niet alleen als het laatste paar front is). Een meetgat zonder frontparen blijft kaal model (0.59.2-test ongewijzigd); front ouder dan 24 u telt niet.
 - Verwacht effect: na een front MAE ~5 i.p.v. ~7,7 km/u (factor 0,82: 5,2; 0,76: 5,9), geen sprong naar het kale model.
 - Meten na installatie: na het volgende front `factor_bron` "72 uur (front)" of "tijdvak" tot er 6 u rustig is; bias per uur in de eerste 6 u na het front.
+- Aanvulling 24-10 19:40: de fout duurde 12:53-18:43 (geen herstel, nieuw front); 15:44-18:34 bias **+17,3** (n=18). Replay met tijdvakfactor 0,56: −3,4 / MAE 3,6.
 
