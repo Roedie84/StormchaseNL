@@ -346,4 +346,7 @@ laatste ronde: 23-10 23:40, gemeten t/m 23-10 23:45
 - **L-SC-016 geverifieerd:** 0 uur vals "hapert" (22-10: 13,6 u). Regenstart (H-SC-3): 3 buien, lange horizon 2× te vroeg (+6..+16 min).
 - Hypotheses: H-SC-3 (regenstart lange horizon), H-SC-9 (windstoten traagheid; L-SC-017 loopt), H-SC-10 (frontvlag te lang). H-SC-8 (passage) wacht op onweer.
 
-laatste ronde: 24-10 03:40, gemeten t/m 24-10 03:50
+## 24-10 07:40 · tussenronde (niet gemeten)
+- HA-MCP kon niet verbinden (502 bij opbouw van de verbinding) → geen history, logs of dashboard; niets gemeten, geen release, dashboardkaart niet bijgewerkt. Volgende ronde meet door vanaf 03:55 (recorder bewaart ~10 d, dus geen verlies).
+
+laatste ronde: 24-10 07:40, gemeten t/m 24-10 03:50
