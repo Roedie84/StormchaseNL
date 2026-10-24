@@ -360,3 +360,13 @@ laatste ronde: 24-10 07:40, gemeten t/m 24-10 03:50
 - Hypotheses: H-SC-3 (regenstart lange horizon; droog), H-SC-9 (windstoten traagheid; L-SC-017 loopt), H-SC-10 (frontvlag te lang). Geen release.
 
 laatste ronde: 24-10 11:40, gemeten t/m 24-10 11:45
+
+## 24-10 15:40 · tussenronde
+- Actief **0.59.2**. Geen Stormchase-logregels. Geen onweer, 0 inslagen < 50 km; niveau groen; bronstatus "alles in orde". Droog.
+- **Front voorbij ~12:53** (11:43 nog `front` true, 15:34 false) → H-SC-10: frontvlag besloeg ~24-10 tot het middaguur een groot deel van 24 u (126 frontparen); toets in de dagafsluiting.
+- **Bug (L-SC-021):** na het front is het 24-uursvenster nog vol front-/naloopparen (17 rustige, 2,7 u). `factor_tijdens_front` (0.59.2) werkt alleen zolang het laatste paar front is → factor valt weg, kaal model. 12:53:58 sprong 40,3 → **51,8 km/u** bij 39,7 gemeten. Per stationsmeting: 11:43-12:44 bias −0,6 / MAE 2,0 (n=7); 12:53-15:34 **+6,6 / MAE 7,7** (n=16). Met factor 0,82: −2,2 / MAE 5,2. Herstelt vanzelf na ~6 u rustig (~19 u), geen melding geraakt (< 60).
+- **Klaargezet (branch `wip/l-sc-021`, suite 917 groen):** L-SC-021 (terugval op 72 u zolang het 24-uursvenster frontparen bevat; meetgat zonder front ongewijzigd) + L-SC-020 (status "nog niet gebouwd (geen kijker)" na een herstart). Release in de dagafsluiting (0.59.3).
+- Windvooruitblik 68 km/u; gemeten max 11:45-15:34 51,7.
+- Hypotheses: H-SC-3 (regenstart lange horizon; droog), H-SC-9 (windstoten traagheid; L-SC-017 loopt), H-SC-10 (frontvlag te lang). Geen release (tussenronde).
+
+laatste ronde: 24-10 15:40, gemeten t/m 24-10 15:45

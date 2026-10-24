@@ -142,7 +142,15 @@ Status: open / akkoord / afgewezen / gebouwd vX / geverifieerd / teruggedraaid. 
 
 
 ## L-SC-020 · radar-vooruitblik na een herstart zonder kijker: status "wacht op radarbeeld" (rapportage)
-- Status: **gepland** (zelf bouwen in de dagafsluiting: alleen de statustekst; bouwen en kijkerregel ongewijzigd).
+- Status: **gepland — klaargezet** op branch `wip/l-sc-021` (commit cb2dcae; status "nog niet gebouwd (geen kijker)" / "wordt gebouwd" als er wel een radarronde is; zonder radarronde blijft "wacht op radarbeeld"; de 0.59.2-toets daarop aangepast). 15:40: nog steeds geen beeld sinds 10:16, referentie_beschikbaar 13:40Z. Was: gepland (zelf bouwen in de dagafsluiting: alleen de statustekst; bouwen en kijkerregel ongewijzigd).
 - Onderbouwing (24-10 11:40): na de herstart van 10:16 bouwt de vooruitblik bewust niets zolang niemand kijkt; `status` blijft "wacht op radarbeeld", `frames` 0, `referentietijd` leeg, terwijl `referentie_beschikbaar` 11:40 is. `gebouwde_stand` (0.59.2) past alleen de status "actueel" aan; de beginwaarde uit `__init__` blijft staan.
 - Bouw: geen gebouwd beeld + wel een radarronde + geen kijker → "nog niet gebouwd (geen kijker)"; test.
 - Meten: status na een herstart zonder kijker; L-SC-018 daarna opnieuw toetsen.
+
+## L-SC-021 · windstootfactor valt ook NA een lang front weg (bug)
+- Status: **gepland — klaargezet** op branch `wip/l-sc-021` (commit 19e03d4; suite 917 groen, 4 tests in `tests/test_release_0593.py`). Dagafsluiting: versie 0.59.3, CHANGELOG (samen met L-SC-020), release. Zelf bouwen als bug: zelfde bedoeling als L-SC-007/L-SC-019 ("een front leert de factor niet, dan mag hij hem ook niet laten verdwijnen"); drempels, meldregels en bijsturing ongewijzigd.
+- Onderbouwing (24-10 15:40): front eindigde ~12:53 (`front` false); venster 24 u: `paren_front` 126, `paren_24u` 17, `uren_metingen` 2,7 → `factor` None; `factor_tijdens_front` geeft alleen een factor als het láátste paar front is → kaal model ("correctie volgt zodra er zes uur ... buiten een front is"). 12:53:58 sprong 40,3 → 51,8 km/u bij 39,7 gemeten. Per stationsmeting 12:53-15:34: bias **+6,6**, MAE 7,7 (n=16) tegen −0,6 / 2,0 (n=7) ervoor. Herstel vanzelf pas na ~6 u rustig.
+- Bouw: terugval op de rustige paren van 72 u zolang het 24-uursvenster front-/naloopparen bevat (niet alleen als het laatste paar front is). Een meetgat zonder frontparen blijft kaal model (0.59.2-test ongewijzigd); front ouder dan 24 u telt niet.
+- Verwacht effect: na een front MAE ~5 i.p.v. ~7,7 km/u (factor 0,82: 5,2; 0,76: 5,9), geen sprong naar het kale model.
+- Meten na installatie: na het volgende front `factor_bron` "72 uur (front)" of "tijdvak" tot er 6 u rustig is; bias per uur in de eerste 6 u na het front.
+
