@@ -13,6 +13,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "custom_components" / "stormchase"))
 
 from const import FRONT_NALOOP_S  # noqa: E402
+from vooruitblik import gebouwde_stand  # noqa: E402
 from windcorrectie import Windcorrectie  # noqa: E402
 
 T0 = 1_760_000_000.0
@@ -73,3 +74,20 @@ def test_front_buiten_het_venster_telt_niet():
     t = _rustig(wc, t + 26 * 3600, 2.0)
     uit = wc.corrigeer(50.0, t - STAP)
     assert uit["factor"] is None and uit["waarde"] == 50.0
+
+
+# ---- L-SC-020: radar-vooruitblik na een herstart zonder kijker ----
+
+def test_na_herstart_zonder_kijker():
+    """24-10 11:40/15:40: na de herstart van 10:16 geen beeld, wel radar 13:40Z."""
+    assert gebouwde_stand("wacht op radarbeeld", None, 1_792_849_200, False) == (
+        "nog niet gebouwd (geen kijker)", None
+    )
+
+
+def test_na_herstart_met_kijker():
+    assert gebouwde_stand("wacht op radarbeeld", None, 1_792_849_200, True)[0] == "wordt gebouwd"
+
+
+def test_zonder_radarronde_ongewijzigd():
+    assert gebouwde_stand("wacht op radarbeeld", None, None, False)[0] == "wacht op radarbeeld"

@@ -187,6 +187,12 @@ def gebouwde_stand(
         datetime.fromtimestamp(gebouwd_tijd, tz=timezone.utc).isoformat()
         if gebouwd_tijd is not None else None
     )
+    # 0.59.3 (L-SC-020): na een herstart zonder kijker is er nog geen beeld,
+    # maar wel een radarronde. "wacht op radarbeeld" klopte dan niet: er is een
+    # radarbeeld, er wordt alleen (bewust) niets gebouwd zolang niemand kijkt.
+    if (status == "wacht op radarbeeld" and gebouwd_tijd is None
+            and huidig_tijd is not None):
+        return ("wordt gebouwd" if bouwt else "nog niet gebouwd (geen kijker)"), None
     if status != "actueel" or gebouwd_tijd is None or huidig_tijd is None:
         return status, referentie
     if gebouwd_tijd == huidig_tijd:
