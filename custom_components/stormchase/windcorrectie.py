@@ -42,6 +42,10 @@ houden we de verhouding gemeten/model bij en schalen de modelwaarde daarmee.
   meer, dan gold het kale model (24-10 03:24: 64 km/u bij 35 gemeten). Nu
   telt dan de factor uit de rustige paren van 72 uur (zelfde eisen). Bij de
   start (geen 72 uur) blijft het kale model staan zoals voorheen.
+- 0.59.3 (L-SC-021): hetzelfde na het front. Zolang het 24-uursvenster nog
+  front- of naloopparen bevat en daardoor geen zes uur rustig heeft, telt de
+  factor uit de rustige paren van 72 uur. 24-10 12:53-15:34: kaal model
+  +6,6 km/u (MAE 7,7, n=16). Een meetgat zonder front: ongewijzigd.
 
 Opslag: per paar [tijd, gemeten, model, front]. Paren uit 0.51.x hebben geen
 frontvlag; bij het terugzetten kijken we dan alsnog naar de stootsprong.
@@ -188,7 +192,8 @@ class Windcorrectie:
 
     def factor_tijdens_front(self, nu: float) -> tuple[float | None, int]:
         """0.59.2: de factor uit de rustige paren van de laatste 72 uur,
-        maar alleen zolang er nu een front is (laatste paar front/naloop).
+        zolang het 24-uursvenster front- of naloopparen bevat (0.59.3: ook
+        na het front, tot er weer zes uur rustig in het venster ligt).
 
         Leerronde 24-10: na een front van ~18 uur zakten de rustige paren in
         het 24-uursvenster onder de zes uur (03:24); de factor (0,70) viel weg
@@ -198,7 +203,12 @@ class Windcorrectie:
         """
         venster = self._venster(nu)
         rustig = self._rustig(venster)
-        if not venster or venster[-1] in rustig:
+        # 0.59.3 (L-SC-021): ook NA het front, zolang het 24-uursvenster nog
+        # front- of naloopparen bevat. Leerronde 24-10 15:40: het front eindigde
+        # om ~12:53, het venster had 126 frontparen en 2,7 uur rustig; de factor
+        # viel weg en het kale model zat er +6,6 km/u naast (n=16). Een gat in de
+        # metingen zonder front (geen frontparen) blijft zoals voorheen.
+        if not venster or len(rustig) == len(venster):
             return None, 0
         lang = self._rustig(
             [p for p in self.paren
