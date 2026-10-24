@@ -370,3 +370,12 @@ laatste ronde: 24-10 11:40, gemeten t/m 24-10 11:45
 - Hypotheses: H-SC-3 (regenstart lange horizon; droog), H-SC-9 (windstoten traagheid; L-SC-017 loopt), H-SC-10 (frontvlag te lang). Geen release (tussenronde).
 
 laatste ronde: 24-10 15:40, gemeten t/m 24-10 15:45
+
+## 24-10 19:40 · tussenronde
+- Actief **0.59.2**. Geen Stormchase-logregels. Geen onweer, 0 inslagen < 50 km; niveau groen; bronstatus "alles in orde". Droog.
+- **L-SC-021 groter dan gedacht:** na het einde van het front (12:53) bleef het kale model staan tot **18:43**; 15:44-18:34 bias **+17,3 km/u** (n=18, model 40-51,5 bij gemeten 24,5-40). Niet vanzelf hersteld: om 18:34 nog maar 5,7 u rustig, daarna een nieuw front. Replay met de tijdvakfactor (0,56, wat L-SC-021 gebruikt): **−3,4 / MAE 3,6**. Geen melding geraakt (< 60). Fix ligt klaar op `wip/l-sc-021` → release 0.59.3 in de dagafsluiting; risico tot dan: na het volgende frontende weer het kale model (vooruitblik 71 km/u).
+- **Nieuw front 18:43** (druk −2,8 hPa/3 u): tijdvakfactor 0,53-0,56 + bijsturing → bias **−6,9** (n=7); kaal +6,7. Een factor uit rustige uren is tijdens een front te laag → past bij H-SC-9/H-SC-10, nog geen voorstel (n=7).
+- **Regenstart (H-SC-3):** aftelling liep van 64 naar 14 min (18:58) en sprong dan naar 84; geen regen t/m 19:52 → 1× vals (bui verdween/schoof). Nu weer 28 min.
+- Hypotheses: H-SC-3 (regenstart lange horizon), H-SC-9 (windstoten traagheid / front), H-SC-10 (frontvlag te lang). Geen release (tussenronde).
+
+laatste ronde: 24-10 19:40, gemeten t/m 24-10 19:50
