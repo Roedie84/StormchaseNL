@@ -393,3 +393,12 @@ laatste ronde: 25-10 15:40, gemeten t/m 25-10 15:45
 - Hypotheses: H-SC-3 (regenstart; vandaag 3 treffers, 2 vals), H-SC-9 (windstoten traagheid → L-SC-022), H-SC-11 (koude-lucht-onweer gemist, n=1). Geen release (tussenronde; L-SC-023 wacht op 26-10 03:40).
 
 laatste ronde: 25-10 19:40, gemeten t/m 25-10 19:45
+
+## 25-10 23:40 · tussenronde
+- 0.59.3 actief; geen herstart sinds 18:47. Bronstatus "alles in orde" (hele ronde, geen wisseling). Radar vers (22:42Z).
+- **Geen onweer:** 0 inslagen < 50 km 19:44-23:44, niveau groen, `weerwaarschuwing` uit; `afstand`/`trend` nu unknown (geen inslagen meer in het venster). Geen valse geel-perioden deze ronde (dag 25-10: 2, zie L-SC-024).
+- **Windstoten 19:44-23:34 (n=24): bias −1,0, MAE 1,6 km/u** (laagste MAE van de dag; 15:54-19:44: 4,0). Licht stijgend 22 → 37 km/u: grootste fouten bij de vlagen 21:24 (−4,2; 35,2 gemeten) en 23:34 (−3,8; 37,0) → verwachting loopt achter bij stijging (H-SC-9). Geen windmelding (vooruitblik 43).
+- **Regen (H-SC-3):** 3 buien. 21:27 (0,24 mm/u): aftelling 21:22 "12" → 21:34 = treffer, 7 min te laat. 21:47 (0,12 mm/u): aftelling 21:37 "72" → 22:49, om 21:42 weg → **gemist** (lichte bui, 15 min). 23:17 (0,48 mm/u): aftelling 22:22 "57" → 23:19 (+2), 23:02 "22" → 23:24 (+7) = treffer. Vals: 0. Dag 25-10 nu: 5 treffers, 2 vals, 1 gemist.
+- Hypotheses: H-SC-3 (regenstart; treffers 2-7 min te laat bij lichte buien), H-SC-9 (windstoten traagheid → L-SC-022), H-SC-11 (koude-lucht-onweer gemist, n=1). L-SC-023 (wip, suite groen) wacht op de dagafsluiting 26-10 03:40. Geen release.
+
+laatste ronde: 25-10 23:40, gemeten t/m 25-10 23:45
