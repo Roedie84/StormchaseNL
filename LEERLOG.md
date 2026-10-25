@@ -362,3 +362,13 @@ laatste ronde: 25-10 03:40, gemeten t/m 25-10 03:50
 - Hypotheses: H-SC-3, H-SC-9 (→ L-SC-022), H-SC-10. Geen release (tussenronde).
 
 laatste ronde: 25-10 07:40, gemeten t/m 25-10 07:45
+
+## 25-10 11:40 · tussenronde
+- 0.59.3 actief; vier HA-herstarts (09:29-10:53) zonder Stormchase-logregels. Geen onweer, 0 inslagen < 50 km; niveau groen; bronstatus "alles in orde"; radar 10:42Z vers.
+- **H-SC-10:** frontvlag ging om **07:44** uit (aan sinds 24-10 18:43 → 13,0 u). `paren_front` 109 → 84.
+- **L-SC-021 geverifieerd:** na het frontende en na elke herstart `factor_bron` "tijdvak" (0,76-0,80), `gecorrigeerd` true - nooit kaal model.
+- **Windstoten 07:44-11:43 (n=25): bias +0,2, MAE 3,9 km/u** (was 5,4 in 03:44-07:34). Wind steeg 22 → 50 km/u: 10:03-10:34 4× −2..−6 (achter bij stijging, H-SC-9), uitschieters 08:54 −11,8 (vlaag 40,4) en 11:43 +8,7 (daling 47 → 39). Geen windmelding (max gemeten 50,5 < drempel); vooruitblik 63.
+- **Regen (H-SC-3):** aftelling 07:42 "40 min" (→ 08:22) - bui begon 08:42 (0,36 mm/u): treffer, **+20 min te vroeg** voorspeld (08:02 "35" → 08:37: +5 min). Aftellingen 09:42-10:47 (57 → 13 min) **vals** (geen neerslag na 09:07). Nu 32 min (11:42, licht).
+- Hypotheses: H-SC-3 (regenstart; 1 treffer, 1 vals), H-SC-9 (traagheid bij stijgende wind → L-SC-022), H-SC-10 (frontvlag 13 u; uitslag gemeten). Geen release.
+
+laatste ronde: 25-10 11:40, gemeten t/m 25-10 11:45

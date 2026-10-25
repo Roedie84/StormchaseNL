@@ -409,3 +409,10 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-25 07:40,TUSSEN,sc_radar_vooruitblik_status_ok,1,1,"L-SC-020: na herstart status 'nog niet gebouwd (geen kijker)', referentie_beschikbaar 06:40Z, frames 0 -> geverifieerd"
 2026-10-25 07:40,TUSSEN,sc_inslagen_50km,0,1,"03:50-07:45 geen onweer; niveau groen; bronstatus alles in orde"
 2026-10-25 07:40,TUSSEN,sc_regen_droog_vanaf,05:38,1,"regen 04:23 piek 5.4 mm/u, droog vanaf 05:38; nieuwe aftelling 07:27 70 min -> 07:42 40 min (verwacht ~08:22-08:37), toets 11:40"
+2026-10-25 11:40,TUSSEN,sc_inslagen_50km,0,1,07:45-11:45 geen onweer; niveau groen; bronstatus alles in orde
+2026-10-25 11:40,TUSSEN,sc_frontvlag_uren,13.0,1,front true 24-10 18:43 -> false 25-10 07:44
+2026-10-25 11:40,TUSSEN,sc_wind_bias_kmh,0.2,25,07:44-11:43 verwachting-voor-meting min gemeten; MAE 3.9; wind 22->50
+2026-10-25 11:40,TUSSEN,sc_wind_mae_kmh,3.9,25,zelfde reeks; 10:03-10:34 -2..-6 bij stijging
+2026-10-25 11:40,TUSSEN,sc_factor_kaal_na_frontende,0,25,"L-SC-021: factor_bron tijdvak 0.76-0.80, gecorrigeerd true (ook na 4 herstarts)"
+2026-10-25 11:40,TUSSEN,sc_regen_starttijd_fout_min,-20,1,07:42 '40 min' -> start 08:42 (te vroeg 20 min); 08:02 '35' -> +5
+2026-10-25 11:40,TUSSEN,sc_regen_vals,1,1,"aftelling 09:42-10:47 57->13 min, geen neerslag na 09:07"
