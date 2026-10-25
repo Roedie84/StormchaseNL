@@ -372,3 +372,14 @@ laatste ronde: 25-10 07:40, gemeten t/m 25-10 07:45
 - Hypotheses: H-SC-3 (regenstart; 1 treffer, 1 vals), H-SC-9 (traagheid bij stijgende wind → L-SC-022), H-SC-10 (frontvlag 13 u; uitslag gemeten). Geen release.
 
 laatste ronde: 25-10 11:40, gemeten t/m 25-10 11:45
+
+## 25-10 15:40 · tussenronde
+- 0.59.3 actief; geen herstart. Bronstatus "alles in orde" (DNS-storing 13:07: Buienradar-reserve en KNMI-nowcast 1× mislukt, opgevangen).
+- **Onweer (n=1 gebeurtenis):** eerste inslag 13:36 op 96 km; dichtste **29,2 km NO om 14:10**; 12 binnen 50 km om 14:13, 13e om 15:18; 0 binnen 25 km. Niveau bleef terecht groen (buiten de waarschuwingsafstand), behalve 15:04-15:14.
+- **Gemist in de verwachting:** "Geen onweer verwacht", ensemble 0 %, bliksempotentie 0,0, terwijl TT 55,4, LI 1,0, CAPE 70 (koude lucht na het front). Lead-time 0. → **H-SC-11** (n=1; meer gevallen nodig).
+- **Vals "nadert" 15:04-15:14** (geel, aankomst 762-1593 min) en **"trekt snel weg" om 14:36** (−6,2 km/u): de dichtste inslag (14:10) lag stil; alleen de tracker verschoof 0,2-0,4 km, en elke nieuwe inslag verder weg gaf een regressiepunt met die verschoven afstand (`Naderingstrend.bij`, sleutel = nieuwste inslag). Replay met de recorderreeksen: oud max +2,3 / min −6,2 km/u, met de fix |v| ≤ 1 → **L-SC-023** (bug, zelf gebouwd, klaargezet op `wip/l-sc-023`, suite 922 groen; release 0.59.4 in de dagafsluiting).
+- Meetbaarheid: `afstand` toont de dichtste inslag ongeacht leeftijd (14:10 → nog 29,3 km om 15:44); geen leeftijd van die inslag als attribuut.
+- Regen: regent licht (0,8 mm/u), volgende bui over 17 min. Wind gemeten 37,8 / verwachting 42,5 km/u (niet als reeks gemeten deze ronde).
+- Hypotheses: H-SC-3 (regenstart), H-SC-9 (windstoten traagheid → L-SC-022), H-SC-11 (koude-lucht-onweer gemist; H-SC-10 frontvlag afgesloten 11:40). Geen release (tussenronde; L-SC-023 wacht op 03:40).
+
+laatste ronde: 25-10 15:40, gemeten t/m 25-10 15:45

@@ -416,3 +416,8 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-25 11:40,TUSSEN,sc_factor_kaal_na_frontende,0,25,"L-SC-021: factor_bron tijdvak 0.76-0.80, gecorrigeerd true (ook na 4 herstarts)"
 2026-10-25 11:40,TUSSEN,sc_regen_starttijd_fout_min,-20,1,07:42 '40 min' -> start 08:42 (te vroeg 20 min); 08:02 '35' -> +5
 2026-10-25 11:40,TUSSEN,sc_regen_vals,1,1,"aftelling 09:42-10:47 57->13 min, geen neerslag na 09:07"
+2026-10-25 15:40,TUSSEN,sc_inslagen_50km,13,1,"eerste inslag 13:36 op 96 km; dichtste 29.2 km NO om 14:10; 12 binnen 50 km om 14:13, 13e om 15:18; 0 binnen 25 km"
+2026-10-25 15:40,TUSSEN,sc_onweer_voorspeld,0,1,"onweersverwachting 'Geen onweer verwacht', ensemble 0 %, bliksempotentie 0.0 (CAPE 70, LI 1.0, TT 55.4): gemist, lead-time 0"
+2026-10-25 15:40,TUSSEN,sc_vals_nadert_min,10,1,"15:04-15:14 nadert + geel bij inslag van 14:10 (54 min oud); afstand 29.4->29.2 door tracker-ruis, aankomst 762-1593 min"
+2026-10-25 15:40,TUSSEN,sc_vals_trend_wegtrekken,1,1,"14:36 'trekt snel weg' -6.2 km/u door 29.2->29.6 (ruis) bij nieuwe inslagen elders"
+2026-10-25 15:40,TUSSEN,sc_bronstatus_ok,1,1,"alles in orde; DNS-storing 13:07 (buienradar reserve 7x mislukt, knmi_nowcast 1x) zonder gevolg"

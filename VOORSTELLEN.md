@@ -164,3 +164,10 @@ Status: open / akkoord / afgewezen / gebouwd vX / geverifieerd / teruggedraaid. 
 - Voorstel: zolang `front` true is en het lopende front ≥ 4 paren heeft: factor = mediaan gemeten/model van de paren van dít front (max. 12 u terug); anders zoals nu. Frontparen blijven buiten de rustige factor (L-SC-007/019/021 ongewijzigd).
 - Verwacht effect: tijdens een front MAE ~3,5 i.p.v. ~6,5 km/u, geen structurele onderschatting; windmelding blijft hoogste van verwachting en stationsmeting.
 - Meten na bouw: bias/MAE per front (verwachting vóór meting), `factor_bron` "front", windmeldingen per front.
+
+## L-SC-023 · GPS-ruis van de eigen locatie geeft vals "nadert" / "trekt weg" (bug)
+- Status: **gepland — klaargezet** op branch `wip/l-sc-023` (commit 9c4d379; `nadering.py` + `tests/test_l_sc_023.py`, 5 tests; suite 922 groen). Dagafsluiting 26-10 03:40: versie 0.59.4, CHANGELOG, release. Zelf bouwen als bug: de bedoeling van `VERPLAATSING_KM` ("kleiner is ruis van de GPS") gold alleen zonder nieuwe inslag; drempels en meldregels ongewijzigd.
+- Onderbouwing (25-10 15:40): dichtste inslag 29,2 km om 14:10, daarna geen dichtere (binnen 50 km 12 → 13, 0 binnen 25 km). Afstand 29,2 → 29,6 (14:32-14:34) → 29,2 (15:01-15:03) alleen door de tracker; nieuwe inslagen elders (markers 78 → 103) gaven elk een punt. Gevolg: 14:36 −6,2 km/u "trekt snel weg"; 15:04-15:14 +1,1..+2,3 km/u "nadert", **waarschuwingsniveau geel**, aankomst 762-1593 min.
+- Bouw: bij een nieuwe inslag en < 0,5 km verschil telt het punt met de vorige afstand; echte nadering telt zodra ze samen ≥ 0,5 km is. Pad zonder inslagtijd ongewijzigd.
+- Verwacht effect: geen nadert/wegtrek-trend en geen geel door ruis bij stilliggend onweer; echte nadering (≥ 0,5 km) ongewijzigd.
+- Meten na installatie: per onweersgebeurtenis nadert-perioden zonder dichtere inslag (doel 0), en nadert bij echte nadering (geen gemiste).
