@@ -351,3 +351,14 @@ laatste ronde: 24-10 23:40, gemeten t/m 24-10 23:45
 - Hypotheses: H-SC-3 (regenstart), H-SC-9 (windstoten traagheid / front → L-SC-022), H-SC-10 (frontvlag te lang: `front` true sinds 18:43, `paren_front` 109). Release 0.59.3.
 
 laatste ronde: 25-10 03:40, gemeten t/m 25-10 03:50
+
+## 25-10 07:40 · tussenronde
+- **HA herstart 06:00 CET: 0.59.3 actief.** Geen Stormchase-logregels. Geen onweer, 0 inslagen < 50 km; niveau groen; bronstatus "alles in orde".
+- **L-SC-020 geverifieerd:** vooruitblik na de herstart "nog niet gebouwd (geen kijker)", `referentie_beschikbaar` 06:40Z, frames 0 (was "wacht op radarbeeld").
+- **L-SC-021 deels:** na de herstart `factor_bron` "tijdvak" (0,78), gecorrigeerd - geen kaal model. Front nog niet voorbij volgens de vlag, dus de echte toets (frontende → 6 u) volgt.
+- **Windstoten 03:44-07:34 (n=24): bias +3,3, MAE 5,4.** Wind zakte 61 → 25 km/u: 03:44-05:54 +4,7/6,6 (n=14), 06:04-07:34 +1,4/3,7 (n=10). Bij dalende wind loopt de verwachting achter (te hoog), bij stijgende (24-10 avond) te laag → H-SC-9 (traagheid) consistent. Piek 04:03 gemeten 61,4 tegen verwachting 52,9 (−8,5).
+- **H-SC-10:** `front` true sinds 24-10 18:43 (13 u) terwijl de druk al stijgt (+2,4 hPa/3 u) en de wind zakt.
+- Regen: droog sinds 05:38 (piek 5,4 mm/u 04:23). Aftelling 07:27 70 min → 07:42 40 min; toets 11:40 (H-SC-3).
+- Hypotheses: H-SC-3, H-SC-9 (→ L-SC-022), H-SC-10. Geen release (tussenronde).
+
+laatste ronde: 25-10 07:40, gemeten t/m 25-10 07:45
