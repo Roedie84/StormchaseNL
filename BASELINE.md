@@ -51,3 +51,6 @@
 | Bronstatus vals "hapert" (reservebron) | 0 u/dag na 0.58.4 | 23-10 | 24-10 03:40 |
 | Windvooruitblik piek tegen gemeten max | +19,7 km/u (84,6 / 64,9) | 23-10, n=1 | 24-10 03:40 |
 
+| Windstoten bias per stationsmeting | +5,6 km/u (n=134); zonder kale-modelperioden −1,3 (n=77) | 24-10 | 25-10 03:40 |
+| Windstoten tijdens een front (tijdvakfactor + bijsturing) | avond −6,4 / MAE 6,7 (n=32) · nacht −0,0 / MAE 4,4 (n=29) | 24/25-10 | 25-10 03:40 |
+| Windvooruitblik piek tegen gemeten max | +5,4 km/u (65 / 59,6) | 24-10, n=1 | 25-10 03:40 |
