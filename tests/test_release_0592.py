@@ -104,7 +104,8 @@ class TestVooruitblikStand:
 
     def test_foutstatus_blijft_staan(self):
         assert gebouwde_stand("bouwen mislukt", _ts(13, 45), _ts(17, 35), False)[0] == "bouwen mislukt"
-        assert gebouwde_stand("wacht op radarbeeld", None, _ts(17, 35), False) == (
+        # 0.59.3 (L-SC-020): zonder radarronde blijft "wacht op radarbeeld"
+        assert gebouwde_stand("wacht op radarbeeld", None, None, False) == (
             "wacht op radarbeeld", None
         )
 

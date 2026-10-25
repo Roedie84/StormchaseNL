@@ -5,6 +5,13 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.59.3] — 2026-10-25
+
+### Opgelost
+
+- **Windstoten: de correctie valt ook NA een lang front niet meer weg (L-SC-021).** 0.59.2 hield de factor alleen vast zolang het laatste stationspaar in een front lag. Na het front van 24-10 (einde ~12:53) bevatte het 24-uursvenster nog 126 front- en naloopparen en maar 2,7 uur rustig; de factor verviel en het kale model stond er tot 18:43 naast: per stationsmeting +6,6 km/u (12:53-15:34, n=16) en +17,3 km/u (15:44-18:34, n=18). Nu telt de factor uit de rustige paren van 72 uur zolang het 24-uursvenster front- of naloopparen bevat, tot er weer zes uur rustig in ligt (`factor_bron` "72 uur (front)"). Replay met de tijdvakfactor: −3,4 km/u, MAE 3,6. Een meetgat zonder front blijft het kale model geven; drempels, meldregels en de bijsturing van 0.59.0 zijn ongewijzigd.
+- **Radar-vooruitblik na een herstart zonder kijker (L-SC-020).** Na een herstart bouwt de vooruitblik bewust niets zolang niemand kijkt, maar de status bleef "wacht op radarbeeld" terwijl er wel een radarronde was. Nu "nog niet gebouwd (geen kijker)", of "wordt gebouwd" als er net een kijker is. Zonder radarronde blijft "wacht op radarbeeld". Bouwen en de kijkerregel zijn ongewijzigd.
+
 ## [0.59.2] — 2026-10-24
 
 ### Opgelost
