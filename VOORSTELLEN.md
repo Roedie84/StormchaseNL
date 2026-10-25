@@ -171,3 +171,10 @@ Status: open / akkoord / afgewezen / gebouwd vX / geverifieerd / teruggedraaid. 
 - Bouw: bij een nieuwe inslag en < 0,5 km verschil telt het punt met de vorige afstand; echte nadering telt zodra ze samen ≥ 0,5 km is. Pad zonder inslagtijd ongewijzigd.
 - Verwacht effect: geen nadert/wegtrek-trend en geen geel door ruis bij stilliggend onweer; echte nadering (≥ 0,5 km) ongewijzigd.
 - Meten na installatie: per onweersgebeurtenis nadert-perioden zonder dichtere inslag (doel 0), en nadert bij echte nadering (geen gemiste).
+
+## L-SC-024 · geel door "nadert" alleen binnen bereik (afstand of aankomsttijd)
+- Status: **open** (raakt waarschuwingsniveau, `weerwaarschuwing` en de verwachtingstekst = meldgedrag → Ruud beslist).
+- Onderbouwing (25-10 19:40): sinds 0.58.0 maakt `gemeten_onweer()` (indices.py) het niveau minstens geel zodra `onweer_nadert` aan staat, **ongeacht afstand of aankomst**. 25-10 17:43-17:54: geel + `weerwaarschuwing` aan bij dichtste inslag **91 km**, aankomst **396-419 min**, 0 inslagen < 50 km; 15:04-15:14: geel bij 29 km met aankomst 762-1593 min (ruis, L-SC-023). n=2 valse geel-perioden op 1 dag, 0 terecht. De pushmelding heeft wel een grens (`notify_max_distance`), het niveau niet.
+- Voorstel: "nadert" telt alleen voor geel als de afstand ≤ de meldafstand (`notify_max_distance`) is **of** de aankomst ≤ 120 min. Inslagen binnen 25 km blijven altijd geel (ongewijzigd, 22-10-geval).
+- Verwacht effect: 25-10 beide valse perioden weg (0 min geel tegen 21); 22-10 (23 km, nadert) blijft geel.
+- Meten na bouw: per onweersdag minuten geel zonder inslag < 50 km (doel 0) en geen gemist geel bij inslagen < 25 km of aankomst ≤ 120 min; replay met de recorderreeksen van 22-10 en 25-10.

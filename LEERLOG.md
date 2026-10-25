@@ -383,3 +383,13 @@ laatste ronde: 25-10 11:40, gemeten t/m 25-10 11:45
 - Hypotheses: H-SC-3 (regenstart), H-SC-9 (windstoten traagheid → L-SC-022), H-SC-11 (koude-lucht-onweer gemist; H-SC-10 frontvlag afgesloten 11:40). Geen release (tussenronde; L-SC-023 wacht op 03:40).
 
 laatste ronde: 25-10 15:40, gemeten t/m 25-10 15:45
+
+## 25-10 19:40 · tussenronde
+- 0.59.3 actief; HA herstartte 15:54, 16:09, 17:25 en 18:47 (installaties EMS/Gold Scalper elders) zonder Stormchase-logregels. Bronstatus "alles in orde".
+- **Onweer 25-10 afgelopen:** binnen 50 km 13 → 0 (16:10-17:18, vanzelf verouderd); daarna nog een cel op **91-94 km** (17:34-17:49, inslagfrequentie 0,2-2,6/min), na 17:54 geen inslagen meer.
+- **Vals alarm 17:43:35-17:54:26 (11 min):** dichtste inslag 93,6 → 91,0 km (echte nieuwe inslag, 2,6 km) → `trend` "nadert snel" 13,8 km/u, aankomst 396-419 min → `onweer_nadert` aan → **waarschuwingsniveau geel, `weerwaarschuwing` aan en verwachting "Onweer in de buurt (gemeten)"** bij 91 km en 6,6 u aankomst. Celsnelheid in die minuten 2-10 km/u. Oorzaak in de code: `gemeten_onweer()` (0.58.0) telt elke nadering, zonder afstands- of aankomstgrens (alleen de pushmelding heeft `notify_max_distance`). L-SC-023 (ruis < 0,5 km) dekt dit niet. Samen met 15:04-15:14 (29 km, aankomst 762-1593 min) **2 valse geel-perioden vandaag** → **L-SC-024** (open: meldgedrag).
+- **Windstoten 15:54-19:44 (n=24): bias +1,2, MAE 4,0 km/u.** Dalend 15:54-16:54 (50 → 27): +3,5..+12,6 te hoog; stijgend 17:33-18:03 (33 → 42): −4,2..−7,3 te laag; daarna rustig ±1-4. Patroon gelijk aan H-SC-9 (traagheid in beide richtingen).
+- **Regen (H-SC-3):** aftelling 17:17 "67 min" (→ 18:24), bui begon 18:17 (0,24 mm/u) → treffer, **7 min te laat**; 17:37 "37" → +3 min. Aftelling 16:40-16:57 (29 → 12 min) **vals** (droog 16:47-18:17). Nu droog, volgende bui over 77 min (licht).
+- Hypotheses: H-SC-3 (regenstart; vandaag 3 treffers, 2 vals), H-SC-9 (windstoten traagheid → L-SC-022), H-SC-11 (koude-lucht-onweer gemist, n=1). Geen release (tussenronde; L-SC-023 wacht op 26-10 03:40).
+
+laatste ronde: 25-10 19:40, gemeten t/m 25-10 19:45
