@@ -446,3 +446,6 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-26 07:40,TUSSEN,sc_regen_buien,1,1,"bui 04:58-05:22 (0.12-0.24 mm/u): aftelling 04:47 '10' -> 04:58 (raak, <1 min), 04:37 '25' +4 min, 04:17 '50' +9 min; 0 vals"
 2026-10-26 07:40,TUSSEN,sc_onweer_gebeurtenissen,0,0,"03:44-07:44 geen inslagen < 50 km; groen; onweer_nadert uit"
 2026-10-26 07:40,TUSSEN,sc_bronstatus_ok,1,1,"alles in orde hele ronde; radar vers (06:41Z); herstart 07:12"
+2026-10-26 11:40,TUSSEN,sc_windstoten_bias_kmh,-0.27,24,"07:54-11:44 per stationsmeting; MAE 2.20; wind 21->31 km/u; vlagen 26.6 (08:14) -4.8, 29.4 (08:54) -7.8; geen front"
+2026-10-26 11:40,TUSSEN,sc_onweer_gebeurtenissen,0,0,"07:44-11:44 geen inslagen < 50 km; groen"
+2026-10-26 11:40,TUSSEN,sc_bronstatus_ok,1,1,"alles in orde hele ronde; radar vers (10:37); herstart 10:27"
