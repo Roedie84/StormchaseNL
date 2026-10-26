@@ -30,6 +30,12 @@ De stapsnelheid rekent vanaf het eerste punt waarop de vorige afstand gemeten
 werd: de afstand blijft vaak minutenlang gelijk (nieuwe inslagen verder weg)
 en zakt dan in een stap; dat is een gewone nadering, geen sprong. Na een
 sprong is de snelheid onbekend tot er weer genoeg punten zijn.
+
+0.59.4 (L-SC-023): komt er een nieuwe inslag bij terwijl de dichtstbijzijnde
+afstand minder dan VERPLAATSING_KM verschilt, dan telt het punt met de vorige
+afstand. Dat verschil is GPS-ruis van de eigen locatie (de dichtstbijzijnde
+inslag zelf is niet veranderd) en gaf op 25-10 een vals "nadert" en "trekt
+snel weg" bij een inslag die al een uur stillag.
 """
 
 from __future__ import annotations
@@ -161,6 +167,16 @@ class Naderingstrend:
                     _sleutel(inslag) != self._sleutel
                     or abs(afstand - vorige) >= VERPLAATSING_KM
                 )
+                # 0.59.4 (L-SC-023): een nieuwe inslag verder weg laat de
+                # dichtstbijzijnde staan; een verschil onder VERPLAATSING_KM
+                # is dan GPS-ruis van de eigen locatie. Die ruis kreeg als
+                # punt een helling: 25-10 gaf 0,4 km in drie minuten bij een
+                # inslag van 54 minuten oud +2,3 km/u ("nadert", geel) en
+                # eerder -6,2 km/u ("trekt snel weg"). Nu telt het punt met
+                # de vorige afstand; echte nadering telt mee zodra ze samen
+                # VERPLAATSING_KM haalt.
+                if nieuw and abs(afstand - vorige) < VERPLAATSING_KM:
+                    afstand = vorige
         else:
             nieuw = True
 

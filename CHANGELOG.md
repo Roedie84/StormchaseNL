@@ -5,6 +5,12 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.59.4] — 2026-10-26
+
+### Opgelost
+
+- **Geen vals "nadert" of "trekt snel weg" meer door GPS-ruis van de eigen locatie (L-SC-023).** Kwam er een nieuwe inslag verder weg bij, dan kreeg het naderingspunt de licht verschoven afstand van de dichtstbijzijnde inslag (de tracker verschuift 0,2-0,4 km). Die ruis gaf een helling: op 25-10 bij een inslag op 29 km die al een uur stillag "trekt snel weg" (−6,2 km/u, 14:36) en "nadert" met waarschuwingsniveau geel (15:04-15:14, aankomst 762-1593 min). Een verschil onder de verplaatsingsgrens (0,5 km) telt nu met de vorige afstand; echte nadering telt mee zodra ze samen die grens haalt. Replay 25-10: snelheid |v| ≤ 1 km/u (was +2,3/−6,2). Drempels en meldregels zijn ongewijzigd.
+
 ## [0.59.3] — 2026-10-25
 
 ### Opgelost
