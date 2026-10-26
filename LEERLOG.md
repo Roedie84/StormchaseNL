@@ -390,3 +390,13 @@ laatste ronde: 26-10 11:40, gemeten t/m 26-10 11:45
 - Hypotheses: H-SC-3 (regenstart; nu toetsbaar), H-SC-9 (traagheid; bevestigd bij dalende wind), H-SC-11 (koude-lucht-onweer gemist, n=1). Geen release.
 
 laatste ronde: 26-10 15:40, gemeten t/m 26-10 15:45
+
+## 26-10 19:40 · tussenronde
+- 0.60.0 actief (HA-herstart 19:15). Geen Stormchase-logregels.
+- **Geen onweer:** 0 inslagen < 50 km 15:44-19:44, niveau groen. Bronstatus de ronde "alles in orde", vanaf 19:39 **"knmi_edr hapert"** (1 fout op rij, DNS-storing 19:33 die ook brightsky/radar/Bitvavo/IG raakte; extern). Radar vers (19:42).
+- **H-SC-3 regenstart, 2 treffers, 0 vals, 0 gemist.** Bui 1 start **15:52** (0,12 → 0,6 mm/u, regen tot 18:07): aftelling 14:57 "62" → 15:59 (7 min te laat voorspeld), 15:40 "27" → 16:07 (15 te laat), 15:47 "12" → 15:59 (7 te laat); lead-time 55 min. Bui 2 start **18:27**: 18:07 "30" → 18:37 (10 te laat), 18:17 "15" → 18:32 (5), 18:22 "5" → 18:27 (raak). Vandaag kwam de regen 5-15 min **eerder** dan voorspeld bij 15-60 min vooruit, raak bij ≤ 5 min; 25-10 kwamen lichte buien juist 2-7 min later. → richting per bui wisselt; geen vaste verschuiving.
+- Tijdens regen toont *Regen begint over* de volgende bui na een droog gat (`volgende_bui`, bewust); de voorspelde gaten (16:17-16:42, 17:08-17:27) kwamen niet: intensiteit bleef 0,12 mm/u. Geen meldfout (regen_verwacht uit tijdens de bui).
+- **Windstoten 15:44-19:34 (n=23): bias −0,6, MAE 1,0 km/u** (beste blok; 11:53-15:34 1,1). Vlagen 26,8 (18:24) −3,2 en 27,0 (19:34) −3,1; oplopend 19:04-19:34 (23 → 27) −1,3..−3,1 → H-SC-9 (te laag bij stijging/vlagen). Geen front, factor tijdvak 0,65.
+- Hypotheses: H-SC-3 (regenstart; vandaag te laat voorspeld, gisteren te vroeg), H-SC-9 (traagheid; bevestigd bij oplopende wind), H-SC-11 (koude-lucht-onweer gemist, n=1). Geen release.
+
+laatste ronde: 26-10 19:40, gemeten t/m 26-10 19:45
