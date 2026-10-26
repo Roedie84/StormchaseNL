@@ -458,3 +458,8 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-26 19:40,TUSSEN,sc_regenstart_fout_min,-10,6,"voorspeld - werkelijk: 15:52 +7/+15/+7 (62/27/12 min vooruit), 18:27 +10/+5/0 (30/15/5); regen kwam eerder dan voorspeld"
 2026-10-26 19:40,TUSSEN,sc_onweer_gebeurtenissen,0,0,"15:44-19:44 geen inslagen < 50 km; groen"
 2026-10-26 19:40,TUSSEN,sc_bronstatus_ok,1,1,"alles in orde tot 19:39; daarna knmi_edr hapert (1 fout, DNS-storing 19:33 extern); radar vers 19:42"
+2026-10-26 23:40,TUSSEN,sc_windstoten_bias_kmh,-0.59,25,"19:49-23:44 per stationsmeting; MAE 1.67; vooraf (stand voor de meting) bias -0.60 MAE 2.86; windsprong 20:34-21:24 22.2 -> 40.8 km/u: vooraf -11.1 (20:43) en -10.8 (21:14); front false, factor tijdvak 0.70-0.75 terwijl gemeten/model 0.89-1.09"
+2026-10-26 23:40,TUSSEN,sc_onweer_gebeurtenissen,0,0,"19:44-23:44 geen inslagen < 50 km; groen"
+2026-10-26 23:40,TUSSEN,sc_regen_buien,0,0,"droog 19:44-23:44 (0.0 mm/u, regen_verwacht uit)"
+2026-10-26 23:40,TUSSEN,sc_bronstatus_ok,1,1,"alles in orde; radar vers 23:42; vooruitblik bewust alleen met kijker (laatst 21:52 herstart)"
+2026-10-26 23:40,TUSSEN,sc_stilstand_functies,0,0,"geen vastzittende functies; onweerstoetsen (0.58.x-0.60.0) wachten op onweer (laatste 25-10, 29 km)"

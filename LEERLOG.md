@@ -400,3 +400,12 @@ laatste ronde: 26-10 15:40, gemeten t/m 26-10 15:45
 - Hypotheses: H-SC-3 (regenstart; vandaag te laat voorspeld, gisteren te vroeg), H-SC-9 (traagheid; bevestigd bij oplopende wind), H-SC-11 (koude-lucht-onweer gemist, n=1). Geen release.
 
 laatste ronde: 26-10 19:40, gemeten t/m 26-10 19:45
+
+## 26-10 23:40 · tussenronde
+- 0.60.0 actief (HA-herstarts 20:06, 20:25, 21:08, 21:52). Geen Stormchase-logregels.
+- **Geen onweer:** 0 inslagen < 50 km 19:44-23:44, groen. Bronstatus de hele ronde "alles in orde" (knmi_edr-hapering van 19:39 hersteld); radar vers (23:42). Droog → regen niet te toetsen.
+- **Windstoten 19:49-23:44 (n=25): bias −0,6, MAE 1,7 km/u** (stand vóór de meting: −0,6 / 2,9). **Windsprong 20:34-21:24: 22 → 41 km/u** in twee stappen van ~10-13 km/u: vooraf −11,1 (20:43) en −10,8 (21:14). `front` bleef false (sprong < `FRONT_STOOT_SPRONG_KMH` 15 tegen de uurmediaan, druk < 1 hPa/u) → tijdvakfactor 0,70-0,75 terwijl gemeten/model 0,89-1,09 was; de 0.60.0-frontfactor sprong dus niet aan. Na 21:54 weer ±1-2.
+- Stilstandcontrole: geen vastzittende functies. Onweerstoetsen (0.58.x-0.60.0) wachten op onweer (laatste 25-10, dichtst 29 km) - weer, geen code. Vooruitblik ververst bewust alleen met een kijker.
+- Hypotheses: H-SC-3 (regenstart; vanavond droog), **H-SC-9** (traagheid; nieuw: een stapsgewijze windtoename onder de frontgrens laat de factor achter, n=1 - eerst ≥ 3 gevallen, dan voorstel), H-SC-11 (koude-lucht-onweer gemist, n=1). Geen release.
+
+laatste ronde: 26-10 23:40, gemeten t/m 26-10 23:45
