@@ -1303,7 +1303,9 @@ class MeteoCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
         wind["komende_uren"] = [
             {"tijd": dt_util.utc_from_timestamp(t).isoformat(), "kmh": w}
             for t, w in self.windcorrectie.bijgestuurde_uren(
-                _komende_uurstoten(hourly, nu), nu, wind.get("factor")
+                _komende_uurstoten(hourly, nu), nu,
+                # 0.60.0 (L-SC-022): tijdens een front de frontfactor
+                wind.get("factor_toegepast", wind.get("factor")),
             )
         ]
         return wind

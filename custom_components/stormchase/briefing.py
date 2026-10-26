@@ -224,7 +224,10 @@ class Briefing:
     def _gemeten(self) -> bool:
         """Gemeten onweer: nadert, of inslagen binnen 25 km (0.58.1)."""
         storm = self._gegevens.get("storm")
-        return gemeten_uit_storm(storm.data if storm is not None else None, SPEED_DEADZONE)
+        if storm is None:
+            return False
+        # 0.60.0 (L-SC-024): nadert telt binnen de meldafstand of aankomst <= 120 min
+        return gemeten_uit_storm(storm.data, SPEED_DEADZONE, getattr(storm, "warn_distance", None))
 
     def _regel_onweer(self) -> str | None:
         """Onweer in de buurt, of de kans erop."""

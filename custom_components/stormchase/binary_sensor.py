@@ -223,7 +223,10 @@ class AlertActiveBinarySensor(CoordinatorEntity[AlertCoordinator], BinarySensorE
 
     def _gemeten(self) -> bool:
         storm = self._storm.data if self._storm is not None else None
-        return gemeten_uit_storm(storm, SPEED_DEADZONE)
+        if storm is None:
+            return False
+        # 0.60.0 (L-SC-024): nadert telt binnen de meldafstand of aankomst <= 120 min
+        return gemeten_uit_storm(storm, SPEED_DEADZONE, getattr(self._storm, "warn_distance", None))
 
     @property
     def is_on(self) -> bool | None:

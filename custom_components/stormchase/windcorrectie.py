@@ -47,6 +47,16 @@ houden we de verhouding gemeten/model bij en schalen de modelwaarde daarmee.
   factor uit de rustige paren van 72 uur. 24-10 12:53-15:34: kaal model
   +6,6 km/u (MAE 7,7, n=16). Een meetgat zonder front: ongewijzigd.
 
+- 0.60.0 (L-SC-022): tijdens een front (laatste paar in front of naloop)
+  telt de mediane verhouding gemeten/model van dat front zelf, vanaf het
+  eerste front- of naloopparen na rustig weer, in plaats van de algemene
+  geleerde factor. De verwachting liep 4 dagen op rij achter bij op- en
+  aflopende wind (tot +-6 km/u). Pas vanaf WINDCORRECTIE_FRONT_MIN_PAREN
+  frontparen, alleen als er al een geleerde factor is, grenzen 0,5-1,3. De
+  bijsturing van 0.59.0 rekent dan met de frontfactor. De geleerde factor
+  zelf (`factor`, `factor_bron`) en het leren blijven ongewijzigd; de
+  toegepaste staat in `factor_toegepast`.
+
 Opslag: per paar [tijd, gemeten, model, front]. Paren uit 0.51.x hebben geen
 frontvlag; bij het terugzetten kijken we dan alsnog naar de stootsprong.
 
@@ -69,6 +79,7 @@ try:
         FRONT_STOOT_SPRONG_KMH,
         FRONT_STOOT_VENSTER_S,
         WIND_MELDING_STATION_MAX_S,
+        WINDCORRECTIE_FRONT_MIN_PAREN,
         WINDCORRECTIE_MIN_SPANNE_S,
         WINDCORRECTIE_TIJDVAK_MIN_PAREN,
         WINDCORRECTIE_TIJDVAK_S,
@@ -85,6 +96,7 @@ except ImportError:  # in de tests zonder pakketstructuur
         FRONT_STOOT_SPRONG_KMH,
         FRONT_STOOT_VENSTER_S,
         WIND_MELDING_STATION_MAX_S,
+        WINDCORRECTIE_FRONT_MIN_PAREN,
         WINDCORRECTIE_MIN_SPANNE_S,
         WINDCORRECTIE_TIJDVAK_MIN_PAREN,
         WINDCORRECTIE_TIJDVAK_S,
@@ -219,6 +231,30 @@ class Windcorrectie:
         ruw = median(p[1] / p[2] for p in lang)
         return round(min(FACTOR_MAX, max(FACTOR_MIN, ruw)), 2), len(lang)
 
+    def factor_front(self, nu: float) -> tuple[float | None, int]:
+        """0.60.0 (L-SC-022): de verhouding gemeten/model van het lopende front.
+
+        Het front loopt vanaf het eerste front- of naloopparen na het laatste
+        rustige paar (een meetgat langer dan de naloop breekt het af). None als
+        het laatste paar rustig is of er minder dan
+        WINDCORRECTIE_FRONT_MIN_PAREN frontparen zijn.
+        """
+        paren = [p for p in self.paren if p[0] <= nu + 60]
+        if not paren:
+            return None, 0
+        rustig = set(self._rustig(paren))
+        reeks: list = []
+        for p in reversed(paren):
+            if p in rustig:
+                break
+            if reeks and reeks[-1][0] - p[0] > FRONT_NALOOP_S:
+                break
+            reeks.append(p)
+        if len(reeks) < WINDCORRECTIE_FRONT_MIN_PAREN:
+            return None, len(reeks)
+        ruw = median(p[1] / p[2] for p in reeks)
+        return round(min(FACTOR_MAX, max(FACTOR_MIN, ruw)), 2), len(reeks)
+
     def _seconde_van_de_dag(self, t: float) -> int:
         d = datetime.fromtimestamp(t, self.tijdzone)
         return d.hour * 3600 + d.minute * 60 + d.second
@@ -259,15 +295,21 @@ class Windcorrectie:
             factor, bron = basis, (basis_bron if basis is not None else None)
         venster = self._venster(nu)
         rustig = self._rustig(venster)
+        # 0.60.0 (L-SC-022): tijdens een front de verhouding van dat front,
+        # zodra er genoeg frontparen zijn; anders de geleerde factor.
+        factor_front, paren_front_nu = (None, 0)
+        if factor is not None and venster and venster[-1] not in rustig:
+            factor_front, paren_front_nu = self.factor_front(nu)
+        toegepast = factor_front if factor_front is not None else factor
         if model is None:
             waarde = None
-        elif factor is None:
+        elif toegepast is None:
             waarde = model
         else:
-            waarde = round(model * factor, 1)
+            waarde = round(model * toegepast, 1)
         # 0.59.0 (L-SC-017): de helft van de laatste fout erbij, aflopend
         # Alleen op de bijgestelde waarde: zonder factor blijft het kale model
-        sturing = (self.bijsturing(nu, factor) if factor is not None
+        sturing = (self.bijsturing(nu, toegepast) if toegepast is not None
                    else {"kmh": 0.0, "start": 0.0, "fout": None})
         if waarde is not None and sturing["kmh"]:
             waarde = round(max(0.0, waarde + sturing["kmh"]), 1)
@@ -288,6 +330,10 @@ class Windcorrectie:
             # 0.59.0 (L-SC-017)
             "bijsturing": sturing["kmh"],
             "bijsturing_fout": sturing["fout"],
+            # 0.60.0 (L-SC-022)
+            "factor_front": factor_front,
+            "paren_lopend_front": paren_front_nu,
+            "factor_toegepast": toegepast,
         }
 
     def bijsturing(self, nu: float, factor: float | None = None) -> dict:

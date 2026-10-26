@@ -5,6 +5,13 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.60.0] — 2026-10-26
+
+### Gewijzigd
+
+- **Waarschuwingsniveau geel alleen nog bij echte nabijheid (L-SC-024).** "Nadert" tilde het niveau naar geel, ook bij een bui ver weg: op 25-10 stond het 11 minuten op geel bij een bui op 91 km met een aankomst over 6,6 uur. Nadert telt nu alleen nog als de bui binnen de meldafstand zit of de verwachte aankomst binnen 120 minuten ligt. Inslagen binnen 25 km geven zoals voorheen geel; hogere niveaus uit officiele waarschuwingen zijn ongewijzigd. Dezelfde regel geldt voor *Waarschuwing actief*, de verwachting ("Onweer in de buurt (gemeten)") en de briefing. `binary_sensor.stormchase_onweer_nadert` zelf is ongewijzigd.
+- **Windstoten tijdens een front: de verhouding van dat front (L-SC-022).** Tijdens een front bleef de algemene geleerde factor gelden en liep de verwachting 4 dagen op rij achter bij op- en aflopende wind (tot ±6 km/u). Nu telt tijdens een front (laatste stationspaar in front of naloop) de mediane verhouding gemeten/model sinds het begin van dat front, zodra er minstens 4 frontparen zijn (~40 min); grenzen 0,5-1,3. De uurbijsturing (0.59.0) en de komende uren rekenen met die factor. Te weinig frontparen, of nog geen geleerde factor: het gedrag van 0.59.x. De geleerde factor zelf (`correctiefactor`, `factor_bron`) en het leren zijn ongewijzigd; nieuwe attributen `factor_front`, `paren_lopend_front` en `factor_toegepast`.
+
 ## [0.59.4] — 2026-10-26
 
 ### Opgelost

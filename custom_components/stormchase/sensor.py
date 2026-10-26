@@ -592,8 +592,16 @@ class MeteoSensor(CoordinatorEntity[MeteoCoordinator], SensorEntity):
             "bijsturing": wind.get("bijsturing"),
             "bijsturing_fout": wind.get("bijsturing_fout"),
             "komende_uren": wind.get("komende_uren"),
+            # 0.60.0 (L-SC-022): tijdens een front de verhouding van dat front
+            "factor_front": wind.get("factor_front"),
+            "paren_lopend_front": wind.get("paren_lopend_front"),
+            "factor_toegepast": wind.get("factor_toegepast"),
             "uitleg": (
                 (
+                    "Modelwaarde x mediane verhouding gemeten/model van het "
+                    "dichtstbijzijnde station sinds het begin van het lopende front"
+                    if wind.get("factor_front") is not None
+                    else
                     "Modelwaarde x mediane verhouding gemeten/model van het "
                     "dichtstbijzijnde station in dit tijdvak van de dag "
                     "(+-2 uur, 72 uur), zonder fronten"
@@ -853,7 +861,10 @@ def _gemeten(storm: StormCoordinator | None) -> bool:
     Zelfde regel als binary_sensor.stormchase_onweer_nadert, plus inslagen
     binnen 25 km.
     """
-    return gemeten_uit_storm(storm.data if storm is not None else None, SPEED_DEADZONE)
+    if storm is None:
+        return False
+    # 0.60.0 (L-SC-024): nadert telt binnen de meldafstand of aankomst <= 120 min
+    return gemeten_uit_storm(storm.data, SPEED_DEADZONE, getattr(storm, "warn_distance", None))
 
 
 class AlertSensor(CoordinatorEntity[AlertCoordinator], SensorEntity):

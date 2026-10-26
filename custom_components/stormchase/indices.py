@@ -501,24 +501,54 @@ TEKST_GEMETEN = "Onweer in de buurt (gemeten)"
 NIVEAUS = ("groen", "geel", "oranje", "rood")
 
 
-def gemeten_onweer(nadert: bool | None, afstand: float | None) -> bool:
-    """Is er nu gemeten onweer: nadert het, of slaat het binnen 25 km in?"""
-    if nadert:
+# 0.60.0 (L-SC-024): "nadert" alleen telt niet meer als de bui ver weg is.
+# 25-10 stond het niveau 11 minuten op geel bij een bui op 91 km met een
+# aankomst over 6,6 uur. Nadert telt nu alleen binnen de meldafstand of bij
+# een verwachte aankomst binnen 120 minuten. Inslagen binnen 25 km blijven
+# zoals ze waren.
+NADERT_MAX_AANKOMST_MIN = 120
+
+
+def gemeten_onweer(
+    nadert: bool | None,
+    afstand: float | None,
+    aankomst_min: float | None = None,
+    meldafstand: float | None = None,
+) -> bool:
+    """Is er nu gemeten onweer: nadert het, of slaat het binnen 25 km in?
+
+    0.60.0 (L-SC-024): "nadert" telt niet als de aankomst bekend is en verder
+    weg ligt dan NADERT_MAX_AANKOMST_MIN, en de bui buiten de meldafstand zit.
+    Zonder aankomsttijd (de bui zit al binnen de meldafstand, of de
+    coordinator rekent er geen uit) blijft nadert gelden zoals voorheen.
+    """
+    if afstand is not None and afstand <= GEMETEN_NABIJ_KM:
         return True
-    return afstand is not None and afstand <= GEMETEN_NABIJ_KM
+    if not nadert:
+        return False
+    if afstand is not None and meldafstand is not None and afstand <= meldafstand:
+        return True
+    try:
+        aankomst = None if aankomst_min is None else float(aankomst_min)
+    except (TypeError, ValueError):
+        aankomst = None
+    return aankomst is None or aankomst <= NADERT_MAX_AANKOMST_MIN
 
 
-def gemeten_uit_storm(data, deadzone: float = 1.0) -> bool:
+def gemeten_uit_storm(data, deadzone: float = 1.0, meldafstand: float | None = None) -> bool:
     """Gemeten onweer uit StormData (snelheid en afstand), 0.58.1.
 
     Zelfde regel als binary_sensor.stormchase_onweer_nadert (snelheid boven de
-    dode zone), plus inslagen binnen 25 km.
+    dode zone), plus inslagen binnen 25 km. 0.60.0 (L-SC-024): nadert alleen
+    binnen de meldafstand of bij een aankomst binnen 120 minuten.
     """
     if not data:
         return False
     snelheid = getattr(data, "speed", None)
     nadert = snelheid is not None and snelheid > deadzone
-    return gemeten_onweer(nadert, getattr(data, "distance", None))
+    return gemeten_onweer(
+        nadert, getattr(data, "distance", None), getattr(data, "eta", None), meldafstand
+    )
 
 
 def niveau_met_metingen(niveau: str | None, gemeten: bool) -> str:

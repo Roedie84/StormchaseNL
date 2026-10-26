@@ -467,3 +467,8 @@ WINDBIJSTURING_AANDEEL = 0.5
 WINDBIJSTURING_MAX_KMH = 15.0
 WINDBIJSTURING_AFLOOP_S = 3 * 3600
 WINDBIJSTURING_MAX_LEEFTIJD_S = 3600
+# 0.60.0 (L-SC-022): tijdens een front telt de verhouding gemeten/model van
+# dat front zelf (sinds het begin ervan) in plaats van de geleerde factor,
+# zodra er minstens zoveel stationsparen in het front liggen (~40 minuten).
+# Daaronder blijft het gedrag van 0.59.x.
+WINDCORRECTIE_FRONT_MIN_PAREN = 4
