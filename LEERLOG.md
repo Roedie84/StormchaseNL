@@ -366,7 +366,7 @@ laatste ronde: 25-10 23:40, gemeten t/m 25-10 23:45
 laatste ronde: 26-10 03:40, gemeten t/m 26-10 03:45
 
 ## 26-10 07:40 · tussenronde
-- HA herstartte 07:12 → **0.59.4 actief** (L-SC-023). **0.60.0** (L-SC-024 + L-SC-022, andere sessie 07:22) is gedownload maar wacht op een herstart (HACS-melding "restart required" 07:23).
+- HA herstartte 07:12 → **0.59.4 actief** (L-SC-023). **0.60.0** (L-SC-024 + L-SC-022, andere sessie 07:22) is sinds de herstart van **07:47 actief**.
 - **Geen onweer:** 0 inslagen < 50 km 03:44-07:44, niveau groen, `onweer_nadert` uit. Bronstatus de hele ronde "alles in orde"; radar vers (06:41Z).
 - **Windstoten 03:54-07:34 (n=23): bias +0,5, MAE 3,0 km/u** (nacht 3,1). Wind 17-29 km/u, vlagerig: de twee vlagen van 29,4 (04:24, 06:04) −7,5/−8,1 te laag, na elke vlaag +2,5..+4,9 te hoog → zelfde traagheid als H-SC-9, nu bij losse vlagen, niet bij een trend.
 - **Regen (H-SC-3):** 1 lichte bui 04:58-05:22 (0,12-0,24 mm/u). Aftelling 04:47 "10" → 04:57:50 = **raak (< 1 min)**, 04:37 "25" → +4 min, 04:17 "50" → +9 min (tussendoor 2× even weg). **0 vals** (nacht: 2 vals). Om 04:58 nog "6 min" terwijl het al regende (1 ronde).
