@@ -54,3 +54,7 @@
 | Windstoten bias per stationsmeting | +5,6 km/u (n=134); zonder kale-modelperioden −1,3 (n=77) | 24-10 | 25-10 03:40 |
 | Windstoten tijdens een front (tijdvakfactor + bijsturing) | avond −6,4 / MAE 6,7 (n=32) · nacht −0,0 / MAE 4,4 (n=29) | 24/25-10 | 25-10 03:40 |
 | Windvooruitblik piek tegen gemeten max | +5,4 km/u (65 / 59,6) | 24-10, n=1 | 25-10 03:40 |
+| Windstoten bias per stationsmeting (dag) | +0,7 km/u, MAE 3,7 (n=151); geen kale-modelperioden | 25-10 | 26-10 03:40 |
+| Windstoten bias 7 d (dagwaarden) | +1,1 km/u (zonder 24-10 kaal model +0,3) | 19..25-10 | 26-10 03:40 |
+| Valse geel-perioden per onweersdag | 2 (21 min; 29 km ruis + 91 km ver weg) | 25-10, n=1 dag | 26-10 03:40 |
+| Regenstart per dag | 5 treffers / 2 vals / 1 gemist | 25-10 | 26-10 03:40 |

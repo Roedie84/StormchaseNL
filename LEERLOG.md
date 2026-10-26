@@ -33,60 +33,10 @@ Doorlopende leerronde (elke 4 uur). Alleen gemeten getallen; KPI's in KPI.csv.
 - Regen KNMI: 19 voorspellingen, 16 uitgekomen, mediaan −7 min (12 te vroeg / 4 te laat) → H-SC-3.
 - Bronnen 09-10 99,93 %, daarna 0 mislukt. Ring 50 km telde 17:31 dubbel (twee Blitzortung-instanties; uuranalyse). Geen release.
 
-## 11-10 03:40 · dagafsluiting 10-10
-- Recorder: eenmalige opschoning 03:00-03:05 klaar; historie 10-10 compleet. Geïnstalleerd 0.52.0; 12 HA-herstarts; locatie tracker iPhone (9× 4-10 s "laatst bekend", 0× thuis). Nacht 00:00-03:45 geen onweer.
-- **Onweer 10-10:** 3 cellen (64-70 km 13:45-15:51; 80 → 46 km 16:24-17:31; 93 → 74 km 20:34-20:59), max 8 inslagen < 50 km, 0 < 25 km, niveau heel de dag groen → 0 hits, 0 misses; 2 nadert-perioden (12,0 / 28,1 min) zonder aankomst = 2 valse nadert (07-10: 4), geen melding (buiten 30 km). Validatie aankomst 0/1, passage 0/2. Lead-time/afstandsfout bij aankomst n.v.t.
-- Bronnen 10-10 2766/2766 = 100 % (4 d 99,92 %); radarbeeld mediaan 3,0 min, max 7,4; Blitzortung 's nachts 18,2 min (11-10: 11,1) weg.
-- **L-SC-001 geverifieerd (mechanisme):** alleen bij nieuwe inslagen, 0 aankomstsprongen zonder inslag, geen 15-min-perioden. Aankomst zelf nog 0/1.
-- **Windstoten (L-SC-007):** dag −2,3 km/u (MAE 4,8, n=153) tegen kaal model +10,9; na 0.52.0 −1,9. **H-SC-5 verworpen:** per modelklasse −3,8/−3,2/−4,3/+2,5 (geen oplopende onderschatting); de −8 bij hoge gemeten stoten is selectie op de uitkomst. L-SC-008 → alleen optie (c). **H-SC-7 (nieuw):** 's nachts lagere verhouding (00-04 u 0,53 tegen factor 0,68 → +5,2 km/u, n=22; na 12:04 dag 0,72 / nacht 0,65).
-- **H-SC-3 (KNMI regen):** n=19 uitgekomen, mediaan −6,9, 14 te vroeg / 5 te laat (p 0,064). 8 van de 14 zichtbare afwijkingen liggen op −6,8..−7,3 (≤15 min 4/4): dat is het meetvenster van `regent` (−10..+10, L-SC-005 afgewezen), geen KNMI-fout → geen voorstel; volgen.
-- **Gebouwd 0.52.1 (L-SC-009):** afstandsreeks alleen bij nieuwe afstand/snelheid en over herstarts (was 180× 73,6 km in 30 min). 737 tests groen, workflow groen, HACS ververst (update zichtbaar). Maakt H-SC-6 toetsbaar.
-- Niet meetbaar: lead-time en afstandsfout (geen onweer < 25 km); radarvooruitblik-versheid (alleen op aanvraag).
-
-laatste ronde: 11-10 03:40, gemeten t/m 11-10 03:45
-
-## 11-10 07:40 · tussenronde
-- **0.52.1 door HACS gedownload om 04:59, nog niet actief** (geen HA-herstart sinds 10-10 20:26; diagnostiek-manifest 0.52.0). HACS meldde bij die installatie een back-upfout (`/tmp/hacs_backup/stormchase/__pycache__` niet leeg) — HACS-kwestie, update-entiteit staat wel op 0.52.1. Logboek 0 Stormchase-fouten. Locatie tracker iPhone.
-- Geen onweer: niveau groen, 0 inslagen < 50 km, `onweer_nadert` uit → alleen beschikbaarheid: bronstatus "alles in orde", radar laatste succes 07:41, KNMI-push verbonden sinds 20:26 (336 meldingen). Buienradar/Bright Sky/MeteoAlarm-velden staan op 09-10: dat zijn terugvalbronnen die bij werkende KNMI niet draaien (code gecontroleerd) — geen meetfout.
-- **Windstoten (H-SC-7, tweede nacht):** 03:45-07:45 n=21: bias **+5,3 km/u** (MAE 5,8; mediaan +4,9); 04-06 u +1,9 (n=11), 06-07:45 u **+7,6** (n=8). Factor 0,67 (24 u, 144 paren) tegen verhouding nu ~0,47 (model 33,5, gemeten 14-17) → de stootvoorspelling zit 's nachts/vroeg te hoog, net als 00-04 u op 10-10 (+5,2). n=2 nachten; toets in de dagafsluiting per uur van de dag.
-- **Regen KNMI (H-SC-3):** n=21 uitgekomen (was 19), mediaan −7, 16 te vroeg / 5 te laat. Nieuw: 05:57 voorspeld 47 min, kwam na 20 (**−27**, horizon > 45 min, géén meetvensterartefact); 06:32 12 → 5 (−7, meetvenster); 03:37 voorspeld 22 min, niet uitgekomen.
-- Hypotheses: H-SC-3 (KNMI regen), H-SC-6 (vroege naderingsschatting; wacht op onweer), H-SC-7 (nachtverhouding wind). Geen release.
-
-laatste ronde: 11-10 07:40, gemeten t/m 11-10 07:45
-
-## 11-10 11:40 · tussenronde
-- HA-herstarts 08:40 en 10:15 → **0.52.2 actief** (0.52.1 afstandsreeks + KNMI-push zonder draadfout). Systeemlog na beide herstarts: 0 Stormchase-fouten/draadfouten. KNMI-push verbonden sinds 10:15. Locatie tracker iPhone.
-- Geen onweer: niveau groen, 0 inslagen < 50 km, `onweer_nadert` uit → alleen beschikbaarheid: bronstatus "alles in orde", niets haperend.
-- **Windstoten overdag (H-SC-7):** 07:44-11:34 n=24: bias **−1,8 km/u** (MAE 2,8; mediaan −1,3); 07:44-09:44 −2,4, 09:44-11:34 −1,1. Overdag licht te laag, 's nachts te hoog (+5,2/+5,3 op twee nachten) → past bij H-SC-7 (één factor voor dag en nacht). Toets per uur van de dag in de dagafsluiting 12-10 (≥ 3 nachten).
-- KNMI-regen (H-SC-3): deze ronde niet geteld (`regen_per_bron` alleen in de diagnostiek, niet als attribuut) → bij de dagafsluiting.
-- Hypotheses: H-SC-3 (KNMI regen), H-SC-6 (vroege naderingsschatting; wacht op onweer), H-SC-7 (nachtverhouding wind). Geen release.
-
-laatste ronde: 11-10 11:40, gemeten t/m 11-10 11:40
-
-## 11-10 15:40 · tussenronde
-- 20 HA-herstarts 11:47-15:33 (supervisor, geen crash); 0.52.2 actief, 0 Stormchase-fouten. Locatie tracker iPhone. Lichte regen ~15:40.
-- Geen onweer: niveau groen, 0 inslagen < 50 km, `onweer_nadert` uit → alleen beschikbaarheid: bronstatus "alles in orde"; radarbeeld 15:41 vers.
-- **Windstoten (H-SC-7):** 11:43-15:34 n=24: bias **−3,7 km/u** (MAE 3,9; mediaan −3,5), beide helften −3,9/−3,5 bij gemeten 25-36 km/u. Overdag dus structureel te laag (ochtend −1,8), 's nachts te hoog (+5,2/+5,3) → past bij één factor voor dag en nacht. Toets per uur van de dag in de dagafsluiting 12-10 (≥ 3 nachten).
-- KNMI-regen (H-SC-3): niet geteld (alleen in de diagnostiek) → dagafsluiting.
-- Hypotheses: H-SC-3, H-SC-6 (wacht op onweer), H-SC-7. Geen release.
-
-laatste ronde: 11-10 15:40, gemeten t/m 11-10 15:40
-
-## 11-10 19:40 · tussenronde
-- 10 HA-herstarts 15:49-18:09 (supervisor, geen crash), daarna rustig; 0.52.2 actief, 0 Stormchase-fouten. Locatie tracker iPhone.
-- Geen onweer: niveau groen, 0 inslagen < 50 km, `onweer_nadert` uit → alleen beschikbaarheid: bronstatus "alles in orde"; radarbeeld 19:42 vers.
-- **Windstoten (H-SC-7):** 15:43-19:34 n=24: bias **−2,6 km/u** (MAE 3,5; mediaan −0,8). Daarin 18:04-18:34 −7..−12: Open-Meteo's `current`-stoot zakte van 34,6 naar 16,6 en sprong om 18:39 terug naar 26,6 (factor bleef 0,68) → modelsprong van de bron, geen integratiefout. Zonder dat halfuur −1,3 (n=20, MAE 2,4). Avond 18:43-19:34 **+0,3** (n=6): de overgang naar de nacht, waar H-SC-7 een positieve bias verwacht. Sinds 18:34 frontdetectie aan (`paren_front` 1 → 8, luchtdruk +2,2 hPa/3 u); factor rekent zonder fronten.
-- Hypotheses: H-SC-3 (KNMI regen), H-SC-6 (wacht op onweer), H-SC-7 (dag te laag/nacht te hoog; toets per uur in de dagafsluiting 12-10). Geen release.
-
-laatste ronde: 11-10 19:40, gemeten t/m 11-10 19:45
-
-## 11-10 23:40 · tussenronde
-- 8 HA-herstarts 21:02-23:31; 0.52.2 actief, 0 Stormchase-fouten. Locatie tracker iPhone. Lichte regen rond 23:40.
-- Geen onweer: niveau groen, 0 inslagen < 50 km, `onweer_nadert` uit → alleen beschikbaarheid: bronstatus "alles in orde"; radarbeeld 23:41 vers.
-- **Windstoten (H-SC-7):** 19:44-23:34 n=23: bias +1,0 km/u (MAE 3,5). Avond tot 22:00 **−1,9** (n=14), vanaf 22:00 **+5,4** (n=9; model 12-13 tegen gemeten 5-12). Derde nacht met dezelfde orde (+5,2 / +5,3 / +5,4) → H-SC-7 sterker; L-SC-008 (akkoord) bouwen in de dagafsluiting, en daar per uur van de dag toetsen of een windsterkte-afhankelijke verhouding de nachtbias wegneemt.
-- Hypotheses: H-SC-3 (KNMI regen), H-SC-6 (wacht op onweer), H-SC-7. Geen release.
-
-laatste ronde: 11-10 23:40, gemeten t/m 11-10 23:45
+## 11-10 · samenvatting dag (6 rondes; ingekort na 14 dagen)
+- Onweer 10-10 (afrekening): 3 cellen 46-93 km, 0 < 25 km, niveau terecht groen; 2 valse nadert-perioden zonder melding; validatie aankomst 0/1, passage 0/2. L-SC-001 geverifieerd (aankomst wijzigt alleen bij nieuwe inslagen). Gebouwd 0.52.1 (L-SC-009, afstandsreeks), actief als 0.52.2 vanaf 10:15. ~40 HA-herstarts (supervisor), 0 Stormchase-fouten; bronnen 10-10 100 %.
+- Windstoten: dag 10-10 −2,3 (MAE 4,8) tegen kaal +10,9; H-SC-5 verworpen. 11-10 per blok +5,3 (nacht 03:45-07:45) / −1,8 / −3,7 / −2,6 / +1,0; derde nacht op rij +5 km/u → H-SC-7 (één factor voor dag en nacht) sterker → L-SC-008 / L-SC-010.
+- Regen KNMI (H-SC-3): n=21 uitgekomen, mediaan −7 min (16 te vroeg / 5 te laat); groot deel is het meetvenster van `regent`.
 
 ## 12-10 03:40 · dagafsluiting 11-10
 - Geen purge/repack in de log; HA-herstart 03:33. 11-10: ~40 herstarts (supervisor), 0 Stormchase-fouten; bronnen 100 % (n=2967; 5 d 99,98 %). Niveau hele dag groen, 0 inslagen < 50 km.
@@ -402,3 +352,15 @@ laatste ronde: 25-10 19:40, gemeten t/m 25-10 19:45
 - Hypotheses: H-SC-3 (regenstart; treffers 2-7 min te laat bij lichte buien), H-SC-9 (windstoten traagheid → L-SC-022), H-SC-11 (koude-lucht-onweer gemist, n=1). L-SC-023 (wip, suite groen) wacht op de dagafsluiting 26-10 03:40. Geen release.
 
 laatste ronde: 25-10 23:40, gemeten t/m 25-10 23:45
+
+## 26-10 03:40 · dagafsluiting 25-10
+- **Release 0.59.4** (03:43, L-SC-023: GPS-ruis geeft geen vals nadert/wegtrek meer; suite 922 groen, workflow groen, HACS ververst; wacht op installatie). Actief nog 0.59.3; geen Stormchase-logregels.
+- **Dag 25-10 onweer (n=1 gebeurtenis):** 13:36-17:54, dichtste 29,2 km (14:10), max 13 < 50 km, 0 < 25 km → niveau terecht groen, op **2 valse geel-perioden** na (15:04-15:14 ruis bij 29 km → 0.59.4; 17:43-17:54 bij 91 km, aankomst 6,6 u → L-SC-024 open). 21 min vals geel, 0 terecht. Verwachting miste het (ensemble 0 %, lead-time 0; H-SC-11, n=1).
+- **Windstoten dag 25-10 (per stationsmeting, n=151): bias +0,7, MAE 3,7 km/u** (24-10 +5,6 / zonder kaal model −1,3). Blokken: nacht 0,0/4,4, ochtend dalend +3,3/5,4, 07:44-11:43 +0,2/3,9, 11:43-15:44 +0,5/2,7 (nieuw gemeten), 15:54-19:44 +1,2/4,0, avond −1,0/1,6. Geen kale-modelperioden meer (L-SC-019/021 houden).
+- **Nacht 23:44-03:44 (n=25): +1,2 / MAE 3,1.** Dalend 23:54-01:54 (37 → 15 km/u) **+1,7..+6,3** te hoog, stijgend 02:04-02:54 (19 → 33) **−1,8..−4,8** te laag → H-SC-9 (traagheid in beide richtingen) opnieuw bevestigd; 4e dag op rij.
+- **Regen 25-10:** 5 treffers (2-7 min te laat bij lichte buien, 1× 20 min te vroeg), 2 vals, 1 gemist. Nacht 26-10: **2 valse aftellingen** tot 15 en 10 min (00:32-00:47, 01:27-01:52) en één tot 50 min, 0,0 mm/u de hele nacht → H-SC-3: vals bij lichte, uiteenvallende buien.
+- **Bronnen:** bronstatus de hele dag "alles in orde" (0 u vals hapert); DNS-storingen 13:07-15:39, 00:12 en 02:34 opgevangen door reserve/herkansing (buienradar 93 %, meting 96 % cumulatief). Radar vers (laatste 03:44).
+- Trend 7 d (19..25-10) windstoten-bias −1,4/+0,5/+0,9/+3,6/−2,2/+5,6/+0,7 → gemiddeld +1,1 (zonder 24-10 kaal model +0,3); 30 d n.v.t. (methode wisselde 21-10/24-10).
+- Hypotheses: H-SC-3 (regenstart; vals bij lichte buien), H-SC-9 (traagheid → L-SC-022), H-SC-11 (koude-lucht-onweer gemist, n=1). Toets 0.59.4 bij het volgende onweer: 0 nadert-perioden zonder dichtere inslag.
+
+laatste ronde: 26-10 03:40, gemeten t/m 26-10 03:45
