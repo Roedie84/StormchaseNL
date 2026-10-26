@@ -449,3 +449,7 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-26 11:40,TUSSEN,sc_windstoten_bias_kmh,-0.27,24,"07:54-11:44 per stationsmeting; MAE 2.20; wind 21->31 km/u; vlagen 26.6 (08:14) -4.8, 29.4 (08:54) -7.8; geen front"
 2026-10-26 11:40,TUSSEN,sc_onweer_gebeurtenissen,0,0,"07:44-11:44 geen inslagen < 50 km; groen"
 2026-10-26 11:40,TUSSEN,sc_bronstatus_ok,1,1,"alles in orde hele ronde; radar vers (10:37); herstart 10:27"
+2026-10-26 15:40,TUSSEN,sc_windstoten_bias_kmh,0.53,23,"11:53-15:34 per stationsmeting (zelfde moment); MAE 1.07; vooraf (10 min) bias 0.47 MAE 2.10; wind 21-30 km/u, na 14:44 dalend +1.7..+3.6; geen front, factor tijdvak 0.73"
+2026-10-26 15:40,TUSSEN,sc_onweer_gebeurtenissen,0,0,"11:44-15:44 geen inslagen < 50 km; groen"
+2026-10-26 15:40,TUSSEN,sc_bronstatus_ok,1,1,"alles in orde hele ronde; radar vers (15:43); KNMI-push verbonden; herstarts 13:32/15:00/15:13"
+2026-10-26 15:40,TUSSEN,sc_regenstart_verwacht_min,22,7,"aftelling 14:57 62 -> 15:42 22; voorspelde start schoof 15:59 -> 15:54 -> 15:59 -> 16:04; nog geen regen (0.0 mm/u)"
