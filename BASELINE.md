@@ -58,3 +58,5 @@
 | Windstoten bias 7 d (dagwaarden) | +1,1 km/u (zonder 24-10 kaal model +0,3) | 19..25-10 | 26-10 03:40 |
 | Valse geel-perioden per onweersdag | 2 (21 min; 29 km ruis + 91 km ver weg) | 25-10, n=1 dag | 26-10 03:40 |
 | Regenstart per dag | 5 treffers / 2 vals / 1 gemist | 25-10 | 26-10 03:40 |
+| Windstoten verwachting vóór stationsmeting (dag) | bias +0,27 km/u · MAE 2,67 (n=120, 5 blokken) | 26-10 | 27-10 03:40 |
+| Regenstart (dag) | 3 treffers / 0 gemist / 2 valse aftellingen | 26-10 | 27-10 03:40 |
