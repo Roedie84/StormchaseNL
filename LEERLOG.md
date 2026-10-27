@@ -370,3 +370,12 @@ laatste ronde: 26-10 23:40, gemeten t/m 26-10 23:45
 - Hypotheses: H-SC-3 (regenstart; richting wisselt per bui), H-SC-9 (traagheid bij vlagen/stappen), H-SC-11 (koude-lucht-onweer gemist, n=1). Geen release.
 
 laatste ronde: 27-10 03:40, gemeten t/m 27-10 03:45
+
+## 27-10 07:40 · tussenronde
+- HA herstartte 06:04; **0.60.0 actief**. Geen Stormchase-logregels. Geen release.
+- **Geen onweer:** 0 inslagen < 50 km 03:44-07:40, groen. Bronstatus de hele ronde "alles in orde"; radar vers (06:42Z). Vooruitblik-beeld staat op 05:04Z (herstart, geen kijker - bewust).
+- **Windstoten 03:53-07:34 (vooraf, n=23): bias −0,87, MAE 2,75 km/u.** 04:14-05:53 vlagen naar 28-33 km/u: verwachting −2..−8 te laag (05:13 32,9 gemeten, 24,5 verwacht); 06:04-07:04 afnemend: +1..+3 te hoog. Zelfde traagheid in beide richtingen als H-SC-9 (geen front, dus 0.60.0-frontfactor niet in het spel).
+- **Regen:** droog, geen aftelling → 0 vals, 0 gemist.
+- Hypotheses: H-SC-3 (regenstart; vanochtend niets te toetsen), H-SC-9 (traagheid; vanochtend nog een stijgend + dalend stuk, bevestigt het patroon maar is geen 'stap' - teller stappen blijft n=1), H-SC-11 (n=1).
+
+laatste ronde: 27-10 07:40, gemeten t/m 27-10 07:40

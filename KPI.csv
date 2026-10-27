@@ -471,3 +471,7 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-26,DAG,sc_windstoten_bias_kmh,0.27,120,"5 blokken met verwachting vóór de meting (zonder 19:44-blok); MAE 2.67; per blok +1.19/+0.54/-0.27/+0.50/-0.60"
 2026-10-26,DAG,sc_windsprong_onder_frontgrens,1,1,"20:34-21:24 22 -> 41 km/u in 2 stappen; vooraf -11.1 / -10.8; front false (H-SC-9)"
 2026-10-26,DAG,sc_bronstatus_hapert,1,1,"19:39 knmi_edr hapert (DNS-storing, 1 fout op rij), hersteld; rest 'alles in orde'; DNS 27-10 02:12 niet zichtbaar in bronstatus"
+2026-10-27 07:40,TUSSEN,sc_windstoten_bias_kmh,-0.87,23,"03:53-07:34 vooraf; MAE 2.75; 04:14-05:53 vlagen 28-33 km/u -2..-8 te laag, 06:04-07:04 afnemend +1..+3 te hoog (H-SC-9)"
+2026-10-27 07:40,TUSSEN,sc_onweer_gebeurtenissen,0,0,"0 inslagen < 50 km 03:44-07:40, groen"
+2026-10-27 07:40,TUSSEN,sc_regen_buien,0,0,"droog, geen aftelling (0 vals)"
+2026-10-27 07:40,TUSSEN,sc_bronstatus_hapert,0,0,"alles in orde; radar 06:42Z vers"
