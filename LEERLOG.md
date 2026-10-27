@@ -409,3 +409,13 @@ laatste ronde: 27-10 15:58, gemeten t/m 27-10 15:59
 - Hypotheses: H-SC-3 (regenstart: 2 raak / 1 vals, fout −4/−5 min), H-SC-9 (traagheid; stap n=2), H-SC-11 (n=1).
 
 laatste ronde: 27-10 19:41, gemeten t/m 27-10 19:44
+
+## 27-10 23:41 · tussenronde
+- Herstart 21:01; **0.60.0 actief**. Geen Stormchase-logregels. Geen release.
+- **Geen onweer:** 0 inslagen < 50 km, groen; bronstatus "alles in orde"; radar vers (23:42). Vooruitblik staat op 21:01 (herstart, geen kijker - bewust).
+- **Regenstart (H-SC-3):** bui 21:57 (0,36 mm/u): om 21:22 "35 min" → 21:57 = **0 min fout** (35 min vooraf); 21:32 "30" → +5 min → **raak**. 22:22 "5 min" aan de staart van de bui, daarna droog → **1 vals** (kort). Dag 27-10: **3 raak / 2 vals**, fout raak −5..0 min.
+- **Windstoten 19:44-23:34 (vooraf, n=24): bias +4,21, MAE 4,28 km/u.** Na de bui (19:54-20:24) +9..+16 te hoog: de verwachting zakt pas ~40 min na de terugval (19,7 → 4,8 gemeten). Daarna (21:00-23:34) +0..+4. Ondersteunt H-SC-9 (traagheid), nu ook op de afloop; stappen n=2.
+- Stilstand: geen vastzittende functies.
+- Hypotheses: H-SC-3 (regenstart 3/2; valse alarmen aan begin en staart van een bui), H-SC-9 (traagheid; stap n=2 + afloop n=1), H-SC-11 (n=1).
+
+laatste ronde: 27-10 23:41, gemeten t/m 27-10 23:44

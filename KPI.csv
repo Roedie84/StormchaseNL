@@ -485,3 +485,7 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-27 19:41,TUSSEN,sc_windstoot_bias_kmh,0.06,23,"vooraf 15:55-19:44"
 2026-10-27 19:41,TUSSEN,sc_windstoot_mae_kmh,4.88,23,"stap 18:34 (bui) 19.7 -> 39.4 gemeten, verwachting 19.9 (-19.5); daarna 19:14 +14.8"
 2026-10-27 19:41,TUSSEN,sc_regenstart_raak,2,3,"17:42 (fout -4 min op 30 min vooraf) en 18:17 (-5 min); vals: aftelling 14:57-16:27 (doel ~16:26-16:31, droog tot 17:42)"
+2026-10-27 23:41,TUSSEN,sc_onweer_gebeurtenissen,0,0,"0 inslagen < 50 km, groen, bronstatus alles in orde, radar 23:42"
+2026-10-27 23:41,TUSSEN,sc_windstoot_bias_kmh,4.21,24,"vooraf 19:44-23:34; na bui 19:54-20:24 +9..+16 (trage afloop)"
+2026-10-27 23:41,TUSSEN,sc_windstoot_mae_kmh,4.28,24,"vooraf 19:44-23:34"
+2026-10-27 23:41,TUSSEN,sc_regenstart_raak,1,2,"21:57 (35 min vooraf voorspeld 21:57 -> 0 min); vals: 22:22 '5 min' aan staart van bui, daarna droog. Dag 27-10: 3 raak / 2 vals"
