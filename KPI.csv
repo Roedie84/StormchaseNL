@@ -481,3 +481,7 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-27 15:58,TUSSEN,sc_onweer_inslagen_50km,0,0,"11:40-15:59 groen, 0 inslagen < 50 km; bronstatus alles in orde"
 2026-10-27 15:58,TUSSEN,sc_windstoot_bias_vooraf_kmh,0.31,26,"11:44-15:54 vooraf; MAE 2.83; stijgend 12-14 u te laag (tot -9.2), dalend 15-16 u te hoog (tot +6.1)"
 2026-10-27 15:58,TUSSEN,sc_regen_aftelling_open,1,1,"aftelling sinds 14:57, 15:59 nog 32 min (~16:31); 15:14-15:27 unknown; uitslag volgende ronde"
+2026-10-27 19:41,TUSSEN,sc_onweer_gebeurtenissen,0,0,"0 inslagen < 50 km, groen, bronstatus alles in orde"
+2026-10-27 19:41,TUSSEN,sc_windstoot_bias_kmh,0.06,23,"vooraf 15:55-19:44"
+2026-10-27 19:41,TUSSEN,sc_windstoot_mae_kmh,4.88,23,"stap 18:34 (bui) 19.7 -> 39.4 gemeten, verwachting 19.9 (-19.5); daarna 19:14 +14.8"
+2026-10-27 19:41,TUSSEN,sc_regenstart_raak,2,3,"17:42 (fout -4 min op 30 min vooraf) en 18:17 (-5 min); vals: aftelling 14:57-16:27 (doel ~16:26-16:31, droog tot 17:42)"
