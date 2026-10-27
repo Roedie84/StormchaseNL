@@ -475,3 +475,6 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-27 07:40,TUSSEN,sc_onweer_gebeurtenissen,0,0,"0 inslagen < 50 km 03:44-07:40, groen"
 2026-10-27 07:40,TUSSEN,sc_regen_buien,0,0,"droog, geen aftelling (0 vals)"
 2026-10-27 07:40,TUSSEN,sc_bronstatus_hapert,0,0,"alles in orde; radar 06:42Z vers"
+2026-10-27 11:40,TUSSEN,sc_onweer_inslagen_50km,0,0,"07:35-11:40 groen, 0 inslagen < 50 km; bronstatus alles in orde"
+2026-10-27 11:40,TUSSEN,sc_windstoot_bias_vooraf_kmh,-0.22,24,"07:44-11:34 vooraf; MAE 2.94; vlagerig 24-37 km/u, fout -6.5..+6.9 zonder trend"
+2026-10-27 11:40,TUSSEN,sc_regen_vals_gemist,0,0,"droog, geen aftelling"
