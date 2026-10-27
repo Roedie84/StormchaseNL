@@ -393,7 +393,7 @@ laatste ronde: 27-10 11:40, gemeten t/m 27-10 11:40
 ## 27-10 15:58 · tussenronde
 - Herstart 12:32; **0.60.0 actief**. Geen Stormchase-logregels. Geen release.
 - **Geen onweer:** 0 inslagen < 50 km, groen; bronstatus de hele ronde "alles in orde"; radar vers (14:59Z). Vooruitblik staat op 11:32Z (herstart, geen kijker - bewust).
-- **Windstoten 11:44-15:54 (vooraf, n=26): bias +0,31, MAE 2,83 km/u.** 12:00-13:45 oplopend naar 39-45 km/u: verwachting mostly −2..−9 te laag (13:44 45,5 gemeten, 36,3 verwacht); 15:14-15:54 afnemend naar 18 km/u: +2..+6 te hoog. Zelfde traagheid in beide richtingen (H-SC-9), geen stap.
+- **Windstoten 11:44-15:54 (vooraf, n=26): bias +0,31, MAE 2,83 km/u.** 12:00-13:45 oplopend naar 39-45 km/u: verwachting meest −2..−9 te laag (13:44 45,5 gemeten, 36,3 verwacht); 15:14-15:54 afnemend naar 18 km/u: +2..+6 te hoog. Zelfde traagheid in beide richtingen (H-SC-9), geen stap.
 - **Regen:** aftelling sinds 14:57 (100 min → 15:09 83, 15:14-15:27 unknown, daarna 95 → 32 om 15:59, doel ~16:31). Nog droog → uitslag (vals/raak, fout in min) volgende ronde. Onderbreking van 13 min in de aftelling genoteerd (n=1).
 - Stilstand: geen vastzittende functies.
 - Hypotheses: H-SC-3 (regenstart; eerste toets vanavond), H-SC-9 (traagheid; vandaag een stijgend + dalend stuk), H-SC-11 (n=1).
