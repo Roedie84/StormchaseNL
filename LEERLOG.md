@@ -441,3 +441,12 @@ laatste ronde: 28-10 03:40, gemeten t/m 28-10 03:44
 - Hypotheses: H-SC-3 (regenstart; nu meetbaar met `afwijking_min`), H-SC-9 (traagheid; stappen n=2, afloop n=2), H-SC-11 (n=1).
 
 laatste ronde: 28-10 07:41, gemeten t/m 28-10 07:45
+
+## 28-10 11:42 · tussenronde
+- Herstart 10:25; **0.60.1 actief**. Geen Stormchase-logregels. Geen release.
+- **Geen onweer:** 0 inslagen < 50 km, groen; bronstatus "alles in orde" (KNMI-push verbonden); radar vers (10:44Z). Droog, geen regenaftelling. Vooruitblik op 10:25 (herstart, geen kijker - bewust).
+- **Windstoten 07:54-11:44 (vooraf, n=23): bias +0,92, MAE 1,73 km/u.** 07:54-08:44 +1,8..+3,9 te hoog bij 8-9 km/u (laag niveau), daarna −2,9..+3,1 bij 11-18 km/u; geen stap. Factor tijdvak 0,78 (24 u 0,64).
+- Stilstand: geen vastzittende functies.
+- Hypotheses: H-SC-3 (regenstart; meetbaar met `afwijking_min`, wacht op een bui), H-SC-9 (traagheid; stappen n=2), H-SC-11 (n=1).
+
+laatste ronde: 28-10 11:42, gemeten t/m 28-10 11:45

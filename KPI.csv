@@ -504,3 +504,6 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-28 07:41,TUSSEN,sc_onweer_gebeurtenissen,0,0,"03:44-07:45 0 inslagen < 50 km, groen; bronstatus alles in orde; radar vers (06:42Z)"
 2026-10-28 07:41,TUSSEN,sc_regen_vals_aftelling,0,0,"droog, geen aftelling"
 2026-10-28 07:41,TUSSEN,sc_regencorrectie_attributen_zichtbaar,1,42,"0.60.1 actief: gecorrigeerd=true, vorm verschuiving (-7 min, >45 min -4.5), afwijking geen 11.0 / verschuiving 8.8 / verhouding 9.7 min -> L-SC-025 geverifieerd"
+2026-10-28 11:42,TUSSEN,sc_windstoten_bias_kmh,0.92,23,"07:54-11:44 vooraf; MAE 1.73; 07:54-08:44 +1.8..+3.9 te hoog bij 8-9 km/u, daarna -2.9..+3.1 bij 11-18 km/u; geen stap"
+2026-10-28 11:42,TUSSEN,sc_onweer_gebeurtenissen,0,0,"07:45-11:45 0 inslagen < 50 km, groen; bronstatus alles in orde; radar vers (10:44Z); herstart 10:25"
+2026-10-28 11:42,TUSSEN,sc_regen_vals_aftelling,0,0,"droog, geen aftelling"
