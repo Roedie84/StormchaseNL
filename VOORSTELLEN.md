@@ -178,3 +178,9 @@ Status: open / akkoord / afgewezen / gebouwd vX / geverifieerd / teruggedraaid. 
 - Voorstel: "nadert" telt alleen voor geel als de afstand ≤ de meldafstand (`notify_max_distance`) is **of** de aankomst ≤ 120 min. Inslagen binnen 25 km blijven altijd geel (ongewijzigd, 22-10-geval).
 - Verwacht effect: 25-10 beide valse perioden weg (0 min geel tegen 21); 22-10 (23 km, nadert) blijft geel.
 - Meten na bouw: per onweersdag minuten geel zonder inslag < 50 km (doel 0) en geen gemist geel bij inslagen < 25 km of aankomst ≤ 120 min; replay met de recorderreeksen van 22-10 en 25-10.
+
+## L-SC-025 · regencorrectie-attributen op *Regen begint over* (rapportage/meetbaarheid)
+- Status: **gebouwd 0.60.1** (28-10 03:44, dagafsluiting; commit ccc4e36, suite 942 groen, workflow groen, HACS ververst; wacht op installatie). Zelf gebouwd als bug: alleen weergave.
+- Onderbouwing: 0.56.0 (L-SC-011) beloofde in de CHANGELOG de attributen `zonder_correctie`, `gecorrigeerd`, `correctie_vorm`, `verschuiving_min`/`verhouding`, `uitkomsten`, `afwijking_min`, `uitleg` op *Regen begint over*. De code zette ze in `MeteoSensor.extra_state_attributes` (tak `rain_starts`), maar die sensor is een `RainSensor` → sinds 19-10 nooit zichtbaar (28-10: geen enkele entiteit met `correctie_vorm`). Of L-SC-011 actief is, was sinds 21-10 niet meer te meten (stilstand-check).
+- Bouw: `_regen_start_attributen` op de RainSensor (verwachting + correctie-attributen), dode tak in MeteoSensor weg. 4 tests `tests/test_release_0601.py`.
+- Meten na installatie: attributen aanwezig; `uitkomsten`, `correctie_vorm` en `afwijking_min` per ronde in KPI.csv (L-SC-011 actief ja/nee, LOO-winst). Daarmee kan H-SC-3 op de eigen correctie getoetst worden.

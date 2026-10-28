@@ -419,3 +419,15 @@ laatste ronde: 27-10 19:41, gemeten t/m 27-10 19:44
 - Hypotheses: H-SC-3 (regenstart 3/2; valse alarmen aan begin en staart van een bui), H-SC-9 (traagheid; stap n=2 + afloop n=1), H-SC-11 (n=1).
 
 laatste ronde: 27-10 23:41, gemeten t/m 27-10 23:44
+
+## 28-10 03:40 · dagafsluiting 27-10
+- 0.60.0 actief (herstart 21:01). Geen Stormchase-logregels; geen purge/repack in de log. **Release 0.60.1** (L-SC-025, alleen weergave; suite 942 groen, workflow groen, HACS ververst; wacht op installatie).
+- **Dag 27-10:** geen onweer (0 inslagen < 50 km, groen); onweerstoetsen 0.58.x-0.60.0 wachten op onweer. Bronstatus in de rondes "alles in orde"; DNS-storing 21:02-21:44 en 28-10 02:33 (1 op rij, hersteld 02:35). Radar vers (02:41Z, 2 min).
+- **Windstoten 27-10 (vooraf, 6 blokken, n=144): bias +0,47, MAE 3,45 km/u** (26-10 +0,27 / 2,67). Hogere MAE komt uit de bui: stap 18:34 −19,5 en afloop 19:54-20:24 +9..+16. 7 d +1,33 (zonder 24-10 +0,62). Vooruitblik max 51 tegen gemeten max 45,5 (+5,5).
+- **Nacht 23:53-03:34 (n=23): bias +0,10, MAE 1,95**; 02:44-03:34 oplopend 6,8 → 18,4: −2..−5,5 te laag (traagheid, geen stap).
+- **Regenstart 27-10:** 3 raak (−5..0 min) / 2 vals / 0 gemist; 24..27-10 samen 12 / 7 / 1. Nacht droog, geen aftelling.
+- **Stilstand → bug:** de L-SC-011-attributen (regencorrectie, 0.56.0) verschenen nooit op *Regen begint over* (verkeerde sensorklasse); of de bijstelling actief is was sinds 21-10 niet meetbaar → **L-SC-025 gebouwd 0.60.1**. Verder geen vastzittende functies.
+- Hypotheses: H-SC-3 (regenstart; vals aan begin/staart van een bui; na 0.60.1 toetsen tegen `correctie_vorm`/`afwijking_min`), H-SC-9 (traagheid; stappen n=2, nodig ≥ 3 voor een voorstel), H-SC-11 (koude-lucht-onweer gemist, n=1).
+
+laatste ronde: 28-10 03:40, gemeten t/m 28-10 03:44
+

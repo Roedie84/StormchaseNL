@@ -60,3 +60,6 @@
 | Regenstart per dag | 5 treffers / 2 vals / 1 gemist | 25-10 | 26-10 03:40 |
 | Windstoten verwachting vóór stationsmeting (dag) | bias +0,27 km/u · MAE 2,67 (n=120, 5 blokken) | 26-10 | 27-10 03:40 |
 | Regenstart (dag) | 3 treffers / 0 gemist / 2 valse aftellingen | 26-10 | 27-10 03:40 |
+| Windstoten verwachting vóór stationsmeting (dag) | bias +0,47 km/u · MAE 3,45 (n=144, 6 blokken; bui-stap −19,5) | 27-10 | 28-10 03:40 |
+| Windstoten bias 7 d (dagwaarden) | +1,33 km/u (zonder 24-10 kaal model +0,62) | 21..27-10 | 28-10 03:40 |
+| Regenstart (4 d) | 12 raak / 7 vals / 1 gemist | 24..27-10 | 28-10 03:40 |
