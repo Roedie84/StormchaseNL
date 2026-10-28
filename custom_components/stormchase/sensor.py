@@ -565,8 +565,6 @@ class MeteoSensor(CoordinatorEntity[MeteoCoordinator], SensorEntity):
     def extra_state_attributes(self) -> dict | None:
         """Bij de windstoten: de kale modelwaarde en de correctie (0.51.0)."""
         data = self.coordinator.data
-        if data and self.entity_description.key == "rain_starts":
-            return _regen_attributen(data)
         if data and self.entity_description.key == "wind_outlook":
             return data.get("windvooruitblik")
         if not data or self.entity_description.key != "wind_gusts":
@@ -844,15 +842,25 @@ class RainSensor(CoordinatorEntity[RainCoordinator], SensorEntity):
         data = self.coordinator.data
         if not data or self.entity_description.key != "rain_starts":
             return {}
-        return {
-            "regent": data.get("regent"),
-            "stopt_over": data.get("stopt_over"),
-            "volgende_bui": gaat_om_volgende_bui(data),
-            "volgende_bui_over": data.get("volgende_bui_over"),
-            "totaal_mm_2u": data.get("totaal"),
-            "bron": data.get("bron"),
-            "verwachting": data.get("verwachting"),
-        }
+        return _regen_start_attributen(data)
+
+
+def _regen_start_attributen(data: dict) -> dict:
+    """Attributen van *Regen begint over*.
+
+    0.60.1: de correctie-attributen van 0.56.0 (L-SC-011) hingen aan de
+    MeteoSensor, die geen *Regen begint over* heeft; ze verschenen dus nooit.
+    Nu staan ze op de RainSensor, naast de verwachting.
+    """
+    return {
+        "regent": data.get("regent"),
+        "stopt_over": data.get("stopt_over"),
+        "volgende_bui": gaat_om_volgende_bui(data),
+        "volgende_bui_over": data.get("volgende_bui_over"),
+        "totaal_mm_2u": data.get("totaal"),
+        **_regen_attributen(data),
+        "verwachting": data.get("verwachting"),
+    }
 
 
 def _gemeten(storm: StormCoordinator | None) -> bool:

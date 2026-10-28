@@ -5,6 +5,12 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.60.1] — 2026-10-28
+
+### Opgelost
+
+- **Regencorrectie zichtbaar op *Regen begint over* (L-SC-025).** De attributen uit 0.56.0 (`zonder_correctie`, `gecorrigeerd`, `correctie_vorm`, `verschuiving_min`/`verhouding`, `uitkomsten`, `afwijking_min`, `uitleg`) hingen aan het verkeerde sensortype en verschenen nooit; of de bijstelling van de regenstart actief is en waarom niet, was alleen in de diagnostiek te zien. Ze staan nu op *Regen begint over*, naast de verwachting. Alleen weergave: de bijstelling zelf, de verwachting, drempels en meldingen zijn ongewijzigd.
+
 ## [0.60.0] — 2026-10-26
 
 ### Gewijzigd
