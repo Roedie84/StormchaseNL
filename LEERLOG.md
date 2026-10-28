@@ -468,3 +468,12 @@ laatste ronde: 28-10 15:43, gemeten t/m 28-10 15:45
 - Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-9 (traagheid; vandaag in alle vensters, dagafsluiting telt op), H-SC-11 (n=1).
 
 laatste ronde: 28-10 19:43, gemeten t/m 28-10 19:45
+
+## 28-10 23:40 · tussenronde
+- **0.60.1 actief**, geen herstart sinds 19:18. Geen Stormchase-fouten in de logs. Geen release.
+- **Geen onweer:** 0 inslagen < 50 km, groen, CAPE 10, LI 7,6; droog. Bronstatus 23:42 "buienradar hapert": externe DNS-storing (~23:25); KNMI-nowcast faalde ook, dus de reservebron werd terecht gevraagd en faalde - juist gemeld. Radar vers (22:43Z), KNMI-push verbonden.
+- **Windstoten 19:53-23:34 (vooraf, n=23): bias −0,15, MAE 1,27 km/u.** Oplopende wind 19:53-22:44 meest te laag (−0,1..−2,2), afname 23:14-23:24 +2,4/+2,9 te hoog → zelfde traagheid als H-SC-9, vandaag 5 vensters dezelfde vorm.
+- Stilstand: geen vastzittende functies (unknown-waarden = geen onweer/regen).
+- Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-9 (traagheid; dagafsluiting telt 28-10 op), H-SC-11 (n=1).
+
+laatste ronde: 28-10 23:40, gemeten t/m 28-10 23:45

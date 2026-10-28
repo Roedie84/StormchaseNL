@@ -513,3 +513,6 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-28 19:43,TUSSEN,sc_windstoten_bias_kmh,1.91,23,"15:54-19:34 vooraf; MAE 2.45; afloop 16:14-17:24 +2..+7.7 te hoog (16:23 14.8 tegen 10.9), 15:54-16:04 -3.0/-1.9 bij 22-23 km/u (traagheid H-SC-9, geen stap)"
 2026-10-28 19:43,TUSSEN,sc_onweer_gebeurtenissen,0,0,"15:45-19:45 0 inslagen < 50 km, groen; CAPE 0, LI 7.0; bronstatus alles in orde; radar vers (18:42Z)"
 2026-10-28 19:43,TUSSEN,sc_regen_vals_aftelling,0,0,"droog, geen aftelling"
+2026-10-28 23:40,TUSSEN,sc_windstoten_bias_kmh,-0.15,23,"19:53-23:34 vooraf; MAE 1.27; oplopend 19:53-22:44 meest te laag (-0.1..-2.2), afname 23:14-23:24 +2.4/+2.9 (traagheid H-SC-9, 5e venster vandaag)"
+2026-10-28 23:40,TUSSEN,sc_onweer_gebeurtenissen,0,0,"19:45-23:45 0 inslagen < 50 km, groen; CAPE 10, LI 7.6; bronstatus 23:42 'buienradar hapert' = externe DNS-storing (KNMI-nowcast faalde ook, reserve gevraagd); radar vers (22:43Z)"
+2026-10-28 23:40,TUSSEN,sc_regen_vals_aftelling,0,0,"droog, geen aftelling"
