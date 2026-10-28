@@ -507,3 +507,6 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-28 11:42,TUSSEN,sc_windstoten_bias_kmh,0.92,23,"07:54-11:44 vooraf; MAE 1.73; 07:54-08:44 +1.8..+3.9 te hoog bij 8-9 km/u, daarna -2.9..+3.1 bij 11-18 km/u; geen stap"
 2026-10-28 11:42,TUSSEN,sc_onweer_gebeurtenissen,0,0,"07:45-11:45 0 inslagen < 50 km, groen; bronstatus alles in orde; radar vers (10:44Z); herstart 10:25"
 2026-10-28 11:42,TUSSEN,sc_regen_vals_aftelling,0,0,"droog, geen aftelling"
+2026-10-28 15:43,TUSSEN,sc_windstoten_bias_kmh,-0.95,22,"11:54-15:43 vooraf; MAE 2.19; pieken te laag (12:24 -5.5 bij 21.4, 13:44 -4.6 bij 27.6, 14:54 -4.8 bij 24.3), rustig +0.5..+3.6 (traagheid H-SC-9, geen stap)"
+2026-10-28 15:43,TUSSEN,sc_onweer_gebeurtenissen,0,0,"11:45-15:45 0 inslagen < 50 km, groen; CAPE 10, LI 6.8; bronstatus alles in orde; radar vers (14:45Z)"
+2026-10-28 15:43,TUSSEN,sc_regen_vals_aftelling,0,0,"droog, geen aftelling"
