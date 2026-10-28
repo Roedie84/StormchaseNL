@@ -500,3 +500,7 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-28 03:40,TUSSEN,sc_onweer_gebeurtenissen,0,0,"23:44-03:44 0 inslagen < 50 km, groen; radar vers (02:41Z, leeftijd 2 min)"
 2026-10-28 03:40,TUSSEN,sc_regen_vals_aftelling,0,0,"droog sinds 22:22, geen aftelling"
 2026-10-28 03:40,DAG,sc_regencorrectie_attributen_zichtbaar,0,1,"L-SC-011-attributen (0.56.0) stonden nooit op Regen begint over (verkeerde sensorklasse) -> L-SC-025 gebouwd 0.60.1"
+2026-10-28 07:41,TUSSEN,sc_windstoten_bias_kmh,0.84,23,"03:54-07:34 vooraf; MAE 2.73; 03:54-04:54 -4..-5 te laag (17-19 gemeten), afloop 05:34-06:24 +2..+5.5 te hoog, daarna +2..+2.5 bij 6-8 km/u (traagheid H-SC-9)"
+2026-10-28 07:41,TUSSEN,sc_onweer_gebeurtenissen,0,0,"03:44-07:45 0 inslagen < 50 km, groen; bronstatus alles in orde; radar vers (06:42Z)"
+2026-10-28 07:41,TUSSEN,sc_regen_vals_aftelling,0,0,"droog, geen aftelling"
+2026-10-28 07:41,TUSSEN,sc_regencorrectie_attributen_zichtbaar,1,42,"0.60.1 actief: gecorrigeerd=true, vorm verschuiving (-7 min, >45 min -4.5), afwijking geen 11.0 / verschuiving 8.8 / verhouding 9.7 min -> L-SC-025 geverifieerd"

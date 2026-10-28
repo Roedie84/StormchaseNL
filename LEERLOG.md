@@ -431,3 +431,13 @@ laatste ronde: 27-10 23:41, gemeten t/m 27-10 23:44
 
 laatste ronde: 28-10 03:40, gemeten t/m 28-10 03:44
 
+
+## 28-10 07:41 · tussenronde
+- Herstarts 06:10 en 06:52; **0.60.1 actief**. Geen Stormchase-logregels. Geen release.
+- **Geen onweer:** 0 inslagen < 50 km, groen; bronstatus "alles in orde"; radar vers (06:42Z). Droog, geen regenaftelling.
+- **L-SC-025 geverifieerd:** *Regen begint over* toont nu de regencorrectie: `gecorrigeerd` true, vorm **verschuiving** (−7 min; > 45 min −4,5), 42 uitkomsten; afwijking zonder correctie 11,0 tegen verschuiving **8,8** en verhouding 9,7 min → de bijstelling is actief en verkleint de fout (~20 %). H-SC-3 kan voortaan per bui tegen `afwijking_min` getoetst worden.
+- **Windstoten 03:54-07:34 (vooraf, n=23): bias +0,84, MAE 2,73 km/u.** 03:54-04:54 −4..−5 te laag bij 17-19 km/u, afloop 05:34-06:24 +2..+5,5 te hoog, daarna +2..+2,5 bij 6-8 km/u → zelfde traagheid als H-SC-9 (stijgen te laag, dalen te hoog); geen stap.
+- Stilstand: geen vastzittende functies.
+- Hypotheses: H-SC-3 (regenstart; nu meetbaar met `afwijking_min`), H-SC-9 (traagheid; stappen n=2, afloop n=2), H-SC-11 (n=1).
+
+laatste ronde: 28-10 07:41, gemeten t/m 28-10 07:45
