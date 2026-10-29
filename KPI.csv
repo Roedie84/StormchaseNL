@@ -533,3 +533,6 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-29 15:45,TUSSEN,sc_bron_vals_hapert,0,1,"0.60.2 geinstalleerd; bronstatus 'alles in orde'; geen KNMI-storing sinds -> L-SC-026 terugvalpad nog niet getoetst"
 2026-10-29 19:40,TUSSEN,sc_windstoten_bias_kmh,0.89,23,"15:54-19:34 vooraf; MAE 1.39; stijging 18:44 (1.6 -> 6.9) -3.0 te laag, daling 19:04-19:14 +2.6/+3.0 te hoog (traagheid H-SC-9), geen stap > 10"
 2026-10-29 19:40,TUSSEN,sc_onweer_gebeurtenissen,0,0,"15:45-19:45 0 inslagen < 50 km, groen; CAPE 0, LI 12.0; droog; bronstatus alles in orde, KNMI-push verbonden"
+2026-10-29 23:40,TUSSEN,sc_windstoten_bias_kmh,1.68,22,"19:53-23:34 vooraf; MAE 2.33; grootste fouten na Open-Meteo-verversing: 21:54 model 6.8 -> 13.3 (waarde 8.5) -> 22:04 gemeten 1.5 = +7.0; 20:54 waarde 2.3 -> 21:03 gemeten 6.3 = -4.0; bijsturing rekent tot de volgende meting tegen de oude modelwaarde"
+2026-10-29 23:40,TUSSEN,sc_onweer_gebeurtenissen,0,0,"19:45-23:45 0 inslagen < 50 km; CAPE 0, LI 12.2; droog; bronstatus alles in orde, KNMI-push verbonden (233 meldingen)"
+2026-10-29 23:40,TUSSEN,sc_waarschuwing_terecht,1,1,"geel sinds 21:57 = KNMI code geel dichte mist Gelderland (officieel, Weerlive bevestigt geel 22:00); vanaf/tot in attributen 22:00Z-09:00Z = 23:00-10:00 lokaal tegen KNMI-tekst 22:00-09:00 -> 1 u verschoven? toets einde 30-10"

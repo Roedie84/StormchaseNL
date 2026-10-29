@@ -526,3 +526,13 @@ laatste ronde: 29-10 15:45, gemeten t/m 29-10 15:45
 - Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-9 (traagheid; stappen n=2), H-SC-11 (n=1).
 
 laatste ronde: 29-10 19:40, gemeten t/m 29-10 19:45
+
+## 29-10 23:40 · tussenronde
+- **0.60.2 actief**, geen Stormchase-fouten (MeteoAlarm-fout 22:53 is de HA-kernintegratie `binary_sensor.meteoalarm`, niet Stormchase). Geen release.
+- **Geen onweer:** 0 inslagen < 50 km, CAPE 0, LI 12,2; droog. Radar vers (23:42). Bronstatus "alles in orde"; L-SC-026 terugvalpad nog niet getoetst (geen KNMI-storing).
+- **Niveau geel sinds 21:57 = terecht:** KNMI code geel dichte mist Gelderland (Weerlive `binary_sensor.knmi_waarschuwing` ook geel). Opgevallen: `vanaf`/`tot` 22:00Z-09:00Z (= 23:00-10:00 lokaal) tegen KNMI-tekst "vanaf 22:00 tot morgen 09:00"; op 23-10 klopte het begin (16Z = 18:00) maar liep het einde 1 u door (tekst 23:00, per uur geel t/m 21Z). Afgeleid uit `alertLevel` per uur in `knmi_verwerk._periode`; n=2 met verschillend patroon → geen conclusie. Toets 30-10: gaat het niveau om 09:00 of pas om 10:00 naar groen?
+- **Windstoten 19:53-23:34 (vooraf, n=22): bias +1,68, MAE 2,33 km/u.** Twee grootste fouten direct na een Open-Meteo-verversing: 21:54:09 model 6,8 → 13,3 (waarde 4,3 → 8,5), 22:04 gemeten 1,5 (+7,0); 20:54 waarde → 2,3, 21:03 gemeten 6,3 (−4,0). De L-SC-017-bijsturing houdt tot de volgende stationsmeting de fout tegen de oude modelwaarde (`laatste` = model van het meetmoment). Rest weer traagheid (dalend 22:04-22:24 +4..+5). Onder H-SC-9 genoteerd; dagafsluiting: aandeel fout in het eerste meetinterval na een verversing over 7 dagen.
+- Stilstand: geen vastzittende functies (unknown = geen onweer/regen).
+- Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-9 (traagheid + modelsprong bij verversing), H-SC-11 (n=1).
+
+laatste ronde: 29-10 23:40, gemeten t/m 29-10 23:45
