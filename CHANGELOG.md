@@ -5,6 +5,14 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.60.2] — 2026-10-29
+
+### Opgelost
+
+- **Bronstatus: MeteoAlarm "hapert" niet meer zolang het KNMI werkt (L-SC-026).** In Nederland wordt MeteoAlarm alleen gevraagd als de KNMI-waarschuwingen falen. Op 29-10 faalde het KNMI om 11:32 één keer (DNS-storing), MeteoAlarm kreeg een time-out, en daarna werkte het KNMI weer: de bronstatus bleef op "meteoalarm hapert" staan tot de volgende KNMI-storing. MeteoAlarm telt nu, net als Buienradar en Bright Sky (0.58.4), als reservebron: "reserve (niet nodig)" zolang de hoofdbron na zijn laatste poging slaagt; faalt hij als hij wél gevraagd wordt, dan weer "hapert". Buiten Nederland is MeteoAlarm de gewone bron en blijft de beoordeling zoals voorheen.
+- **Lege foutmelding bij een time-out.** Een time-out heeft geen tekst; `laatste_fout` toonde dan "". Nu de soort fout (`TimeoutError`).
+- Alleen rapportage: ophalen, terugval, waarschuwingen en meldingen zijn ongewijzigd.
+
 ## [0.60.1] — 2026-10-28
 
 ### Opgelost

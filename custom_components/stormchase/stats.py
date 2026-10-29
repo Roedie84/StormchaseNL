@@ -41,7 +41,16 @@ RUST_NA_UREN = 24
 #: 0.58.4 (L-SC-016): reservebron -> de bron waarvoor hij invalt. Buienradar
 #: wordt alleen gevraagd als de KNMI-nowcast faalt (rain.py), Bright Sky
 #: ("meting") alleen als de KNMI-waarnemingen (EDR) ontbreken (meting.py).
-RESERVE_VOOR = {"buienradar": "knmi_nowcast", "meting": "knmi_edr"}
+#: 0.60.2: MeteoAlarm alleen als de KNMI-waarschuwingen falen (alerts.py, in
+#: Nederland). 29-10 stond de bronstatus vanaf 11:33 op "meteoalarm hapert":
+#: één time-out tijdens een DNS-storing, daarna niet meer gevraagd omdat het
+#: KNMI weer werkte. Buiten Nederland is MeteoAlarm de gewone bron; het KNMI
+#: wordt dan niet gevraagd, dus telt MeteoAlarm daar gewoon mee.
+RESERVE_VOOR = {
+    "buienradar": "knmi_nowcast",
+    "meting": "knmi_edr",
+    "meteoalarm": "knmi_waarschuwingen",
+}
 
 
 @dataclass
@@ -95,7 +104,12 @@ class BronStatus:
         self.retry_after = retry_after(melding) if self.beperkt else None
         self.mislukt += 1
         self.op_rij_mislukt += 1
-        self.laatste_fout = str(melding)[:200]
+        # 0.60.2: een time-out heeft geen tekst (str(TimeoutError()) == "");
+        # dan de soort fout, anders staat er een lege foutmelding.
+        tekst = str(melding)
+        if not tekst and isinstance(melding, BaseException):
+            tekst = type(melding).__name__
+        self.laatste_fout = tekst[:200]
         self.laatste_fout_op = dt_util.utcnow()
         self._meld(False)
 

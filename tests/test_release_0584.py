@@ -44,7 +44,8 @@ def _storing_dan_herstel(stats):
 
 def test_reservebronnen_zijn_gekoppeld():
     stats = Statistieken()
-    assert RESERVE_VOOR == {"buienradar": "knmi_nowcast", "meting": "knmi_edr"}
+    assert RESERVE_VOOR["buienradar"] == "knmi_nowcast"
+    assert RESERVE_VOOR["meting"] == "knmi_edr"
     assert stats.bronnen["buienradar"].hoofdbron is stats.bronnen["knmi_nowcast"]
     assert stats.bronnen["meting"].hoofdbron is stats.bronnen["knmi_edr"]
     assert stats.bronnen["radar"].hoofdbron is None
