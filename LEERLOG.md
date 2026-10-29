@@ -497,3 +497,13 @@ laatste ronde: 29-10 03:40, gemeten t/m 29-10 03:55
 - Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-9 (traagheid; stappen n=2), H-SC-11 (n=1).
 
 laatste ronde: 29-10 07:41, gemeten t/m 29-10 07:45
+
+## 29-10 11:40 · tussenronde
+- **0.60.1 actief**, geen Stormchase-fouten. **Release 0.60.2** (acuut, foute data nu: zie onder).
+- **Geen onweer:** 0 inslagen < 50 km, groen, CAPE 0 (piek 12 u 20), LI 8,1; droog.
+- **Bronstatus "meteoalarm hapert" sinds 11:35:** om 11:32 faalden de KNMI-waarschuwingen één keer (DNS-storing), MeteoAlarm viel in en kreeg een time-out (`laatste_fout` leeg, laatste succes 28-10 23:45 UTC); daarna werkte het KNMI weer (11:35) en wordt MeteoAlarm niet meer gevraagd → status bleef "hapert" tot de volgende KNMI-storing. Zelfde gat als L-SC-016, MeteoAlarm stond niet in `RESERVE_VOOR` → **L-SC-026 gebouwd 0.60.2** (reserve van `knmi_waarschuwingen`; lege fouttekst → `TimeoutError`). Suite 947 groen (+5 tests). Workflow groen, HACS ververst; wacht op installatie.
+- **Windstoten 07:54-11:44 (vooraf, n=24): bias +0,26, MAE 1,65 km/u.** Oplopende wind 09:04-09:44 te laag (−2,0..−3,4), daarna afnemend 10:24-11:04 te hoog (+2,5..+3,1) → zelfde traagheid H-SC-9; geen stap > 10 km/u (stappen blijven n=2).
+- Stilstand: geen vastzittende functies (unknown = geen onweer/regen).
+- Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-9 (traagheid; stappen n=2), H-SC-11 (n=1).
+
+laatste ronde: 29-10 11:40, gemeten t/m 29-10 11:45

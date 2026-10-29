@@ -184,3 +184,10 @@ Status: open / akkoord / afgewezen / gebouwd vX / geverifieerd / teruggedraaid. 
 - Onderbouwing: 0.56.0 (L-SC-011) beloofde in de CHANGELOG de attributen `zonder_correctie`, `gecorrigeerd`, `correctie_vorm`, `verschuiving_min`/`verhouding`, `uitkomsten`, `afwijking_min`, `uitleg` op *Regen begint over*. De code zette ze in `MeteoSensor.extra_state_attributes` (tak `rain_starts`), maar die sensor is een `RainSensor` → sinds 19-10 nooit zichtbaar (28-10: geen enkele entiteit met `correctie_vorm`). Of L-SC-011 actief is, was sinds 21-10 niet meer te meten (stilstand-check).
 - Bouw: `_regen_start_attributen` op de RainSensor (verwachting + correctie-attributen), dode tak in MeteoSensor weg. 4 tests `tests/test_release_0601.py`.
 - Meten na installatie: attributen aanwezig; `uitkomsten`, `correctie_vorm` en `afwijking_min` per ronde in KPI.csv (L-SC-011 actief ja/nee, LOO-winst). Daarmee kan H-SC-3 op de eigen correctie getoetst worden.
+
+## L-SC-026 · bronstatus: MeteoAlarm is de reserve van de KNMI-waarschuwingen (rapportage)
+- Status: **gebouwd 0.60.2** (29-10 11:47, tussenronde: acuut — foute status nu; zelf gebouwd: alleen classificatie bronstatus, ophalen en terugval ongewijzigd; suite 947 groen, 5 tests `tests/test_release_0602.py`; workflow groen, HACS ververst; wacht op installatie).
+- Onderbouwing: 29-10 `sensor.stormchase_bronstatus` = "meteoalarm hapert" vanaf 11:35. KNMI-waarschuwingen faalden 11:32:54 één keer (ClientConnectorDNSError), `alerts.py` viel terug op MeteoAlarm, time-out 11:33:14 (`op_rij_mislukt` 1, laatste succes 28-10 23:45 UTC > 15 min → hapert). KNMI 11:35 weer gelukt, dus MeteoAlarm wordt niet meer gevraagd en de status blijft staan tot de volgende KNMI-storing. L-SC-016 (0.58.4) koppelde alleen buienradar→knmi_nowcast en meting→knmi_edr. Daarnaast `laatste_fout` = "" (str(TimeoutError())).
+- Bouw: `RESERVE_VOOR["meteoalarm"] = "knmi_waarschuwingen"`; buiten Nederland (KNMI niet gevraagd) blijft MeteoAlarm een gewone bron. Fouttekst leeg → naam van de fout.
+- Meten na installatie: uren "meteoalarm hapert" terwijl de KNMI-waarschuwingen slagen = 0; `laatste_fout` nooit leeg.
+
