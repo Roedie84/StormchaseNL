@@ -477,3 +477,14 @@ laatste ronde: 28-10 19:43, gemeten t/m 28-10 19:45
 - Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-9 (traagheid; dagafsluiting telt 28-10 op), H-SC-11 (n=1).
 
 laatste ronde: 28-10 23:40, gemeten t/m 28-10 23:45
+
+## 29-10 03:40 · dagafsluiting 28-10
+- **0.60.1 actief**, geen herstart sinds 19:18, geen purge/repack in de log. Geen Stormchase-fouten. Geen release (niets te bouwen; geen open voorstellen met akkoord).
+- **Dag 28-10:** geen onweer (0 inslagen < 50 km, groen, CAPE 0-10); onweerstoetsen 0.58.x-0.60.0 wachten op onweer. Droog: geen regenaftelling, geen vals alarm. Bronstatus 5/6 rondes in orde; 23:42 'buienradar hapert' door de externe DNS-storing (terecht gemeld, hersteld).
+- **Windstoten 28-10 (vooraf, 6 blokken, n=137): bias +0,46, MAE 2,05 km/u** (27-10 +0,47 / 3,45). 7 d +1,27 (zonder 24-10 +0,55).
+- **Nacht 23:54-03:44 (n=23): bias +0,83, MAE 1,31**; afnemende wind 02:39-03:44 +1,2..+2,2 te hoog.
+- **H-SC-9:** 28-10 alle 6 vensters dezelfde vorm (stijgen te laag, dalen te hoog), maar geen stap (> 10 km/u in één meting) → stappen blijven n=2, nodig ≥ 3 voor een voorstel. De traagheid zelf is nu 2 dagen op rij in elk venster zichtbaar; bias over de dag klein (+0,5).
+- Stilstand: geen vastzittende functies (unknown = geen onweer/regen).
+- Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-9 (traagheid; stappen n=2), H-SC-11 (koude-lucht-onweer gemist, n=1).
+
+laatste ronde: 29-10 03:40, gemeten t/m 29-10 03:55
