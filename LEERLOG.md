@@ -517,3 +517,12 @@ laatste ronde: 29-10 11:40, gemeten t/m 29-10 11:45
 - Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-9 (traagheid; stappen n=2), H-SC-11 (n=1).
 
 laatste ronde: 29-10 15:45, gemeten t/m 29-10 15:45
+
+## 29-10 19:40 · tussenronde
+- **0.60.2 actief**, geen Stormchase-fouten. Geen release.
+- **Geen onweer:** 0 inslagen < 50 km, groen, CAPE 0, LI 12,0; droog. Radar vers (19:41). Bronstatus "alles in orde", KNMI-push verbonden (113 meldingen). L-SC-026 terugvalpad nog niet getoetst (geen KNMI-storing).
+- **Windstoten 15:54-19:34 (vooraf, n=23): bias +0,89, MAE 1,39 km/u.** Stap 18:44 (1,6 → 6,9) −3,0 te laag, daarna 19:04-19:14 +2,6/+3,0 te hoog → zelfde traagheid H-SC-9; geen stap > 10 km/u (stappen blijven n=2). Dag 29-10 tot nu: bias steeds positief (+0,26..+1,73).
+- Stilstand: geen vastzittende functies (unknown = geen onweer/regen).
+- Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-9 (traagheid; stappen n=2), H-SC-11 (n=1).
+
+laatste ronde: 29-10 19:40, gemeten t/m 29-10 19:45
