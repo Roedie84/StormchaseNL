@@ -528,3 +528,6 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-29 11:40,TUSSEN,sc_windstoten_bias_kmh,0.26,24,"07:54-11:44 vooraf; MAE 1.65; stijgend 09:04-09:44 -2.0..-3.4, dalend 10:24-11:04 +2.5..+3.1 (traagheid H-SC-9), geen stap"
 2026-10-29 11:40,TUSSEN,sc_onweer_gebeurtenissen,0,0,"07:45-11:45 0 inslagen < 50 km, groen; CAPE 0, LI 8.1; droog"
 2026-10-29 11:40,TUSSEN,sc_bron_vals_hapert,1,1,"meteoalarm hapert sinds 11:35 na 1 time-out 11:33 terwijl KNMI-waarschuwingen weer werken (11:35); L-SC-026 gebouwd 0.60.2"
+2026-10-29 15:45,TUSSEN,sc_windstoten_bias_kmh,1.73,23,"11:53-15:44 vooraf; MAE 1.84; afnemende wind 10.8 -> 3.2 km/u, 12:43-15:03 +1.2..+4.0 te hoog (traagheid H-SC-9), geen stap > 10"
+2026-10-29 15:45,TUSSEN,sc_onweer_gebeurtenissen,0,0,"11:45-15:45 0 inslagen < 50 km, groen; CAPE 20 (piek 12 u 30), LI 9.8; droog"
+2026-10-29 15:45,TUSSEN,sc_bron_vals_hapert,0,1,"0.60.2 geinstalleerd; bronstatus 'alles in orde'; geen KNMI-storing sinds -> L-SC-026 terugvalpad nog niet getoetst"
