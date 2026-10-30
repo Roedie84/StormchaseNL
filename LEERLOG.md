@@ -536,3 +536,14 @@ laatste ronde: 29-10 19:40, gemeten t/m 29-10 19:45
 - Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-9 (traagheid + modelsprong bij verversing), H-SC-11 (n=1).
 
 laatste ronde: 29-10 23:40, gemeten t/m 29-10 23:45
+
+## 30-10 03:40 · dagafsluiting 29-10
+- **0.60.2 actief** (HACS: geen nieuwere), geen purge/repack, geen Stormchase-fouten in de log. Geen release.
+- **Dag 29-10:** geen onweer (0 inslagen < 50 km, CAPE 0-20), droog; regencorrectie actief (verschuiving, 42 uitkomsten, 8,8 tegen kaal 11,0 min). Bronstatus 1× vals "meteoalarm hapert" 11:35 → L-SC-026 (0.60.2), sindsdien in orde; terugvalpad nog niet getoetst. Geel 21:57 terecht (KNMI mist).
+- **Windstoten 29-10 (vooraf, n=138): bias +1,07, MAE 1,66 km/u** (28-10 +0,46/2,05). **7 d +0,92** (was +1,27; zonder 24-10 +0,13). Nacht 23:43-03:34 (n=24) +0,22 / MAE 1,62; stap 02:24 (4,6 → 9,9) −5,1 te laag.
+- **Toets modelsprong (H-SC-9, 23:40):** eerste meting na een Open-Meteo-verversing MAE 1,82 / bias +0,91 (n=57) tegen overige 1,57 / +0,94 (n=105); 7 van 14 fouten ≥ 3 km/u vallen na een verversing (35 % van de metingen). Effect klein, n=1 dag → geen voorstel; blijft onder H-SC-9.
+- **Nieuw H-SC-12 (KNMI-periode):** waarschuwing vernieuwd "vanaf 03:00 tot 10:00"; attributen vanaf 02Z (03:00 ✓) tot 10Z (= 11:00), per uur geel t/m slot 09Z. `tot` 1 u later dan de tekst in 3/3 (23-10, 29-10, 30-10); past bij KNMI-uurslots die het einde van het uur labelen (`_periode` telt +1 u, en `vanaf` 29-10 was ook 1 u laat). Toets 30-10: niveau groen om 10:00 of 11:00 en `niveau_per_uur`; bevestigd → zelf bouwen (rapportage) in de dagafsluiting van 31-10.
+- Stilstand: geen vastzittende functies (unknown = geen onweer/regen; regencorrectie nu actief).
+- Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-9 (traagheid + modelsprong), H-SC-12 (KNMI-eindtijd). H-SC-11 (koude-lucht-onweer, n=1) geparkeerd tot het volgende onweer.
+
+laatste ronde: 30-10 03:40, gemeten t/m 30-10 03:45
