@@ -557,3 +557,13 @@ laatste ronde: 30-10 03:40, gemeten t/m 30-10 03:45
 - Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-9 (traagheid + modelsprong), H-SC-12 (KNMI-eindtijd, toets vandaag).
 
 laatste ronde: 30-10 07:41, gemeten t/m 30-10 07:45
+
+## 30-10 11:41 · tussenronde
+- **0.60.2 actief** (HACS: geen nieuwere), geen Stormchase-fouten (MeteoAlarm-fout = HA-kernintegratie `binary_sensor.meteoalarm`). Geen release.
+- Geen onweer (0 inslagen < 50 km, CAPE 0, LI 13,9), droog. Bronstatus "alles in orde", radar vers (11:42). Radar-vooruitblik laatst 07:40: bewust (geen kijker, L-SC-020).
+- **H-SC-12 getoetst (4/4):** KNMI-mist vernieuwd naar "06:00 tot 10:00" (lokaal); `tot` = 10Z (11:00 lokaal), laatste geel-slot 09Z. Het einde komt dus 4 van 4 keer 1 u te laat uit `_periode` (+1 u op de laatste slot; KNMI markeert het eindtijdstip zelf als slot). Het **niveau** zelf werd groen om 10:55, toen KNMI de waarschuwing introk (uitgifte 10:51), niet door `tot` → alleen de getoonde eindtijd (attribuut/melding) is fout. Status: bevestigd → **L-SC-027** (rapportagefout) bouwen in de dagafsluiting 31-10.
+- **Windstoten 07:54-11:34 (vooraf, n=22): bias +0,44, MAE 1,16 km/u.** Eerste meting na een Open-Meteo-verversing MAE **1,52** (n=6) tegen 1,03 (n=16); de twee grootste fouten (+3,3 om 10:13, +3,1 om 10:43) liggen direct na een verversing (6,2 → 9,3; 8,6 → 9,9). Steunt het modelsprong-deel van H-SC-9 (2e dag); dagafsluiting telt 7 dagen.
+- Stilstand: geen (unknown = geen onweer/regen).
+- Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-9 (traagheid + modelsprong bij verversing), H-SC-12 (bevestigd → L-SC-027).
+
+laatste ronde: 30-10 11:41, gemeten t/m 30-10 11:45

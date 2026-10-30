@@ -549,3 +549,6 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-30 07:41,TUSSEN,sc_windstoten_bias_kmh,1.31,23,"03:40-07:44 vooraf; MAE 1.42; wind 0-5 km/u afnemend, achterstand 05:54-06:34 +2.6..+4.3"
 2026-10-30 07:41,TUSSEN,sc_onweer_inslagen_50km,0,0,"geen onweer; alleen beschikbaarheid gemeten: bronstatus alles in orde, KNMI-push verbonden"
 2026-10-30 07:41,TUSSEN,sc_waarschuwing_geel,1,1,"KNMI mist Gelderland (officieel); H-SC-12 toets 11:40"
+2026-10-30 11:41,TUSSEN,sc_waarschuwing_tot_verschil_u,1,4,"KNMI mist: tekst 06:00-10:00 lokaal, attr tot 10Z (=11:00), laatste geel-slot 09Z; 4/4 tot 1 u te laat. Niveau groen 10:55 = KNMI trok in (uitgifte 10:51), niet door tot"
+2026-10-30 11:41,TUSSEN,sc_windstoten_bias_kmh,0.44,22,"07:54-11:34 vooraf; MAE 1.16; eerste meting na Open-Meteo-verversing MAE 1.52 (n=6) tegen 1.03 (n=16); grootste +3.3 (10:13) en +3.1 (10:43) direct na verversing"
+2026-10-30 11:41,TUSSEN,sc_onweer_inslagen_50km,0,0,"geen onweer (CAPE 0, LI 13.9); alleen beschikbaarheid: bronstatus alles in orde, radar vers 11:42"
