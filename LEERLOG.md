@@ -547,3 +547,13 @@ laatste ronde: 29-10 23:40, gemeten t/m 29-10 23:45
 - Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-9 (traagheid + modelsprong), H-SC-12 (KNMI-eindtijd). H-SC-11 (koude-lucht-onweer, n=1) geparkeerd tot het volgende onweer.
 
 laatste ronde: 30-10 03:40, gemeten t/m 30-10 03:45
+
+## 30-10 07:41 · tussenronde
+- **0.60.2 actief** (HACS: geen nieuwere), HA-herstart 07:40, geen Stormchase-fouten. Geen release.
+- Geen onweer (0 inslagen < 50 km, CAPE 10, LI 14), droog. Bronstatus "alles in orde"; KNMI-push verbonden; MeteoAlarm/BrightSky/Buienradar in rust/reserve (niet nodig).
+- **Geel = KNMI mist Gelderland** (officieel, sinds de herstart 07:40 weer actief). H-SC-12 (eindtijd 1 u te laat) toets 11:40: niveau groen om 10:00 of 11:00.
+- **Windstoten 03:40-07:44 (vooraf, n=23): bias +1,31, MAE 1,42 km/u** (lage wind 0-5 km/u, afnemend tot 06:34 → voorspelling liep achter; 05:54-06:34 +2,6..+4,3). Past bij H-SC-9 (traagheid); geen nieuw voorstel.
+- Stilstand: geen (unknown = geen onweer/regen).
+- Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-9 (traagheid + modelsprong), H-SC-12 (KNMI-eindtijd, toets vandaag).
+
+laatste ronde: 30-10 07:41, gemeten t/m 30-10 07:45
