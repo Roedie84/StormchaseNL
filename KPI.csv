@@ -554,3 +554,5 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-30 11:41,TUSSEN,sc_onweer_inslagen_50km,0,0,"geen onweer (CAPE 0, LI 13.9); alleen beschikbaarheid: bronstatus alles in orde, radar vers 11:42"
 2026-10-30 15:56,TUSSEN,sc_windstoten_bias_kmh,-0.84,26,"11:44-15:54 vooraf; MAE 1.67; na Open-Meteo-verversing MAE 2.32 (n=8) tegen 1.38 (n=18); grootste -5.5 (14:33) en -3.4 (13:33) direct na verversing; middag stijgende wind tot 20 km/u"
 2026-10-30 15:56,TUSSEN,sc_onweer_inslagen_50km,0,0,"geen onweer (CAPE 0, LI 13.6); bronstatus alles in orde, niveau groen"
+2026-10-30 19:40,TUSSEN,sc_windstoten_bias_kmh,-1.43,21,"15:58-19:34 vooraf; MAE 2.07; na Open-Meteo-verversing MAE 2.11 (n=7) tegen 2.04 (n=14) -> dit venster geen modelsprong-effect; grootste -6.0 (18:54, gemeten 15.2) en -3.7 (16:14)"
+2026-10-30 19:40,TUSSEN,sc_onweer_inslagen_50km,0,0,"geen onweer (CAPE 0, LI 12.5); bronstatus alles in orde, niveau groen, radar vers 19:42"
