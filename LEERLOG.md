@@ -585,3 +585,12 @@ laatste ronde: 30-10 15:56, gemeten t/m 30-10 15:58
 - Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-9 (traagheid + modelsprong; vanavond niet gezien), H-SC-12 (bevestigd → L-SC-027, bouwen dagafsluiting 31-10).
 
 laatste ronde: 30-10 19:40, gemeten t/m 30-10 19:45
+
+## 30-10 23:40 · tussenronde
+- **0.60.2 actief** (HACS: geen nieuwere), geen Stormchase-fouten. Geen release.
+- Geen onweer (0 inslagen < 50 km, CAPE 0, LI 11,0), droog. Bronstatus "alles in orde", niveau groen, radar vers (23:42).
+- **Windstoten 19:53-23:34 (vooraf, n=23): bias −1,98, MAE 2,43 km/u** (vlagen tot 23,0 om 20:24 en 20,8 om 22:54; voorspelling 10,2 en 6,0 te laag). Eerste meting na een Open-Meteo-verversing MAE **1,93** (n=8) tegen **2,70** (n=15) → 2e tegenwaarneming op rij voor het modelsprong-deel; het traagheidsdeel (achterlopen bij oplopende wind, bias 15:56 −0,84 → 19:40 −1,43 → nu −1,98) wordt sterker. Dagafsluiting telt 7 d en beslist.
+- Stilstand: geen (unknown = geen onweer/regen).
+- Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-9 (traagheid sterk, modelsprong 3 voor / 2 tegen vandaag), H-SC-12 (bevestigd → L-SC-027, bouwen dagafsluiting 31-10).
+
+laatste ronde: 30-10 23:40, gemeten t/m 30-10 23:45
