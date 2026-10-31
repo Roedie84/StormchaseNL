@@ -564,3 +564,5 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-31 03:40,DAG,sc_windstoten_uur_mae_7d_kmh,2.29,172,"uurgemiddelden statistiek 24-10 00:00..31-10 03:00; bias +1.11; stijgend -0.08 (n=79), dalend +2.26 (n=73); zonder 24-10 (front) MAE 1.33 bias +0.35, dalend +1.16; baseline voor L-SC-017 2.52"
 2026-10-31 03:40,DAG,sc_windstoten_backtest_extra_k_mae,1.21,147,"extra k x (gemeten vorig uur - model vorig uur) op uurniveau, zonder 24-10: k0 1.333 / k0.5 1.208 / k0.75 1.283; met 24-10 k0 2.28 / k0.5 1.76 -> winst zit vooral in de frontdag"
 2026-10-31 03:40,TUSSEN,sc_windstoten_bias_kmh,-1.25,23,"23:54-03:34 vooraf; MAE 1.36; stijging 03:04-03:24 (14.3-17.1) -1.8..-3.6 te laag (traagheid)"
+2026-10-31 07:40,TUSSEN,sc_windstoten_bias_kmh,-2.60,24,"03:44-07:34 vooraf; MAE 2.64; 23/24 te laag, oplopende ochtendwind (gemeten 12-20, voorspeld 11-15): traagheidsdeel zoals 30-10 avond"
+2026-10-31 07:40,TUSSEN,sc_beschikbaarheid,1,1,"geen onweer (0 inslagen < 50 km, CAPE 0, kans 0 %); bronstatus alles in orde; radar 2 min; niveau groen; geen Stormchase-fouten"
