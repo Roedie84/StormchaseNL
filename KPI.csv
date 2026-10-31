@@ -570,3 +570,5 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-31 11:40,TUSSEN,sc_beschikbaarheid,1,1,"geen onweer (0 inslagen < 50 km, CAPE 0, kans 0 %); bronstatus alles in orde; radar 2 min; niveau groen; draait 0.60.2 (0.60.3 in HACS)"
 2026-10-31 15:40,TUSSEN,sc_windstoten_bias_kmh,-0.74,23,"11:53-15:34 vooraf; MAE 1.85; 16/23 te laag; gemeten 6.8-15.7 (12:14 15.7 tegen 10.9)"
 2026-10-31 15:40,TUSSEN,sc_beschikbaarheid,1,1,"geen onweer (0 inslagen < 50 km, CAPE 0, kans 0 %), droog; bronstatus alles in orde; radar 1 min; niveau groen; draait 0.60.2 (0.60.3 in HACS, geen herstart)"
+2026-10-31 19:40,TUSSEN,sc_windstoten_bias_kmh,0.35,24,"15:43-19:34 vooraf; MAE 1.79; 7/24 te laag; gemeten 3.2-13.5 (afnemende avondwind, model iets te hoog)"
+2026-10-31 19:40,TUSSEN,sc_beschikbaarheid,1,1,"geen onweer (0 inslagen < 50 km, CAPE 0, kans 0 %), droog; bronstatus alles in orde; radar 1 min; niveau groen; draait 0.60.3 (HA-start 16:30)"

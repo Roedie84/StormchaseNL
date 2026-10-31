@@ -193,7 +193,7 @@ Status: open / akkoord / afgewezen / gebouwd vX / geverifieerd / teruggedraaid. 
 
 
 ## L-SC-027 · KNMI-waarschuwing: eindtijd `tot` 1 uur te laat (rapportage, H-SC-12)
-- Status: **gebouwd 0.60.3** (31-10 03:46, dagafsluiting; suite 951 groen, `tests/test_release_0603.py`; workflow groen, HACS ververst; wacht op installatie). Meten: `tot` tegen de KNMI-tekst bij de volgende 2 waarschuwingen. Was: gepland — zelf bouwen (rapportagefout: alleen de getoonde eindtijd; niveau, drempels en meldmomenten ongewijzigd).
+- Status: **gebouwd 0.60.3, actief sinds 31-10 16:30** — toets bij de eerstvolgende KNMI-waarschuwing. Was: **gebouwd 0.60.3** (31-10 03:46, dagafsluiting; suite 951 groen, `tests/test_release_0603.py`; workflow groen, HACS ververst; wacht op installatie). Meten: `tot` tegen de KNMI-tekst bij de volgende 2 waarschuwingen. Was: gepland — zelf bouwen (rapportagefout: alleen de getoonde eindtijd; niveau, drempels en meldmomenten ongewijzigd).
 - Onderbouwing (30-10 11:41, n=4): 23-10, 29-10, 30-10 03:40 en 30-10 07:41 staat `tot` steeds 1 u later dan de KNMI-tekst (vandaag tekst "06:00 tot 10:00", `tot` 10Z = 11:00, laatste geel-slot in `niveau_per_uur` 09Z). `knmi_verwerk._periode` telt +1 u op de laatste slot, maar KNMI markeert het eindtijdstip zelf al als slot. Het niveau ging 30-10 om 10:55 naar groen doordat KNMI introk (uitgifte 10:51), dus het effect zit alleen in attribuut/meldtekst.
 - Bouw: `tot` = tijd van de laatste slot op/boven de rang (geen +1 u); test met de payload van 30-10 (slots 06Z-09Z geel → tot 09Z).
 - Verwacht effect: `tot` gelijk aan de KNMI-tekst. Meten: bij de volgende 2 KNMI-waarschuwingen `tot` tegen de tekst (verschil 0 u).
