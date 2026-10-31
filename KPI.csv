@@ -566,3 +566,5 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-31 03:40,TUSSEN,sc_windstoten_bias_kmh,-1.25,23,"23:54-03:34 vooraf; MAE 1.36; stijging 03:04-03:24 (14.3-17.1) -1.8..-3.6 te laag (traagheid)"
 2026-10-31 07:40,TUSSEN,sc_windstoten_bias_kmh,-2.60,24,"03:44-07:34 vooraf; MAE 2.64; 23/24 te laag, oplopende ochtendwind (gemeten 12-20, voorspeld 11-15): traagheidsdeel zoals 30-10 avond"
 2026-10-31 07:40,TUSSEN,sc_beschikbaarheid,1,1,"geen onweer (0 inslagen < 50 km, CAPE 0, kans 0 %); bronstatus alles in orde; radar 2 min; niveau groen; geen Stormchase-fouten"
+2026-10-31 11:40,TUSSEN,sc_windstoten_bias_kmh,-0.54,24,"07:54-11:44 vooraf; MAE 1.47; 17/24 te laag; gemeten 7.6-15.5"
+2026-10-31 11:40,TUSSEN,sc_beschikbaarheid,1,1,"geen onweer (0 inslagen < 50 km, CAPE 0, kans 0 %); bronstatus alles in orde; radar 2 min; niveau groen; draait 0.60.2 (0.60.3 in HACS)"

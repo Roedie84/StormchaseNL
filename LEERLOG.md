@@ -615,3 +615,12 @@ laatste ronde: 31-10 03:40, gemeten t/m 31-10 03:45
 - Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-13 (KNMI-slotlabel; wacht op waarschuwing), H-SC-11 geparkeerd.
 
 laatste ronde: 31-10 07:42, gemeten t/m 31-10 07:45
+
+## 31-10 11:41 · tussenronde
+- **Draait nog 0.60.2** (HA-start 30-10 13:03; 0.60.3 in HACS klaar, herstart staat op de controlekaart). Geen Stormchase-fouten. Geen release.
+- Geen onweer (0 inslagen < 50 km, CAPE 0, kans 0 %), droog. Bronstatus "alles in orde", niveau groen, radar 2 min oud, locatie via tracker.
+- **Windstoten 07:54-11:44 (vooraf, n=24): bias −0,54, MAE 1,47 km/u** (17/24 te laag; gemeten 8-16). Kleiner dan vanochtend (−2,60) nu de wind niet meer aantrekt → past bij het afgesloten traagheidsbeeld (H-SC-9); alleen noteren.
+- Stilstand: geen (unknown = geen onweer/regen).
+- Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-13 (KNMI-slotlabel; wacht op waarschuwing én 0.60.3 actief), H-SC-11 geparkeerd.
+
+laatste ronde: 31-10 11:43, gemeten t/m 31-10 11:45
