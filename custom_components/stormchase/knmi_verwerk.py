@@ -109,7 +109,14 @@ def niveau_per_uur(payload: dict | None, nu: datetime, uren: int = UREN_VOORUIT)
 
 
 def _periode(per_uur: list[dict], rang: int) -> tuple[str | None, str | None]:
-    """Begin en einde van de aaneengesloten uren op of boven deze rang."""
+    """Begin en einde van de aaneengesloten uren op of boven deze rang.
+
+    Het einde is de tijd van het laatste uur op of boven de rang, zonder er
+    een uur bij op te tellen (L-SC-027): in de KNMI-uurverwachting is dat
+    uur zelf al het eindtijdstip uit de waarschuwingstekst ("06:00 tot
+    10:00" -> laatste geel-uur 10:00). Tot 0.60.2 kwam er een uur bij en
+    stond `tot` steeds een uur later dan de tekst (23-10, 29-10, 30-10).
+    """
     rangen = {kleur: r for kleur, r in KNMI_NIVEAUS.values()}
     vanaf = tot = None
     for uur in per_uur:
@@ -119,9 +126,6 @@ def _periode(per_uur: list[dict], rang: int) -> tuple[str | None, str | None]:
             tot = uur["tijd"]
         elif vanaf is not None:
             break
-    if tot is not None:
-        moment = _als_tijd(tot)
-        tot = (moment + timedelta(hours=1)).isoformat() if moment else None
     return vanaf, tot
 
 

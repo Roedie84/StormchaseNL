@@ -5,6 +5,12 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.60.3] — 2026-10-31
+
+### Opgelost
+
+- **KNMI-waarschuwing: eindtijd niet meer een uur te laat (L-SC-027).** `tot` kreeg een uur extra bovenop het laatste uur met het waarschuwingsniveau. In de KNMI-uurverwachting is dat laatste uur zelf het eindtijdstip uit de tekst: op 30-10 "mist 06:00 tot 10:00" stond `tot` op 11:00 (laatste geel-uur 10:00); zo ook op 23-10 en 29-10 (n=4). Nu is `tot` het laatste uur op of boven het niveau. Alleen de getoonde eindtijd (attribuut, meldtekst en weerbericht): het niveau per uur, de drempels en de meldmomenten zijn ongewijzigd.
+
 ## [0.60.2] — 2026-10-29
 
 ### Opgelost

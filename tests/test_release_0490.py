@@ -320,9 +320,10 @@ class TestWaarschuwingen:
         assert data["regio"] == "Gelderland" and data["gebied"] == "Gelderland"
         w = data["actief"][0]
         assert w["soort"] == "zware windstoten"
-        # Het lopende uur (14:00) tot en met 17:00 op geel of hoger
+        # Het lopende uur (14:00) tot en met 17:00 op geel of hoger; het
+        # laatste geel-uur is zelf het einde (L-SC-027, 0.60.3)
         assert w["vanaf"] == UUR.isoformat()
-        assert w["tot"] == (UUR + timedelta(hours=4)).isoformat()
+        assert w["tot"] == (UUR + timedelta(hours=3)).isoformat()
         assert w["id"] == "knmi|4|geel|zware windstoten"
         # Niveau per uur vanaf het lopende uur, het vorige uur valt weg
         assert data["niveau_per_uur"][0] == {"tijd": UUR.isoformat(), "niveau": "geel"}
