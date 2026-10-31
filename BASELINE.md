@@ -66,3 +66,4 @@
 | Windstoten verwachting vóór stationsmeting (dag) | bias +1,07 km/u · MAE 1,66 (n=138, 6 blokken, geen stap) | 29-10 | 30-10 03:40 |
 | Windstoten bias 7 d (dagwaarden) | +0,92 km/u (zonder 24-10 kaal model +0,13) | 23..29-10 | 30-10 03:40 |
 | Windstoten MAE eerste meting na modelverversing | 1,82 tegen 1,57 km/u overig (n=57/105) | 29-10 00:00-30-10 03:34 | 30-10 03:40 |
+| Windstoten uurfout 7 d (na L-SC-017/022) | MAE 2,29 km/u, bias +1,11; zonder frontdag 1,33 / +0,35 | 24..30-10, n=172 uur | 31-10 03:40 |

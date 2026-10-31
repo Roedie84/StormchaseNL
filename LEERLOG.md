@@ -594,3 +594,15 @@ laatste ronde: 30-10 19:40, gemeten t/m 30-10 19:45
 - Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-9 (traagheid sterk, modelsprong 3 voor / 2 tegen vandaag), H-SC-12 (bevestigd → L-SC-027, bouwen dagafsluiting 31-10).
 
 laatste ronde: 30-10 23:40, gemeten t/m 30-10 23:45
+
+## 31-10 03:40 · dagafsluiting 30-10
+- **0.60.2 actief**, geen purge/repack, geen Stormchase-fouten. **Release 0.60.3** (L-SC-027, zie onder).
+- **Dag 30-10:** geen onweer (0 inslagen < 50 km, CAPE 0-10), droog; KNMI-mist 's ochtends (geel, ingetrokken 10:51). Bronstatus "alles in orde", radar vers (03:42).
+- **Windstoten 30-10 (vooraf, n=139): bias −0,38, MAE 1,73 km/u.** 7 d (dagwaarden) +1,17; zonder 24-10 +0,43. Nacht 23:54-03:34 (n=23) −1,25 / MAE 1,36.
+- **H-SC-9 afgesloten (7 d, uurgemiddelden n=172):** MAE **2,29** (vóór L-SC-017 2,52), stijgend −0,08 (was −1,46), dalend +2,26 (was +1,74; frontdag 24-10). Zonder 24-10 MAE 1,33, dalend +1,16. Backtest extra bijsturing k 0,5 op uurniveau: 1,33 → 1,21 km/u zonder frontdag (−0,12) → te klein voor een voorstel bij deze windsnelheden (windmelding ≥ 60). Modelsprong-deel niet bevestigd (3 voor / 2 tegen). **L-SC-017 geverifieerd.**
+- **Gebouwd 0.60.3 (L-SC-027):** `tot` = laatste uur op/boven het niveau (geen +1 u). Suite **951 groen** (+3 `test_release_0603.py`, 1 bestaande test bijgesteld), workflow groen, HACS ververst. Meten: `tot` tegen de KNMI-tekst bij de volgende 2 waarschuwingen.
+- **Nieuw H-SC-13 (KNMI-uurslot = einde van het uur?):** 30-10 tekst "06:00 tot 10:00", eerste geel-slot 06Z (07:00) → `vanaf` mogelijk ook 1 u laat (29-10 idem). Als de slots het einde van het uur labelen, telt `niveau_per_uur` het afgelopen uur nog als lopend (niveau tot ~1 u na de eindtijd). Toets bij de volgende KNMI-waarschuwing: `vanaf` tegen de tekst en het moment waarop het niveau zakt.
+- Stilstand: geen (unknown = geen onweer/regen).
+- Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-13 (KNMI-slotlabel), H-SC-11 geparkeerd (koude-lucht-onweer).
+
+laatste ronde: 31-10 03:40, gemeten t/m 31-10 03:45
