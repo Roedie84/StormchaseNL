@@ -588,3 +588,7 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-11-01 19:40,TUSSEN,sc_onweer_gebeurtenissen,0,0,"0 inslagen < 50 km, ensemble 0 %, niveau groen; bronstatus alles in orde"
 2026-11-01 19:40,TUSSEN,sc_windstoten_bias_kmh,-1.08,22,"15:44-19:34, model vlak voor de meting tegen gemeten (4,3-9,9); 17/22 te laag"
 2026-11-01 19:40,TUSSEN,sc_windstoten_mae_kmh,1.34,22,"15:44-19:34; middag 11:44-15:34 2,58"
+2026-11-01 23:40,TUSSEN,sc_onweer_gebeurtenissen,0,0,"0 inslagen < 50 km, ensemble 0 %, CAPE 30, LI 9; niveau groen; bronstatus alles in orde"
+2026-11-01 23:40,TUSSEN,sc_windstoten_bias_kmh,0.60,24,"19:44-23:43, model vlak voor de meting; MAE 1.65; 7/24 te laag (piek 19:44-20:24 te laag, daarna te hoog)"
+2026-11-01 23:40,TUSSEN,sc_motregen_gemist_min,130,2,"station Hupsel 3.4 km neerslag > 0 19:00-19:30 en 21:50-23:30 (max 0.51 mm/u, ww 51/57); KNMI-nowcast 0.0, regenbeeld droog, regen_verwacht uit (H-SC-15)"
+2026-11-01 23:40,TUSSEN,sc_weather_rainy_bij_radar_droog_min,210,4,"weather.stormchase rainy (KNMI-uurmodel) 18:00-19:57, 22:00-22:50, 23:00-23:43 terwijl neerslagintensiteit 0.0"

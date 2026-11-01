@@ -700,3 +700,13 @@ laatste ronde: 01-11 15:40, gemeten t/m 01-11 15:35
 - Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-13 (KNMI-slotlabel; wacht op een waarschuwing), H-SC-14 (bijsturing na model-/locatiesprong). H-SC-11 geparkeerd.
 
 laatste ronde: 01-11 19:40, gemeten t/m 01-11 19:35
+
+## 01-11 23:40 · tussenronde
+- Draait 0.60.3, geen Stormchase-fouten (HA-herstart 21:20 door EMS-installatie, schoon). Geen release.
+- Geen onweer (0 inslagen < 50 km, ensemble 0 %, CAPE 30, LI 9), niveau groen, bronstatus "alles in orde", `onderweg` uit. Radar vers (22:43Z).
+- **Nieuw (H-SC-15): motregen buiten beeld.** Station Hupsel (3,4 km, `meting_weerstation`) mat neerslag 19:00-19:30 (0,01-0,26 mm/u) en 21:50-23:30 (0,02-0,51 mm/u; `neerslag_1u` tot 0,15 mm; weercode 51/57 motregen). KNMI-nowcast (bron in gebruik) gaf de hele tijd **0,0**: `neerslagintensiteit` 0,0 sinds 28-10 01:00 (0 wijzigingen), `regenbeeld` "Droog, komende 2 uur geen regen", `regen_verwacht` uit. `weather.stormchase` stond wel `rainy` (KNMI-uurmodel; radar droog → modelconditie) 18:00-19:57, 22:00-22:50, 23:00-nu ≈ 3,5 u vandaag. Radar ziet lage motregen niet; de regenvalidatie telde deze avond als droog. "Droog sinds 27-10" in eerdere rondes was dus een radarmeting, geen grondwaarheid → **L-SC-029 (open)**.
+- **Windstoten 19:44-23:43 (n=24): bias +0,60, MAE 1,65 km/u** (7/24 te laag): 19:44-20:24 te laag bij de piek (gemeten 8,6-10,6), daarna te hoog bij afnemende wind → traagheid (H-SC-9). Geen locatiewissel (H-SC-14 n blijft 1).
+- Stilstand: geen (unknown = geen onweer).
+- Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-14 (bijsturing na model-/locatiesprong), **H-SC-15** (nowcast mist motregen; station meet). H-SC-13 (KNMI-slotlabel) geparkeerd tot de volgende waarschuwing; H-SC-11 geparkeerd.
+
+laatste ronde: 01-11 23:40, gemeten t/m 01-11 23:43
