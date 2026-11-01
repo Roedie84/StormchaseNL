@@ -691,3 +691,12 @@ laatste ronde: 01-11 11:45, gemeten t/m 01-11 11:35
 - Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-13 (KNMI-slotlabel; wacht op een waarschuwing), H-SC-14 (bijsturing na model-/locatiesprong). H-SC-11 geparkeerd.
 
 laatste ronde: 01-11 15:40, gemeten t/m 01-11 15:35
+
+## 01-11 19:40 · tussenronde
+- Draait 0.60.3, geen Stormchase-fouten na 15:40. Geen release.
+- Geen onweer (0 inslagen < 50 km, kans 0 %), niveau groen, bronstatus "alles in orde", `onderweg` uit. Radarbeeld vers; vooruitblik laatst 09:15 (geen kijker, bewust).
+- **Windstoten 15:44-19:34 (n=22): bias −1,08, MAE 1,34 km/u** (17/22 te laag; gemeten 4,3-9,9). Kleiner dan de middag (−2,10/2,58) nu de wind afneemt → past bij traagheid (H-SC-9). Geen locatiewissel, dus H-SC-14 niet opnieuw getoetst (n blijft 1).
+- Stilstand: geen (unknown = geen onweer/regen).
+- Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-13 (KNMI-slotlabel; wacht op een waarschuwing), H-SC-14 (bijsturing na model-/locatiesprong). H-SC-11 geparkeerd.
+
+laatste ronde: 01-11 19:40, gemeten t/m 01-11 19:35
