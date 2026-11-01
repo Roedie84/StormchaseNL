@@ -583,3 +583,5 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-11-01 07:40,TUSSEN,sc_beschikbaarheid,1,1,"geen onweer (0 inslagen < 50 km, CAPE 10, LI 12.1), droog; bronstatus alles in orde; buienradar 1 DNS-fout 04:22 (reserve, niet nodig); groen"
 2026-11-01 11:40,TUSSEN,sc_windstoten_bias_kmh,1.79,21,"07:44-11:34; MAE 2.08; 4/21 te laag; gemeten 1.8-9.3; 10:45 modelsprong naar 13.6 bij gemeten 6.1-8.2"
 2026-11-01 11:40,TUSSEN,sc_beschikbaarheid,1,1,"geen onweer (0 inslagen < 50 km, CAPE 0, LI 11.8), droog; bronstatus alles in orde; herstart 09:15 10 s laatst bekend; onderweg aan 11:35, tracker"
+2026-11-01 15:40,TUSSEN,sc_windstoten_bias_kmh,-2.10,24,"11:44-15:34 vooraf; MAE 2.58; 20/24 te laag; gemeten 3.0-14.8; zonder 11:54-paar (bijsturing na locatiewissel, voorspeld 0.3) -1.87 / MAE 2.37 (n=23)"
+2026-11-01 15:40,TUSSEN,sc_beschikbaarheid,1,1,"geen onweer (0 inslagen < 50 km, CAPE 0, LI 11.5, kans 0 %), droog; bronstatus alles in orde; niveau groen; KNMI 2x fetchfout 11:50/12:50 bij DNS-storing (extern); onderweg uit, tracker"

@@ -681,3 +681,13 @@ laatste ronde: 01-11 07:42, gemeten t/m 01-11 07:35
 - Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-13 (KNMI-slotlabel; wacht op een waarschuwing), H-SC-11 geparkeerd.
 
 laatste ronde: 01-11 11:45, gemeten t/m 01-11 11:35
+
+## 01-11 15:40 · tussenronde
+- Draait 0.60.3, geen Stormchase-fouten (KNMI-integratie 2× fetchfout 11:50/12:50 bij DNS-storing, extern). Geen release.
+- Geen onweer (0 inslagen < 50 km, CAPE 0, LI 11,5, kans 0 %), droog. Bronstatus "alles in orde", niveau groen. `onderweg` weer uit, locatie via tracker.
+- **Windstoten 11:44-15:34 (n=24): bias −2,10, MAE 2,58 km/u** (20/24 te laag; gemeten 3,0-14,8). Middagwind trok aan (14:14 14,8) en het model liep eronder; 's ochtends juist erboven → traagheidsbeeld H-SC-9.
+- **Nieuw (H-SC-14):** 11:45:39 (locatiewissel onderweg, buiten de :02/:32-cyclus) sprong `model` 17,6 → 4,7; de uurbijsturing −3,1 (helft van fout −6,4, gemeten tegen het *oude* model) werd op de nieuwe basis gezet: 4,7 × 0,72 − 3,1 = **0,3 km/u** tot de volgende meting (11:54, gemeten 7,8). De bijsturing bewaart (tijd, gemeten, model) maar past de fout absoluut toe op een ander model/locatie. Melding onaangetast (`windstoten_melding` = station 6,3/7,8). Zonder dat paar: bias −1,87 / MAE 2,37 (n=23). n=1 → **L-SC-028 (open)**.
+- Stilstand: geen (unknown = geen onweer/regen).
+- Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-13 (KNMI-slotlabel; wacht op een waarschuwing), H-SC-14 (bijsturing na model-/locatiesprong). H-SC-11 geparkeerd.
+
+laatste ronde: 01-11 15:40, gemeten t/m 01-11 15:35

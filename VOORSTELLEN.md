@@ -197,3 +197,9 @@ Status: open / akkoord / afgewezen / gebouwd vX / geverifieerd / teruggedraaid. 
 - Onderbouwing (30-10 11:41, n=4): 23-10, 29-10, 30-10 03:40 en 30-10 07:41 staat `tot` steeds 1 u later dan de KNMI-tekst (vandaag tekst "06:00 tot 10:00", `tot` 10Z = 11:00, laatste geel-slot in `niveau_per_uur` 09Z). `knmi_verwerk._periode` telt +1 u op de laatste slot, maar KNMI markeert het eindtijdstip zelf al als slot. Het niveau ging 30-10 om 10:55 naar groen doordat KNMI introk (uitgifte 10:51), dus het effect zit alleen in attribuut/meldtekst.
 - Bouw: `tot` = tijd van de laatste slot op/boven de rang (geen +1 u); test met de payload van 30-10 (slots 06Z-09Z geel → tot 09Z).
 - Verwacht effect: `tot` gelijk aan de KNMI-tekst. Meten: bij de volgende 2 KNMI-waarschuwingen `tot` tegen de tekst (verschil 0 u).
+
+## L-SC-028 · uurbijsturing windstoten niet meenemen over een model-/locatiesprong (voorspelling, H-SC-14)
+- Status: **open** (01-11 15:40; raakt de bijgestelde windverwachting die de windmelding voedt → Ruud beslist).
+- Onderbouwing (01-11, n=1): bij de locatiewissel van 11:45:39 ging `model` 17,6 → 4,7 km/u. `windcorrectie.bijsturing` rekent de fout tegen het model van het laatste meetmoment (17,6 × 0,72 = 12,7 tegen gemeten 6,3 → fout −6,4) en telt de helft (−3,1) absoluut op bij de nieuwe waarde 4,7 × 0,72 = 3,4 → **0,3 km/u** gedurende 9 min (gemeten daarna 7,8). Melding bleef goed door de stationsmeting (max van beide).
+- Voorstel: als de modelwaarde sinds de laatste meting > 40 % verandert of de locatie wisselde, de bijsturing relatief toepassen (fout/verwacht × nieuwe verwachting) of laten vervallen tot de volgende meting. Test met de reeks van 01-11.
+- Verwacht effect: geen onrealistisch lage (of hoge) stoten na een locatiewissel; bij storm voorkomt het tot 15 km/u te lage verwachting na een modelsprong. Meten: per locatiewissel/modelsprong de fout van de eerste verwachting tegen de volgende stationsmeting (nu 7,5 km/u te laag).
