@@ -672,3 +672,12 @@ laatste ronde: 01-11 03:45, gemeten t/m 01-11 03:35
 - Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-13 (KNMI-slotlabel; wacht op een waarschuwing), H-SC-11 geparkeerd.
 
 laatste ronde: 01-11 07:42, gemeten t/m 01-11 07:35
+
+## 01-11 11:40 · tussenronde
+- **HA-herstart 09:15**, draait 0.60.3; locatie 10 s "laatst bekend" bij de herstart, daarna tracker. `onderweg` aan sinds 11:35 (Ruud onderweg), locatie via tracker verwerkt. Geen Stormchase-fouten. Geen release.
+- Geen onweer (0 inslagen < 50 km, CAPE 0, LI 11,8, kans 0 %), droog. Bronstatus "alles in orde", niveau groen, radar actueel.
+- **Windstoten 07:44-11:34 (n=21): bias +1,79, MAE 2,08 km/u** (4/21 te laag; gemeten 1,8-9,3). Modelverversing 10:45 sprong 6,2 → 13,6 km/u bij gemeten 6,1-8,2 (grootste fout +5,4), daarna 9-11 bij 6-9 → model boven de meting bij aantrekkende middagwind; alleen noteren (H-SC-9-beeld).
+- Stilstand: geen (unknown = geen onweer/regen).
+- Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-13 (KNMI-slotlabel; wacht op een waarschuwing), H-SC-11 geparkeerd.
+
+laatste ronde: 01-11 11:45, gemeten t/m 01-11 11:35

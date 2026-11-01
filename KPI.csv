@@ -581,3 +581,5 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-11-01 03:40,DAG,sc_stilstand_functies,0,0,"regen-uitkomsten 42 sinds 28-10 = geen regen sinds 27-10 (geen stilstand); aankomst/passage unknown = geen onweer; vooruitblik 'geen kijker' (bewust L-SC-020)"
 2026-11-01 07:40,TUSSEN,sc_windstoten_bias_kmh,1.71,23,"03:44-07:34 vooraf; MAE 1.79; 1/23 te laag; gemeten 0.0-5.5 (zeer zwakke wind), factor 0.65 tijdvak"
 2026-11-01 07:40,TUSSEN,sc_beschikbaarheid,1,1,"geen onweer (0 inslagen < 50 km, CAPE 10, LI 12.1), droog; bronstatus alles in orde; buienradar 1 DNS-fout 04:22 (reserve, niet nodig); groen"
+2026-11-01 11:40,TUSSEN,sc_windstoten_bias_kmh,1.79,21,"07:44-11:34; MAE 2.08; 4/21 te laag; gemeten 1.8-9.3; 10:45 modelsprong naar 13.6 bij gemeten 6.1-8.2"
+2026-11-01 11:40,TUSSEN,sc_beschikbaarheid,1,1,"geen onweer (0 inslagen < 50 km, CAPE 0, LI 11.8), droog; bronstatus alles in orde; herstart 09:15 10 s laatst bekend; onderweg aan 11:35, tracker"
