@@ -651,3 +651,15 @@ laatste ronde: 31-10 19:42, gemeten t/m 31-10 19:45
 - Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-13 (KNMI-slotlabel; wacht op een waarschuwing), H-SC-11 geparkeerd.
 
 laatste ronde: 31-10 23:45, gemeten t/m 31-10 23:45
+
+## 01-11 03:40 · dagafsluiting 31-10
+- **0.60.3 actief** (HA-herstarts 16:30 en 21:32), geen purge/repack zichtbaar, geen Stormchase-logregels. Geen release (geen bug gevonden, geen voorstel met akkoord).
+- **Dag 31-10:** geen onweer (0 inslagen < 50 km de hele dag, kans 0 %), droog (laatste regen 27-10), niveau groen, geen KNMI-waarschuwing. Bronnen: 0 fouten op 31-10 (alle `laatste_fout_op` ≤ 30-10), radar 2 min oud, locatie via tracker (21:32 10 s "laatst bekend" bij herstart).
+- **Windstoten 31-10 (vooraf, n=142): bias −0,82, MAE 1,77 km/u** (92/142 te laag); dag 08-20 −0,28 / 1,70, nacht −1,39 / 1,83 (ochtendwind 03-08 u loopt achter, traagheidsbeeld H-SC-9). **7 d (25..31-10) +0,25** (was +1,17 met frontdag 24-10). Nacht 23:54-03:34 (n=23) −0,56 / MAE 1,19.
+- **L-SC-026 geverifieerd:** 31-10 0 u "meteoalarm hapert" (MeteoAlarm "rust (niet nodig)" ondanks op_rij_mislukt 1). Lege `laatste_fout` is de bewaarde fout van 29-10.
+- L-SC-027 (eindtijd `tot`), L-SC-021/022/024 (front/nadert) en L-SC-023 wachten op een KNMI-waarschuwing, front of onweer.
+- Stilstand: geen (regen-uitkomsten staan op 42 sinds 28-10 omdat het sinds 27-10 droog is; unknown = geen onweer/regen).
+- Meetbaarheid: `sensor.stormchase_bronstatus` staat niet in de recorder → uren "hapert" alleen uit de rondes te reconstrueren (bekend, geen wijziging in HA).
+- Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-13 (KNMI-slotlabel; wacht op een waarschuwing), H-SC-11 geparkeerd.
+
+laatste ronde: 01-11 03:45, gemeten t/m 01-11 03:35

@@ -574,3 +574,8 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-10-31 19:40,TUSSEN,sc_beschikbaarheid,1,1,"geen onweer (0 inslagen < 50 km, CAPE 0, kans 0 %), droog; bronstatus alles in orde; radar 1 min; niveau groen; draait 0.60.3 (HA-start 16:30)"
 2026-10-31 23:40,TUSSEN,sc_windstoten_bias_kmh,0.10,24,19:44-23:34 vooraf; MAE 0.62; 14/24 te laag; gemeten 3.2-9.5 (rustige nacht)
 2026-10-31 23:40,TUSSEN,sc_beschikbaarheid,1,1,"geen onweer (0 inslagen < 50 km, CAPE 10, kans 0 %), droog; bronstatus alles in orde; radar 1 min; niveau groen; draait 0.60.3 (HA-start 21:32)"
+2026-11-01 03:40,DAG,sc_windstoten_bias_dag_kmh,-0.82,142,"31-10 vooraf (stand voor elke stationsmeting); MAE 1.77; 92/142 te laag; dag 08-20 -0.28 / MAE 1.70 (n=72), nacht -1.39 / MAE 1.83 (n=70); gemeten 3.2-20.4"
+2026-11-01 03:40,DAG,sc_windstoten_bias_7d_kmh,0.25,7,"25..31-10 dagwaarden 0.67/0.27/0.47/0.46/1.07/-0.38/-0.82; 24..30-10 was +1.17 (frontdag 24-10 valt eruit)"
+2026-11-01 03:40,TUSSEN,sc_windstoten_bias_kmh,-0.56,23,"23:54-03:34 vooraf; MAE 1.19; 14/23 te laag; gemeten 4.8-9.8 (01:04-01:54 8-10 tegen 6.7-7.3)"
+2026-11-01 03:40,DAG,sc_beschikbaarheid,1,1,"31-10: geen onweer (0 inslagen < 50 km hele dag, kans 0 %), droog (laatste regen 27-10); niveau groen; weerwaarschuwing uit; 0 bronfouten na 30-10 15:17 (alle laatste_fout_op <= 30-10); radar 2 min; geen Stormchase-logregels"
+2026-11-01 03:40,DAG,sc_stilstand_functies,0,0,"regen-uitkomsten 42 sinds 28-10 = geen regen sinds 27-10 (geen stilstand); aankomst/passage unknown = geen onweer; vooruitblik 'geen kijker' (bewust L-SC-020)"
