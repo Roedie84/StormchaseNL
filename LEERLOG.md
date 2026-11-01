@@ -663,3 +663,12 @@ laatste ronde: 31-10 23:45, gemeten t/m 31-10 23:45
 - Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-13 (KNMI-slotlabel; wacht op een waarschuwing), H-SC-11 geparkeerd.
 
 laatste ronde: 01-11 03:45, gemeten t/m 01-11 03:35
+
+## 01-11 07:40 · tussenronde
+- Draait 0.60.3, geen Stormchase-fouten. Geen release.
+- Geen onweer (0 inslagen < 50 km, CAPE 10, LI 12,1, kans 0 %), droog. Bronstatus "alles in orde"; buienradar (reserve, niet nodig) 1 DNS-fout 04:22 bij de netwerkhapering, groen.
+- **Windstoten 03:44-07:34 (vooraf, n=23): bias +1,71, MAE 1,79 km/u** (1/23 te laag; gemeten 0-5,5). Bij bijna windstil loopt het model (factor 0,65) boven de meting; absolute fout klein → alleen noteren (H-SC-9-beeld).
+- Stilstand: geen (unknown = geen onweer/regen).
+- Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-13 (KNMI-slotlabel; wacht op een waarschuwing), H-SC-11 geparkeerd.
+
+laatste ronde: 01-11 07:42, gemeten t/m 01-11 07:35
