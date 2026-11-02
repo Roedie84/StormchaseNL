@@ -209,3 +209,10 @@ Status: open / akkoord / afgewezen / gebouwd vX / geverifieerd / teruggedraaid. 
 - Onderbouwing (01-11, n=2 perioden, ~130 min): station Hupsel (3,4 km) mat 19:00-19:30 en 21:50-23:30 neerslag (0,01-0,51 mm/u, weercode 51/57 = motregen); de KNMI-nowcast gaf 0,0 en `neerslagintensiteit` staat sinds 28-10 01:00 onafgebroken op 0,0. `regenbeeld` zei "Droog, komende 2 uur geen regen" terwijl het motregende; alleen `weather.stormchase` (KNMI-uurmodel) toonde `rainy`. Radar ziet lage motregen onder de bundel niet: bekend natuurkundig gat, geen ophaalfout.
 - Voorstel: als het station ≤ 10 km `neerslag_intensiteit` ≥ 0,1 mm/u meet of een motregen-/regencode (50-67) geeft, terwijl de nowcast < 0,1 geeft: `regenbeeld` "Lichte motregen (station), radar droog", `regen_verwacht` aan, en in de regenvalidatie als "regen (station)" boeken in plaats van droog. Drempel en meldgedrag ongewijzigd voor radarregen.
 - Verwacht effect: geen "droog" meer bij gemeten motregen; regenvalidatie telt ook motregen. Meten: minuten met station-neerslag > 0 en regenbeeld "droog" (01-11: ~130 min → 0), en het aantal valse "regent"-minuten (station > 0 maar droog daarna; doel < 10 %).
+
+## L-SC-030 · regenuitkomst na verplaatsing niet meetellen (meetfout)
+- Status: **te bouwen in de dagafsluiting** (02-11 07:40; zelf te bouwen: meetfout. Afwijking: de uitkomst voedt `regencorrectie.leer`, dus de getoonde start verschuift ongemerkt mee).
+- Onderbouwing (02-11, n=1 + code): `Validatie.voorspel("regen", ...)` bewaart geen locatie; `uitgekomen` rekent af op het eerste "regent" op de plek van dat moment. Voorspelling 06:17 "over 57 min" (Eibergen) werd afgerekend op 06:42 terwijl de locatie ~13 km westwaarts reed: −31,7 min. Voor passage bestaat `_km_tussen` al, voor regen niet.
+- Voorstel: bij de regenvoorspelling de locatie bewaren; ligt de plek bij afronding > 5 km verder, dan de voorspelling vervallen zonder uitkomst.
+- Verwacht effect: geen uitkomsten over een andere plek in de leerset; `afwijking_min` niet vervuild door ritten.
+- Meten: test + bij de eerstvolgende rit in de regen geen nieuwe uitkomst; het bestaande −31,7-punt valt vanzelf uit het venster (n=60).

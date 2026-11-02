@@ -598,3 +598,8 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-11-02 03:40,DAG,sc_beschikbaarheid,1,1,"01-11: geen onweer (0 inslagen < 50 km hele dag, ensemble 0 %), niveau groen, geen KNMI-waarschuwing; bronstatus alles in orde; KNMI 2x fetchfout bij DNS-storing 11:50/12:50 (extern); herstarts 09:15/21:20 schoon"
 2026-11-02 03:40,TUSSEN,sc_motregen_gemist_min,20,2,"station Hupsel 00:20 0.03 mm/u en 01:10 0.018 mm/u, ww 51 00:50-01:00; nowcast neerslagintensiteit 0.0, regenbeeld droog (H-SC-15)"
 2026-11-02 03:40,DAG,sc_stilstand_functies,0,0,"aankomst/passage/regen_begint unknown = geen onweer/regen op de radar; vooruitblik 'geen kijker' (bewust L-SC-020)"
+2026-11-02 07:40,TUSSEN,sc_regen_bui,1,1,"nowcast op de actieve locatie 06:42-07:22 (piek 4.6 mm/u); eerste regen sinds 27-10"
+2026-11-02 07:40,TUSSEN,sc_regen_afwijking_min,-31.7,1,"uitkomst 06:17 'over 57' kwam na 25 min, MAAR locatie reed 06:36-06:50 ~13 km west: geen zuivere uitkomst; L-SC-030"
+2026-11-02 07:40,TUSSEN,sc_windstoten_bias_kmh,1.02,24,"03:50-07:44 vooraf; MAE 1.38; 4/24 te laag; na locatiewissel 06:36 +0.74 (n=7), geen modelsprong (3.1->3.6)"
+2026-11-02 07:40,TUSSEN,sc_beschikbaarheid,1,1,"0 inslagen < 50 km, ensemble 0 %, groen; bronstatus alles in orde; 0 Stormchase-fouten; herstart 06:35 schoon"
+2026-11-02 07:40,TUSSEN,sc_stilstand_functies,0,0,"aankomst/passage unknown = geen onweer"

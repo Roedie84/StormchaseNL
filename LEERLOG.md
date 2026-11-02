@@ -721,3 +721,15 @@ laatste ronde: 01-11 23:40, gemeten t/m 01-11 23:43
 
 laatste ronde: 02-11 03:40, gemeten t/m 02-11 03:40
 
+
+## 02-11 07:40 · tussenronde
+- Draait 0.60.3, geen fouten (herstart 06:35 schoon). Geen release. Geen onweer, groen, bronstatus in orde.
+- **Eerste bui sinds 27-10:** nowcast 06:42-07:22 (piek 4,6 mm/u). Volgende uitkomst staat open (rond 08:05, "over 20 min").
+- **Regenstart lijkt −31,7 min fout, maar is geen fout van de nowcast.** Voorspelling 06:17 "over 57 min" gold voor Eibergen; 06:36-06:50 reed de locatie ~13 km naar het westen (Ruurlo), richting de bui, en daar regende het om 06:42. `validatie.uitgekomen` rekent de oude voorspelling tegen een andere plek af; de uitkomst staat nu in de leerset (`afwijking_min` kaal 11,0 → 11,5, verschuiving 8,8 → 9,3). → **L-SC-030** (meetfout; zelf te bouwen in de dagafsluiting). H-SC-3: deze bui telt niet (n ongewijzigd).
+- **H-SC-14 (bijsturing na locatiewissel):** wissel 06:36-06:50 zonder modelsprong (3,1 → 3,6), na de wissel bias +0,74 (n=7): geen uitslag, n blijft 1.
+- **H-SC-15:** station Hupsel staat nu op 13,9 km (> 10 km uit L-SC-029): bij Ruurlo zou de voorgestelde motregenregel niet gelden; weercode 57 om 07:30 komt van Twenthe (36,6 km).
+- Windstoten 03:50-07:44 (n=24): bias **+1,02**, MAE 1,38 km/u (4/24 te laag).
+- Stilstand: geen.
+- Hypotheses: H-SC-3 (regenstart; wacht op zuivere bui), H-SC-14 (n=1), H-SC-15 (motregen). H-SC-13, H-SC-11 geparkeerd.
+
+laatste ronde: 02-11 07:40, gemeten t/m 02-11 07:50
