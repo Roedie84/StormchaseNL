@@ -762,11 +762,11 @@ laatste ronde: 02-11 15:40, gemeten t/m 02-11 15:50
 ## 02-11 19:40 · tussenronde
 - Draait 0.61.0, geen fouten; herstarts 17:05, 18:34, 19:28 schoon. Geen onweer, groen, CAPE 0. Geen release; L-SC-030 blijft voor de dagafsluiting.
 - **Open-Meteo hersteld:** laatste 503 om 16:33, sinds ~17:03 weer data. Bronstatus alles in orde.
-- **Stilstaand model kost de meeste fout:** 15:45-17:03 windstoten vooraf **+10,86** (n=8, 0/8 te laag): 13,6-14,2 tegen 1-5 gemeten. De uurbijsturing dempte dat niet, het model was immers ongewijzigd oud.
+- **Stilstaand model kost de meeste fout:** 15:45-17:03 windstoten vooraf **+10,86** (n=8, 0/8 te laag): 13,6-14,2 tegen 1-5 gemeten. De uurbijsturing dempte dat niet; waarom niet is nog niet nagelopen in de code.
 - **Na herstel:** modelsprong 14,2 → 6,6; 17:04-17:50 **+0,9** (n=5). Daarna trok de wind aan: 17:53-19:35 **−3,19** (n=10, 9/10 te laag), gemeten tot 13,7. Verwachting zakte 18:05 ~8 min naar 2,7; oorzaak niet vastgesteld, n=1.
 - **H-SC-14:** bijsturing vervalt netjes bij een modelsprong: +0,9 direct erna is de derde uitslag. Geen locatiewissel in deze ronde; n=3 voor model, n=2 voor locatie.
 - H-SC-15: geen neerslag gemeten, geen uitslag. H-SC-3: geen nieuwe regenstart. Stilstand: geen.
-- Meetbaar houden: de leerronde kan de bronleeftijd van de windverwachting niet zien in de history (geen attributen). Voor de dagafsluiting: hoort bij een voorstel om bij een oud model de bijsturing wél op gemeten wind te laten leunen? Eerst n > 1 storing.
+- Meetbaarheid: de leeftijd van de windverwachting staat niet in de history (geen attributen). Dagafsluiting: nalopen waarom de bijsturing bij een oud model niet dempt; voorstel pas na n > 1 storing.
 - Hypotheses: H-SC-3 (regenstart), H-SC-14 (bijsturing na model-/locatiesprong; n=3/2), H-SC-15 (motregen). H-SC-13, H-SC-11 geparkeerd.
 
 laatste ronde: 02-11 19:40, gemeten t/m 02-11 19:50
