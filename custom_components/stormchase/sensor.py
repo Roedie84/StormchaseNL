@@ -589,6 +589,8 @@ class MeteoSensor(CoordinatorEntity[MeteoCoordinator], SensorEntity):
             # 0.59.0 (L-SC-017): helft van de laatste fout, aflopend over 3 uur
             "bijsturing": wind.get("bijsturing"),
             "bijsturing_fout": wind.get("bijsturing_fout"),
+            # 0.61.0 (L-SC-028): "modelsprong" als de bijsturing vervalt
+            "bijsturing_vervallen": wind.get("bijsturing_vervallen"),
             "komende_uren": wind.get("komende_uren"),
             # 0.60.0 (L-SC-022): tijdens een front de verhouding van dat front
             "factor_front": wind.get("factor_front"),

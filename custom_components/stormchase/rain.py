@@ -38,7 +38,7 @@ from .const import (
     METEO_URL,
     RAIN_INTERVAL,
 )
-from .buienreeks import lees_reeks
+from .buienreeks import lees_reeks, met_station_regen, station_regen
 from .regencorrectie import corrigeer, leer
 from .knmi_api import NietGevonden, poging, vijf_minuten_slot
 from .knmi_grid import radarcel
@@ -80,6 +80,8 @@ class RainCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdateC
         self._was_verwacht: bool | None = None
         self.validatie = None  # wordt na het aanmaken gezet
         self.knmi = None  # KnmiBronnen, wordt na het aanmaken gezet
+        # 0.61.0 (L-SC-029): MetingCoordinator, voor motregen van het station
+        self.meting = None
 
     @property
     def drempel(self) -> float:
@@ -281,16 +283,32 @@ class RainCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdateC
             ],
         }
 
+        # 0.61.0 (L-SC-029): de radar zegt droog, maar het station binnen
+        # 10 km meet motregen: dan regent het nu. De verwachting van de radar
+        # (begint_over, en de melding van een bui die eraan komt) blijft
+        # staan; radarregen is ongewijzigd.
+        nu = dt_util.utcnow().timestamp()
+        station = None
+        if not regent:
+            station = station_regen(getattr(self.meting, "data", None), drempel, nu)
+        data = met_station_regen(data, station)
+        regent = data["regent"]
+
         self.onthoud(data)
         self._vuur_event(data)
 
         # Voorspelling vastleggen en nakijken: begon het regenen wanneer we
         # dachten?
         if self.validatie is not None:
-            nu = dt_util.utcnow().timestamp()
             self.validatie.verlopen(nu)
 
-            if regent:
+            if regent and station is not None:
+                # 0.61.0 (L-SC-029): als "regen (station)" boeken, niet droog
+                self.validatie.uitgekomen(
+                    "regen", nu,
+                    {"intensiteit": station.get("intensiteit"), "regen_bron": "station"},
+                )
+            elif regent:
                 self.validatie.uitgekomen(
                     "regen", nu, {"intensiteit": nu_intensiteit}
                 )

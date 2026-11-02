@@ -189,6 +189,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     storm.opslag = opslag
     # Regen en onweer delen dezelfde lijst met voorspellingen
     regen.validatie = storm.validatie
+    # 0.61.0 (L-SC-029): motregen van het nabije station telt als regen
+    regen.meting = meting
 
     # 0.47.0: de toestand van voor de herstart terugzetten, voor de eerste
     # ophaalronde en voordat de notifier luistert, zodat er niets dubbel gemeld

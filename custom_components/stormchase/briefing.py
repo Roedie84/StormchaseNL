@@ -205,6 +205,11 @@ class Briefing:
             return None
 
         data = regen.data
+        # 0.61.0 (L-SC-029): motregen gemeten door het station, radar droog
+        if data.get("regent") and data.get("regen_bron") == "station":
+            motregen = (data.get("station_regen") or {}).get("motregen", True)
+            soort = "Het motregent" if motregen else "Het regent licht"
+            return f"{soort} (gemeten door het station), radar droog."
         if data.get("regent"):
             deel = f"Het regent, {data['intensiteit']:.1f} mm/u".replace(".", ",")
             if data.get("stopt_over"):

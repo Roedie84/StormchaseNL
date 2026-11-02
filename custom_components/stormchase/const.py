@@ -289,6 +289,14 @@ DEFAULT_RAIN_LEAD = 10          # minuten vooruit waarschuwen
 DEFAULT_RAIN_THRESHOLD = 0.1    # mm/u; hieronder noemen we het droog
 
 RAIN_INTERVAL = timedelta(minutes=5)
+# 0.61.0 (L-SC-029): motregen die het station meet telt als "regent nu", ook
+# als de radar/nowcast droog zegt (lage motregen valt onder de bundel). Alleen
+# een station binnen STATION_REGEN_MAX_KM, met een meting van hooguit
+# STATION_REGEN_MAX_S oud, en neerslag vanaf de regendrempel of een
+# motregen-/regencode (WMO 4680: 50-67).
+STATION_REGEN_MAX_KM = 10.0
+STATION_REGEN_MAX_S = 30 * 60
+STATION_REGEN_CODES = range(50, 68)
 BUIENRADAR_URL = "https://gpsgadget.buienradar.nl/data/raintext"
 
 EVENT_RAIN_INCOMING = f"{DOMAIN}_rain_incoming"
@@ -467,6 +475,15 @@ WINDBIJSTURING_AANDEEL = 0.5
 WINDBIJSTURING_MAX_KMH = 15.0
 WINDBIJSTURING_AFLOOP_S = 3 * 3600
 WINDBIJSTURING_MAX_LEEFTIJD_S = 3600
+# 0.61.0 (L-SC-028): na een modelsprong (locatiewissel of nieuwe modelrun)
+# vervalt de bijsturing tot de volgende stationsmeting. De fout is geleerd
+# tegen de modelwaarde van het meetmoment; bij een andere modelwaarde klopt
+# een absolute correctie niet meer (01-11 11:45: model 17,6 -> 4,7 km/u gaf
+# 0,3 km/u bij 7,8 gemeten). Sprong: meer dan WINDBIJSTURING_SPRONG_DEEL
+# verschil met de modelwaarde van het meetmoment en minstens
+# WINDBIJSTURING_SPRONG_MIN_KMH (bij weinig wind is 40 % niets).
+WINDBIJSTURING_SPRONG_DEEL = 0.40
+WINDBIJSTURING_SPRONG_MIN_KMH = 3.0
 # 0.60.0 (L-SC-022): tijdens een front telt de verhouding gemeten/model van
 # dat front zelf (sinds het begin ervan) in plaats van de geleerde factor,
 # zodra er minstens zoveel stationsparen in het front liggen (~40 minuten).

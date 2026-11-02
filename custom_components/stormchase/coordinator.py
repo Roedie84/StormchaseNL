@@ -1306,6 +1306,8 @@ class MeteoCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
                 _komende_uurstoten(hourly, nu), nu,
                 # 0.60.0 (L-SC-022): tijdens een front de frontfactor
                 wind.get("factor_toegepast", wind.get("factor")),
+                # 0.61.0 (L-SC-028): na een modelsprong geen bijsturing
+                model,
             )
         ]
         return wind

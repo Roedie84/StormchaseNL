@@ -57,6 +57,16 @@ houden we de verhouding gemeten/model bij en schalen de modelwaarde daarmee.
   zelf (`factor`, `factor_bron`) en het leren blijven ongewijzigd; de
   toegepaste staat in `factor_toegepast`.
 
+- 0.61.0 (L-SC-028): na een modelsprong vervalt de bijsturing tot de volgende
+  stationsmeting. De fout is geleerd tegen de modelwaarde van het meetmoment;
+  wisselt de locatie (ander punt, ander station) of springt het model, dan
+  klopt die absolute correctie niet meer. 01-11 11:45: model 17,6 -> 4,7 km/u,
+  fout -6,4 van de oude plek gaf 3,4 - 3,1 = 0,3 km/u (gemeten daarna 7,8).
+  Sprong: meer dan 40 % en minstens 3 km/u verschil (const.py). Zonder
+  bijsturing blijft model x factor staan, zoals voor 0.59.0; de volgende meting
+  koppelt weer aan de nieuwe modelwaarde. Relatief toepassen
+  (fout/verwacht x nieuwe verwachting) gaf in dat geval 2,5 km/u: verder weg.
+
 Opslag: per paar [tijd, gemeten, model, front]. Paren uit 0.51.x hebben geen
 frontvlag; bij het terugzetten kijken we dan alsnog naar de stootsprong.
 
@@ -71,6 +81,8 @@ from statistics import median
 try:
     from .const import (
         FRONT_DRUK_1U_HPA,
+        WINDBIJSTURING_SPRONG_DEEL,
+        WINDBIJSTURING_SPRONG_MIN_KMH,
         WINDBIJSTURING_AANDEEL,
         WINDBIJSTURING_AFLOOP_S,
         WINDBIJSTURING_MAX_KMH,
@@ -88,6 +100,8 @@ try:
 except ImportError:  # in de tests zonder pakketstructuur
     from const import (
         FRONT_DRUK_1U_HPA,
+        WINDBIJSTURING_SPRONG_DEEL,
+        WINDBIJSTURING_SPRONG_MIN_KMH,
         WINDBIJSTURING_AANDEEL,
         WINDBIJSTURING_AFLOOP_S,
         WINDBIJSTURING_MAX_KMH,
@@ -309,7 +323,8 @@ class Windcorrectie:
             waarde = round(model * toegepast, 1)
         # 0.59.0 (L-SC-017): de helft van de laatste fout erbij, aflopend
         # Alleen op de bijgestelde waarde: zonder factor blijft het kale model
-        sturing = (self.bijsturing(nu, toegepast) if toegepast is not None
+        # 0.61.0 (L-SC-028): met de modelwaarde van nu, voor de sprongtoets
+        sturing = (self.bijsturing(nu, toegepast, model) if toegepast is not None
                    else {"kmh": 0.0, "start": 0.0, "fout": None})
         if waarde is not None and sturing["kmh"]:
             waarde = round(max(0.0, waarde + sturing["kmh"]), 1)
@@ -330,13 +345,17 @@ class Windcorrectie:
             # 0.59.0 (L-SC-017)
             "bijsturing": sturing["kmh"],
             "bijsturing_fout": sturing["fout"],
+            # 0.61.0 (L-SC-028): "modelsprong" als de bijsturing vervalt
+            "bijsturing_vervallen": sturing.get("vervallen"),
             # 0.60.0 (L-SC-022)
             "factor_front": factor_front,
             "paren_lopend_front": paren_front_nu,
             "factor_toegepast": toegepast,
         }
 
-    def bijsturing(self, nu: float, factor: float | None = None) -> dict:
+    def bijsturing(
+        self, nu: float, factor: float | None = None, model: float | None = None
+    ) -> dict:
         """0.59.0 (L-SC-017): bijsturing met de fout van het laatste uur.
 
         fout = laatste stationsmeting - verwachting van dat moment (model x
@@ -344,15 +363,23 @@ class Windcorrectie:
         bijsturing is WINDBIJSTURING_AANDEEL x fout, begrensd, en loopt
         lineair af naar 0 over WINDBIJSTURING_AFLOOP_S na de meting. Geen
         meting, of een ouder dan WINDBIJSTURING_MAX_LEEFTIJD_S: geen bijsturing.
+        0.61.0 (L-SC-028): `model` is de modelwaarde van nu; wijkt die sterk
+        af van die van het meetmoment, dan vervalt de bijsturing.
         """
-        return bijsturing(self.laatste, nu, factor)
+        return bijsturing(self.laatste, nu, factor, model)
 
-    def bijgestuurde_uren(self, uren: list, nu: float, factor: float | None = None) -> list:
-        """Komende uurstoten [(epoch, model)] bijgesteld en bijgestuurd."""
+    def bijgestuurde_uren(
+        self, uren: list, nu: float, factor: float | None = None, model: float | None = None
+    ) -> list:
+        """Komende uurstoten [(epoch, model)] bijgesteld en bijgestuurd.
+
+        0.61.0 (L-SC-028): `model` is de modelwaarde van nu; na een sprong
+        vervalt de bijsturing ook voor de komende uren.
+        """
         if factor is None:
             return [(t, round(float(m), 1)) for t, m in uren if m is not None]
         f = factor
-        start = self.bijsturing(nu, factor)["start"]
+        start = self.bijsturing(nu, factor, model)["start"]
         laatste_t = self.laatste[0] if self.laatste else nu
         uit = []
         for t, model in uren:
@@ -440,22 +467,48 @@ def _afloop(sinds_s: float) -> float:
     return max(0.0, 1.0 - sinds_s / WINDBIJSTURING_AFLOOP_S)
 
 
-def bijsturing(laatste, nu: float, factor: float | None = None) -> dict:
-    """0.59.0 (L-SC-017): {"kmh": nu, "start": bij de meting, "fout"}."""
+def modelsprong(model_toen: float | None, model_nu: float | None) -> bool:
+    """0.61.0 (L-SC-028): is de modelwaarde sinds de meting gesprongen?
+
+    Meer dan WINDBIJSTURING_SPRONG_DEEL van de waarde van het meetmoment en
+    minstens WINDBIJSTURING_SPRONG_MIN_KMH. Onbekend: geen sprong.
+    """
+    try:
+        toen, nu_ = float(model_toen), float(model_nu)
+    except (TypeError, ValueError):
+        return False
+    verschil = abs(nu_ - toen)
+    if verschil < WINDBIJSTURING_SPRONG_MIN_KMH:
+        return False
+    return toen <= 0 or verschil / toen > WINDBIJSTURING_SPRONG_DEEL
+
+
+def bijsturing(
+    laatste, nu: float, factor: float | None = None, model: float | None = None
+) -> dict:
+    """0.59.0 (L-SC-017): {"kmh": nu, "start": bij de meting, "fout"}.
+
+    0.61.0 (L-SC-028): met `model` (de modelwaarde van nu) vervalt de
+    bijsturing na een modelsprong: kmh en start 0, de oude fout blijft
+    zichtbaar, "vervallen": "modelsprong".
+    """
     leeg = {"kmh": 0.0, "start": 0.0, "fout": None}
     if not laatste:
         return leeg
     try:
-        tijd, gemeten, model = (float(x) for x in laatste)
+        tijd, gemeten, model_meting = (float(x) for x in laatste)
     except (TypeError, ValueError):
         return leeg
     leeftijd = nu - tijd
     if leeftijd > WINDBIJSTURING_MAX_LEEFTIJD_S or leeftijd < -300:
         return leeg
-    verwacht = model * (1.0 if factor is None else factor)
+    verwacht = model_meting * (1.0 if factor is None else factor)
     fout = gemeten - verwacht
     start = max(-WINDBIJSTURING_MAX_KMH,
                 min(WINDBIJSTURING_MAX_KMH, WINDBIJSTURING_AANDEEL * fout))
+    if model is not None and modelsprong(model_meting, model):
+        return {"kmh": 0.0, "start": 0.0, "fout": round(fout, 1),
+                "vervallen": "modelsprong"}
     return {"kmh": round(start * _afloop(leeftijd), 1),
             "start": round(start, 2), "fout": round(fout, 1)}
 

@@ -383,6 +383,9 @@ def metingen(
         "wolkenbasis": round(hc * 0.3048) if hc is not None else None,
         "neerslag": round(rg / 6, 2) if rg is not None else None,
         "neerslag_intensiteit": rg,
+        # 0.61.0 (L-SC-029): welk station de neerslag mat en hoe ver weg
+        "neerslag_station": (per_parameter.get("rg") or {}).get("station"),
+        "neerslag_station_afstand_km": (per_parameter.get("rg") or {}).get("afstand_km"),
         "neerslag_1u": waarden.get("R1H"),
         "weercode": code,
         "onweer": code in WW_ONWEER if code is not None else None,

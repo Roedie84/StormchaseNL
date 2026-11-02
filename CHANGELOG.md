@@ -5,6 +5,13 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.61.0] — 2026-11-02
+
+### Gewijzigd
+
+- **Windstoten: geen bijsturing meer na een modelsprong (L-SC-028).** De uurbijsturing (0.59.0) telt de helft van de laatste fout (gemeten min verwachting op het meetmoment) absoluut bij de verwachting. Na een locatiewissel of een sprong in het model klopt die fout niet meer: op 01-11 11:45 ging het model bij de wissel 17,6 → 4,7 km/u en gaf de fout van de oude plek (−6,4) een verwachting van **0,3 km/u** (gemeten daarna 7,8). Wijkt de modelwaarde van nu meer dan 40 % (en minstens 3 km/u) af van die van het meetmoment, dan vervalt de bijsturing tot de volgende stationsmeting; dan geldt model × factor (hier 3,4 km/u). Ook voor de komende uren. Nieuw attribuut `bijsturing_vervallen` ("modelsprong") op de windstoten. Relatief toepassen (fout/verwacht × nieuwe verwachting) gaf in dit geval 2,5 km/u en is daarom niet gekozen. Factor, leren en de windmelding (hoogste van verwachting en stationsmeting) zijn ongewijzigd.
+- **Motregen van het nabije station telt als "regent nu" (L-SC-029).** Op 01-11 mat Hupsel (3,4 km) ~130 min motregen (0,01-0,51 mm/u, weercode 51/57) terwijl de nowcast 0,0 gaf en het regenbeeld "Droog, komende 2 uur geen regen" zei: lage motregen valt onder de radarbundel. Meet een station binnen 10 km (meting hooguit 30 min oud) neerslag vanaf de regendrempel of een motregen-/regencode (50-67) terwijl de radar droog zegt, dan: `regent` aan (dus *Regen verwacht* aan), regenbeeld "Lichte motregen (station Hupsel), radar droog", en in de regenvalidatie geboekt als regen (`regen_bron: station`). De bui die de radar ziet aankomen blijft staan (`begint_over` en de melding "regen komt eraan" ongewijzigd) en verschijnt als volgende bui. Nieuwe attributen `regen_bron` (radar/station) en `station_regen` op *Regen verwacht*; de KNMI-meting geeft nu ook `neerslag_station` en `neerslag_station_afstand_km`. Radarregen, drempels en meldgedrag daarvan zijn ongewijzigd.
+
 ## [0.60.3] — 2026-10-31
 
 ### Opgelost

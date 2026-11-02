@@ -183,6 +183,10 @@ class RainExpectedBinarySensor(CoordinatorEntity[RainCoordinator], BinarySensorE
             return {}
         return {
             "regent_nu": data.get("regent"),
+            # 0.61.0 (L-SC-029): "station" als de radar droog zegt maar het
+            # station binnen 10 km motregen meet
+            "regen_bron": data.get("regen_bron"),
+            "station_regen": data.get("station_regen"),
             "begint_over_minuten": data.get("begint_over"),
             "stopt_over_minuten": data.get("stopt_over"),
             "intensiteit_mm_u": data.get("intensiteit"),

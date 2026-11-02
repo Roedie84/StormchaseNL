@@ -158,7 +158,9 @@ async def async_get_config_entry_diagnostics(
             **_kort(
                 regen_data,
                 ("bron", "intensiteit", "regent", "begint_over", "begint_over_kaal",
-                 "regencorrectie", "stopt_over", "volgende_bui_over", "piek"),
+                 "regencorrectie", "stopt_over", "volgende_bui_over", "piek",
+                 # 0.61.0 (L-SC-029)
+                 "regen_bron", "station_regen"),
             ),
             # De volledige reeks, om te kunnen zien of het parsen klopte
             "verwachting": (regen_data or {}).get("verwachting"),
