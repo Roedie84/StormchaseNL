@@ -770,3 +770,13 @@ laatste ronde: 02-11 15:40, gemeten t/m 02-11 15:50
 - Hypotheses: H-SC-3 (regenstart), H-SC-14 (bijsturing na model-/locatiesprong; n=3/2), H-SC-15 (motregen). H-SC-13, H-SC-11 geparkeerd.
 
 laatste ronde: 02-11 19:40, gemeten t/m 02-11 19:50
+
+
+## 02-11 23:40 · tussenronde
+- Draait 0.61.0, geen fouten; zes herstarts sinds 19:40 schoon. Geen onweer, groen, CAPE 20. Bronstatus in orde, radarbeeld vers. Geen release; L-SC-030 blijft voor de dagafsluiting.
+- **Windstoten vooraf 19:44-23:44:** bias **+0,19**, MAE **1,41** (n=24, 11/24 te laag): het beste blok van vandaag, met een vers model en zonder bui.
+- **Laatste halfuur trekt de wind aan:** 23:14-23:44 **−2,23** (4/4 te laag), gemeten tot 14,0. Zelfde patroon als 17:53-19:35 (−3,19): de bijsturing loopt achter als de wind oploopt. n=2 op één dag; dagafsluiting kijkt of het blijft.
+- H-SC-14: geen modelsprong of locatiewissel in dit venster, n blijft 3/2. H-SC-15, H-SC-3: geen neerslag, geen uitslag. Stilstand: geen.
+- Hypotheses: H-SC-3 (regenstart), H-SC-14 (bijsturing na model-/locatiesprong; n=3/2), H-SC-15 (motregen). H-SC-13, H-SC-11 geparkeerd.
+
+laatste ronde: 02-11 23:40, gemeten t/m 02-11 23:50

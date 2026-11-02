@@ -624,3 +624,8 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-11-02 19:40,TUSSEN,sc_onweer_gebeurtenissen,0,0,"0 inslagen < 50 km, ensemble 0 %, CAPE 0, LI 7.9, groen"
 2026-11-02 19:40,TUSSEN,sc_bron_open_meteo_op_rij_mislukt,0,1,"hersteld; laatste fout 16:33; slaag 99 %; radar en KNMI in orde"
 2026-11-02 19:40,TUSSEN,sc_stilstand_functies,0,0,"aankomst/passage unknown = geen onweer"
+2026-11-02 23:40,TUSSEN,sc_windstoten_bias_kmh,0.19,24,"19:44-23:44 vooraf; MAE 1.41; 11/24 te laag; beste blok van de dag"
+2026-11-02 23:40,TUSSEN,sc_windstoten_bias_kmh,-2.23,4,"23:14-23:44 wind trekt aan, gemeten tot 14.0; 4/4 te laag"
+2026-11-02 23:40,TUSSEN,sc_onweer_gebeurtenissen,0,0,"0 inslagen < 50 km, ensemble 0 %, CAPE 20, groen"
+2026-11-02 23:40,TUSSEN,sc_bron_status,0,1,"alles in orde; herstarts 20:14-23:05 schoon; radarbeeld 22:42 UTC vers"
+2026-11-02 23:40,TUSSEN,sc_stilstand_functies,0,0,"aankomst/passage unknown = geen onweer"
