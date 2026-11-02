@@ -733,3 +733,14 @@ laatste ronde: 02-11 03:40, gemeten t/m 02-11 03:40
 - Hypotheses: H-SC-3 (regenstart; wacht op zuivere bui), H-SC-14 (n=1), H-SC-15 (motregen). H-SC-13, H-SC-11 geparkeerd.
 
 laatste ronde: 02-11 07:40, gemeten t/m 02-11 07:50
+
+
+## 02-11 11:40 · tussenronde
+- Draait 0.61.0, geen fouten; DNS-storing 11:21 ~1 min (extern), bronstatus in orde. Geen onweer, groen. Geen release; L-SC-030 blijft voor de dagafsluiting.
+- **Eerste uitslag L-SC-028:** 10:46 model 22,7 → 38,5 zonder locatiewissel, bijsturing vervalt tot 10:54, verwachting 12,3 → 25,0 tegen ~10 gemeten. Daarna bijsturing −6,7 (fout −13,6). Met de oude bijsturing was het 22,5 geweest: n=1, geen oordeel.
+- **Windstoten (5-minutengemiddelden):** 07:50-10:45 bias **+1,79**, MAE 1,80 (n=35). 10:45-11:40 **+8,66** (n=11): model 41, factor 0,73, gemeten 14,6. Dagafsluiting toetst of de wind nog aantrekt of de modelrun te hoog was.
+- **Regen:** bui 08:12-09:17 (0,1-0,7 mm/u), bij Ruurlo. 42 uitkomsten, afwijking kaal 11,1, verschuiving 9,3. L-SC-029 gebouwd in 0.61.0 (status bijgewerkt).
+- Stilstand: geen.
+- Hypotheses: H-SC-3 (regenstart), H-SC-14 (bijsturing na model-/locatiesprong; n=2), H-SC-15 (motregen; nu met 0.61.0 meten). H-SC-13, H-SC-11 geparkeerd.
+
+laatste ronde: 02-11 11:40, gemeten t/m 02-11 11:45

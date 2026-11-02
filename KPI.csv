@@ -603,3 +603,10 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-11-02 07:40,TUSSEN,sc_windstoten_bias_kmh,1.02,24,"03:50-07:44 vooraf; MAE 1.38; 4/24 te laag; na locatiewissel 06:36 +0.74 (n=7), geen modelsprong (3.1->3.6)"
 2026-11-02 07:40,TUSSEN,sc_beschikbaarheid,1,1,"0 inslagen < 50 km, ensemble 0 %, groen; bronstatus alles in orde; 0 Stormchase-fouten; herstart 06:35 schoon"
 2026-11-02 07:40,TUSSEN,sc_stilstand_functies,0,0,"aankomst/passage unknown = geen onweer"
+2026-11-02 11:40,TUSSEN,sc_windstoten_bias_kmh,1.79,35,07:50-10:45 uit 5-minutengemiddelden (ander venster dan 'vooraf'); MAE 1.80
+2026-11-02 11:40,TUSSEN,sc_windstoten_bias_kmh,8.66,11,"10:45-11:40 na modelsprong; MAE 8.66; model 22.7->38.5 (41 om 11:40), gemeten 10-14.6"
+2026-11-02 11:40,TUSSEN,sc_modelsprong_bijsturing_vervallen,1,1,"eerste uitslag L-SC-028: 10:46-10:54 vervallen, verwachting 12.3->25.0 tegen ~10 gemeten; geen locatiewissel; 10:54 terug op -6.7"
+2026-11-02 11:40,TUSSEN,sc_regen_bui,1,1,"08:12-09:17, 0.1-0.7 mm/u, Ruurlo; radar droog sinds 09:17"
+2026-11-02 11:40,TUSSEN,sc_regen_afwijking_min,11.1,42,"kaal 11.1, verschuiving 9.3, verhouding 10.2 (07:40 kaal 11.5)"
+2026-11-02 11:40,TUSSEN,sc_beschikbaarheid,1,1,"0 inslagen, groen; bronstatus in orde; DNS-storing 11:21 ~1 min (extern)"
+2026-11-02 11:40,TUSSEN,sc_stilstand_functies,0,0,aankomst/passage unknown = geen onweer
