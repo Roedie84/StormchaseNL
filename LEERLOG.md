@@ -744,3 +744,16 @@ laatste ronde: 02-11 07:40, gemeten t/m 02-11 07:50
 - Hypotheses: H-SC-3 (regenstart), H-SC-14 (bijsturing na model-/locatiesprong; n=2), H-SC-15 (motregen; nu met 0.61.0 meten). H-SC-13, H-SC-11 geparkeerd.
 
 laatste ronde: 02-11 11:40, gemeten t/m 02-11 11:45
+
+
+## 02-11 15:40 · tussenronde
+- Draait 0.61.0, geen fouten; herstarts 13:12 en 15:26 schoon. Geen onweer, groen. Geen release; L-SC-030 blijft voor de dagafsluiting.
+- **Modelrun van 11:40 (41 km/u) was te hoog:** wind trok niet aan zoals gedacht. Gemeten bleef ≤ 11,3 tot 12:44; `windvooruitblik` zakte 42 → 29.
+- **Windstoten vooraf:** 11:44-12:44 bias **+4,29** (n=7). 12:54-13:34 **−6,00** (n=5): echte vlaag bij Hupsel, gemeten tot 26,9 km/u (wind 18 km/u, regen tot 2,4 mm/u). Station bleef gelijk (attributen nagelezen), locatie bleef Werk. 13:44-15:34 **+6,42** (n=11), 0/11 te laag: verwachting 12-14 tegen 5-12.
+- **Open-Meteo 503 sinds 13:43:** 8× op rij, volgende poging 16:03; KNMI in orde. Extern, maar de windverwachting staat sindsdien stil, wat de laatste bias vertekent.
+- **H-SC-15:** Hupsel (13,9 km) mat 12:40-13:40 regen, `neerslag_1u` 1,38 mm; nowcast op de locatie 0,0. Station > 10 km, dus de regel uit 0.61.0 telt het terecht niet; of het op de locatie regende is niet te meten.
+- **H-SC-14:** geen locatiewissel, geen nieuwe uitslag voor L-SC-028 (n blijft 2).
+- Regen: 41 uitkomsten, kaal 11,1, verschuiving 9,4. Stilstand: geen.
+- Hypotheses: H-SC-3 (regenstart), H-SC-14 (bijsturing na model-/locatiesprong; n=2), H-SC-15 (motregen). H-SC-13, H-SC-11 geparkeerd.
+
+laatste ronde: 02-11 15:40, gemeten t/m 02-11 15:50

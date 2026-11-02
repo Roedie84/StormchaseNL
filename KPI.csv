@@ -610,3 +610,11 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-11-02 11:40,TUSSEN,sc_regen_afwijking_min,11.1,42,"kaal 11.1, verschuiving 9.3, verhouding 10.2 (07:40 kaal 11.5)"
 2026-11-02 11:40,TUSSEN,sc_beschikbaarheid,1,1,"0 inslagen, groen; bronstatus in orde; DNS-storing 11:21 ~1 min (extern)"
 2026-11-02 11:40,TUSSEN,sc_stilstand_functies,0,0,aankomst/passage unknown = geen onweer
+2026-11-02 15:40,TUSSEN,sc_windstoten_bias_kmh,4.29,7,"11:44-12:44 vooraf; MAE 4.29; 0/7 te laag; na modelrun 41 km/u"
+2026-11-02 15:40,TUSSEN,sc_windstoten_bias_kmh,-6.0,5,"12:54-13:34 bui Hupsel, gemeten 14.1-26.9; MAE 6.56; 4/5 te laag; station ongewijzigd"
+2026-11-02 15:40,TUSSEN,sc_windstoten_bias_kmh,6.42,11,"13:44-15:34; MAE 6.42; 0/11 te laag; verwachting 12-14 tegen 5-12; Open-Meteo 503 sinds 13:43, model staat stil"
+2026-11-02 15:40,TUSSEN,sc_regen_station_buiten_nowcast_min,60,1,"Hupsel 13.9 km neerslag 0.7-2.4 mm/u 12:40-13:40 (neerslag_1u 1.38); nowcast locatie 0.0, regenbeeld droog; station > 10 km, geen uitspraak over de locatie"
+2026-11-02 15:40,TUSSEN,sc_regen_afwijking_min,11.1,41,"kaal 11.1, verschuiving 9.4, verhouding 10.2 (11:40 n=42)"
+2026-11-02 15:40,TUSSEN,sc_onweer_gebeurtenissen,0,0,"0 inslagen < 50 km, ensemble 0 %, CAPE 20, LI 5.6, groen"
+2026-11-02 15:40,TUSSEN,sc_bron_open_meteo_op_rij_mislukt,8,1,"503 sinds laatste succes 13:42; volgende poging 16:03; KNMI-bronnen in orde; extern"
+2026-11-02 15:40,TUSSEN,sc_stilstand_functies,0,0,"aankomst/passage unknown = geen onweer"
