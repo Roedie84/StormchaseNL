@@ -710,3 +710,14 @@ laatste ronde: 01-11 19:40, gemeten t/m 01-11 19:35
 - Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-14 (bijsturing na model-/locatiesprong), **H-SC-15** (nowcast mist motregen; station meet). H-SC-13 (KNMI-slotlabel) geparkeerd tot de volgende waarschuwing; H-SC-11 geparkeerd.
 
 laatste ronde: 01-11 23:40, gemeten t/m 01-11 23:43
+
+## 02-11 03:40 · dagafsluiting 01-11
+- **0.60.3 actief**, geen Stormchase-fouten na 23:43, geen purge/repack. Geen release (geen bug; L-SC-028/029 wachten op akkoord).
+- **Dag 01-11:** geen onweer (0 inslagen < 50 km, ensemble 0 %), niveau groen, geen KNMI-waarschuwing. Bronnen: alleen 2 KNMI-fetchfouten bij de DNS-storing (11:50/12:50, extern); herstarts 09:15 en 21:20 schoon.
+- **Windstoten 01-11 (vooraf, n=137): bias +0,03, MAE 1,78 km/u** (ochtend te hoog +1,7, middag te laag −2,1 → traagheid bij aantrekkende/afnemende wind, H-SC-9). **7 d +0,16** (was +0,25). Nacht 23:50-03:40 (n=24) +0,36 / MAE 1,25; enige grote misser 00:00 (9,2 gemeten tegen 5,2).
+- **H-SC-15 (motregen buiten beeld):** ook vannacht station Hupsel 00:20 (0,03 mm/u) en 01:10 (0,018), weercode 51 om 00:50-01:00; nowcast 0,0 en "droog". Klein, maar bevestigt het patroon (01-11 avond 130 min). L-SC-029 blijft open.
+- Stilstand: geen (unknown = geen onweer/regen op de radar).
+- Hypotheses: H-SC-3 (regenstart; wacht op een bui), H-SC-14 (bijsturing na locatiesprong; n=1), H-SC-15 (nowcast mist motregen). H-SC-13 en H-SC-11 geparkeerd.
+
+laatste ronde: 02-11 03:40, gemeten t/m 02-11 03:40
+

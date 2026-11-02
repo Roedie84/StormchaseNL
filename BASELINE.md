@@ -69,3 +69,5 @@
 | Windstoten uurfout 7 d (na L-SC-017/022) | MAE 2,29 km/u, bias +1,11; zonder frontdag 1,33 / +0,35 | 24..30-10, n=172 uur | 31-10 03:40 |
 | Windstoten vooraf, dag (na 0.60.x) | −0,82 km/u (MAE 1,77); dag −0,28 / nacht −1,39 | 31-10, n=142 | 01-11 03:40 |
 | Windstoten vooraf, 7 d (dagwaarden, zonder frontdag) | +0,25 km/u | 25..31-10 | 01-11 03:40 |
+| Windstoten na bijstelling (dag / 7 d) | +0,03 km/u (MAE 1,78) · 7 d +0,16 | 01-11, n=137 · 26-10..01-11 | 02-11 03:40 |
+
