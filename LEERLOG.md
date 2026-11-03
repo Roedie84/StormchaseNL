@@ -798,7 +798,7 @@ laatste ronde: 03-11 03:40, gemeten t/m 03-11 03:55
 - Draait 0.61.1, geen fouten. Geen onweer, groen, CAPE 20, 0 inslagen < 50 km. Bronstatus in orde; Open-Meteo 503 om 07:07 eenmalig, daarna geslaagd. Geen release.
 - **H-SC-3 (regenstart), uitslag 'over 52 min':** nowcast telde 03:55 'over 48 min, tot 0,1 mm/u' af tot 15 min, en was 04:22 weg. Intensiteit 0,0 tot 07:40. **Valse start, n=1**, zeer lichte bui. Zo'n ingetrokken bui levert geen uitkomst, dus `afwijking_min` ziet valse starts niet; telt alleen wat wel viel.
 - **Regenfout:** kaal 10,8, verschuiving 8,9, verhouding 9,9 (n=40). Was 11,1 (n=41): het −31,7-punt valt weg. Effect L-SC-030 zelf pas meetbaar bij een rit in de regen; status blijft gebouwd.
-- **H-SC-16:** 03:54-07:34 bias **−2,06**, MAE 2,19 (n=23, 21/23 te laag), gemeten tot 18,4. Stijgend **−3,52** (n=8), rest −1,28 (n=15). Derde venster op rij met hetzelfde teken; de rest is nu wel ook negatief, dus niet alleen 'achterlopen op een stijging'. Dagafsluiting telt.
+- **H-SC-16:** 03:54-07:34 bias **−2,06**, MAE 2,19 (n=23, 21/23 te laag), gemeten tot 18,4. Stijgend **−3,52** (n=8), rest −1,28 (n=15). Tweede blok op rij te laag (23:44-03:34: −1,46); de rest is nu ook duidelijk negatief, dus niet alleen achterlopen op een stijging. Dagafsluiting telt.
 - H-SC-14: geen modelsprong of locatiewissel gezien, n blijft 3/2. Stilstand: geen.
 - Hypotheses: H-SC-3 (regenstart), H-SC-14 (bijsturing na model-/locatiesprong; n=3/2), H-SC-16 (oplopende wind). H-SC-15 op de achtergrond; H-SC-13, H-SC-11 geparkeerd.
 
