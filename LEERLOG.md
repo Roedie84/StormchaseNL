@@ -780,3 +780,15 @@ laatste ronde: 02-11 19:40, gemeten t/m 02-11 19:50
 - Hypotheses: H-SC-3 (regenstart), H-SC-14 (bijsturing na model-/locatiesprong; n=3/2), H-SC-15 (motregen). H-SC-13, H-SC-11 geparkeerd.
 
 laatste ronde: 02-11 23:40, gemeten t/m 02-11 23:50
+
+
+## 03-11 03:40 · dagafsluiting 02-11
+- Draait 0.61.0, geen fouten. Dag 02-11: geen onweer, 0 inslagen < 50 km, groen. Open-Meteo 503 13:43-16:33 (extern), nu alles in orde. **Gebouwd 0.61.1** (L-SC-030, zie onder).
+- **Windstoten 02-11:** bias **+1,99**, MAE **2,94** (n=164, 11 vensters), 7 d **+0,40**. 37 metingen na de modelsprong en tijdens de 503 droegen bijna alles: +4,3 tot +10,9. Zonder die vensters zit de dag dicht bij 0.
+- **Nalopen 'bijsturing dempt niet bij een oud model':** uit de code: de bijsturing neemt per definitie de helft van de fout (`WINDBIJSTURING_AANDEEL` 0,5). Een fout die blijft staan, wordt dus maar half weggenomen, ook bij een stilstaand model. Past bij +10,86 in 15:45-17:03; de kale modelwaarde staat niet in de history, dus niet bevestigd.
+- **H-SC-16 (nieuw):** als de gemeten wind oploopt zit de verwachting te laag. Nacht 23:44-03:34: **−3,27** bij een stijgende meting (n=8) tegen −0,44 (n=15) daarbuiten; dag: −3,19 en −2,23. Zelfde mechanisme als hierboven: de bijsturing loopt een halve stap achter. Bij 0,59.0 gaf de replay −11 % uurfout. Eerst meer dagen; een ander aandeel kan niet zonder een replay, en de paren staan niet in de export.
+- **L-SC-030 gebouwd 0.61.1:** regenvoorspelling onthoudt de plek, > 5 km verder vervalt hij zonder uitkomst. Plek staat niet in de diagnostiek. 983 tests groen, 7 nieuw. Het −31,7-punt valt vanzelf uit het venster.
+- H-SC-14: geen modelsprong of locatiewissel sinds 23:40, n blijft 3/2. H-SC-15, H-SC-3: nowcast meldt nu 'over 52 min', meting volgt 07:40. Stilstand: geen.
+- Hypotheses: H-SC-3 (regenstart), H-SC-14 (bijsturing na model-/locatiesprong; n=3/2), H-SC-16 (oplopende wind). H-SC-15 op de achtergrond; H-SC-13, H-SC-11 geparkeerd.
+
+laatste ronde: 03-11 03:40, gemeten t/m 03-11 03:55

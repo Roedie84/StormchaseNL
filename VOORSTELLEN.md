@@ -211,7 +211,7 @@ Status: open / akkoord / afgewezen / gebouwd vX / geverifieerd / teruggedraaid. 
 - Verwacht effect: geen "droog" meer bij gemeten motregen; regenvalidatie telt ook motregen. Meten: minuten met station-neerslag > 0 en regenbeeld "droog" (01-11: ~130 min → 0), en het aantal valse "regent"-minuten (station > 0 maar droog daarna; doel < 10 %).
 
 ## L-SC-030 · regenuitkomst na verplaatsing niet meetellen (meetfout)
-- Status: **te bouwen in de dagafsluiting** (02-11 07:40; zelf te bouwen: meetfout. Afwijking: de uitkomst voedt `regencorrectie.leer`, dus de getoonde start verschuift ongemerkt mee).
+- Status: **gebouwd 0.61.1** (03-11, dagafsluiting; zelf gebouwd: meetfout; suite 983 groen, `test_release_0611.py` (7); workflow groen, HACS ververst). Effect: bij de eerstvolgende rit in de regen geen nieuwe uitkomst. Was: te bouwen in de dagafsluiting (02-11 07:40; de uitkomst voedt `regencorrectie.leer`).
 - Onderbouwing (02-11, n=1 + code): `Validatie.voorspel("regen", ...)` bewaart geen locatie; `uitgekomen` rekent af op het eerste "regent" op de plek van dat moment. Voorspelling 06:17 "over 57 min" (Eibergen) werd afgerekend op 06:42 terwijl de locatie ~13 km westwaarts reed: −31,7 min. Voor passage bestaat `_km_tussen` al, voor regen niet.
 - Voorstel: bij de regenvoorspelling de locatie bewaren; ligt de plek bij afronding > 5 km verder, dan de voorspelling vervallen zonder uitkomst.
 - Verwacht effect: geen uitkomsten over een andere plek in de leerset; `afwijking_min` niet vervuild door ritten.
