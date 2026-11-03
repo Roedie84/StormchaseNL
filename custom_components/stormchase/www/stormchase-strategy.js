@@ -691,6 +691,7 @@ const BRONNAAM = {
   knmi_nowcast: "KNMI nowcast",
   knmi_edr: "KNMI EDR",
   knmi_wms: "KNMI WMS",
+  blitzortung: "Blitzortung",
 };
 
 /** Toestand van een bron: ok, traag, fout of ongebruikt. */

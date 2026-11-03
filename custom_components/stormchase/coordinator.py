@@ -31,6 +31,7 @@ from .tijd import MARGE_KWARTIER, MARGE_UUR, aantal_gevuld, dichtstbijzijnde, op
 from .validatie import Validatie
 from .nadering import Naderingstrend
 from .windcorrectie import voor_melding
+from .stats import BLITZORTUNG_MELD_SECONDEN, blitzortung_fout
 from .herstart import OPSLAG_VERSIE, inslagtijd, puntsleutel, snoei_storm
 from .herpoging import HerpogingMixin
 from .verouderd import VerouderdMixin
@@ -487,6 +488,31 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
             return None
 
         return state.state
+
+    def _meld_blitzortung(self) -> None:
+        """0.61.2: zet de Blitzortung-integratie in de bronstatus.
+
+        Gemeten aan de bliksemteller (of anders de afstandssensor). Een gelijke
+        uitkomst telt hooguit eens per BLITZORTUNG_MELD_SECONDEN, een andere
+        meteen; zo hapert de bron na ongeveer een minuut onbeschikbaar.
+        """
+        if self.stats is None:
+            return
+        bron = self.stats.bronnen.get("blitzortung")
+        entity_id = self._opt(CONF_COUNTER_SENSOR) or self._opt(CONF_DISTANCE_SENSOR)
+        if bron is None or not entity_id:
+            return
+        state = self.hass.states.get(entity_id)
+        fout = blitzortung_fout(state.state if state is not None else None)
+        nu = dt_util.utcnow().timestamp()
+        vorige = getattr(self, "_blitz_gemeld", None)
+        if vorige is not None and vorige[1] == fout and nu - vorige[0] < BLITZORTUNG_MELD_SECONDEN:
+            return
+        self._blitz_gemeld = (nu, fout)
+        if fout is None:
+            bron.succes()
+        else:
+            bron.fout(fout)
 
     def _read_float(self, entity_id: str | None) -> float | None:
         """Lees een sensorwaarde als float, of None als dat niet lukt."""
@@ -1194,6 +1220,7 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
 
         if self.stats is not None:
             self.stats.noteer_meting(distance, speed)
+        self._meld_blitzortung()
 
         self._fire_events(data)
         self._plan_staat_opslag()

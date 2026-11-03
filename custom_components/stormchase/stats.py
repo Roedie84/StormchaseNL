@@ -192,6 +192,28 @@ class BronStatus:
         }
 
 
+#: 0.61.2: zo vaak telt een gelijke uitkomst van de bliksemteller mee in de
+#: tellers. De ronde draait elke 10 s; per ronde tellen zou de dagtellers
+#: laten exploderen. Een andere uitkomst telt meteen.
+BLITZORTUNG_MELD_SECONDEN = 60
+
+
+def blitzortung_fout(toestand: str | None) -> str | None:
+    """0.61.2: foutmelding als de bliksemteller niets meet, anders None.
+
+    03-11: de bronstatus zei "alles in orde" en de ringen 0/0/0 terwijl de
+    bliksemteller onbeschikbaar was; "geen inslagen" was zo niet te
+    onderscheiden van "geen meting". `toestand` is de state van de teller,
+    None als de entiteit niet bestaat. "unknown" telt niet als fout: die
+    staat er na een herstart tot de eerste inslag.
+    """
+    if toestand is None:
+        return "bliksemteller niet gevonden"
+    if toestand == "unavailable":
+        return "bliksemteller onbeschikbaar"
+    return None
+
+
 def _tijd(moment: datetime | None) -> str | None:
     """Tijdstip als leesbare tekst."""
     return moment.isoformat() if moment else None
@@ -251,6 +273,8 @@ class Statistieken:
             "knmi_nowcast": BronStatus(),
             "knmi_edr": BronStatus(),
             "knmi_wms": BronStatus(),
+            # 0.61.2: de Blitzortung-integratie, gemeten aan de bliksemteller
+            "blitzortung": BronStatus(),
         }
     )
 

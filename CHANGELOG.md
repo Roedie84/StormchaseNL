@@ -5,6 +5,12 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.61.2] — 2026-11-03
+
+### Opgelost
+
+- **Bronstatus ziet Blitzortung.** De bronstatus zei "alles in orde" en de ringen 0/0/0 terwijl de bliksemteller onbeschikbaar was; "geen inslagen" was niet te onderscheiden van "geen meting". Blitzortung staat nu als bron in de bronstatus, gemeten aan de bliksemteller (of anders de afstandssensor). Onbeschikbaar of niet gevonden telt als fout; na ongeveer een minuut staat er "blitzortung hapert". "unknown" (na een herstart tot de eerste inslag) telt niet als fout. Een gelijke uitkomst telt hooguit eens per minuut mee in de dagtellers.
+
 ## [0.61.1] — 2026-11-03
 
 ### Opgelost
