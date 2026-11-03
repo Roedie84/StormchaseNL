@@ -216,3 +216,10 @@ Status: open / akkoord / afgewezen / gebouwd vX / geverifieerd / teruggedraaid. 
 - Voorstel: bij de regenvoorspelling de locatie bewaren; ligt de plek bij afronding > 5 km verder, dan de voorspelling vervallen zonder uitkomst.
 - Verwacht effect: geen uitkomsten over een andere plek in de leerset; `afwijking_min` niet vervuild door ritten.
 - Meten: test + bij de eerstvolgende rit in de regen geen nieuwe uitkomst; het bestaande −31,7-punt valt vanzelf uit het venster (n=60).
+
+## L-SC-031 · inslagringen tonen 0 als Blitzortung uit ligt (meetfout)
+- Status: **open, zelf te bouwen** (03-11 23:40; rapportage, geen waarschuwingsdrempel → dagafsluiting. Niet acuut bij CAPE 0).
+- Onderbouwing (live 03-11, n=1 avond): teller onbeschikbaar 251 van 271 min sinds 19:15, `sensor.stormchase_inslagen_binnen_*` bleven 0. `_count_rings` geeft bij geen data 0 per ring met `ring_bron` "geen". "Geen inslagen" is zo niet te onderscheiden van "geen meting"; ook de leerronde van 19:40 trapte erin.
+- Voorstel: ringsensoren `unknown` als de bron hapert (bron `blitzortung` in `self.stats`, zelfde grens als 0.61.2); `data.rings` voor de waarschuwingslogica ongewijzigd, zodat niveau en meldingen niet veranderen. Bij bouwen nagaan wie de ringsensoren leest (kaart, briefing, templates).
+- Verwacht effect: ringen eerlijk bij uitval; geen verandering in waarschuwen.
+- Meten: test met bron hapert = sensor None, bron in orde = telling; live bij de volgende uitval. Of Ruud bij uitval tijdens hoge CAPE een melding wil is meldgedrag: apart voorstel als dat speelt.

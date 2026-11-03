@@ -655,3 +655,8 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-11-03 19:40,TUSSEN,sc_regen_afwijking_min,10.8,39,"kaal 10.8, verschuiving 8.4, verhouding 10.0 (07:40 n=40: 8.9)"
 2026-11-03 19:40,TUSSEN,sc_beschikbaarheid,1,1,"geen onweer, groen, 0 inslagen < 50 km, CAPE 0; bronstatus alles in orde; radarbeeld 19:42 vers, KNMI-push verbonden"
 2026-11-03 19:40,TUSSEN,sc_stilstand_functies,0,0,"aankomst/passage unknown = geen onweer"
+2026-11-03 23:40,TUSSEN,sc_windstoten_bias_kmh,0.13,24,"19:54-23:44 vooraf; MAE 1.24; 11/24 te laag; gemeten 9.1-15.6"
+2026-11-03 23:40,TUSSEN,sc_windstoten_bias_stijgend_kmh,-1.24,7,"meting >= 1 km/u boven de vorige; dalend +1.81 (n=7); rest -0.08 (n=10); H-SC-16"
+2026-11-03 23:40,TUSSEN,sc_blitzortung_uit_min,161,1,"loopt sinds 21:04:51 (t/m 23:46); ook 19:15-20:24 en 20:38-20:59: 251 van 271 min sinds 19:15; langste in 11 d daarvoor 34 min; ringen tonen 0"
+2026-11-03 23:40,TUSSEN,sc_beschikbaarheid,0,1,"bronstatus blitzortung hapert sinds 22:16 (0.61.2); overige bronnen in orde; geen onweer verwacht, groen, CAPE 0; '0 inslagen' sinds 19:15 niet gemeten"
+2026-11-03 23:40,TUSSEN,sc_stilstand_functies,0,0,"aankomst/passage unknown = geen onweer"

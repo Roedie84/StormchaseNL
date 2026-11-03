@@ -831,3 +831,15 @@ laatste ronde: 03-11 15:40, gemeten t/m 03-11 15:45
 - Hypotheses: H-SC-3 (regenstart), H-SC-14 (bijsturing na model-/locatiesprong; n=3/2), H-SC-16 (oplopende wind, mogelijk gelijk aan H-SC-9). H-SC-15 op de achtergrond; H-SC-13, H-SC-11 geparkeerd.
 
 laatste ronde: 03-11 19:40, gemeten t/m 03-11 19:45
+
+## 03-11 23:40 · tussenronde
+- Draait 0.61.2, geen fouten. Groen, CAPE 0, 0 onweerskans, radarbeeld vers (23:42). Geen release: 0.61.2 is vanavond al uit, en bij CAPE 0 is de fout hieronder niet acuut.
+- **Blitzortung ligt eruit:** `sensor.onweer_detectie_lightning_counter` onbeschikbaar sinds **21:04:51**, nu 161 min, ook 19:15-20:24 en 20:38-20:59. Samen 251 van de 271 min sinds 19:15. Langste in de 11 dagen ervoor: 34 min (normaal 7-28 min om 01:00, de rest < 34). Integratie staat op `loaded`, herstarts 20:38-22:16 hielpen niet, en hij kwam tussendoor zelf terug: lijkt extern. Geen oorzaak in de log.
+- **Bijstelling 19:40:** 'bronstatus in orde, 0 inslagen < 50 km' klopte niet; Blitzortung was toen al uit (bronstatus kende hem pas sinds 0.61.2, die werkt: `hapert`, 80 fouten sinds 22:16). De 0 sinds 19:15 is geen meting. Met CAPE 0 en kans 0 mist er vrijwel zeker niets.
+- **Nieuw L-SC-031 (zelf te bouwen, dagafsluiting):** ringen geven nog 0/0/0 bij uitval, gemeld 21:52; 0.61.2 bouwde alleen de bronstatus.
+- **H-SC-16:** 19:54-23:44 bias **+0,13**, MAE 1,24 (n=24, 11/24 te laag), gemeten 9,1-15,6. Stijgend **−1,24** (n=7), dalend **+1,81** (n=7), rest −0,08 (n=10). Symmetrisch: een meting die springt zit de verwachting de helft achter, beide kanten op. Bevestigt 19:40: traagheid (H-SC-9), geen eigen effect van stijging. Dagafsluiting legt fout naast staplengte.
+- H-SC-14: geen modelsprong of locatiewissel gezien, n blijft 3/2. H-SC-3, H-SC-15: droog, geen uitslag. L-SC-030: nog geen rit in de regen.
+- Stilstand: geen.
+- Hypotheses: H-SC-3 (regenstart), H-SC-14 (bijsturing na model-/locatiesprong; n=3/2), H-SC-16 (waarschijnlijk gelijk aan H-SC-9). H-SC-15 op de achtergrond; H-SC-13, H-SC-11 geparkeerd.
+
+laatste ronde: 03-11 23:40, gemeten t/m 03-11 23:46
