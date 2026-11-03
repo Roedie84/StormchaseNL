@@ -822,3 +822,12 @@ laatste ronde: 03-11 11:40, gemeten t/m 03-11 11:45
 - Hypotheses: H-SC-3 (regenstart), H-SC-14 (bijsturing na model-/locatiesprong; n=3/2), H-SC-16 (oplopende wind). H-SC-15 op de achtergrond; H-SC-13, H-SC-11 geparkeerd.
 
 laatste ronde: 03-11 15:40, gemeten t/m 03-11 15:45
+
+## 03-11 19:40 · tussenronde
+- Draait 0.61.1, geen fouten; herstarts 17:03 en 19:33 schoon. Geen onweer, groen, CAPE 0, 0 inslagen < 50 km. Bronstatus in orde, radarbeeld vers (19:42). Geen release.
+- **H-SC-16:** 15:44-19:34 bias **+0,56**, MAE 1,15 (n=24, 7/24 te laag), gemeten 10-22. Eerste blok na vier te lage. Stijgend **−0,33** (n=4), **dalend +1,93** (n=7), rest +0,09 (n=13). De wind nam af, en dan zit de verwachting te hoog (16:34-17:14 +2 tot +3). Dat is dezelfde traagheid de andere kant op (H-SC-9), dus H-SC-16 is waarschijnlijk geen eigen effect van stijging. Stijgend per blok: −3,27/−3,52/−5,17/−5,87/−0,33; de kleine stijgingen van vanavond (max +1,3) tellen nauwelijks. Dagafsluiting: fout tegen de grootte van de stap.
+- H-SC-14: geen modelsprong of locatiewissel gezien, n blijft 3/2. H-SC-3, H-SC-15: droog, regenfout kaal 10,8, verschuiving 8,4 (n=39). L-SC-030: nog geen rit in de regen.
+- Stilstand: geen.
+- Hypotheses: H-SC-3 (regenstart), H-SC-14 (bijsturing na model-/locatiesprong; n=3/2), H-SC-16 (oplopende wind, mogelijk gelijk aan H-SC-9). H-SC-15 op de achtergrond; H-SC-13, H-SC-11 geparkeerd.
+
+laatste ronde: 03-11 19:40, gemeten t/m 03-11 19:45

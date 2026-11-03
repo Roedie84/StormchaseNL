@@ -650,3 +650,8 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-11-03 15:40,TUSSEN,sc_windstoten_bias_stijgend_kmh,-5.87,7,"meting >= 1 km/u boven de vorige; rest -1.08 (n=17); H-SC-16; uitschieters 13:03 -10.4, 13:34 -8.3"
 2026-11-03 15:40,TUSSEN,sc_beschikbaarheid,1,1,"geen onweer, groen, 0 inslagen < 50 km, CAPE 0; bronstatus alles in orde, Open-Meteo 99 %; radarbeeld 15:42 vers"
 2026-11-03 15:40,TUSSEN,sc_stilstand_functies,0,0,"aankomst/passage unknown = geen onweer"
+2026-11-03 19:40,TUSSEN,sc_windstoten_bias_kmh,0.56,24,"15:44-19:34 vooraf; MAE 1.15; 7/24 te laag; gemeten 10.2-21.9; meting afgeleid uit stand - bijsturing + bijsturing_fout (klopt met stationswaarden)"
+2026-11-03 19:40,TUSSEN,sc_windstoten_bias_stijgend_kmh,-0.33,4,"meting >= 1 km/u boven de vorige; dalend +1.93 (n=7); rest +0.09 (n=13); H-SC-16"
+2026-11-03 19:40,TUSSEN,sc_regen_afwijking_min,10.8,39,"kaal 10.8, verschuiving 8.4, verhouding 10.0 (07:40 n=40: 8.9)"
+2026-11-03 19:40,TUSSEN,sc_beschikbaarheid,1,1,"geen onweer, groen, 0 inslagen < 50 km, CAPE 0; bronstatus alles in orde; radarbeeld 19:42 vers, KNMI-push verbonden"
+2026-11-03 19:40,TUSSEN,sc_stilstand_functies,0,0,"aankomst/passage unknown = geen onweer"
