@@ -5,6 +5,12 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.61.1] — 2026-11-03
+
+### Opgelost
+
+- **Regenuitkomst telt niet meer op een andere plek (L-SC-030).** Een regenvoorspelling onthoudt nu de plek waarvoor hij gemaakt is. Ligt de locatie bij afronding meer dan 5 km verder, dan vervalt de voorspelling zonder uitkomst. Op 02-11 werd "over 57 min" uit Eibergen afgerekend op een bui 13 km westwaarts (−31,7 min); zo'n uitkomst stuurde via de regencorrectie ongemerkt de getoonde start bij. De plek staat niet in de diagnostiek. Voorspellingen van vóór deze versie lopen gewoon af.
+
 ## [0.61.0] — 2026-11-02
 
 ### Gewijzigd

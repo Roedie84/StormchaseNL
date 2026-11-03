@@ -220,7 +220,7 @@ class RainCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdateC
                 latitude, longitude, stats
             )
 
-        return self._verwerk(reeks, bron)
+        return self._verwerk(reeks, bron, (latitude, longitude))
 
     async def _buienradar_of_open_meteo(self, latitude, longitude, stats):
         """De bestaande route: Buienradar, en anders Open-Meteo."""
@@ -243,7 +243,7 @@ class RainCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdateC
                 return self.val_terug(err2), None
         return reeks, bron
 
-    def _verwerk(self, reeks, bron) -> dict:
+    def _verwerk(self, reeks, bron, plek=None) -> dict:
         """Lees de reeks en stel de gegevens samen."""
         if bron is None:
             # Alle bronnen faalden: val_terug gaf de vorige gegevens al terug
@@ -300,6 +300,9 @@ class RainCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdateC
         # Voorspelling vastleggen en nakijken: begon het regenen wanneer we
         # dachten?
         if self.validatie is not None:
+            # 0.61.1 (L-SC-030): eerst de verplaatsing, anders verloopt de
+            # voorspelling alsnog als "niet uitgekomen" op een andere plek.
+            self.validatie.vervalt_na_verplaatsing("regen", plek)
             self.validatie.verlopen(nu)
 
             if regent and station is not None:
@@ -313,9 +316,10 @@ class RainCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdateC
                     "regen", nu, {"intensiteit": nu_intensiteit}
                 )
             elif begint_kaal is not None and begint_kaal <= 60:
-                self.validatie.voorspel(
-                    "regen", nu, begint_kaal, {"verwachte_piek": piek, "bron": bron}
-                )
+                extra = {"verwachte_piek": piek, "bron": bron}
+                if plek is not None:
+                    extra["plek"] = [round(plek[0], 3), round(plek[1], 3)]
+                self.validatie.voorspel("regen", nu, begint_kaal, extra)
 
         return data
 

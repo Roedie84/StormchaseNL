@@ -63,6 +63,12 @@ PASSAGE_RUIM_KM = 20.0
 # geldt als opvolger; de afstand van de opvolger telt dan mee.
 OPVOLGER_KM = 15.0
 
+# 0.61.1 (L-SC-030): een regenvoorspelling gaat over de plek waar hij gemaakt
+# is. Verderop afrekenen zegt niets over de nowcast: op 02-11 werd "over 57 min"
+# uit Eibergen afgerekend op bui 13 km westwaarts (-31,7 min), en die uitkomst
+# stuurt via regencorrectie.leer de getoonde start bij.
+PLEK_VERVALT_KM = 5.0
+
 
 def _km_tussen(a: tuple[float, float], b: tuple[float, float]) -> float:
     """Afstand in km tussen twee (lat, lon)-punten, vlakke benadering."""
@@ -234,6 +240,25 @@ class Validatie:
             geduld = GEDULD_MINUTEN.get(soort, 45) * 60
             if nu > voorspelling["verwacht_op"] + geduld:
                 self._rond_af(soort, nu, {"uitgekomen": False})
+
+    def vervalt_na_verplaatsing(
+        self, soort: str, plek: tuple[float, float] | None
+    ) -> bool:
+        """Laat een open voorspelling vallen als de plek te ver weg ligt.
+
+        Zonder uitkomst: niet goed, niet fout, want over deze plek is niets
+        voorspeld. Een voorspelling zonder bewaarde plek (van voor 0.61.1)
+        loopt gewoon af.
+        """
+        voorspelling = self.open.get(soort)
+        if voorspelling is None or plek is None:
+            return False
+        bewaard = voorspelling.get("plek")
+        if bewaard is None or _km_tussen(tuple(bewaard), tuple(plek)) <= PLEK_VERVALT_KM:
+            return False
+        del self.open[soort]
+        self.wijzigingen += 1
+        return True
 
     def volg_passagecel(
         self, cellen: list[dict] | None, laatste_pos: dict
@@ -409,7 +434,7 @@ class Validatie:
                 soort: {
                     "verwacht_over_min": v["verwacht_over"],
                     **{k: w for k, w in v.items() if k not in
-                       ("gemaakt_op", "verwacht_op", "verwacht_over")},
+                       ("gemaakt_op", "verwacht_op", "verwacht_over", "plek")},
                 }
                 for soort, v in self.open.items()
             },
