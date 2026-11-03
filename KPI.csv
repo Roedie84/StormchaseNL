@@ -642,3 +642,7 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-11-03 07:40,TUSSEN,sc_regen_afwijking_min,10.8,40,"kaal 10.8, verschuiving 8.9, verhouding 9.9 (15:40 02-11 kaal 11.1 n=41)"
 2026-11-03 07:40,TUSSEN,sc_beschikbaarheid,1,1,"geen onweer, groen, 0 inslagen < 50 km, CAPE 20; bronstatus alles in orde; Open-Meteo 503 om 07:07 eenmalig, 07:35 weer geslaagd"
 2026-11-03 07:40,TUSSEN,sc_stilstand_functies,0,0,"aankomst/passage unknown = geen onweer"
+2026-11-03 11:40,TUSSEN,sc_windstoten_bias_kmh,-2.93,24,"07:44-11:34 vooraf; MAE 3.23; 21/24 te laag; gemeten tot 25.2 om 11:34"
+2026-11-03 11:40,TUSSEN,sc_windstoten_bias_stijgend_kmh,-5.17,11,"meting >= 1 km/u boven de vorige; rest -1.02 (n=13); H-SC-16; uitschieters 10:04 -11.3, 11:34 -9.9"
+2026-11-03 11:40,TUSSEN,sc_beschikbaarheid,1,1,"geen onweer, groen, 0 inslagen < 50 km, CAPE 0; bronstatus alles in orde, Open-Meteo 99 %; radarbeeld 11:42 vers"
+2026-11-03 11:40,TUSSEN,sc_stilstand_functies,0,0,"aankomst/passage unknown = geen onweer"
