@@ -5,6 +5,12 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.61.3] — 2026-11-04
+
+### Opgelost
+
+- **Inslagringen tonen geen 0 meer als Blitzortung eruit ligt (L-SC-031).** Op 03-11 was de bliksemteller 251 van de 271 min sinds 19:15 onbeschikbaar en stonden de ringen op 0/0/0: "geen inslagen" was niet te onderscheiden van "geen meting". De ringsensoren staan nu op onbekend zolang de teller onbeschikbaar is en er geen inslagmarkers zijn. De waarschuwingslogica leest de ringen als voorheen; niveau, chase-potentie en meldingen veranderen niet.
+
 ## [0.61.2] — 2026-11-03
 
 ### Opgelost

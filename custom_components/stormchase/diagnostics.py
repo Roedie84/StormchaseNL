@@ -134,6 +134,7 @@ async def async_get_config_entry_diagnostics(
             "markers": storm_data.markers if storm_data else None,
             "ringen": storm_data.rings if storm_data else None,
             "ringen_via": storm_data.ring_bron if storm_data else None,
+            "ringen_gemeten": storm_data.ringen_gemeten if storm_data else None,
             "cel": storm_data.cel if storm_data else None,
             "cellen": storm_data.cellen if storm_data else None,
             "frequentie_per_minuut": storm_data.frequentie if storm_data else None,

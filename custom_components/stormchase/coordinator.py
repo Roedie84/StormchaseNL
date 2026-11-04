@@ -306,6 +306,9 @@ class StormData:
     markers: int = 0
     rings: dict[int, int] = field(default_factory=dict)
     ring_bron: str = "geen"
+    #: 0.61.3 (L-SC-031): False als de ringen niets gemeten hebben (Blitzortung
+    #: ligt eruit). `rings` blijft bestaan voor de waarschuwingslogica.
+    ringen_gemeten: bool = True
     afstand_bron: str = "sensor"
     cel: dict | None = None
     cellen: list | None = None
@@ -513,6 +516,17 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
             bron.succes()
         else:
             bron.fout(fout)
+
+    def _blitz_meet(self) -> bool:
+        """0.61.3 (L-SC-031): meet de bliksemteller nu?
+
+        True zonder ingestelde teller: dan valt er niets te zeggen.
+        """
+        entity_id = self._opt(CONF_COUNTER_SENSOR) or self._opt(CONF_DISTANCE_SENSOR)
+        if not entity_id:
+            return True
+        state = self.hass.states.get(entity_id)
+        return blitzortung_fout(state.state if state is not None else None) is None
 
     def _read_float(self, entity_id: str | None) -> float | None:
         """Lees een sensorwaarde als float, of None als dat niet lukt."""
@@ -1199,6 +1213,7 @@ class StormCoordinator(LocationMixin, DataUpdateCoordinator[StormData]):
             markers=markers,
             rings=rings,
             ring_bron=ring_bron,
+            ringen_gemeten=bool(markers) or self._blitz_meet(),
             afstand_bron=afstand_bron,
             cel=cel,
             cellen=cellen,

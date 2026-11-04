@@ -521,6 +521,10 @@ class RingSensor(CoordinatorEntity[StormCoordinator], SensorEntity):
         """Aantal inslagen binnen deze ring."""
         if self.coordinator.data is None:
             return None
+        # 0.61.3 (L-SC-031): geen meting is geen 0. De waarschuwingslogica
+        # leest `data.rings` en merkt hier niets van.
+        if not self.coordinator.data.ringen_gemeten:
+            return None
         return self.coordinator.data.rings.get(self._bound)
 
     @property
@@ -533,6 +537,8 @@ class RingSensor(CoordinatorEntity[StormCoordinator], SensorEntity):
         """
         if self.coordinator.data is None:
             return {}
+        if not self.coordinator.data.ringen_gemeten:
+            return {"telling_via": "geen meting (Blitzortung hapert)"}
         return {"telling_via": self.coordinator.data.ring_bron}
 
 
