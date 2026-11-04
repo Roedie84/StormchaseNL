@@ -218,7 +218,7 @@ Status: open / akkoord / afgewezen / gebouwd vX / geverifieerd / teruggedraaid. 
 - Meten: test + bij de eerstvolgende rit in de regen geen nieuwe uitkomst; het bestaande −31,7-punt valt vanzelf uit het venster (n=60).
 
 ## L-SC-031 · inslagringen tonen 0 als Blitzortung uit ligt (meetfout)
-- Status: **open, zelf te bouwen** (03-11 23:40; rapportage, geen waarschuwingsdrempel → dagafsluiting. Niet acuut bij CAPE 0).
+- Status: **gebouwd 0.61.3** (04-11 03:40, dagafsluiting; 994 tests groen, workflow groen, HACS ververst; wacht op installatie). Lezers: geen automations, badge op dashboard-tablet (toont onbekend). Meten: bij de volgende uitval ringen onbekend, niveau gelijk. Was: open, zelf te bouwen.
 - Onderbouwing (live 03-11, n=1 avond): teller onbeschikbaar 251 van 271 min sinds 19:15, `sensor.stormchase_inslagen_binnen_*` bleven 0. `_count_rings` geeft bij geen data 0 per ring met `ring_bron` "geen". "Geen inslagen" is zo niet te onderscheiden van "geen meting"; ook de leerronde van 19:40 trapte erin.
 - Voorstel: ringsensoren `unknown` als de bron hapert (bron `blitzortung` in `self.stats`, zelfde grens als 0.61.2); `data.rings` voor de waarschuwingslogica ongewijzigd, zodat niveau en meldingen niet veranderen. Bij bouwen nagaan wie de ringsensoren leest (kaart, briefing, templates).
 - Verwacht effect: ringen eerlijk bij uitval; geen verandering in waarschuwen.

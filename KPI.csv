@@ -660,3 +660,11 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-11-03 23:40,TUSSEN,sc_blitzortung_uit_min,161,1,"loopt sinds 21:04:51 (t/m 23:46); ook 19:15-20:24 en 20:38-20:59: 251 van 271 min sinds 19:15; langste in 11 d daarvoor 34 min; ringen tonen 0"
 2026-11-03 23:40,TUSSEN,sc_beschikbaarheid,0,1,"bronstatus blitzortung hapert sinds 22:16 (0.61.2); overige bronnen in orde; geen onweer verwacht, groen, CAPE 0; '0 inslagen' sinds 19:15 niet gemeten"
 2026-11-03 23:40,TUSSEN,sc_stilstand_functies,0,0,"aankomst/passage unknown = geen onweer"
+2026-11-04 03:40,DAG,sc_windstoten_bias_dag_kmh,-1.37,143,"03-11 vooraf, samengesteld uit 6 vensters; MAE 2.20"
+2026-11-04 03:40,DAG,sc_windstoten_bias_7d_kmh,0.14,7,28-10..03-11 dagwaarden 0.46/1.07/-0.38/-0.82/0.03/1.99/-1.37
+2026-11-04 03:40,DAG,sc_windstoten_bias_kmh,0.46,24,23:44-03:34 vooraf; MAE 1.82; 9/24 te laag; gemeten 9.3-18.3
+2026-11-04 03:40,DAG,sc_windstoten_bias_stijgend_kmh,-1.83,7,"dalend +1.71 (n=8); rest +1.12 (n=9); helling fout/stap -0.86, r -0.74: H-SC-16 = H-SC-9"
+2026-11-04 03:40,DAG,sc_blitzortung_uit_min,292,24,"unavailable 17547 s in 24 u, 6 perioden; terug sinds 03:04:25; extern (DNS-fouten 03:04)"
+2026-11-04 03:40,DAG,sc_beschikbaarheid,1,1,"03-11 geen onweer, groen, CAPE 0; bronstatus sinds 03:19 alles in orde"
+2026-11-04 03:40,DAG,sc_onweer_gebeurtenissen,0,0,"CAPE 0, ensemble 0 %; 19:15-03:04 grotendeels niet gemeten"
+2026-11-04 03:40,DAG,sc_stilstand_functies,0,0,aankomst/passage unknown = geen onweer

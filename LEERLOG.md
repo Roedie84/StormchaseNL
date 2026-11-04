@@ -843,3 +843,14 @@ laatste ronde: 03-11 19:40, gemeten t/m 03-11 19:45
 - Hypotheses: H-SC-3 (regenstart), H-SC-14 (bijsturing na model-/locatiesprong; n=3/2), H-SC-16 (waarschijnlijk gelijk aan H-SC-9). H-SC-15 op de achtergrond; H-SC-13, H-SC-11 geparkeerd.
 
 laatste ronde: 03-11 23:40, gemeten t/m 03-11 23:46
+
+## 04-11 03:40 · dagafsluiting 03-11
+- **Gebouwd 0.61.3** (L-SC-031): ringsensoren onbekend als de teller onbeschikbaar is en er geen markers zijn. `data.rings` ongewijzigd, dus niveau en meldingen gelijk. Lezers nagelopen: geen automation, één badge op dashboard-tablet. 994 tests groen, 7 nieuw, workflow groen, HACS ververst.
+- Dag 03-11: geen onweer, groen, CAPE 0. Windstoten **−1,37**, MAE **2,20** (n=143, 6 vensters), 7 d **+0,14**.
+- **Blitzortung:** 292 min onbeschikbaar in 24 u, 6 perioden, terug sinds **03:04:25**; bronstatus alles in orde. 19:15-03:04 grotendeels geen meting, CAPE 0, dus vrijwel zeker niets gemist.
+- Nacht 23:44-03:34: bias +0,46, MAE 1,82 (n=24), gemeten 9,3-18,3. Stijgend −1,83 (n=7), dalend +1,71 (n=8), rest +1,12 (n=9).
+- **H-SC-16 gesloten:** fout tegen staplengte helling −0,86, r −0,74: bijna de hele stap blijft als fout staan, beide kanten op. Dat is vlagerigheid die de verwachting niet volgt, geen effect van stijgen. Gaat op in H-SC-9.
+- H-SC-14: n blijft 3/2. H-SC-3, H-SC-15: droog. L-SC-030: nog geen rit in de regen. Stilstand: geen.
+- Hypotheses: H-SC-3 (regenstart), H-SC-14 (bijsturing na model-/locatiesprong; n=3/2). H-SC-15 op de achtergrond; H-SC-13, H-SC-11 geparkeerd.
+
+laatste ronde: 04-11 03:40, gemeten t/m 04-11 03:46

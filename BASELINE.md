@@ -72,3 +72,6 @@
 | Windstoten na bijstelling (dag / 7 d) | +0,03 km/u (MAE 1,78) · 7 d +0,16 | 01-11, n=137 · 26-10..01-11 | 02-11 03:40 |
 | Windstoten na bijstelling (dag / 7 d) | +1,99 km/u (MAE 2,94, storing en modelsprong) · 7 d +0,40 | 02-11, n=164 · 27-10..02-11 | 03-11 03:40 |
 | Windstoten bij oplopende meting / rest | −3,27 (n=8) / −0,44 (n=15) | nacht 02→03 | 03-11 03:40 |
+
+| Windstoten na bijstelling (dag / 7 d) | −1,37 km/u (MAE 2,20) · 7 d +0,14 | 03-11, n=143 · 28-10..03-11 | 04-11 03:40 |
+| Fout tegen staplengte gemeten wind | helling −0,86, r −0,74 | nacht 03→04, n=24 | 04-11 03:40 |
