@@ -872,3 +872,12 @@ laatste ronde: 04-11 07:40, gemeten t/m 04-11 07:45
 - Hypotheses: H-SC-3 (regenstart), H-SC-14 (bijsturing na model-/locatiesprong; n=3/2). H-SC-15 op de achtergrond; H-SC-13, H-SC-11 geparkeerd.
 
 laatste ronde: 04-11 11:40, gemeten t/m 04-11 11:44
+
+## 04-11 15:40 · tussenronde
+- Draait 0.61.3 (HACS gelijk), geen fouten. Geen release. Groen, CAPE 0 (piek 12 u 10), onweerskans 0, geen inslagen < 50 km. Bronstatus alles in orde. Geen onweer: alleen beschikbaarheid.
+- **Windstoten 11:53-15:34 (vooraf):** bias **−0,80**, MAE **3,34** (n=23, 12/23 te laag), gemeten 26,0-42,4. Stijgend **−3,52** (n=12), dalend +2,17 (n=9), rest +2,10 (n=2). Grootste misser 13:13: 35,1 tegen 26,0: een dip, geen trend. Bijsturing 15:34 +4,5 bij gemeten 41,3 tegen 36,4. Geen windmelding in de buurt (drempel 60).
+- H-SC-9 bevestigt opnieuw, maar de bias zakte van −2,27 naar −0,80 nu de wind op niveau blijft. De MAE blijft ~3,3: vlagen, niet een achterstand.
+- H-SC-14: n blijft 3/2. H-SC-3, H-SC-15: droog. L-SC-030: nog geen rit in de regen. Stilstand: geen.
+- Hypotheses: H-SC-3 (regenstart), H-SC-14 (bijsturing na model-/locatiesprong; n=3/2). H-SC-15 op de achtergrond; H-SC-13, H-SC-11 geparkeerd.
+
+laatste ronde: 04-11 15:40, gemeten t/m 04-11 15:44
