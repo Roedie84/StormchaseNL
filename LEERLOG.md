@@ -854,3 +854,13 @@ laatste ronde: 03-11 23:40, gemeten t/m 03-11 23:46
 - Hypotheses: H-SC-3 (regenstart), H-SC-14 (bijsturing na model-/locatiesprong; n=3/2). H-SC-15 op de achtergrond; H-SC-13, H-SC-11 geparkeerd.
 
 laatste ronde: 04-11 03:40, gemeten t/m 04-11 03:46
+
+## 04-11 07:40 · tussenronde
+- Draait 0.61.3 (HACS gelijk), geen fouten. Geen release. Groen, CAPE 0, onweerskans 0, geen inslagen.
+- **Blitzortung terug:** 03:45-07:44 maar 1 s onbeschikbaar (herstart 04:44). Bronstatus alles in orde. Nachtelijke DNS-fouten bij Buienradar, Open-Meteo en KNMI om 03:04 en 04:43 zijn afgevangen; radar en nowcast vers.
+- **Windstoten 03:54-07:44 (vooraf):** bias **−1,07**, MAE **1,70** (n=24, 16/24 te laag), gemeten 11,1-19,4. Stijgend −3,28 (n=6), dalend +0,61 (n=7), rest −0,94 (n=11). Wind trekt aan: past bij H-SC-9.
+- **H-SC-14:** modelsprongen 05:46 (23,4 → 20,9) en 07:10 (24,8 → 21,6) blijven onder de 40 %, dus terecht geen verval. 07:10 gaf wel de grootste misser: 12,8 tegen 18,2 om 07:14 (bijsturing −1,2 uit de lage meting van 07:04). Tracker liep tussen 06:40 en 06:54 van 3,4 naar 14 km van Hupsel; of dat als wissel telt is niet nagegaan. n blijft 3/2.
+- H-SC-3, H-SC-15: droog. L-SC-030: nog geen rit in de regen. Stilstand: geen.
+- Hypotheses: H-SC-3 (regenstart), H-SC-14 (bijsturing na model-/locatiesprong; n=3/2). H-SC-15 op de achtergrond; H-SC-13, H-SC-11 geparkeerd.
+
+laatste ronde: 04-11 07:40, gemeten t/m 04-11 07:45
