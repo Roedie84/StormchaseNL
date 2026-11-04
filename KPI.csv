@@ -680,3 +680,7 @@ datumtijd,type,kpi,waarde,n,opmerking
 2026-11-04 15:40,TUSSEN,sc_windstoten_bias_stijgend_kmh,-3.52,12,"dalend +2.17 (n=9); rest +2.10 (n=2)"
 2026-11-04 15:40,TUSSEN,sc_beschikbaarheid,1,1,"geen onweer, groen, 0 inslagen < 50 km, CAPE 0 (piek 12 u 10); bronstatus alles in orde"
 2026-11-04 15:40,TUSSEN,sc_stilstand_functies,0,0,aankomst/passage unknown = geen onweer
+2026-11-04 19:40,TUSSEN,sc_windstoten_bias_kmh,-1.57,23,"15:53-19:34 vooraf; MAE 3.13; 14/23 te laag; gemeten 20.4-36.6; grootste misser 18:03 25.2 tegen 33.6"
+2026-11-04 19:40,TUSSEN,sc_windstoten_bias_stijgend_kmh,-6.28,6,"stap >= +1; dalend +1.40 (n=10); rest -1.76 (n=7); wind neemt af"
+2026-11-04 19:40,TUSSEN,sc_beschikbaarheid,1,1,"geen onweer, groen, 0 inslagen < 50 km, CAPE 0, kans 0; bronstatus alles in orde; Blitzortung 15:44-19:44 teller 0, 1x fout rond herstart 19:36"
+2026-11-04 19:40,TUSSEN,sc_stilstand_functies,0,0,"aankomst/passage unknown = geen onweer"
