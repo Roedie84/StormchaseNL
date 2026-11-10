@@ -51,6 +51,7 @@ from .knmi_api import poging
 from .knmi_grid import KNMI_REGIOS, in_nederland_grof, regio_uit_geocode, verwachtingscel
 from .knmi_verwerk import verwachting as knmi_verwachting
 from .knmi_verwerk import waarschuwingen as knmi_waarschuwingen
+from . import meteoalarm_json as ma_json
 from .const import KNMI_DETAIL_INTERVAL
 
 _LOGGER = logging.getLogger(__name__)
@@ -280,6 +281,12 @@ class AlertCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
         """
         gebied = (waarschuwing.get("gebied") or "").lower()
 
+        # 0.62.0: "Nederland met uitzondering van ..." noemt geen provincie;
+        # geldt voor jouw gebied tenzij dat bij de uitzonderingen staat.
+        if ma_json.landelijk(gebied):
+            namen = [self.regio] if self.regio else list(self._gebiedsnamen)
+            return ma_json.landelijk_geldt(gebied, namen)
+
         if self.regio:
             return self.regio in gebied
 
@@ -322,9 +329,16 @@ class AlertCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
                 await self._bepaal_land(latitude, longitude)
             knmi = await self._knmi(latitude, longitude)
             if knmi is not None:
+                if not knmi.get("aantal"):
+                    await self._vul_aan_met_meteoalarm(knmi, land)
                 self.onthoud(knmi)
                 self._vuur_events(knmi["actief"])
                 return knmi
+
+        # 0.62.0: eerst de JSON-API; de oude Atom-feed is sinds 09-11 leeg.
+        alles = await self._meteoalarm_json(land)
+        if alles is not None:
+            return self._meteoalarm_resultaat(land, alles)
 
         url = f"{METEOALARM_URL}{land}"
 
@@ -420,6 +434,89 @@ class AlertCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
         self.onthoud(data)
         self._vuur_events(actief)
         return data
+
+    async def _meteoalarm_json(self, land: str) -> list[dict] | None:
+        """MeteoAlarm via de JSON-API (0.62.0), of None als dat niet lukt."""
+        try:
+            async with async_timeout.timeout(20):
+                response = await self._session.get(f"{ma_json.JSON_URL}{land}")
+                response.raise_for_status()
+                data = await response.json(content_type=None)
+        except Exception as err:  # noqa: BLE001 - dan de Atom-feed
+            _LOGGER.debug("MeteoAlarm JSON niet gelukt: %s", err)
+            return None
+        if not isinstance(data, (dict, list)):
+            return None
+        if self.stats is not None:
+            self.stats.bronnen["meteoalarm"].succes()
+        return ma_json.waarschuwingen(data, dt_util.utcnow())
+
+    def _meteoalarm_resultaat(self, land: str, alles: list[dict]) -> dict:
+        """Filter en vorm zoals de Atom-tak, voor de JSON-waarschuwingen."""
+        actief = [w for w in alles if self._relevant(w)]
+        actief.sort(key=lambda w: w["rang"], reverse=True)
+        if self.stats is not None:
+            self.stats.alert_laatste_in_land = len(alles)
+            self.stats.alert_laatste_na_filter = len(actief)
+            self.stats.alert_filternamen = (
+                [self.regio] if self.regio else list(self._gebiedsnamen)
+            )
+        zwaarste = actief[0] if actief else None
+        data = {
+            "actief": actief,
+            "aantal": len(actief),
+            "niveau": zwaarste["niveau"] if zwaarste else None,
+            "rang": zwaarste["rang"] if zwaarste else 0,
+            "soort": zwaarste["soort"] if zwaarste else None,
+            "gebied": zwaarste["gebied"] if zwaarste else None,
+            "land": land,
+            "gefilterd_op": self.regio or (
+                ", ".join(self._gebiedsnamen[:3]) if self._gebiedsnamen else None
+            ),
+            "aantal_in_land": len(alles),
+            "gebieden_in_land": sorted({w.get("gebied") for w in alles if w.get("gebied")})[:25],
+            "bron": "meteoalarm",
+            "regio": None,
+            "niveau_per_uur": None,
+        }
+        self.onthoud(data)
+        self._vuur_events(actief)
+        return data
+
+    async def _vul_aan_met_meteoalarm(self, knmi: dict, land: str) -> None:
+        """0.62.0: meldt het KNMI voor je regio niets, kijk dan bij MeteoAlarm.
+
+        10-11: code geel (dichte mist) voor "Nederland met uitzondering van
+        ...": de KNMI-app gaf voor Gelderland niets. Alleen landelijke of op
+        jouw gebied gerichte waarschuwingen tellen; het KNMI-antwoord blijft
+        verder zoals het was.
+        """
+        alles = await self._meteoalarm_json(land)
+        if not alles:
+            return
+        namen = [knmi.get("regio") or ""] + list(self._gebiedsnamen)
+        relevant = []
+        for w in alles:
+            gebied = (w.get("gebied") or "").lower()
+            if ma_json.landelijk(gebied):
+                if ma_json.landelijk_geldt(gebied, [n for n in namen if n]):
+                    relevant.append(w)
+            elif any(n and n.lower() in gebied for n in namen):
+                relevant.append(w)
+        if not relevant:
+            return
+        relevant.sort(key=lambda w: w["rang"], reverse=True)
+        zwaarste = relevant[0]
+        knmi.update(
+            actief=relevant,
+            aantal=len(relevant),
+            niveau=zwaarste["niveau"],
+            rang=zwaarste["rang"],
+            soort=zwaarste["soort"],
+            gebied=zwaarste["gebied"],
+            aanvulling="meteoalarm",
+            niveau_per_uur=ma_json.vul_per_uur(knmi.get("niveau_per_uur"), relevant),
+        )
 
     def _knmi_regio(self, latitude: float, longitude: float) -> tuple[int, str]:
         """De KNMI-waarschuwingsregio voor deze positie.

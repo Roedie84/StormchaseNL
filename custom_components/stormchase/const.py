@@ -255,11 +255,13 @@ LANDCODES = {
 GEOCODE_URL = "https://api.bigdatacloud.net/data/reverse-geocode-client"
 
 # MeteoAlarm gebruikt de CAP-schaal; wij vertalen naar de bekende kleuren.
+# CAP-ernst van MeteoAlarm naar kleur en rang. 0.62.0: Minor is GROEN
+# (geen waarschuwing), Moderate geel, Severe oranje, Extreme rood - tot
+# 0.61 stond alles een kleur te hoog (groen als geel, geel als oranje).
 ALERT_LEVELS = {
-    "Minor": ("geel", 1),
-    "Moderate": ("oranje", 2),
-    "Severe": ("rood", 3),
-    "Extreme": ("rood", 4),
+    "Moderate": ("geel", 1),
+    "Severe": ("oranje", 2),
+    "Extreme": ("rood", 3),
 }
 ALERT_LEVEL_CHOICES = ["geel", "oranje", "rood"]
 DEFAULT_ALERT_MIN_LEVEL = "geel"

@@ -5,6 +5,15 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.62.0] — 2026-11-10
+
+### Opgelost
+
+- **Landelijke waarschuwingen komen nu door.** Ruud 10-11 06:53: "Het KNMI geeft momenteel code geel, ik zie dat niet terug op dashboard tablet". Code geel (dichte mist, 09-11 23:30 tot 10-11 12:00) gold voor "Nederland met uitzondering van Zeeland, Waddeneilanden, IJsselmeergebied en Waddenzeegebied en delen van: Limburg". De KNMI-app gaf voor de regio Gelderland niets en het niveau per uur "geen"; het gebiedsfilter zocht een provincienaam die er niet in staat. Een waarschuwing voor "Nederland" of "Nederland met uitzondering van …" (ook in het Engels: "The Netherlands except …") geldt nu voor jouw gebied, tenzij dat bij de uitzonderingen staat; "delen van" een gebied telt niet als uitzondering.
+- **MeteoAlarm vult het KNMI aan.** Meldt het KNMI voor je regio niets, dan kijkt Stormchase ook bij MeteoAlarm; landelijke of op jouw gebied gerichte waarschuwingen tellen dan mee, en het niveau per uur wordt aangevuld (attribuut `aanvulling: meteoalarm`).
+- **MeteoAlarm via de JSON-API.** De oude Atom-feed (meteoalarm-legacy-atom) is sinds 09-11 19:35 leeg; Stormchase leest nu eerst `api/v1/warnings/feeds-<land>` en valt alleen terug op de Atom-feed als dat niet lukt. Het niveau komt uit het awareness_level van MeteoAlarm zelf; groen, verlopen, ingetrokken en "all clear" tellen niet.
+- **Kleur van MeteoAlarm-waarschuwingen.** De CAP-ernst stond een kleur te hoog: Minor (groen) telde als geel, Moderate (geel) als oranje. Nu Moderate = geel, Severe = oranje, Extreme = rood; Minor is geen waarschuwing.
+
 ## [0.61.3] — 2026-11-04
 
 ### Opgelost
