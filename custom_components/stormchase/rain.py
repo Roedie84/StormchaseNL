@@ -38,7 +38,13 @@ from .const import (
     METEO_URL,
     RAIN_INTERVAL,
 )
-from .buienreeks import lees_reeks, met_station_regen, station_regen
+from .buienreeks import (
+    lees_reeks,
+    met_station_regen,
+    station_regen,
+    van_hoofd,
+    voor_thuis_opgehaald,
+)
 from .regencorrectie import corrigeer, leer
 from .knmi_api import NietGevonden, poging, vijf_minuten_slot
 from .knmi_grid import radarcel
@@ -366,3 +372,51 @@ class RainCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdateC
         # Na een herstart eerst een ronde meekijken, zodat een lopende bui
         # niet meteen een melding oplevert.
         self._was_verwacht = verwacht
+
+
+class ThuisRainCoordinator(RainCoordinator):
+    """De neerslagverwachting voor de thuislocatie (0.63.0).
+
+    De hoofdverwachting volgt de actieve locatie (bijvoorbeeld de telefoon) en
+    stuurt de meldingen. Deze staat vast op thuis, voor schermen in huis.
+    Staat de actieve locatie zelf thuis, dan neemt hij de hoofdverwachting
+    over en haalt hij niets extra op. Hij vuurt geen gebeurtenissen (dus geen
+    meldingen), telt niet mee in de bronstatistiek en legt geen voorspellingen
+    vast; de geleerde bijstelling van de start neemt hij over van de
+    hoofdverwachting.
+    """
+
+    def __init__(self, hass: HomeAssistant, entry: ConfigEntry, hoofd: RainCoordinator) -> None:
+        super().__init__(hass, entry)
+        self.name = f"{entry.title} regen thuis"
+        self.hoofd = hoofd
+
+    def resolve_location(self) -> tuple[float, float, str]:
+        return (self.hass.config.latitude, self.hass.config.longitude, "thuis")
+
+    def _van_hoofd(self) -> dict | None:
+        """De hoofdverwachting als de actieve locatie thuis staat, anders None."""
+        try:
+            lat, lon, _ = self.hoofd.resolve_location()
+        except Exception:  # noqa: BLE001 - dan haalt thuis zelf op
+            return None
+        thuis = (self.hass.config.latitude, self.hass.config.longitude)
+        return van_hoofd((lat, lon), thuis, self.hoofd.data)
+
+    async def _haal_op(self) -> dict:
+        over = self._van_hoofd()
+        if over is not None:
+            return self.onthoud(over)
+        return voor_thuis_opgehaald(await super()._haal_op())
+
+    def volg_hoofd(self) -> None:
+        """De hoofdverwachting is ververst: neem haar over als die voor thuis geldt."""
+        over = self._van_hoofd()
+        if over is not None:
+            self.async_set_updated_data(self.onthoud(over))
+
+    def _regencorrectie(self, bron: str) -> dict | None:
+        return self.hoofd._regencorrectie(bron)
+
+    def _vuur_event(self, data: dict) -> None:
+        """Geen gebeurtenis: meldingen horen bij de actieve locatie."""

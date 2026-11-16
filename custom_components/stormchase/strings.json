@@ -252,6 +252,9 @@
       "rain_summary": {
         "name": "Rain outlook"
       },
+      "rain_summary_home": {
+        "name": "Rain outlook home"
+      },
       "rain_intensity": {
         "name": "Neerslagintensiteit"
       },

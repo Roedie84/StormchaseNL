@@ -378,6 +378,10 @@ async def async_setup_entry(
 
     regen: RainCoordinator = data["rain"]
     entities += [RainSensor(regen, entry, beschrijving) for beschrijving in RAIN_SENSORS]
+    # 0.63.0: het regenbeeld voor thuis (schermen in huis); de rest volgt de actieve locatie
+    regen_thuis = data.get("rain_home")
+    if regen_thuis is not None:
+        entities.append(RainHomeSensor(regen_thuis, entry, RAIN_HOME_SUMMARY))
     entities.append(LocationSensor(storm, entry))
     entities += [
         SevereSensor(meteo, entry, "rotation", "rotatiekans", "rotatie_detail"),
@@ -851,6 +855,33 @@ class RainSensor(CoordinatorEntity[RainCoordinator], SensorEntity):
         if not data or self.entity_description.key != "rain_starts":
             return {}
         return _regen_start_attributen(data)
+
+
+RAIN_HOME_SUMMARY = MeteoSensorDescription(
+    key="rain_summary_home",
+    translation_key="rain_summary_home",
+    value=regenbeeld,
+)
+
+
+class RainHomeSensor(RainSensor):
+    """Het regenbeeld voor de thuislocatie (0.63.0)."""
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        data = self.coordinator.data
+        if not data:
+            return {}
+        return {
+            # "thuis": zelf opgehaald voor thuis; "actieve locatie": die staat thuis
+            "locatie": data.get("thuis_bron"),
+            "bron": data.get("bron"),
+            "regent_nu": data.get("regent"),
+            "begint_over_minuten": data.get("begint_over"),
+            "stopt_over_minuten": data.get("stopt_over"),
+            "intensiteit_mm_u": data.get("intensiteit"),
+            "piek_mm_u": data.get("piek"),
+        }
 
 
 def _regen_start_attributen(data: dict) -> dict:

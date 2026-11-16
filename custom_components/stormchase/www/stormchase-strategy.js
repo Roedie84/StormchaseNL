@@ -106,6 +106,8 @@ const ENTITEITEN = {
   regenStart: ["sensor", "rain_starts", "stormchase_regen_begint_over"],
   regenStopt: ["sensor", "rain_stops", "stormchase_regen_stopt_over"],
   regenBeeld: ["sensor", "rain_summary", "stormchase_regenbeeld"],
+  // 0.63.0: het regenbeeld voor thuis; het dashboard zelf volgt de actieve locatie
+  regenBeeldThuis: ["sensor", "rain_summary_home", "stormchase_regenbeeld_thuis"],
   regenIntensiteit: ["sensor", "rain_intensity", "stormchase_neerslagintensiteit"],
   regenPiek: ["sensor", "rain_peak", "stormchase_neerslagpiek_2_uur"],
   stoten: ["sensor", "meting_windstoten", "stormchase_windstoten_gemeten"],

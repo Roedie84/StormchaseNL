@@ -5,6 +5,17 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.63.0] — 2026-11-16
+
+### Toegevoegd
+
+- **Regenbeeld thuis.** Ruud 16-11: "Kunnen we het opsplitsen? Tablet geeft voor thuis locatie? Meldingen op iPhone voor actuele locatie?" Met de locatie op de telefoon (op het werk, 12,9 km van huis) toonde het tablet thuis de regen van het werk. Nieuwe sensor *Regenbeeld thuis* (`rain_summary_home`): hetzelfde regenbeeld in één zin, maar altijd voor de thuislocatie. Attributen: `locatie` (thuis of actieve locatie), bron, regent nu, begint/stopt over, intensiteit en piek.
+- Staat de actieve locatie binnen 1 km van thuis, dan neemt *Regenbeeld thuis* de hoofdverwachting over en wordt er niets extra opgehaald. Anders haalt hij elke vijf minuten zelf de verwachting voor thuis op (KNMI, anders Buienradar, anders Open-Meteo).
+
+### Ongewijzigd
+
+- Alle andere regensensoren, *Regen verwacht* en de meldingen volgen de actieve locatie. De verwachting voor thuis stuurt geen meldingen, telt niet mee in de bronstatistiek en legt geen voorspellingen vast; de geleerde bijstelling van de start neemt hij over.
+
 ## [0.62.0] — 2026-11-10
 
 ### Opgelost

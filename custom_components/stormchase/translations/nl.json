@@ -252,6 +252,9 @@
       "rain_summary": {
         "name": "Regenbeeld"
       },
+      "rain_summary_home": {
+        "name": "Regenbeeld thuis"
+      },
       "rain_intensity": {
         "name": "Neerslagintensiteit"
       },

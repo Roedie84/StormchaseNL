@@ -7,6 +7,7 @@ Bewust zonder Home Assistant erin, zodat het los te testen is.
 from __future__ import annotations
 
 from datetime import datetime
+from math import asin, cos, radians, sin, sqrt
 
 try:
     from .const import STATION_REGEN_CODES, STATION_REGEN_MAX_KM, STATION_REGEN_MAX_S
@@ -274,3 +275,50 @@ def regenbeeld(data: dict | None) -> str | None:
     if data.get("verwachting") is not None:
         return "Droog, komende 2 uur geen regen."
     return None
+
+
+# ---- 0.63.0: het regenbeeld voor thuis, los van de actieve locatie ----
+
+#: Binnen deze afstand geldt de actieve locatie als thuis en volgt het
+#: regenbeeld voor thuis gewoon de hoofdverwachting (geen tweede ophaalronde).
+THUIS_IS_HIER_KM = 1.0
+
+
+def afstand_km(a, b) -> float | None:
+    """Afstand over de bol tussen twee (breedte, lengte)-paren, of None."""
+    try:
+        la1, lo1, la2, lo2 = (radians(float(x)) for x in (a[0], a[1], b[0], b[1]))
+    except (TypeError, ValueError, IndexError):
+        return None
+    h = sin((la2 - la1) / 2) ** 2 + cos(la1) * cos(la2) * sin((lo2 - lo1) / 2) ** 2
+    return 2 * 6371.0 * asin(min(1.0, sqrt(h)))
+
+
+def thuis_is_hier(plek, thuis, grens_km: float = THUIS_IS_HIER_KM) -> bool:
+    """Staat de actieve locatie (vrijwel) op de thuislocatie?
+
+    Ruud 16-11: "Tablet geeft voor thuis locatie? Meldingen op iPhone voor
+    actuele locatie?" Met de tracker op het werk (12,9 km) toonde het tablet
+    thuis de regen van het werk. Onbekende posities tellen als niet thuis:
+    dan haalt de thuisverwachting zelf op.
+    """
+    km = afstand_km(plek, thuis)
+    return km is not None and km <= grens_km
+
+
+def van_hoofd(hoofd_plek, thuis, hoofd_data: dict | None) -> dict | None:
+    """De hoofdverwachting als die ook voor thuis geldt, anders None.
+
+    None betekent: de verwachting voor thuis moet zelf ophalen (de actieve
+    locatie is ergens anders, onbekend, of de hoofdverwachting is er nog niet).
+    """
+    if not hoofd_data or not thuis_is_hier(hoofd_plek, thuis):
+        return None
+    return dict(hoofd_data, thuis_bron="actieve locatie")
+
+
+def voor_thuis_opgehaald(data):
+    """Merk een zelf opgehaalde verwachting als 'thuis' (andere waarden ongemoeid)."""
+    if isinstance(data, dict) and "thuis_bron" not in data:
+        return dict(data, thuis_bron="thuis")
+    return data

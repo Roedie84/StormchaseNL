@@ -43,7 +43,7 @@ from .briefing import Briefing
 from .bronhistorie import BronHistorie
 from .frontend import async_register_frontend
 from .notifier import StormNotifier
-from .rain import RainCoordinator
+from .rain import RainCoordinator, ThuisRainCoordinator
 from .stats import Statistieken
 from .validatie import Validatie
 from .herstart import OPSLAG_VERSIE, Bewaarplan
@@ -118,6 +118,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     storm = StormCoordinator(hass, entry)
     meteo = MeteoCoordinator(hass, entry)
     regen = RainCoordinator(hass, entry)
+    # 0.63.0: de verwachting voor thuis, los van de actieve locatie
+    regen_thuis = ThuisRainCoordinator(hass, entry, regen)
     waarschuwingen = AlertCoordinator(hass, entry)
     meting = MetingCoordinator(hass, entry)
     radar = RadarCoordinator(hass, entry)
@@ -163,6 +165,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         )
     waarschuwingen.knmi = knmi
     regen.knmi = knmi
+    regen_thuis.knmi = knmi
     meting.zet_knmi(knmi)
     radar.knmi = knmi
     radar.storm = storm
@@ -306,6 +309,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await meteo.async_refresh()
     # Regen mag net als de weerparameters falen zonder de rest te blokkeren.
     await regen.async_refresh()
+    # 0.63.0: thuis volgt de hoofdverwachting zolang de actieve locatie thuis is
+    await regen_thuis.async_refresh()
+    entry.async_on_unload(regen.async_add_listener(regen_thuis.volg_hoofd))
     await waarschuwingen.async_refresh()
     # Metingen zijn een aanvulling; falen mag de rest niet blokkeren.
     await meting.async_refresh()
@@ -317,6 +323,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             "storm": storm,
             "meteo": meteo,
             "rain": regen,
+            "rain_home": regen_thuis,
             "alerts": waarschuwingen,
             "meting": meting,
             "radar": radar,

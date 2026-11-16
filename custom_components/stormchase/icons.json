@@ -40,6 +40,9 @@
       "rain_summary": {
         "default": "mdi:text-box-outline"
       },
+      "rain_summary_home": {
+        "default": "mdi:home-roof"
+      },
       "rain_intensity": {
         "default": "mdi:water"
       },
