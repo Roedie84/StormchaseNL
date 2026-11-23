@@ -53,7 +53,7 @@ from .indices import (
     windschering,
 )
 
-from . import windvooruitblik
+from . import mistcheck, windvooruitblik
 from .const import (
     CLEARED_FACTOR,
     DOMAIN,
@@ -1291,6 +1291,9 @@ class MeteoCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
         self.windcorrectie = None
         # 0.53.0: laatste stationsmeting (km/u, epoch) voor de windmelding
         self.wind_gemeten: tuple[float, float] | None = None
+        # 0.64.0: de stationsmeting (gezet in __init__) en het laatste mistoordeel
+        self.stationsmeting = None
+        self.mistoordeel: dict | None = None
         # 0.57.0: windvooruitblik - welke dag in welke klasse al gemeld is,
         # de KNMI-bron (AlertCoordinator) en het bewaarplan voor de opslag
         self.windvooruitblik_gemeld: dict = {}
@@ -1609,7 +1612,14 @@ class MeteoCoordinator(HerpogingMixin, VerouderdMixin, LocationMixin, DataUpdate
             if code in CODES_IJZEL:
                 actief.add("ijzel")
             if code in CODES_MIST:
-                actief.add("mist")
+                # 0.64.0: alleen als een stationsmeting de mist bevestigt
+                bron = self.stationsmeting
+                oordeel = mistcheck.beoordeel(
+                    bron() if callable(bron) else None, dt_util.utcnow().timestamp()
+                )
+                self.mistoordeel = {**oordeel, "weercode": code}
+                if oordeel["bevestigd"]:
+                    actief.add("mist")
 
         if temperatuur is not None:
             hitte = float(self._opt(CONF_HEAT_THRESHOLD, DEFAULT_HEAT_THRESHOLD))

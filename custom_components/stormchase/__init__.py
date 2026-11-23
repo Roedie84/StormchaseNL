@@ -234,6 +234,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     windcorrectie = Windcorrectie(staat.get("windcorrectie"), tijdzone=_dt.get_default_time_zone())
     meteo.windcorrectie = windcorrectie
+    # 0.64.0: de mistmelding vraagt de stationsmeting om bevestiging
+    meteo.stationsmeting = lambda: meting.data
 
     @callback
     def _koppel_wind() -> None:

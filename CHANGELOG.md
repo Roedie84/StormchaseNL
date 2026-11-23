@@ -5,6 +5,16 @@ Alle noemenswaardige wijzigingen aan dit project staan hier.
 Het formaat volgt [Keep a Changelog](https://keepachangelog.com/nl/1.1.0/),
 en het project gebruikt [semantische versienummers](https://semver.org/lang/nl/).
 
+## [0.64.0] — 2026-11-23
+
+### Opgelost
+
+- **Mistmelding alleen als een meting het bevestigt.** Ruud 23-11 17:24: "Mist melding terwijl er geen mist is?" De melding "Dichte mist op je locatie" kwam uit de weercode van het rekenmodel (45/48), terwijl het station 87 % luchtvochtigheid, een dauwpunt van −1,4 °C bij 0,4 °C en ruim 80 km zicht gaf. Nu vraagt de melding de stationsmeting (hooguit 90 minuten oud) om bevestiging: zicht onder 1 km, of een luchtvochtigheid van 95 % of meer met het dauwpunt binnen 1 graad van de temperatuur. Zonder (verse) meting of zonder bevestiging komt er geen mistmelding. Zeer plaatselijke mist die het station niet ziet, wordt dus niet meer gemeld.
+
+### Ongewijzigd
+
+- Sneeuw, ijzel, hitte en vorst, en de officiële waarschuwingen (code geel en hoger, ook voor mist).
+
 ## [0.63.0] — 2026-11-16
 
 ### Toegevoegd
